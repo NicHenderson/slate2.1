@@ -1,0 +1,676 @@
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 20px;
+  /* Without this, the grid's default row alignment ("normal", which acts
+     like stretch here) takes any extra room from the min-height reserved
+     in renderGrid (js/data.js) and stretches the actual card ROWS to fill
+     it — harmless on a full page (no extra room to stretch into), but a
+     page with just one short row balloons that row (and every card in it)
+     to fill the whole reserved height instead of leaving the leftover
+     space empty below, like it's supposed to. */
+  align-content: start;
+}
+
+.card-grid.subtab-hidden + .pagination-slot {
+  display: none;
+}
+
+/* Pins pagination to the same spot at the bottom of the section regardless
+   of how many rows the current page actually has (a last page with 3 cards
+   shouldn't leave the controls floating higher up than a full page does). */
+.pagination-slot {
+  margin-top: auto;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+/* Same "raised sticker" family as .add-btn / .sort-btn elsewhere (paper
+   background + hard offset shadow, popped against the dark corkboard) —
+   these were still the old flat outline-on-dark pills, which is also why
+   they read as nearly invisible against the page background. */
+.page-num,
+.page-nav {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(-1deg);
+  transition: transform var(--transition), box-shadow var(--transition),
+    background var(--transition), color var(--transition);
+}
+
+.page-num:nth-child(even),
+.page-nav:nth-child(even) {
+  transform: rotate(1deg);
+}
+
+.page-num:hover,
+.page-nav:hover:not(:disabled) {
+  background: var(--paper);
+  color: var(--ink);
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 6px 0 var(--accent-deep);
+}
+
+.page-num:active,
+.page-nav:active:not(:disabled) {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 var(--accent-deep);
+}
+
+.page-num.active {
+  background: var(--accent-strong);
+  color: #fff;
+}
+
+.page-num.active:hover {
+  background: var(--accent-strong);
+  color: #fff;
+}
+
+.page-nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+/* The dragged card becomes a dashed "drop slot" — it still occupies its
+   grid slot (so siblings keep reflowing around it) and now shows where the
+   card will land, while a floating .drag-ghost clone tracks the pointer.
+   Contents and the tape/ribbon are hidden so only the slot outline reads.
+   transform/box-shadow are !important to beat the per-nth-child tilt and
+   the hover lift, which would otherwise still apply to the slot.
+   touch-action only matters here, since it only takes effect once a touch
+   hold has already won over a scroll (see setupDragReorder in
+   collections.js). */
+.card.dragging,
+.booklet-card.dragging {
+  background: rgba(167, 139, 250, 0.08);
+  outline: 2px dashed var(--accent-strong);
+  outline-offset: -2px;
+  box-shadow: none !important;
+  transform: none !important;
+  border-color: transparent;
+  touch-action: none;
+}
+
+.card.dragging > *,
+.booklet-card.dragging > * {
+  visibility: hidden;
+}
+
+.card.dragging::before {
+  display: none;
+}
+
+/* Sortable cards read as grabbable; the whole page shows "grabbing" for the
+   duration of a drag so the cursor doesn't flicker as it crosses elements.
+   Drag-to-reorder is exclusive to Collections — nowhere else. */
+#grid-collections .collection-card,
+#col-detail-grid .col-item-card {
+  cursor: grab;
+  user-select: none;
+}
+
+body.is-dragging,
+body.is-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+.drag-hint {
+  margin: 0 0 14px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+
+.drag-hint[hidden] {
+  display: none;
+}
+
+.hint-touch {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .hint-pointer {
+    display: none;
+  }
+  .hint-touch {
+    display: inline;
+  }
+}
+
+.card {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 12px 16px;
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: 18px;
+  width: 42px;
+  height: 15px;
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+  transform: rotate(-6deg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+.card-grid .card:nth-child(3n) {
+  transform: rotate(-1.6deg);
+}
+.card-grid .card:nth-child(3n + 1) {
+  transform: rotate(1.3deg);
+}
+.card-grid .card:nth-child(3n + 2) {
+  transform: rotate(-0.7deg);
+}
+
+.dash-row .card:nth-child(3n) {
+  transform: rotate(-1.6deg);
+}
+.dash-row .card:nth-child(3n + 1) {
+  transform: rotate(1.3deg);
+}
+.dash-row .card:nth-child(3n + 2) {
+  transform: rotate(-0.7deg);
+}
+
+/* body.no-hover is set by setupDragReorder (collections.js) only while a
+   drag is in progress: cards sliding under a stationary cursor would
+   otherwise each fire their bouncy hover lift. */
+body:not(.no-hover) .card-grid .card:hover,
+body:not(.no-hover) .dash-row .card:hover {
+  transform: rotate(0deg) translateY(-6px) scale(1.035);
+  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 30px 6px rgba(167, 139, 250, 0.55),
+    0 0 60px 10px rgba(139, 92, 246, 0.25), 4px 12px 22px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+.card-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 0;
+  background: var(--bg-elevated);
+}
+
+.card-poster-empty {
+  background: linear-gradient(135deg, #2a2338, #3a3050);
+}
+
+.card-title {
+  font-family: var(--font-hand);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.15;
+  padding: 0 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.card-rating {
+  padding: 0 2px 8px;
+}
+
+.card-rating .rating-row {
+  width: 100%;
+  gap: 5px;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
+.card-rating .stars {
+  font-size: 12px;
+  letter-spacing: 0;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.card-rating .stars-value {
+  font-size: 11px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: max-content;
+}
+
+.card-rating .detail-unrated {
+  font-size: 12px;
+}
+
+/* Collections read as filed-away objects, not another movie poster: a
+   booklet with a stitched spine, a small "stamp" collage instead of a
+   full poster, and a bookmark ribbon tab. Deliberately upright (no
+   Polaroid tilt) — see the mockup rationale: more archive object, less
+   physical gesture than the ticket/photo language used elsewhere. */
+.booklet-card {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  background: var(--paper);
+  box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+body:not(.no-hover) .card-grid .booklet-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 26px 6px rgba(167, 139, 250, 0.5),
+    4px 10px 18px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+
+/* Book spine: a violet cloth band that's lit in the middle and darker at
+   both edges (rounded-binding look), two raised bands near the top and
+   bottom like a hardcover, and a soft shadow where it hinges into the
+   pages. */
+.booklet-spine {
+  width: 16px;
+  flex-shrink: 0;
+  position: relative;
+  background: linear-gradient(
+    90deg,
+    var(--accent-deep) 0%,
+    var(--accent-strong) 50%,
+    var(--accent-deep) 100%
+  );
+  border-right: 1px solid rgba(13, 12, 21, 0.4);
+  box-shadow: inset -3px 0 4px rgba(13, 12, 21, 0.28);
+}
+
+.booklet-spine::before,
+.booklet-spine::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.booklet-spine::before {
+  top: 20px;
+}
+
+.booklet-spine::after {
+  bottom: 20px;
+}
+
+.booklet-body {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  color: var(--ink);
+  padding: 16px 13px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.booklet-ribbon {
+  position: absolute;
+  top: -5px;
+  right: 18px;
+  width: 15px;
+  height: 23px;
+  background: var(--accent-strong);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 76%, 0 100%);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.25);
+}
+
+/* Cover: the poster collage fills the booklet's width; the collection's
+   emoji is stamped over its corner as a round seal, so the icon is the
+   first thing you read. */
+.booklet-cover {
+  position: relative;
+}
+
+.booklet-stamp {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2px solid var(--ink);
+  display: grid;
+  gap: 2px;
+  background: var(--ink);
+}
+
+/* 1 / 2 / 3 titles get 1 / 2 / 3 panels instead of a 2x2 with holes. */
+.booklet-stamp.stamp-n1 {
+  grid-template: 1fr / 1fr;
+}
+.booklet-stamp.stamp-n2 {
+  grid-template: 1fr / 1fr 1fr;
+}
+.booklet-stamp.stamp-n3 {
+  grid-template: 1fr 1fr / 1.25fr 1fr;
+}
+.booklet-stamp.stamp-n3 > :first-child {
+  grid-row: 1 / 3;
+}
+.booklet-stamp.stamp-n4 {
+  grid-template: 1fr 1fr / 1fr 1fr;
+}
+
+.booklet-stamp img,
+.stamp-slot-empty {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: cover;
+}
+
+.stamp-slot-empty {
+  background: linear-gradient(135deg, #2a2338, #3a3050);
+}
+
+.booklet-icon {
+  position: absolute;
+  left: -10px;
+  bottom: -18px;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  box-shadow: 2px 3px 0 var(--accent-deep);
+  font-size: 26px;
+  line-height: 1;
+  transform: rotate(-7deg);
+}
+
+.booklet-icon .ico {
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+}
+
+/* Nothing in it yet: the emoji itself becomes the cover. */
+.booklet-cover.is-empty {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 2px dashed var(--ink-muted);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(139, 92, 246, 0.03));
+}
+
+.booklet-empty-icon .ico {
+  width: 64px;
+  height: 64px;
+  vertical-align: middle;
+}
+
+.booklet-empty-icon {
+  font-size: 56px;
+  line-height: 1;
+  filter: drop-shadow(2px 3px 0 rgba(109, 40, 217, 0.25));
+}
+
+.booklet-title {
+  margin-top: 14px; /* clears the seal hanging off the cover */
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.28;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.booklet-footer {
+  margin-top: auto;
+  border-top: 1px dashed rgba(13, 12, 21, 0.25);
+  padding-top: 9px;
+}
+
+.booklet-bar {
+  height: 8px;
+  overflow: hidden;
+  background: rgba(13, 12, 21, 0.1);
+  border: 1px solid rgba(13, 12, 21, 0.35);
+}
+
+.booklet-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--accent-strong);
+}
+
+/* Everything watched: the bar fills with a stripe so "done" reads apart
+   from "nearly". */
+.booklet-progress.is-complete .booklet-bar > span {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--accent-deep) 0 6px,
+    var(--accent-strong) 6px 12px
+  );
+}
+
+.booklet-progress-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  height: 14px; /* fixed, so the taller ✓ doesn't nudge the bar off line */
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+}
+
+.booklet-done {
+  font-size: 12px;
+  line-height: 1;
+  color: var(--accent-deep);
+}
+
+.ghost-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 12px 16px;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.25);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+body:not(.no-hover) .card-grid .ghost-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 3px 9px 16px rgba(0, 0, 0, 0.35);
+}
+
+.ghost-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border: 2px dashed var(--border);
+  color: var(--text-muted);
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.ghost-card:hover .ghost-slot {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.ghost-plus {
+  font-size: 36px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.ghost-label {
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.15;
+  padding: 0 3px;
+  color: var(--text);
+}
+
+.grid-empty {
+  grid-column: 1 / -1;
+  padding: 40px 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.loading {
+  grid-column: 1 / -1;
+  padding: 40px 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* "Add Collection" reads as an empty booklet waiting to be filled, not the
+   generic dashed-poster ghost used for movies/shows — same spine+body
+   silhouette as .booklet-card, own inner classes so nothing here touches
+   .ghost-slot/.ghost-plus/.ghost-label used by those other grids. */
+.booklet-ghost {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  padding: 0;
+  background: var(--paper);
+  border: none;
+  box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+body:not(.no-hover) .card-grid .booklet-ghost:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 22px 5px rgba(167, 139, 250, 0.4),
+    4px 10px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* Same spine shape as .booklet-spine, in blank-paper tones: an unwritten book. */
+.booklet-ghost-spine {
+  width: 16px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, #d4cee3 0%, #e6e1f1 50%, #d4cee3 100%);
+  border-right: 1px solid rgba(13, 12, 21, 0.2);
+  box-shadow: inset -3px 0 4px rgba(13, 12, 21, 0.14);
+}
+
+.booklet-ghost-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 13px;
+}
+
+.booklet-ghost-slot {
+  width: clamp(48px, 22%, 72px);
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--ink-muted);
+  color: var(--ink-muted);
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.booklet-ghost:hover .booklet-ghost-slot {
+  border-color: var(--accent-deep);
+  color: var(--accent-deep);
+}
+
+.booklet-ghost-plus {
+  font-size: 26px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.booklet-ghost-label {
+  font-family: var(--font-hand);
+  font-size: 15px;
+  color: var(--ink);
+}
+
+/* The dragged card's floating clone (setupDragReorder in collections.js).
+   Placed last on purpose: it's a clone of a real card, so it also carries
+   .card/.booklet-card/.col-item-card etc., which set their own `position`
+   at equal specificity. `body >` raises specificity so this wins no matter
+   which stylesheet loads last (modal.css sets `.col-item-card { position:
+   relative }` and used to beat this, leaving the ghost in normal flow far
+   below the cursor) and it renders fixed-to-the-viewport. */
+body > .drag-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 0;
+  pointer-events: none;
+  z-index: 1000;
+  cursor: grabbing;
+  will-change: transform;
+  scale: 1;
+  rotate: 0deg;
+  box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.25);
+  /* No `translate` here on purpose: it's set every frame to follow the
+     pointer, and a transition on it (or the cloned card's own transform
+     transition) would make the ghost lag behind. Only the pick-up
+     (scale/tilt/shadow) is animated. */
+  transition: scale 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    rotate 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.drag-ghost.lifted {
+  scale: 1.06;
+  rotate: -2.5deg;
+  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 30px 8px rgba(167, 139, 250, 0.55),
+    10px 22px 34px rgba(0, 0, 0, 0.55);
+}

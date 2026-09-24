@@ -1,0 +1,2202 @@
+.hidden {
+  display: none !important;
+}
+
+.add-btn {
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-family: var(--font-display);
+  background: var(--accent-strong);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(1deg);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.add-btn:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 6px 0 var(--accent-deep);
+}
+
+.add-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 var(--accent-deep);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: rgba(5, 4, 9, 0.95);
+  backdrop-filter: blur(8px);
+}
+
+.modal {
+  width: min(520px, calc(100vw - 32px));
+  max-height: min(640px, calc(100vh - 64px));
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 4px 10px 24px rgba(0, 0, 0, 0.4);
+  animation: modal-in 0.2s ease;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.modal-head-left,
+.modal-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.library-row {
+  cursor: pointer;
+}
+
+#library-filter {
+  margin-bottom: 4px;
+}
+
+.modal-head h2 {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.modal-close {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 14px;
+  transition: background var(--transition), color var(--transition);
+}
+
+.modal-close:hover {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.modal-search {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-search input {
+  flex: 1;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--paper-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.modal-search input::placeholder {
+  color: var(--text-muted);
+}
+
+.modal-search input:focus {
+  border-color: var(--accent);
+}
+
+.modal-search-btn {
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-strong);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  transition: filter var(--transition);
+}
+
+.modal-search-btn:hover {
+  filter: brightness(1.15);
+}
+
+.modal-error {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #f87171;
+}
+
+.modal-results {
+  margin-top: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.result-row:hover {
+  background: var(--paper-dim);
+  border-color: var(--border);
+}
+
+.result-poster {
+  width: 46px;
+  height: 69px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.result-poster-empty {
+  background: linear-gradient(135deg, #2a2338, #3a3050);
+}
+
+.result-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.result-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.result-year {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.results-status {
+  padding: 20px 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.batch-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.batch-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.row-check {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: var(--accent-strong);
+}
+
+.row-check:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.result-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.result-info-btn {
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.result-info-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.mini-add-btn {
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background var(--transition), border-color var(--transition),
+    color var(--transition);
+}
+
+.mini-add-btn:hover {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  color: #fff;
+}
+
+.info-backdrop {
+  z-index: 110;
+}
+
+/* Same Polaroid-poster + paper-panel shell as #detail-modal (.detail-layout
+   etc.) but its own dedicated classes — this is a single, non-browsable
+   title preview (no prev/next), so no nav arrows, and it's deliberately kept
+   separate from .detail-* so the two can keep evolving independently. */
+.info-layout {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: min(680px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  animation: modal-in 0.2s ease;
+}
+
+.info-poster-box {
+  position: relative;
+  flex-shrink: 0;
+  background: var(--paper);
+  padding: 10px 10px 24px;
+  box-shadow: 4px 10px 22px rgba(0, 0, 0, 0.45);
+  transform: rotate(-3deg);
+}
+
+.info-poster-box::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: calc(50% - 7px);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4), inset -2px -2px 3px rgba(0, 0, 0, 0.3),
+    inset 2px 2px 2px rgba(255, 255, 255, 0.5);
+}
+
+.info-poster-img {
+  display: block;
+  width: 200px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 0;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.info-poster-empty {
+  background: linear-gradient(135deg, #2a2338, #3a3050);
+}
+
+.info-panel {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  box-shadow: 4px 10px 24px rgba(0, 0, 0, 0.4);
+}
+
+.info-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+}
+
+.info-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-right: 36px;
+}
+
+.info-title {
+  font-family: var(--font-hand);
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.info-genre-line {
+  margin-top: 4px;
+  font-family: var(--font-hand);
+  font-size: 15px;
+  color: var(--accent-deep);
+}
+
+.info-meta {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.info-meta-year {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.info-meta-runtime {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.info-synopsis {
+  margin-top: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.info-actions {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.info-actions .mini-add-btn {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  color: #fff;
+  padding: 9px 18px;
+  font-size: 14px;
+}
+
+.info-actions .mini-add-btn:hover {
+  background: var(--accent-deep);
+  border-color: var(--accent-deep);
+}
+
+.mini-add-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.detail-layout {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  width: min(1000px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  animation: modal-in 0.2s ease;
+}
+
+.detail-nav-btn {
+  position: absolute;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  border: none;
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.5), 0 8px 20px rgba(0, 0, 0, 0.5);
+  transform: translateY(-50%) scale(1);
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.2s ease;
+}
+
+.detail-nav-btn:hover:not(:disabled) {
+  background: var(--accent);
+  transform: translateY(-50%) scale(1.14);
+  box-shadow: 0 0 0 10px rgba(139, 92, 246, 0.18),
+    0 0 26px rgba(167, 139, 250, 0.65), 0 10px 24px rgba(0, 0, 0, 0.5);
+}
+
+.detail-nav-btn:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.9);
+  transition-duration: 0.1s;
+}
+
+.detail-nav-prev {
+  left: -100px;
+}
+
+.detail-nav-next {
+  right: -100px;
+}
+
+.detail-nav-btn:disabled {
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  opacity: 0.5;
+  cursor: default;
+}
+
+.detail-poster-box {
+  position: relative;
+  flex-shrink: 0;
+  background: var(--paper);
+  padding: 14px 14px 32px;
+  box-shadow: 4px 10px 22px rgba(0, 0, 0, 0.45);
+  transform: rotate(-3deg);
+}
+
+.detail-poster-box::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: calc(50% - 7px);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4), inset -2px -2px 3px rgba(0, 0, 0, 0.3),
+    inset 2px 2px 2px rgba(255, 255, 255, 0.5);
+}
+
+.detail-poster-img {
+  display: block;
+  width: 300px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 0;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.detail-poster-empty {
+  background: linear-gradient(135deg, #2a2338, #3a3050);
+}
+
+.detail-panel {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 36px;
+  box-shadow: 4px 10px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* padding-bottom isn't spacing — it's clearance. When this panel's content
+   is short enough that .detail-body doesn't need to scroll, its box ends
+   exactly at the action row's normal-flow edge; the sticker buttons' offset
+   shadow and slight rotation paint a few px past that (transform/box-shadow
+   don't count toward layout size), and overflow-y:auto clips paint beyond
+   the box regardless of whether a scrollbar is showing. Same trap as the
+   drag-ghost and the mobile stars override before it — see the CSS-cascade
+   gotcha notes. */
+.detail-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  padding-bottom: 10px;
+}
+
+.detail-panel::before,
+.detail-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.detail-panel::before {
+  transform: rotate(-2.2deg);
+}
+
+.detail-panel::after {
+  transform: rotate(1.6deg);
+}
+
+.detail-close-btn {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+}
+
+.detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding-right: 44px;
+}
+
+.detail-head-left {
+  min-width: 0;
+}
+
+.detail-title {
+  font-family: var(--font-hand);
+  font-size: 38px;
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.detail-genre-line {
+  margin-top: 4px;
+  font-family: var(--font-hand);
+  font-size: 17px;
+  color: var(--accent-deep);
+}
+
+.detail-meta {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.detail-meta-year {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.detail-meta-runtime {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.detail-synopsis {
+  margin-top: 20px;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.detail-meta-strip {
+  display: flex;
+  gap: 32px;
+  margin-top: 24px;
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-field {
+  flex: 1;
+}
+
+.detail-section {
+  margin-top: 20px;
+}
+
+.detail-label {
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.detail-date-value {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.detail-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+
+.detail-actions-review {
+  justify-content: space-between;
+}
+
+.detail-actions-review [data-action="edit"] {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 8px 4px;
+  border-radius: 6px;
+}
+
+.detail-actions-review [data-action="edit"]:hover {
+  background: transparent;
+  color: var(--accent-deep);
+}
+
+.detail-actions-review [data-action="add-to-collection"] {
+  border: none;
+  background: var(--accent-strong);
+  color: #fff;
+  padding: 11px 22px;
+  border-radius: 7px;
+  box-shadow: 0 3px 10px rgba(139, 92, 246, 0.35);
+}
+
+.detail-actions-review [data-action="add-to-collection"]:hover {
+  background: var(--accent-deep);
+}
+
+/* The towatch/watching action row (Mark as watched · Add to collection ·
+   Delete) reads as three flat pills, out of step with the rest of the app —
+   everywhere else a primary/secondary/danger trio (Collections' Edit ·
+   Delete · +Add) uses the same "raised sticker" family: a hard offset
+   shadow and a slight scattered-stickers rotation (.add-btn / .sort-btn /
+   .sort-btn-danger). Reusing that here instead of inventing a new look.
+   Scoped away from .detail-actions-review, which already has its own
+   (unrelated, already-approved) softer treatment for the watched state. */
+.detail-actions:not(.detail-actions-review) .complete-btn {
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(1deg);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.detail-actions:not(.detail-actions-review) .complete-btn:hover {
+  filter: none;
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 6px 0 var(--accent-deep);
+}
+
+.detail-actions:not(.detail-actions-review) .complete-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 var(--accent-deep);
+}
+
+.detail-actions:not(.detail-actions-review) .edit-btn {
+  border: none;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(-1deg);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.detail-actions:not(.detail-actions-review) .edit-btn:hover {
+  background: var(--paper);
+  color: var(--ink);
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 6px 0 var(--accent-deep);
+}
+
+.detail-actions:not(.detail-actions-review) .edit-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 var(--accent-deep);
+}
+
+.detail-actions:not(.detail-actions-review) .delete-btn {
+  border: none;
+  background: var(--paper);
+  color: #b42318;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  box-shadow: 3px 4px 0 #b42318;
+  transform: rotate(1deg);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.detail-actions:not(.detail-actions-review) .delete-btn:hover {
+  background: var(--paper);
+  color: #b42318;
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 6px 0 #b42318;
+}
+
+.detail-actions:not(.detail-actions-review) .delete-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 #b42318;
+}
+
+@media (max-width: 860px) {
+  .detail-layout {
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    padding-bottom: 10px;
+  }
+
+  .detail-poster-img {
+    width: 180px;
+  }
+
+  .detail-layout .detail-panel {
+    max-height: none;
+  }
+
+  .detail-layout .detail-body {
+    overflow-y: visible;
+  }
+
+  /* Not enough room beside the stacked layout for off-card arrows — arrow
+     keys still work as a way to move between titles. */
+  .detail-nav-btn {
+    display: none;
+  }
+}
+
+.update-backdrop {
+  z-index: 120;
+}
+
+.update-modal {
+  width: min(480px, calc(100vw - 32px));
+}
+
+/* "Mark as watched" — Polaroid poster (like #detail-modal) on the left, a
+   panel on the right whose own header is a die-cut violet ticket instead of
+   a plain heading, naming the actual movie instead of a generic "Mark as
+   watched" (that text becomes the eyebrow above the title). #start-modal
+   ("Start watching") deliberately still uses the plain .modal/.update-modal
+   shell — not asked to change, and it has no single title/poster to anchor
+   this treatment against yet. */
+.update-layout {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  width: min(740px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  animation: modal-in 0.2s ease;
+}
+
+.update-poster-box {
+  position: relative;
+  flex-shrink: 0;
+  background: var(--paper);
+  padding: 10px 10px 24px;
+  box-shadow: 4px 10px 22px rgba(0, 0, 0, 0.45);
+  transform: rotate(-3deg);
+}
+
+.update-poster-box::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: calc(50% - 7px);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4), inset -2px -2px 3px rgba(0, 0, 0, 0.3),
+    inset 2px 2px 2px rgba(255, 255, 255, 0.5);
+}
+
+.update-poster-img {
+  display: block;
+  width: 200px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 0;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.update-poster-empty {
+  background: linear-gradient(135deg, #2a2338, #3a3050);
+}
+
+.update-panel {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: var(--paper);
+  box-shadow: 4px 10px 24px rgba(0, 0, 0, 0.4);
+}
+
+.update-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  color: #fff;
+  z-index: 1;
+}
+
+.update-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.update-ticket {
+  position: relative;
+  background: var(--accent-strong);
+  color: #fff;
+  padding: 18px 44px 20px 24px;
+}
+
+.update-ticket::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -8px;
+  height: 16px;
+  background: radial-gradient(circle at 12px 0, transparent 8px, var(--accent-strong) 8.5px)
+    repeat-x;
+  background-size: 24px 16px;
+}
+
+.update-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.85;
+}
+
+.update-movie-title {
+  font-family: var(--font-hand);
+  font-size: 25px;
+  line-height: 1.15;
+  margin-top: 2px;
+}
+
+.update-movie-meta {
+  font-size: 12.5px;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+.update-form-body {
+  padding: 20px 24px 24px;
+}
+
+.field-label {
+  display: block;
+  margin: 16px 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.field-input {
+  width: 100%;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--paper-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  color-scheme: light;
+  resize: vertical;
+  transition: border-color var(--transition);
+}
+
+.field-input:focus {
+  border-color: var(--accent);
+}
+
+.field-input::placeholder {
+  color: var(--text-muted);
+}
+
+.stars.stars-input {
+  cursor: pointer;
+  user-select: none;
+  font-size: 40px;
+  letter-spacing: 2px;
+}
+
+.update-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.update-actions-right {
+  display: flex;
+  gap: 10px;
+}
+
+.delete-btn {
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  color: #f87171;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.delete-btn:hover {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: #f87171;
+}
+
+.icon-delete-btn {
+  padding: 10px 14px;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.delete-btn-solid {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+
+.delete-btn-solid:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+.confirm-backdrop {
+  z-index: 130;
+}
+
+.confirm-modal {
+  width: min(420px, calc(100vw - 32px));
+  border-radius: 0;
+}
+
+.confirm-head-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.confirm-warning-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(220, 38, 38, 0.14);
+  color: #dc2626;
+}
+
+.confirm-warning-icon svg {
+  width: 21px;
+  height: 21px;
+}
+
+.confirm-text {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Cancel / Yes, delete read as flat pills everywhere else has moved on to
+   the "raised sticker" family (.add-btn / .sort-btn / .sort-btn-danger,
+   also now the detail modal's action row) — offset shadow, slight
+   rotation, square corners, Oswald uppercase. Outline violet + solid red;
+   the already-watched danger state below only swaps which button sits on
+   which side (see the safety-swap comment there), not the styling —
+   same two looks in both states, not a different pair of buttons.
+   Scoped to .confirm-modal specifically — .cancel-btn and .confirm-actions
+   are shared with the New Collection modal, which this isn't touching. */
+.confirm-modal .confirm-actions .cancel-btn {
+  border: none;
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(-1deg);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.confirm-modal .confirm-actions .cancel-btn:hover {
+  background: var(--paper);
+  color: var(--ink);
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 6px 0 var(--accent-deep);
+}
+
+.confirm-modal .confirm-actions .cancel-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 var(--accent-deep);
+}
+
+.confirm-modal .confirm-actions .delete-btn {
+  border: none;
+  border-radius: 0;
+  background: #dc2626;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  box-shadow: 3px 4px 0 #991b1b;
+  transform: rotate(1deg);
+  transition: transform var(--transition), box-shadow var(--transition),
+    background var(--transition);
+}
+
+.confirm-modal .confirm-actions .delete-btn:hover {
+  background: #ef4444;
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 6px 0 #991b1b;
+}
+
+.confirm-modal .confirm-actions .delete-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 #991b1b;
+}
+
+/* Deleting something already watched should feel meaningfully riskier
+   than deleting a plain to-watch entry — you're not just removing a
+   list item, you're losing a rating/review you actually wrote. A pulsing
+   red glow + tinted paper + a named consequence in the copy carries
+   that weight instead of just reusing the same flat warning every time. */
+.confirm-modal.confirm-danger {
+  background: color-mix(in srgb, var(--paper) 92%, #dc2626 8%);
+  border: 2px solid #dc2626;
+  animation: confirm-danger-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes confirm-danger-pulse {
+  0%,
+  100% {
+    box-shadow: 4px 10px 24px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(220, 38, 38, 0.5);
+  }
+  50% {
+    box-shadow: 4px 10px 24px rgba(0, 0, 0, 0.4), 0 0 28px 8px rgba(220, 38, 38, 0.5);
+  }
+}
+
+.confirm-modal.confirm-danger .confirm-head-row h2 {
+  color: #dc2626;
+}
+
+.confirm-modal.confirm-danger .confirm-text strong {
+  color: #dc2626;
+}
+
+/* Type-to-confirm: forces a deliberate act (reading the exact title back)
+   instead of a single reflex click, and gates the delete button on it. */
+.confirm-typed-input {
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid #dc2626;
+  border-radius: 0;
+  outline: none;
+}
+
+.confirm-typed-input:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.25);
+}
+
+/* Safety swap: Cancel moves into the right-hand "default action" slot
+   users expect, Delete moves left — position only. Both buttons keep the
+   exact same styling as the plain (non-danger) state above, just reused,
+   not two different looks; the "stays visually muted until the typed
+   title matches" part still lives in the :disabled rule below, and the
+   shake on hover is still the last "are you SURE" before the click. */
+.confirm-modal.confirm-danger .cancel-btn {
+  order: 2;
+}
+
+.confirm-modal.confirm-danger #confirm-yes {
+  order: 1;
+}
+
+.confirm-modal.confirm-danger #confirm-yes:disabled {
+  background: var(--border);
+  color: var(--ink-muted);
+  transform: none;
+  opacity: 1;
+  box-shadow: none;
+}
+
+@keyframes confirm-delete-shake {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  20% {
+    transform: translateX(-3px) rotate(-1.5deg);
+  }
+  40% {
+    transform: translateX(3px) rotate(1.5deg);
+  }
+  60% {
+    transform: translateX(-2px) rotate(-1deg);
+  }
+  80% {
+    transform: translateX(2px) rotate(1deg);
+  }
+}
+
+.confirm-modal.confirm-danger #confirm-yes:not(:disabled):hover {
+  animation: confirm-delete-shake 0.4s ease-in-out;
+}
+
+/* Cards inside an open collection reuse the regular .card-grid look; these
+   are only the extras they carry (watched state, remove button). */
+.col-item-card {
+  position: relative;
+}
+
+/* Scoped to .col-item-card, not #col-detail-grid: the floating drag clone
+   lives in <body>, outside the grid, and must look identical to the card. */
+.col-item-card.item-watched .card-poster {
+  opacity: 0.65;
+  filter: grayscale(0.4);
+}
+
+.col-item-card.item-dropped .card-poster {
+  opacity: 0.55;
+  filter: grayscale(0.9);
+}
+
+/* Status badge (top-left): the one circle carries all four states. It stays
+   hoverable so its title tooltip ("Watching"…) can show; clicks still fall
+   through to the card. */
+.col-item-card .status-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: help;
+}
+
+.status-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.status-badge.is-watched {
+  background: var(--accent-strong);
+}
+
+.status-badge.is-watching {
+  background: #d97706;
+}
+
+.status-badge.is-watching svg {
+  margin-left: 1px; /* a play triangle looks centred a touch to the right */
+}
+
+.status-badge.is-dropped {
+  background: #6b7280;
+}
+
+/* Not started: an empty dashed ring on a pale, translucent disc, so it stays
+   visible on both dark and light posters. */
+.status-badge.is-towatch {
+  background: rgba(236, 232, 245, 0.82);
+  border: 2px dashed var(--ink-muted);
+  box-shadow: 0 0 0 1px rgba(13, 12, 21, 0.25);
+}
+
+.col-item-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(13, 11, 20, 0.82);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  color: #f87171;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity var(--transition), background var(--transition);
+}
+
+body:not(.no-hover) .col-item-card:hover .col-item-remove {
+  opacity: 1;
+}
+
+.col-item-remove:hover {
+  background: rgba(248, 113, 113, 0.25);
+}
+
+/* ---------- collection icons (js/icons.js) ---------- */
+
+/* An icon is 1em square so it scales with the text around it; the seal and
+   the empty cover set their own sizes in cards.css. */
+.ico {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.16em;
+}
+
+.ico-emoji {
+  object-fit: contain;
+}
+
+.ico-native {
+  width: auto;
+  height: auto;
+  line-height: 1;
+}
+
+/* ---------- icon picker (create / edit collection) ---------- */
+
+#collection-modal .update-modal {
+  width: min(520px, calc(100vw - 32px));
+  max-height: min(800px, calc(100vh - 48px)); /* room for the picker without a scroll inside a scroll */
+}
+
+#collection-form {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 2px 2px;
+}
+
+.icon-picker {
+  overflow: hidden;
+  background: var(--paper-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.icon-current {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 12px;
+  text-align: left;
+  transition: background var(--transition);
+}
+
+.icon-current:hover {
+  background: var(--accent-soft);
+}
+
+.icon-preview {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.icon-preview .ico {
+  width: 32px;
+  height: 32px;
+}
+
+.icon-preview-empty {
+  font-size: 26px;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+.icon-current-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.icon-current-caret {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  transition: transform var(--transition);
+}
+
+.icon-current[aria-expanded="true"] .icon-current-caret {
+  transform: rotate(180deg);
+}
+
+.icon-panel {
+  padding: 10px 12px 10px;
+  background: var(--paper);
+  border-top: 1px solid var(--border);
+}
+
+.icon-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.icon-tab {
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: background var(--transition), color var(--transition),
+    border-color var(--transition);
+}
+
+.icon-tab:hover {
+  color: var(--text);
+}
+
+.icon-tab.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.icon-search {
+  margin-bottom: 10px;
+}
+
+.icon-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 10px;
+}
+
+.icon-color {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  background: var(--swatch);
+  box-shadow: 0 0 0 1px rgba(13, 12, 21, 0.25);
+  transition: transform var(--transition);
+}
+
+.icon-color:hover {
+  transform: scale(1.12);
+}
+
+.icon-color.selected {
+  box-shadow: 0 0 0 2px var(--swatch);
+}
+
+.icon-grid {
+  --pick-color: #6d28d9;
+  height: clamp(150px, 30vh, 235px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.icon-group-label {
+  margin: 12px 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.icon-group-label:first-child {
+  margin-top: 0;
+}
+
+.icon-cells {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+  gap: 2px;
+}
+
+.icon-cell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  transition: background 0.12s ease;
+}
+
+.icon-cell:hover {
+  background: var(--accent-soft);
+}
+
+.icon-cell.selected {
+  background: var(--accent-soft);
+  outline: 2px solid var(--accent);
+}
+
+.icon-cell img,
+.icon-cell svg {
+  width: 28px;
+  height: 28px;
+}
+
+.icon-cell svg {
+  color: var(--pick-color);
+}
+
+.icon-empty {
+  padding: 28px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.icon-credit {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.icon-credit a {
+  color: var(--accent);
+}
+
+.cancel-btn {
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.cancel-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.detail-actions-start {
+  justify-content: flex-start;
+}
+
+/* Positioned in JS (positionDetailColMenu in detailModal.js) against the
+   trigger button's real on-screen rect, not with a CSS anchor — it lives
+   outside #detail-body so it can float free of that panel's
+   overflow-x:hidden (needed there to stop long reviews from causing a
+   horizontal scrollbar, but it was also clipping this menu). */
+.detail-col-menu {
+  position: fixed;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 260px;
+  max-width: min(320px, calc(100vw - 32px));
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.detail-col-menu .sort-option:disabled {
+  cursor: default;
+}
+
+.detail-col-menu .col-pick:not(:last-of-type) {
+  border-bottom: 1px solid rgba(42, 35, 56, 0.18);
+}
+
+.col-pick-check {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: #fff;
+}
+
+.col-menu-empty {
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.edit-btn {
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  transition: border-color var(--transition), color var(--transition),
+    background var(--transition);
+}
+
+.edit-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* The value next to the *input* stars (picking a rating) reads as its own
+   answer, not a caption — bigger and dark instead of the small muted label
+   used for the passive display elsewhere (cards, detail modal). Scoped to
+   .stars-input specifically so those other .rating-row uses are untouched. */
+.rating-row:has(.stars-input) .stars-value {
+  font-size: 17px;
+  color: var(--ink);
+}
+
+.stars {
+  position: relative;
+  font-size: 20px;
+  letter-spacing: 2px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.stars-base {
+  color: #3a3050;
+}
+
+.stars-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--accent);
+}
+
+.stars-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.detail-unrated {
+  font-size: 14px;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.detail-dates {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.detail-review {
+  position: relative;
+  margin: 0 10px;
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.55;
+  padding: 16px 18px 14px;
+  background: color-mix(in srgb, var(--accent) 16%, var(--paper));
+  border-radius: 2px;
+  transform: rotate(-1.3deg);
+  box-shadow: 2px 6px 12px rgba(0, 0, 0, 0.28);
+}
+
+.detail-review::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 24px;
+  width: 44px;
+  height: 16px;
+  background: color-mix(in srgb, var(--accent-deep) 65%, transparent);
+  transform: rotate(-7deg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.detail-review-empty {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.complete-btn {
+  padding: 11px 22px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-strong);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  transition: filter var(--transition);
+}
+
+.complete-btn:hover {
+  filter: brightness(1.15);
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  padding: 12px 20px;
+  background: var(--paper);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  animation: modal-in 0.2s ease;
+}
+
+.toast-error {
+  border-color: #f87171;
+  color: #f87171;
+}
+
+@media (max-width: 560px) {
+  .info-layout {
+    flex-direction: column;
+    align-items: center;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+
+  .info-poster-img {
+    width: 160px;
+  }
+
+  .info-panel {
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
+/* =====================================================================
+   "+ Add" flow (library picker + TMDB search) — reimagined in the
+   Corkboard Violet / boleto language. Scoped to #library-modal and
+   #search-modal specifically: .modal, .picker-card, .result-row,
+   .field-input etc. are shared by other modals (collections picker,
+   info modal, forms) that were never part of this redesign, so this
+   flow gets its own dedicated classes instead of overriding those.
+   ===================================================================== */
+
+.modal-add {
+  width: min(840px, calc(100vw - 64px));
+  max-height: min(760px, calc(100vh - 64px));
+  transform: rotate(-0.3deg);
+}
+
+#library-modal .modal-head h2,
+#search-modal .modal-head h2 {
+  font-size: 24px;
+}
+
+.modal-close svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Makes an otherwise-invisible feature ("search TMDB for something not
+   in your to-watch list yet") readable as a plain sentence instead of a
+   bare icon guessing game. The resting offset shadow (same family as
+   .add-btn / .sort-btn) reads as "raised, press me" before the cursor
+   ever lands on it, not only once it hovers. */
+.add-hint {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 11px 12px;
+  margin-bottom: 22px;
+  background: rgba(139, 92, 246, 0.07);
+  border: 1.5px dashed rgba(109, 40, 217, 0.35);
+  cursor: pointer;
+  font-family: var(--font-hand);
+  font-size: 16px;
+  color: var(--ink-muted);
+  box-shadow: 2px 3px 0 rgba(109, 40, 217, 0.3);
+  transform: rotate(-0.4deg);
+  transition: background var(--transition), border-color var(--transition),
+    box-shadow var(--transition), transform var(--transition);
+}
+
+.add-hint:hover {
+  background: rgba(139, 92, 246, 0.14);
+  border-color: var(--accent-deep);
+  box-shadow: 3px 5px 0 rgba(109, 40, 217, 0.42);
+  transform: rotate(0deg) translateY(-2px);
+}
+
+.add-hint:active {
+  box-shadow: 1px 2px 0 rgba(109, 40, 217, 0.42);
+  transform: rotate(0deg) translateY(0);
+}
+
+.add-hint svg {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  color: var(--accent-deep);
+}
+
+.add-hint strong {
+  color: var(--accent-deep);
+  font-weight: 700;
+}
+
+/* Pending-list grid: each item reads as a mini Polaroid, same tape
+   corner / rotation / straight edge as the real card grid. */
+.add-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 22px 18px;
+  max-height: 560px;
+  overflow-y: auto;
+  /* No sideways scroll: a ticked card's check stamp pokes a few px past the
+     right column, which would otherwise add a horizontal scrollbar. */
+  overflow-x: hidden;
+  padding: 10px 10px 12px;
+}
+
+.add-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  cursor: pointer;
+}
+
+.add-card-inner {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  box-shadow: 2px 4px 9px rgba(0, 0, 0, 0.28);
+  padding: 7px 7px 9px;
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.15s ease;
+}
+
+.add-grid .add-card:nth-child(3n) .add-card-inner {
+  transform: rotate(-1.4deg);
+}
+.add-grid .add-card:nth-child(3n + 1) .add-card-inner {
+  transform: rotate(1.1deg);
+}
+.add-grid .add-card:nth-child(3n + 2) .add-card-inner {
+  transform: rotate(-0.5deg);
+}
+
+.add-card:hover .add-card-inner {
+  transform: rotate(0deg) translateY(-4px);
+  box-shadow: 3px 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.add-card-inner::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: calc(50% - 19px);
+  width: 38px;
+  height: 13px;
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+  transform: rotate(-5deg);
+  pointer-events: none;
+}
+
+.add-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  display: block;
+  background: var(--surface);
+}
+
+.add-poster-empty {
+  background: linear-gradient(135deg, #2a2338, #3a3050);
+}
+
+.add-title {
+  font-family: var(--font-hand);
+  font-size: 15px;
+  line-height: 1.2;
+  padding: 0 2px;
+  color: var(--ink);
+}
+
+/* Collection mode ("+ Add" inside a collection) makes the cards selectable:
+   a ticked card gets a violet frame and a check stamp on its corner. */
+.add-card.selected .add-card-inner {
+  outline: 3px solid var(--accent-strong);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 5px rgba(139, 92, 246, 0.22), 3px 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.add-check {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.15s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.add-card.selected .add-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Movies | Shows tabs sit above the search hint in collection mode. */
+.library-tabs {
+  margin-bottom: 20px;
+}
+
+.add-filter {
+  width: 100%;
+  margin-top: 4px;
+  padding: 13px 16px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.add-filter:focus {
+  border-color: var(--accent);
+}
+
+.add-filter::placeholder {
+  color: var(--ink-muted);
+}
+
+/* TMDB search screen */
+.tmdb-search-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.tmdb-search-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 13px 16px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.tmdb-search-row input:focus {
+  border-color: var(--accent);
+}
+
+.tmdb-search-row input::placeholder {
+  color: var(--ink-muted);
+}
+
+.tmdb-go-btn {
+  padding: 13px 22px;
+  flex-shrink: 0;
+  background: var(--accent-strong);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(1deg);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.tmdb-go-btn:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 6px 0 var(--accent-deep);
+}
+
+.tmdb-go-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 var(--accent-deep);
+}
+
+.tmdb-go-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+}
+
+.tmdb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 460px;
+  overflow-y: auto;
+  padding: 4px 4px 8px;
+}
+
+.tmdb-row {
+  display: flex;
+  align-items: stretch;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  box-shadow: 2px 4px 9px rgba(0, 0, 0, 0.22);
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.tmdb-row:hover {
+  box-shadow: 3px 7px 14px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.tmdb-stub {
+  flex: 0 0 74px;
+  border-right: 2px dashed rgba(13, 12, 21, 0.22);
+  position: relative;
+  overflow: hidden;
+}
+
+.tmdb-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: var(--surface);
+}
+
+.tmdb-poster-empty {
+  background: linear-gradient(135deg, #2a2338, #3a3050);
+}
+
+.tmdb-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 16px;
+  min-width: 0;
+}
+
+.tmdb-row-title {
+  font-family: var(--font-hand);
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.tmdb-row-year {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.tmdb-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  flex-shrink: 0;
+}
+
+.tmdb-info-btn {
+  padding: 8px 14px;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.tmdb-info-btn:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.tmdb-add-btn {
+  padding: 8px 16px;
+  background: var(--accent-strong);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  box-shadow: 2px 3px 0 var(--accent-deep);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.tmdb-add-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 3px 4px 0 var(--accent-deep);
+}
+
+.tmdb-add-btn.added,
+.tmdb-add-btn:disabled {
+  background: var(--border);
+  color: var(--ink-muted);
+  box-shadow: none;
+  cursor: default;
+  transform: none;
+}
+
+/* Stacks "Mark as watched" the same way #detail-modal already stacks below
+   860px — placed after .update-poster-img's own base rule (not inside the
+   earlier shared 860px block above) so this actually wins the cascade;
+   same specificity earlier in the file loses to a later unconditional rule
+   regardless of which media query matches. */
+@media (max-width: 860px) {
+  .update-layout {
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    width: min(420px, calc(100vw - 32px));
+  }
+
+  .update-poster-img {
+    width: 150px;
+  }
+
+  .update-layout .update-panel {
+    max-height: none;
+    width: 100%;
+  }
+
+  /* The stacked layout leaves less room for the star row than the old plain
+     .update-modal shell did (that mobile padding tweak lives on .update-modal
+     for #start-modal, which still uses it — this is the new panel's own). */
+  .update-form-body {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .rating-row:has(.stars-input) .stars.stars-input {
+    font-size: 33px;
+  }
+}
+
+/* Same specificity as the rule above, later in the file, so it wins for the
+   narrowest phones instead of losing to it — a plain .stars.stars-input
+   rule at this breakpoint (see responsive.css) is a lower-specificity match
+   here and would never win against the :has() rule above regardless of
+   which one is "more specific" by width. */
+@media (max-width: 340px) {
+  .rating-row:has(.stars-input) .stars.stars-input {
+    font-size: 28px;
+  }
+}

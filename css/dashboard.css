@@ -1,0 +1,169 @@
+/* ---------- Surprise Me ---------- */
+
+.surprise-btn {
+  flex-shrink: 0;
+  padding: 11px 20px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #fff;
+  background: var(--accent-strong);
+  box-shadow: 3px 5px 0 var(--accent-deep);
+  transform: rotate(-1deg);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.surprise-btn:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 7px 0 var(--accent-deep);
+}
+
+.surprise-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 var(--accent-deep);
+}
+
+/* ---------- Dashboard blocks ---------- */
+
+.dash-block {
+  margin-top: 32px;
+}
+
+.dash-block-title {
+  font-size: 19px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 14px;
+}
+
+.dash-block-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.dash-block-head .dash-block-title {
+  margin-bottom: 0;
+}
+
+.dash-block-count {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* horizontal scrolling rows of reused cards */
+.dash-row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 4px 4px 12px;
+  scroll-snap-type: x proximity;
+}
+
+.dash-row .card {
+  flex: 0 0 150px;
+  width: 150px;
+  scroll-snap-align: start;
+}
+
+.dash-row .card-title {
+  font-size: 14px;
+}
+
+/* empty states */
+.dash-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 28px;
+  background: var(--bg-elevated);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+.dash-empty p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.dash-empty-btn {
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background var(--transition), color var(--transition);
+}
+
+.dash-empty-btn:hover {
+  background: var(--accent-soft);
+}
+
+.dash-empty-text {
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 20px 0;
+}
+
+/* ---------- Genre distribution chart ---------- */
+
+.genre-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px;
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.28);
+}
+
+.genre-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 36px;
+  align-items: center;
+  gap: 14px;
+}
+
+.genre-name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.genre-bar-track {
+  height: 10px;
+  background: var(--bg-elevated);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.genre-bar {
+  height: 100%;
+  min-width: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-strong), var(--accent));
+  transition: width 0.4s ease;
+}
+
+.genre-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.genre-chart .dash-empty-text {
+  padding: 0;
+}

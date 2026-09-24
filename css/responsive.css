@@ -1,0 +1,301 @@
+/* =====================================================================
+   Slate — central responsive rules.
+   All breakpoint behaviour lives here rather than scattered across the
+   component stylesheets. Loaded last so these rules win on override.
+
+   Breakpoints:
+     Tablet & below : max-width 768px  (off-canvas drawer nav, tuned grids)
+     Mobile         : max-width 480px  (1–2 col grids, full-width modals)
+   ===================================================================== */
+
+/* Dynamic viewport height avoids the mobile URL-bar height jump. */
+@supports (height: 100dvh) {
+  .app {
+    height: 100dvh;
+  }
+  .auth-screen {
+    min-height: 100dvh;
+  }
+}
+
+/* The mobile nav controls are hidden on desktop. */
+.menu-toggle,
+.sidebar-backdrop {
+  display: none;
+}
+
+/* =========================== TABLET & BELOW (≤768px) =========================== */
+@media (max-width: 768px) {
+  /* ---------- Off-canvas sidebar drawer ---------- */
+
+  /* Toggle sits below modal z-indexes (90+) so it never floats over a modal;
+     when the drawer is open the sidebar (z 100) covers it, and the drawer is
+     dismissed by tapping the backdrop, a nav item, or Escape. */
+  .menu-toggle {
+    display: flex;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 70;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+
+  .menu-toggle-bar {
+    width: 20px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--text);
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: min(280px, 82vw);
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  }
+
+  .app.sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+
+  /* Brand clears the floating toggle. */
+  .sidebar-brand {
+    padding-left: 52px;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 96;
+    background: rgba(8, 6, 14, 0.6);
+    backdrop-filter: blur(1px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .app.sidebar-open .sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Content spans full width; top padding clears the floating toggle. */
+  .content {
+    padding: 64px 20px 28px;
+  }
+
+  .section-header {
+    flex-wrap: wrap;
+  }
+
+  /* ---------- Card grids: tablet 2–3 columns ---------- */
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+  }
+
+  /* ---------- Forms & touch targets ---------- */
+
+  /* 16px prevents iOS Safari from zooming in on focus. */
+  .field-input,
+  .modal-search input {
+    font-size: 16px;
+    padding: 12px 14px;
+  }
+
+  .modal-close {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .nav-btn,
+  .ticket,
+  .logout-btn,
+  .subtab-btn,
+  .status-tab,
+  .sort-btn,
+  .add-btn,
+  .surprise-btn,
+  .modal-search-btn,
+  .complete-btn,
+  .cancel-btn,
+  .delete-btn,
+  .edit-btn,
+  .mini-add-btn,
+  .result-info-btn,
+  .auth-submit {
+    min-height: 44px;
+  }
+
+  /* ---------- Detail modal ---------- */
+  .detail-panel {
+    padding: 24px 20px;
+  }
+}
+
+/* =============================== MOBILE (≤480px) =============================== */
+@media (max-width: 480px) {
+  .content {
+    padding: 60px 14px 24px;
+  }
+
+  .section-header {
+    margin-bottom: 20px;
+    gap: 10px;
+  }
+
+  .section-header h1 {
+    font-size: 22px;
+  }
+
+  /* ---------- Card grids: 2 columns ---------- */
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .ghost-card {
+    min-height: 180px;
+  }
+
+  /* ---------- Quick Stats: 2×2 grid instead of a squeezed row ---------- */
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  /* ---------- Dashboard rows (stay horizontally scrollable) ---------- */
+  .dash-block {
+    margin-top: 26px;
+  }
+
+  .dash-block-title {
+    font-size: 16px;
+  }
+
+  .dash-row .card {
+    flex: 0 0 140px;
+    width: 140px;
+  }
+
+  .genre-chart {
+    padding: 16px;
+  }
+
+  .genre-row {
+    grid-template-columns: 82px 1fr 28px;
+    gap: 10px;
+  }
+
+  /* ---------- Modals: near full-width with small margins ---------- */
+  .modal {
+    width: calc(100vw - 20px);
+    max-height: calc(100vh - 24px);
+    padding: 16px;
+  }
+
+  .detail-layout {
+    width: calc(100vw - 20px);
+  }
+
+  .detail-poster-img {
+    width: 150px;
+  }
+
+  .detail-title {
+    font-size: 22px;
+  }
+
+  .detail-panel {
+    padding: 20px 16px;
+  }
+
+  .detail-head {
+    padding-right: 32px;
+    gap: 12px;
+  }
+
+  /* Action rows stack full-width for comfortable tapping. */
+  .update-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .update-actions-right {
+    width: 100%;
+  }
+
+  .update-actions-right .cancel-btn,
+  .update-actions-right .modal-search-btn {
+    flex: 1;
+  }
+
+  .update-actions > .delete-btn {
+    width: 100%;
+  }
+
+  .confirm-actions .cancel-btn,
+  .confirm-actions .delete-btn-solid {
+    flex: 1;
+  }
+
+  .detail-actions {
+    flex-wrap: wrap;
+  }
+
+  /* Larger touch targets for pickers and rating input. */
+  .emoji-option {
+    padding: 10px 0;
+    font-size: 22px;
+  }
+
+  .update-modal {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .stars.stars-input {
+    font-size: 37px;
+    letter-spacing: 0;
+  }
+
+  /* Only here, where the 10-star row is wide enough to need the line to
+     itself, does the value drop below it — on desktop it stays right next
+     to the stars (see .rating-row:has(.stars-input) .stars-value). */
+  .rating-row:has(.stars-input) .stars-value {
+    flex-basis: 100%;
+  }
+}
+
+/* A 10-star row this wide has nowhere left to shrink to on genuinely tiny
+   screens (old iPhone SE and similar, ~320px) without overflowing past the
+   modal's edge — step it back down there rather than let it visibly clip. */
+@media (max-width: 340px) {
+  .stars.stars-input {
+    font-size: 31px;
+  }
+}

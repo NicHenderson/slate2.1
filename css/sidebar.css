@@ -1,0 +1,246 @@
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  padding: 24px 18px;
+}
+
+.sidebar-brand {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 14px;
+  padding: 6px 6px 24px;
+}
+
+.logo-frame {
+  grid-row: 1 / 3;
+  width: 86px;
+}
+
+.sidebar-logo {
+  display: block;
+  width: 100%;
+  border-radius: 14px;
+}
+
+.brand-name {
+  grid-column: 2;
+  grid-row: 1;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+.brand-tagline {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.brand-tag {
+  display: inline-block;
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-weight: 400;
+  font-size: 28px;
+  text-align: center;
+  padding: 9px 20px 7px;
+  transform: rotate(-2deg);
+  box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.32);
+}
+
+.brand-tag::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: calc(50% - 7px);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4), inset -2px -2px 3px rgba(0, 0, 0, 0.3),
+    inset 2px 2px 2px rgba(255, 255, 255, 0.5);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+/* Two tickets in the same group (no separator between them) sit closer
+   together than a group break does, so give that pair a bit more air on
+   top of the base gap. */
+.nav-btn + .nav-btn {
+  margin-top: 8px;
+}
+
+.nav-label {
+  display: inline-block;
+  position: relative;
+  align-self: flex-start;
+  background: var(--pop);
+  color: #fff;
+  font-family: var(--font-hand);
+  font-weight: 400;
+  font-size: 16px;
+  padding: 4px 14px 3px 11px;
+  margin: 14px 0 2px 2px;
+  transform: rotate(-1.5deg);
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+.nav-label::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Each nav button reads as a torn movie-ticket stub: an icon stub on the
+   left, cut away from the label by a dashed perforation with die-cut
+   notches top and bottom.
+
+   Split into two boxes: .nav-btn is the plain layout/click target, and
+   the inner .ticket span carries the paper look (background, tilt,
+   shadow, the overflow: hidden that clips the die-cut notches). The
+   hover glow lives on .nav-btn (not .ticket) since .ticket's own
+   overflow: hidden would clip an outward box-shadow into a hard-edged
+   rectangle instead of a soft halo. */
+.nav-btn {
+  position: relative;
+  display: block;
+  width: 100%;
+  background: none;
+  padding: 0;
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nav-btn:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 0 8px 2px rgba(167, 139, 246, 0.6),
+    0 0 20px 6px rgba(139, 92, 246, 0.4);
+}
+
+.ticket {
+  display: flex;
+  align-items: stretch;
+  min-height: 40px;
+  background: var(--paper);
+  color: var(--ink);
+  overflow: hidden;
+  box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.28);
+  transform: rotate(-1deg);
+}
+
+.sidebar-nav > .nav-btn:nth-child(3n) .ticket {
+  transform: rotate(-1.4deg);
+}
+.sidebar-nav > .nav-btn:nth-child(3n + 1) .ticket {
+  transform: rotate(1.1deg);
+}
+.sidebar-nav > .nav-btn:nth-child(3n + 2) .ticket {
+  transform: rotate(-0.5deg);
+}
+
+.nav-stub {
+  flex: 0 0 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 2px dashed rgba(13, 12, 21, 0.3);
+  position: relative;
+}
+
+.nav-svg-icon {
+  width: 19px;
+  height: 19px;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.nav-btn.active .nav-svg-icon {
+  color: #fff;
+}
+
+.nav-stub::before,
+.nav-stub::after {
+  content: "";
+  position: absolute;
+  left: 100%;
+  margin-left: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--sidebar-bg);
+}
+.nav-stub::before {
+  top: -5px;
+}
+.nav-stub::after {
+  bottom: -5px;
+}
+
+.nav-label-text {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-hand);
+  font-size: 14px;
+  line-height: 1.15;
+  padding: 9px 12px;
+}
+
+.nav-btn.active .ticket {
+  background: var(--accent-strong);
+  color: #fff;
+}
+
+.nav-btn.active .nav-stub {
+  border-right-color: rgba(255, 255, 255, 0.35);
+}
+
+.nav-btn.active .nav-stub::before,
+.nav-btn.active .nav-stub::after {
+  background: var(--sidebar-bg);
+}
+
+.sidebar-footer {
+  padding: 14px 6px 0;
+}
+
+.logout-btn {
+  font-family: var(--font-hand);
+  font-size: 17px;
+  font-weight: 400;
+  text-transform: lowercase;
+  color: var(--text-muted);
+  padding: 0;
+  background: none;
+}
+
+.logout-btn:hover {
+  color: var(--text);
+  background: none;
+}

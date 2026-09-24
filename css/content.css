@@ -1,0 +1,680 @@
+.content {
+  flex: 1;
+  overflow-y: auto;
+  /* Without this, .content's available width depends on whether ITS OWN
+     scrollbar happens to be showing — which page you're on (a shorter
+     last page vs a full one) can flip that, changing how many grid
+     columns fit and every row-height measurement downstream of it. That's
+     a second, independent cause of the pagination-bar-shifts-between-pages
+     bug alongside the min-height reservation below: reserving the
+     scrollbar's space unconditionally means the width never depends on
+     which page happens to be showing. */
+  scrollbar-gutter: stable;
+  padding: 36px 40px;
+}
+
+.section {
+  display: none;
+  animation: fade-in 0.25s ease;
+}
+
+.section.active {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.section-header > div:not(.header-actions) {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.section-header h1 {
+  font-size: 30px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Open-collection title: "Collections › Name". The first part is the way
+   back, so it reads as a quiet link; the collection's own name stays
+   full-strength. */
+.crumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.crumb-link {
+  flex-shrink: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+
+.crumb-link:hover,
+.crumb-link:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
+}
+
+.crumb-sep {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* With room to spare, keep "Collections ›" and the name on one row and let
+   a long name wrap beside the crumb instead of dropping under a stranded ›.
+   On narrow screens the crumb wraps as a whole (base rule above). */
+@media (min-width: 769px) {
+  .crumb {
+    flex-wrap: nowrap;
+  }
+
+  .crumb-current {
+    min-width: 0;
+  }
+}
+
+.current-sort {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.current-sort span {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.section-sub {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-weight: 400;
+  font-size: 15px;
+  padding: 4px 14px 3px 11px;
+  transform: rotate(-1.5deg);
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.sort-wrap {
+  position: relative;
+}
+
+/* Paper counterpart to .add-btn's solid sticker — same stamped-shadow
+   language and family shadow color, just unfilled, so the pair reads as
+   primary/secondary siblings rather than two unrelated controls. */
+.sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border: none;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(-1deg);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.sort-btn-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.sort-btn:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 6px 0 var(--accent-deep);
+}
+
+.sort-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 var(--accent-deep);
+}
+
+/* Destructive sibling of .sort-btn (Delete collection): same sticker, red. */
+.sort-btn-danger {
+  color: #b42318;
+  box-shadow: 3px 4px 0 #b42318;
+}
+
+.sort-btn-danger:hover {
+  box-shadow: 4px 6px 0 #b42318;
+}
+
+.sort-btn-danger:active {
+  box-shadow: 1px 2px 0 #b42318;
+}
+
+/* Sort menu: each option reads as a mini movie-ticket row (a symbol
+   stub cut away from the label by a dashed perforation), grouped under
+   small caps headers — the same "boleto" language as the sidebar nav. */
+.sort-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  min-width: 215px;
+  padding: 8px;
+  background: var(--paper);
+  color: var(--text);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.sort-group-label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 8px 6px 4px;
+}
+
+.sort-group-label:first-child {
+  padding-top: 2px;
+}
+
+.sort-option {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 3px;
+  border-radius: 2px;
+  overflow: hidden;
+  transition: background var(--transition);
+}
+
+.sort-stub {
+  flex: 0 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  border-right: 1.5px dashed rgba(13, 12, 21, 0.28);
+  color: var(--accent);
+}
+
+.sort-option-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-hand);
+  font-size: 15px;
+  padding: 6px 10px;
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+
+.sort-option:not(.active):hover {
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.sort-option.active {
+  background: var(--accent-strong);
+}
+
+.sort-option.active .sort-stub {
+  color: #fff;
+  border-right-color: rgba(255, 255, 255, 0.4);
+}
+
+.sort-option.active .sort-option-label {
+  color: #fff;
+  font-weight: 700;
+}
+
+.subtabs {
+  display: flex;
+  gap: 8px;
+  margin: -8px 0 20px;
+}
+
+.subtab-btn {
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background var(--transition), color var(--transition),
+    border-color var(--transition);
+}
+
+.subtab-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.subtab-btn.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Status picker (Watched / Watching / Dropped): one paper ticket strip,
+   perforated top and bottom, torn into three stubs by dashed dividers —
+   the same "boleto" language as the sidebar nav and the sort menu, just
+   laid out as a strip of admission stubs instead of a list. */
+.subtabs.status-strip {
+  gap: 0;
+  width: fit-content;
+  margin: -4px 0 22px 2px;
+  background: var(--paper);
+  color: var(--ink);
+  border-top: 2px dashed rgba(13, 12, 21, 0.25);
+  border-bottom: 2px dashed rgba(13, 12, 21, 0.25);
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+  transform: rotate(-0.5deg);
+}
+
+.status-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px 9px 16px;
+  font-family: var(--font-hand);
+  font-size: 15px;
+  color: var(--ink-muted);
+  transition: background var(--transition), color var(--transition);
+}
+
+.status-tab + .status-tab {
+  border-left: 2px dashed rgba(13, 12, 21, 0.25);
+}
+
+.status-tab-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.status-tab-count {
+  min-width: 1.4em;
+  padding: 0 6px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+  background: rgba(13, 12, 21, 0.08);
+  border-radius: 999px;
+}
+
+.status-tab.active .status-tab-count {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.status-tab:hover:not(.active) {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--ink);
+}
+
+.status-tab.active {
+  background: var(--accent-strong);
+  color: #fff;
+}
+
+.card-grid.subtab-hidden,
+.subtab-hidden {
+  display: none !important;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 20px;
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.3);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 16px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.4);
+}
+
+.stats-grid .stat-card:nth-child(1) { transform: rotate(-1.2deg); }
+.stats-grid .stat-card:nth-child(2) { transform: rotate(0.9deg); }
+.stats-grid .stat-card:nth-child(3) { transform: rotate(-0.7deg); }
+.stats-grid .stat-card:nth-child(4) { transform: rotate(1.1deg); }
+
+.stat-card:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 3px 8px 14px rgba(0, 0, 0, 0.35);
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+/* ---------- open-collection stats strip (js/collections.js) ----------
+   One slim paper ticket with three segments split by dashed perforations,
+   instead of three separate cards. */
+.col-stats {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 26px;
+  padding: 8px 4px;
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+  transform: rotate(-0.25deg);
+}
+
+.col-stats[hidden] {
+  display: none;
+}
+
+/* Tells the reader these numbers ignore the Movies | Shows tab below: the
+   label sits on the strip's top edge like a legend. */
+.cs-scope {
+  position: absolute;
+  top: -8px;
+  left: 14px;
+  padding: 0 7px;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--paper);
+  border: 1px solid var(--border);
+  cursor: help;
+}
+
+.cs-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 2px 16px;
+}
+
+.cs-item + .cs-item {
+  border-left: 2px dashed rgba(13, 12, 21, 0.22);
+}
+
+.cs-progress {
+  flex: 0 1 270px;
+}
+
+.cs-extremes {
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
+.cs-value {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cs-value small {
+  margin-left: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.cs-meta {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 80px;
+}
+
+.cs-label {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Best & worst: two slim rows (arrow, title, score); each opens its title. */
+.extreme-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+  padding: 1px 0;
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  transition: color var(--transition);
+}
+
+.extreme-row:hover,
+.extreme-row:focus-visible {
+  color: var(--accent);
+}
+
+.extreme-arrow {
+  flex: none;
+  width: 8px;
+  font-size: 9px;
+  color: var(--accent);
+}
+
+.extreme-row:last-child .extreme-arrow {
+  color: var(--text-muted);
+}
+
+/* Name, then its score, then how many others share that score, all side by
+   side; only the name gives way (ellipsis) when there's no room. */
+.extreme-title {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.extreme-rating {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
+.extreme-ties {
+  flex: none;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 15px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  cursor: help;
+}
+
+.stat-bar {
+  height: 6px;
+  overflow: hidden;
+  background: rgba(13, 12, 21, 0.1);
+  border: 1px solid rgba(13, 12, 21, 0.3);
+}
+
+.stat-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--accent-strong);
+}
+
+.stat-bar.is-complete > span {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--accent-deep) 0 6px,
+    var(--accent-strong) 6px 12px
+  );
+}
+
+/* Narrow screens: progress takes the first row, the other two share the next. */
+@media (max-width: 768px) {
+  .col-stats {
+    flex-wrap: wrap;
+    transform: none;
+  }
+
+  .cs-progress {
+    flex: 1 1 100%;
+    padding: 4px 12px 10px;
+    border-bottom: 2px dashed rgba(13, 12, 21, 0.22);
+  }
+
+  .cs-item {
+    padding: 8px 12px 4px;
+  }
+
+  .cs-progress + .cs-item {
+    border-left: 0;
+  }
+}
+
+/* Phones: the average's label goes under its value, leaving the room to the
+   best / worst titles. */
+@media (max-width: 480px) {
+  .cs-item:not(.cs-progress):not(.cs-extremes) {
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+.placeholder-panel {
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  background: var(--bg-elevated);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--transition);
+}
+
+.placeholder-panel:hover {
+  border-color: var(--accent);
+}
+
+.placeholder-panel p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.under-construction {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 320px;
+}
+
+.under-construction-icon {
+  font-size: 56px;
+  line-height: 1;
+}
+
+.under-construction-text {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}

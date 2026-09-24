@@ -1,0 +1,129 @@
+:root {
+  --bg: #0d0c15;
+  --bg-elevated: #17131f;
+  --sidebar-bg: #120e1b;
+  --surface: #1c1727;
+  --border: #2a2338;
+  --accent: #a78bfa;
+  --accent-strong: #8b5cf6;
+  --accent-deep: #6d28d9;
+  --accent-soft: rgba(167, 139, 246, 0.12);
+  --pop: #2979ff;
+  --text: #ece8f5;
+  --text-muted: #9d94b3;
+  --paper: var(--text);
+  --paper-dim: color-mix(in srgb, var(--bg) 7%, var(--text));
+  --ink: var(--bg);
+  --ink-muted: #5c5470;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --transition: 0.2s ease;
+  --font-body: "Libre Franklin", "Inter", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --font-display: "Oswald", sans-serif;
+  --font-hand: "Patrick Hand", cursive;
+}
+
+/* Paper-surfaced components (cards, modals, the auth card) sit on a light
+   ground, so the shared text/accent tokens flip to their ink-safe values
+   here instead of being redeclared at every selector that uses them. */
+:where(
+    .modal-backdrop,
+    .sort-menu,
+    .toast,
+    .card,
+    .stat-card,
+    .genre-chart,
+    .collection-card,
+    .col-item-card,
+    .col-stats,
+    .auth-card,
+    .ghost-card
+  ) {
+  --text: var(--ink);
+  --text-muted: var(--ink-muted);
+  --accent: var(--accent-deep);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: #4c3d6e var(--bg-elevated);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4c3d6e;
+  border-radius: 8px;
+  border: 2px solid var(--bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-strong);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.04) 0 2px, transparent 3px),
+    radial-gradient(circle at 60% 70%, rgba(0, 0, 0, 0.35) 0 2px, transparent 3px),
+    radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.03) 0 2px, transparent 3px),
+    var(--bg);
+  background-size: 70px 70px, 90px 90px, 110px 110px, 100% 100%;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
