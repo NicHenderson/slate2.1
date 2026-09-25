@@ -42,6 +42,11 @@
 /* ---------- hero (brand) ---------- */
 
 .auth-hero {
+  /* Explicit, not inherited: body's own `color: var(--text)` (base.css)
+     resolves outside .auth-screen's pinned scope, using whatever theme is
+     actually cached — .auth-hero-title had no color of its own and was
+     quietly inheriting that unpinned value instead. */
+  color: var(--text);
   flex: 1 1 56%;
   position: relative;
   display: flex;
@@ -128,6 +133,17 @@
 .auth-hero-content {
   position: relative;
   z-index: 1;
+}
+
+/* Same rounded-square treatment as the sidebar's own logo (.sidebar-logo),
+   plus a lifted shadow this one actually needs, sitting over the busier
+   poster wall instead of a flat panel. */
+.auth-hero-logo {
+  display: block;
+  width: 60px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  box-shadow: 2px 6px 16px rgba(0, 0, 0, 0.5);
 }
 
 /* A soft, blurred halo behind the title block so the busier collage never
