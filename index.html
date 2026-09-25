@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="css/base.css?v=7" />
   <link rel="stylesheet" href="css/sidebar.css?v=2" />
   <link rel="stylesheet" href="css/content.css?v=14" />
-  <link rel="stylesheet" href="css/cards.css?v=23" />
+  <link rel="stylesheet" href="css/cards.css?v=24" />
   <link rel="stylesheet" href="css/modal.css?v=40" />
   <link rel="stylesheet" href="css/dashboard.css?v=2" />
   <link rel="stylesheet" href="css/auth.css?v=3" />
@@ -301,6 +301,7 @@
       <section class="section" id="movies-towatch">
         <header class="section-header">
           <div>
+            <p class="drag-hint" id="movies-towatch-drag-hint" hidden><svg class="drag-hint-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg><span class="hint-pointer">Drag to reorder</span><span class="hint-touch">Press &amp; hold to reorder</span></p>
             <p class="current-sort">Sorted by <span id="movies-towatch-current-sort-label"></span></p>
             <h1>Movies To Watch</h1>
             <p class="section-sub">Your movie watchlist</p>
@@ -316,7 +317,6 @@
             <button class="add-btn" data-type="movie">+ Add</button>
           </div>
         </header>
-        <p class="drag-hint" id="movies-towatch-drag-hint" hidden><span class="hint-pointer">Drag movies to reorder them.</span><span class="hint-touch">Press and hold a movie, then drag to reorder.</span></p>
         <div class="card-grid" id="grid-movies-towatch">
           <p class="loading">Loading…</p>
         </div>
@@ -325,6 +325,7 @@
       <section class="section" id="shows-towatch">
         <header class="section-header">
           <div>
+            <p class="drag-hint" id="shows-towatch-drag-hint" hidden><svg class="drag-hint-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg><span class="hint-pointer">Drag to reorder</span><span class="hint-touch">Press &amp; hold to reorder</span></p>
             <p class="current-sort">Sorted by <span id="shows-towatch-current-sort-label"></span></p>
             <h1>Shows To Watch</h1>
             <p class="section-sub">Your show watchlist</p>
@@ -340,7 +341,6 @@
             <button class="add-btn" data-type="tv">+ Add</button>
           </div>
         </header>
-        <p class="drag-hint" id="shows-towatch-drag-hint" hidden><span class="hint-pointer">Drag shows to reorder them.</span><span class="hint-touch">Press and hold a show, then drag to reorder.</span></p>
         <div class="card-grid" id="grid-shows-towatch">
           <p class="loading">Loading…</p>
         </div>
@@ -349,11 +349,11 @@
       <section class="section" id="collections">
         <header class="section-header">
           <div>
+            <p class="drag-hint" id="collections-drag-hint" hidden><svg class="drag-hint-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg><span class="hint-pointer">Drag to reorder</span><span class="hint-touch">Press &amp; hold to reorder</span></p>
             <h1>Collections</h1>
             <p class="section-sub">Curated groups of titles</p>
           </div>
         </header>
-        <p class="drag-hint" id="collections-drag-hint" hidden><span class="hint-pointer">Drag collections to reorder them.</span><span class="hint-touch">Press and hold a collection, then drag to reorder.</span></p>
         <div class="card-grid" id="grid-collections">
           <p class="loading">Loading…</p>
         </div>
@@ -362,6 +362,7 @@
       <section class="section" id="collection-view">
         <header class="section-header">
           <div>
+            <p class="drag-hint" id="col-detail-drag-hint" hidden><svg class="drag-hint-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg><span class="hint-pointer">Drag to reorder</span><span class="hint-touch">Press &amp; hold to reorder</span></p>
             <h1 class="crumb">
               <button class="crumb-link" id="col-crumb-back" type="button">Collections</button>
               <span class="crumb-sep" aria-hidden="true">›</span>
@@ -389,7 +390,6 @@
             <span class="status-tab-count">0</span>
           </button>
         </div>
-        <p class="drag-hint" id="col-detail-drag-hint" hidden><span class="hint-pointer">Drag titles to reorder them.</span><span class="hint-touch">Press and hold a title, then drag to reorder.</span></p>
         <div class="card-grid" id="col-detail-grid"></div>
       </section>
 

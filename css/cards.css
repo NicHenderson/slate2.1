@@ -90,11 +90,34 @@ body.is-dragging * {
   user-select: none !important;
 }
 
+/* A small pill in the header (not a button — no shadow/tilt from the
+   .add-btn/.sort-btn sticker family) instead of a line of text sitting
+   right above the grid, which put it too far from the header it belongs
+   to and left it squeezed against the first row of cards, where the
+   hover-lift on those cards could cover it. The header's own gap (10px,
+   .section-header > div) and margin-bottom (28px, before the grid) place
+   it for free. */
 .drag-hint {
-  margin: 0 0 14px;
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  padding: 5px 11px 5px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-glow) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--accent-deep);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.drag-hint-icon {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  color: var(--accent);
 }
 
 .drag-hint[hidden] {
