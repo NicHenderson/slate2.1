@@ -489,6 +489,11 @@ importBody?.addEventListener("click", (e) => {
   if (action === "back") showImportSummary(importFileName, importParsed);
   if (action === "mode") selectImportMode(e.target.closest("[data-import-mode]"));
   if (action === "run") runImport();
+  if (action === "confirm-replace") runImport(true);
+});
+
+importBody?.addEventListener("input", (e) => {
+  if (e.target.id === "import-confirm-input") syncReplaceConfirm();
 });
 
 document.getElementById("import-close")?.addEventListener("click", closeImportModal);
@@ -522,12 +527,12 @@ function showImportModes() {
           <span class="import-mode-desc">Everything you have stays. New titles and collections are added; anything already in your library is left exactly as it is.</span>
         </span>
       </button>
-      <button type="button" class="import-mode import-mode-danger" role="radio" aria-checked="false" data-import-action="mode" data-import-mode="replace" disabled>
+      <button type="button" class="import-mode import-mode-danger" role="radio" aria-checked="false" data-import-action="mode" data-import-mode="replace">
         <span class="import-mode-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
         </span>
         <span class="import-mode-text">
-          <span class="import-mode-title">Replace everything <span class="import-mode-soon">Next step</span></span>
+          <span class="import-mode-title">Replace everything</span>
           <span class="import-mode-desc">Deletes everything in your account and brings in only this file.</span>
         </span>
       </button>
@@ -563,7 +568,9 @@ async function insertRows(table, rows, created, onRows) {
   const written = [];
   for (let i = 0; i < rows.length; i += IMPORT_CHUNK) {
     const chunk = rows.slice(i, i + IMPORT_CHUNK);
-    const { data, error } = await db.from(table).insert(chunk).select();
+    // defaultToNull: false — in a multi-row insert, a column some rows leave
+    // out (created_at, a collection's icon) gets its database default, not null.
+    const { data, error } = await db.from(table).insert(chunk, { defaultToNull: false }).select();
     if (error) throw new Error(`${table}: ${error.message}`);
     (data ?? []).forEach((row) => created[table].push(row.id));
     // With row-level security a refused insert can "succeed" with nothing
@@ -822,7 +829,7 @@ function showImportDone(report) {
   importBody.querySelector('[data-import-action="close"]').focus();
 }
 
-function showImportFailed(undone) {
+function showImportFailed(undone, message) {
   setImportHeader("Import data", "The import didn't finish", importFileName.replace(/\.slate$/i, ""));
   setImportView(
     "error",
@@ -831,9 +838,10 @@ function showImportFailed(undone) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 L21.5 20 L2.5 20 Z"/><line x1="12" y1="9.7" x2="12" y2="14.2"/><circle cx="12" cy="17.2" r="0.75" fill="currentColor" stroke="none"/></svg>
       </span>
       <p class="import-error-text" role="alert">${
-        undone
+        message ??
+        (undone
           ? "Something went wrong while importing, so it was undone: your library is exactly as it was."
-          : "Something went wrong while importing, and not everything could be undone. Some titles from the file may be in your library now — nothing you already had was changed."
+          : "Something went wrong while importing, and not everything could be undone. Some titles from the file may be in your library now — nothing you already had was changed.")
       }</p>
       <p class="import-note">Check your connection and try again.</p>
     </div>
@@ -852,27 +860,385 @@ function warnBeforeLeaving(e) {
   e.returnValue = "";
 }
 
-async function runImport() {
-  if (importBusy || !importParsed || importMode !== "add") return;
+// Add runs straight away; Replace goes through the danger screen first and
+// comes back here (confirmed) from its button.
+async function runImport(confirmed = false) {
+  if (importBusy || !importParsed) return;
+  if (importMode === "replace" && !confirmed) {
+    showReplaceDanger();
+    return;
+  }
+  if (importMode === "replace" && !replaceConfirmed()) return;
+  const replace = importMode === "replace";
+  const backupFirst = replace && document.getElementById("import-backup-first")?.checked === true;
+  clearInterval(replaceCountdown);
   importBusy = true;
   window.addEventListener("beforeunload", warnBeforeLeaving);
   showImportWorking();
   const started = performance.now();
   let outcome;
   try {
-    outcome = { ok: true, ...(await importAdd(importParsed, setImportProgress)) };
+    const result = replace
+      ? await importReplace(importParsed, backupFirst, setImportProgress)
+      : await importAdd(importParsed, setImportProgress);
+    outcome = { ok: true, ...result };
   } catch (err) {
     console.error("Import failed:", err);
-    outcome = { ok: false, undone: err.undone === true };
+    outcome = { ok: false, undone: err.undone === true, stage: err.stage };
   }
   const left = IMPORT_MIN_WORKING_MS - (performance.now() - started);
   if (left > 0) await new Promise((resolve) => setTimeout(resolve, left));
   importBusy = false;
   window.removeEventListener("beforeunload", warnBeforeLeaving);
-  if (outcome.ok) {
+  if (outcome.ok && replace) {
+    await reloadLibrary();
+    showReplaceDone(outcome.report);
+  } else if (outcome.ok) {
     applyImported(outcome.written);
     showImportDone(outcome.report);
+  } else if (outcome.stage === "backup") {
+    showImportFailed(true, "Your backup couldn't be downloaded, so nothing was deleted or imported.");
+  } else if (!outcome.undone && replace) {
+    showImportFailed(
+      false,
+      "Something went wrong while replacing, and not everything could be put back. Your library may be a mix of what you had and this file" +
+        (backupFirst ? " — the backup you just downloaded has everything you had." : ".")
+    );
   } else {
     showImportFailed(outcome.undone);
   }
+}
+
+/* ---------- Import: Replace everything ----------
+
+   The one import that deletes, so it asks three times over: a screen that
+   says exactly what goes, a box to type "Delete Data" into that only opens
+   after a few seconds (no confirming on reflex), and — ticked unless
+   unticked — a backup of the current library downloaded before anything is
+   touched. */
+
+const REPLACE_CONFIRM_WORD = "Delete Data";
+const REPLACE_WAIT_SECONDS = 3;
+let replaceCountdown = null;
+
+// Case and extra spaces don't matter: what matters is typing it on purpose.
+function replaceConfirmed() {
+  const input = document.getElementById("import-confirm-input");
+  if (!input || input.disabled) return false;
+  const typed = input.value.trim().replace(/\s+/g, " ").toLowerCase();
+  return typed === REPLACE_CONFIRM_WORD.toLowerCase();
+}
+
+function syncReplaceConfirm() {
+  const btn = importBody.querySelector('[data-import-action="confirm-replace"]');
+  if (btn) btn.disabled = !replaceConfirmed();
+}
+
+function showReplaceDanger() {
+  const have = {
+    movies: STORE.movies.size,
+    shows: STORE.shows.size,
+    collections: STORE.collections.size,
+  };
+  const incoming = importParsed;
+  setImportHeader("Import data · Replace everything", "This deletes your library", importFileName.replace(/\.slate$/i, ""));
+  setImportView(
+    "danger",
+    `<div class="import-danger">
+      <p class="import-danger-text">
+        Everything in your account — <strong>${plural(have.movies, "movie")}, ${plural(have.shows, "show")} and ${plural(have.collections, "collection")}</strong>, with every rating and review — will be deleted and replaced by this file's
+        ${plural(incoming.movies.length, "movie")}, ${plural(incoming.shows.length, "show")} and ${plural(incoming.collections.length, "collection")}.
+        <strong>This can't be undone.</strong>
+      </p>
+
+      <label class="import-check">
+        <input type="checkbox" id="import-backup-first" checked />
+        <span class="import-check-box" aria-hidden="true"></span>
+        <span class="import-check-text">
+          <span class="import-check-title">Download a backup of my library first</span>
+          <span class="import-check-hint">Saved as a .slate file before anything is deleted, so you can always bring it back.</span>
+        </span>
+      </label>
+
+      <label class="import-confirm-label" for="import-confirm-input">To confirm, type <strong>${REPLACE_CONFIRM_WORD}</strong></label>
+      <div class="import-confirm-wrap">
+        <input type="text" class="field-input import-confirm-input" id="import-confirm-input" autocomplete="off" autocapitalize="off" spellcheck="false" disabled placeholder="Wait ${REPLACE_WAIT_SECONDS}…" />
+        <span class="import-confirm-timer" id="import-confirm-timer" aria-hidden="true"></span>
+      </div>
+    </div>
+    <div class="update-actions import-actions">
+      <button type="button" class="cancel-btn" data-import-action="continue">Back</button>
+      <div class="update-actions-right">
+        <button type="button" class="delete-btn import-replace-btn" data-import-action="confirm-replace" disabled>Delete &amp; import</button>
+      </div>
+    </div>`
+  );
+
+  // The box stays locked for a few seconds, counting down in its placeholder
+  // while a ring drains beside it.
+  const input = document.getElementById("import-confirm-input");
+  let left = REPLACE_WAIT_SECONDS;
+  clearInterval(replaceCountdown);
+  replaceCountdown = setInterval(() => {
+    left -= 1;
+    if (!input.isConnected) {
+      clearInterval(replaceCountdown);
+      return;
+    }
+    if (left > 0) {
+      input.placeholder = `Wait ${left}…`;
+      return;
+    }
+    clearInterval(replaceCountdown);
+    input.disabled = false;
+    input.placeholder = REPLACE_CONFIRM_WORD;
+    input.closest(".import-confirm-wrap").classList.add("is-open");
+    input.focus();
+  }, 1000);
+  importBody.querySelector('[data-import-action="continue"]').focus();
+}
+
+// Fresh copies of every row, keyed by table, taken right before replacing:
+// what gets restored if the replace has to be undone.
+async function snapshotAccount() {
+  const [movies, shows, collections, collectionItems] = await Promise.all(
+    ["movies", "shows", "collections", "collection_items"].map(fetchAllRows)
+  );
+  return { movies, shows, collections, collectionItems };
+}
+
+// Upserts full rows (see persistOrder in collections.js for why full rows),
+// in chunks, checking every one was written.
+async function upsertRows(table, rows, onRows) {
+  for (let i = 0; i < rows.length; i += IMPORT_CHUNK) {
+    const chunk = rows.slice(i, i + IMPORT_CHUNK);
+    const { data, error } = await db.from(table).upsert(chunk).select("id");
+    if (error) throw new Error(`${table}: ${error.message}`);
+    if ((data?.length ?? 0) !== chunk.length) {
+      throw new Error(`${table}: the upsert wrote fewer rows than expected`);
+    }
+    onRows?.(chunk.length);
+  }
+}
+
+async function deleteIds(table, ids, onRows) {
+  for (let i = 0; i < ids.length; i += IMPORT_CHUNK) {
+    const chunk = ids.slice(i, i + IMPORT_CHUNK);
+    const { error } = await db.from(table).delete().in("id", chunk);
+    if (error) throw new Error(`${table}: ${error.message}`);
+    onRows?.(chunk.length);
+  }
+}
+
+// Replace mode. New content lands first; what the account had is removed
+// only once all of it is in:
+//
+//   1. the backup, if asked for (if it can't be made, nothing happens)
+//   2. titles: one the account already has (same TMDB id) is overwritten in
+//      place with the file's version, the rest are inserted — no moment
+//      where the same title exists twice, whatever the database allows
+//   3. the file's collections and their items, inserted as new
+//   4. only then: the old collection items, the old collections, and the
+//      titles the file doesn't have, deleted
+//
+// A failure in 2–3 is undone (new rows deleted, overwritten titles put
+// back from the snapshot). A failure in 4 is retried once; if some old rows
+// still won't go, the import stands and the report says so.
+async function importReplace(parsed, backupFirst, onProgress) {
+  if (backupFirst) {
+    onProgress("Saving a backup of your library…", 0);
+    try {
+      const file = await buildSlateBackup();
+      downloadFile(file.name.replace("slate-backup-", "slate-backup-before-import-"), file.text);
+    } catch (err) {
+      err.stage = "backup";
+      err.undone = true;
+      throw err;
+    }
+  }
+
+  onProgress("Checking your library…", 0);
+  const snap = await snapshotAccount();
+  const created = { movies: [], shows: [], collections: [], collection_items: [] };
+  const overwritten = { movies: [], shows: [] }; // originals, for undoing
+
+  const itemTotal = parsed.collections.reduce((n, col) => n + col.items.length, 0);
+  const total = Math.max(
+    1,
+    parsed.movies.length + parsed.shows.length + parsed.collections.length + itemTotal +
+      snap.collectionItems.length + snap.collections.length + snap.movies.length + snap.shows.length
+  );
+  let done = 0;
+  const tick = (label) => (n) => {
+    done += n;
+    onProgress(label, done / total);
+  };
+
+  const idByTmdb = { movie: new Map(), show: new Map() };
+  const keepIds = new Set(); // account titles the file overwrites (not deleted)
+
+  try {
+    for (const [type, table, label] of [["movie", "movies", "Bringing in movies…"], ["show", "shows", "Bringing in shows…"]]) {
+      onProgress(label, done / total);
+      const fileRows = type === "movie" ? parsed.movies : parsed.shows;
+      const accByTmdb = new Map();
+      snap[table].forEach((row) => {
+        if (!accByTmdb.has(row.tmdb_id)) accByTmdb.set(row.tmdb_id, row);
+      });
+      const updates = [];
+      const inserts = [];
+      fileRows.forEach((fileRow) => {
+        const { ref, ...fields } = fileRow;
+        const existing = accByTmdb.get(fileRow.tmdb_id);
+        if (existing) {
+          // The whole row as the file has it, on the account's id.
+          updates.push({ ...existing, ...fields, created_at: fields.created_at ?? existing.created_at });
+          overwritten[table].push(existing);
+          keepIds.add(existing.id);
+          idByTmdb[type].set(fileRow.tmdb_id, existing.id);
+        } else {
+          inserts.push(withoutNulls(fields, ["created_at"]));
+        }
+      });
+      await upsertRows(table, updates, tick(label));
+      const written = await insertRows(table, inserts, created, tick(label));
+      written.forEach((row) => idByTmdb[type].set(row.tmdb_id, row.id));
+    }
+
+    onProgress("Rebuilding your collections…", done / total);
+    const tmdbByRef = {
+      movie: new Map(parsed.movies.map((row) => [row.ref, row.tmdb_id])),
+      show: new Map(parsed.shows.map((row) => [row.ref, row.tmdb_id])),
+    };
+    // One at a time: each new id is needed for its items, and a collection
+    // with the same name as another must stay its own collection.
+    const itemRows = [];
+    for (const col of parsed.collections) {
+      const [row] = await insertRows(
+        "collections",
+        [withoutNulls({ name: col.name, icon: col.icon, position: col.position, created_at: col.created_at }, ["icon", "position", "created_at"])],
+        created,
+        tick("Rebuilding your collections…")
+      );
+      const seen = new Set();
+      col.items.forEach((item) => {
+        const itemId = idByTmdb[item.item_type].get(tmdbByRef[item.item_type].get(item.item_ref));
+        if (!itemId || seen.has(itemId)) return;
+        seen.add(itemId);
+        itemRows.push(
+          withoutNulls(
+            { collection_id: row.id, item_id: itemId, item_type: item.item_type, position: item.position, created_at: item.created_at },
+            ["position", "created_at"]
+          )
+        );
+      });
+    }
+    await insertRows("collection_items", itemRows, created, tick("Rebuilding your collections…"));
+  } catch (err) {
+    onProgress("Something went wrong — putting everything back…", done / total);
+    let undone = await deleteCreated(created);
+    if (undone) {
+      try {
+        await upsertRows("movies", overwritten.movies);
+        await upsertRows("shows", overwritten.shows);
+      } catch (restoreErr) {
+        console.error("Import restore failed:", restoreErr);
+        undone = false;
+      }
+    }
+    err.undone = undone;
+    throw err;
+  }
+
+  // Everything new is in: now clear out the old.
+  const oldTitles = {
+    movies: snap.movies.filter((row) => !keepIds.has(row.id)).map((row) => row.id),
+    shows: snap.shows.filter((row) => !keepIds.has(row.id)).map((row) => row.id),
+  };
+  const removals = [
+    ["collection_items", snap.collectionItems.map((row) => row.id)],
+    ["collections", snap.collections.map((row) => row.id)],
+    ["movies", oldTitles.movies],
+    ["shows", oldTitles.shows],
+  ];
+  let leftovers = 0;
+  for (const [table, ids] of removals) {
+    onProgress("Clearing out your old library…", done / total);
+    try {
+      await deleteIds(table, ids, tick("Clearing out your old library…"));
+    } catch (err) {
+      console.warn("Replace: retrying the removal of old rows —", err.message);
+      try {
+        await deleteIds(table, ids); // deleting what's already gone is harmless
+      } catch (again) {
+        console.error("Replace: old rows left behind —", again.message);
+        leftovers += ids.length;
+      }
+    }
+  }
+
+  onProgress("Done", 1);
+  return {
+    report: {
+      movies: parsed.movies.length,
+      shows: parsed.shows.length,
+      collections: parsed.collections.length,
+      removed: oldTitles.movies.length + oldTitles.shows.length,
+      backup: backupFirst,
+      leftovers,
+    },
+  };
+}
+
+// After a replace nearly every row changed: read the library again and
+// redraw everything from it, rather than patching STORE row by row.
+async function reloadLibrary() {
+  try {
+    const snap = await snapshotAccount();
+    STORE.movies.clear();
+    STORE.shows.clear();
+    STORE.collections.clear();
+    STORE.collectionItems.clear();
+    snap.movies.forEach((row) => STORE.movies.set(row.id, row));
+    snap.shows.forEach((row) => STORE.shows.set(row.id, row));
+    snap.collections.forEach((row) => STORE.collections.set(row.id, row));
+    snap.collectionItems.forEach((row) => STORE.collectionItems.set(row.id, row));
+    rerenderGrids(Object.keys(GRID_CONFIG));
+    renderCollections();
+    refreshOpenCollection();
+    if (typeof renderProfilePreview === "function") renderProfilePreview();
+  } catch (err) {
+    console.error("Reload after import failed:", err);
+    showToast("Imported — refresh the page to see everything.", true);
+  }
+}
+
+function showReplaceDone(report) {
+  const lines = [
+    `Your library is now this file: <strong>${plural(report.movies, "movie")}, ${plural(report.shows, "show")} and ${plural(report.collections, "collection")}</strong>.`,
+  ];
+  if (report.removed) {
+    lines.push(`${plural(report.removed, "title")} that ${report.removed === 1 ? "wasn't" : "weren't"} in the file ${report.removed === 1 ? "was" : "were"} removed.`);
+  }
+  if (report.backup) lines.push("Your previous library was downloaded as a backup first.");
+  if (report.leftovers) {
+    lines.push(`${plural(report.leftovers, "old entry")} couldn't be removed and ${report.leftovers === 1 ? "is" : "are"} still there — you can delete ${report.leftovers === 1 ? "it" : "them"} by hand.`.replace("entrys", "entries"));
+  }
+  setImportHeader("Import data · Done", "Library replaced", importFileName.replace(/\.slate$/i, ""));
+  setImportView(
+    "done",
+    `<div class="import-done">
+      <span class="import-done-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </span>
+      ${lines.map((line) => `<p class="import-done-line">${line}</p>`).join("")}
+    </div>
+    <div class="update-actions import-actions">
+      <span></span>
+      <div class="update-actions-right">
+        <button type="button" class="modal-search-btn" data-import-action="close">Done</button>
+      </div>
+    </div>`
+  );
+  importBody.querySelector('[data-import-action="close"]').focus();
 }

@@ -467,16 +467,6 @@
   color: var(--ink-muted);
 }
 
-.import-mode-soon {
-  margin-left: 6px;
-  padding: 1px 7px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--ink) 12%, transparent);
-  font-family: var(--font-body);
-  font-size: 10.5px;
-  letter-spacing: 0.04em;
-  vertical-align: 2px;
-}
 
 /* ---------- working ---------- */
 
@@ -542,6 +532,166 @@
   color: var(--accent-deep);
 }
 
+/* ---------- danger (Replace everything) ---------- */
+
+/* The ticket turns red for the one screen that deletes. */
+.import-backdrop[data-view="danger"] .update-ticket {
+  background: #dc2626;
+}
+
+.import-backdrop[data-view="danger"] .update-ticket::after {
+  background: radial-gradient(circle at 12px 0, transparent 8px, #dc2626 8.5px) repeat-x;
+  background-size: 24px 16px;
+}
+
+.import-danger-text {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.import-danger-text strong {
+  color: #b42318;
+}
+
+/* The backup checkbox: a paper square with a tick, ticked by default. */
+.import-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px dashed color-mix(in srgb, var(--ink) 28%, transparent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--paper));
+  cursor: pointer;
+}
+
+.import-check input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.import-check-box {
+  flex-shrink: 0;
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border: 2px solid var(--accent-deep);
+  background: var(--paper);
+  transition: background var(--transition);
+}
+
+.import-check input:checked + .import-check-box {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.import-check input:checked + .import-check-box::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 6px;
+  height: 11px;
+  border: solid #fff;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg);
+}
+
+.import-check input:focus-visible + .import-check-box {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.import-check-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.import-check-title {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.import-check-hint {
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.import-confirm-label {
+  display: block;
+  margin: 18px 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
+
+.import-confirm-label strong {
+  color: #b42318;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13.5px;
+}
+
+.import-confirm-wrap {
+  position: relative;
+}
+
+.import-confirm-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.import-confirm-input:focus {
+  border-color: #dc2626;
+}
+
+/* A red line under the box drains over the wait, then disappears. */
+.import-confirm-timer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: #dc2626;
+  transform-origin: left;
+  animation: import-confirm-drain 3s linear forwards;
+}
+
+.import-confirm-wrap.is-open .import-confirm-timer {
+  display: none;
+}
+
+@keyframes import-confirm-drain {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* The final button: solid red sticker, like the delete confirmation's. */
+.import-actions .import-replace-btn {
+  background: #dc2626;
+  color: #fff;
+  box-shadow: 3px 4px 0 #991b1b;
+  transform: rotate(1deg);
+}
+
+.import-actions .import-replace-btn:hover:not(:disabled) {
+  background: #ef4444;
+  box-shadow: 4px 6px 0 #991b1b;
+}
+
+.import-actions .import-replace-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 3px 4px 0 #991b1b;
+}
+
 /* ---------- small screens / reduced motion ---------- */
 
 @media (max-width: 480px) {
@@ -572,20 +722,41 @@
   }
 }
 
+/* Reduced motion (the OS setting or Settings > Reduce animations, which
+   base.css turns into near-zero durations for everything) stills the
+   decoration: the envelope, the fan, the pop. Never the progress bar: it's
+   the one thing saying work is going on, so it keeps moving either way (the
+   selectors outrank base.css's catch-all; both use !important). */
 @media (prefers-reduced-motion: reduce) {
   .import-env-card,
-  .import-progress span,
   .import-fan-card,
   .import-done-icon,
   .import-backdrop[data-view] .import-body > * {
     animation: none;
   }
+
+  .import-progress span {
+    animation-duration: 1.2s !important;
+    transition-duration: 0.3s !important;
+  }
+
+  .import-confirm-timer {
+    animation-duration: 3s !important;
+  }
 }
 
 :root[data-reduce-motion="true"] .import-env-card,
-:root[data-reduce-motion="true"] .import-progress span,
 :root[data-reduce-motion="true"] .import-fan-card,
 :root[data-reduce-motion="true"] .import-done-icon,
 :root[data-reduce-motion="true"] .import-backdrop[data-view] .import-body > * {
   animation: none;
+}
+
+:root[data-reduce-motion="true"] .import-progress span {
+  animation-duration: 1.2s !important;
+  transition-duration: 0.3s !important;
+}
+
+:root[data-reduce-motion="true"] .import-confirm-timer {
+  animation-duration: 3s !important;
 }
