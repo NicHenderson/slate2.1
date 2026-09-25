@@ -31,10 +31,10 @@
   <link rel="stylesheet" href="css/sidebar.css?v=2" />
   <link rel="stylesheet" href="css/content.css?v=15" />
   <link rel="stylesheet" href="css/cards.css?v=25" />
-  <link rel="stylesheet" href="css/modal.css?v=40" />
+  <link rel="stylesheet" href="css/modal.css?v=41" />
   <link rel="stylesheet" href="css/auth.css?v=3" />
   <link rel="stylesheet" href="css/settings.css?v=8" />
-  <link rel="stylesheet" href="css/responsive.css?v=22" />
+  <link rel="stylesheet" href="css/responsive.css?v=23" />
 </head>
 <body>
   <div class="auth-screen hidden" id="auth-screen">
@@ -638,40 +638,45 @@
   </div>
 
   <div class="modal-backdrop update-backdrop hidden" id="start-modal">
-    <div class="modal update-modal">
-      <div class="modal-head">
-        <h2 id="start-title">Start watching</h2>
-        <button class="modal-close" id="start-close" aria-label="Close">✕</button>
-      </div>
-      <form id="start-form">
-        <label class="field-label" for="start-date">Started on</label>
-        <input type="date" id="start-date" class="field-input" />
+    <div class="update-layout">
+      <div class="update-poster-box" id="start-poster"></div>
+      <div class="update-panel">
+        <button class="modal-close update-close-btn" id="start-close" aria-label="Close">✕</button>
+        <div class="update-ticket">
+          <p class="update-eyebrow" id="start-title">Start watching</p>
+          <p class="update-movie-title" id="start-show-title"></p>
+          <p class="update-movie-meta" id="start-show-meta"></p>
+        </div>
+        <form id="start-form" class="update-form-body">
+          <label class="field-label" for="start-date">Started on</label>
+          <input type="date" id="start-date" class="field-input" />
 
-        <label class="field-label" for="start-finish-date">Finished on (optional)</label>
-        <input type="date" id="start-finish-date" class="field-input" />
+          <label class="field-label" for="start-finish-date">Finished on (optional)</label>
+          <input type="date" id="start-finish-date" class="field-input" />
 
-        <div id="start-extra" class="hidden">
-          <p class="field-label">Rating</p>
-          <div class="rating-row">
-            <div class="stars stars-input" id="start-stars">
-              <span class="stars-base">★★★★★★★★★★</span>
-              <span class="stars-fill" id="start-stars-fill" style="width: 0%">★★★★★★★★★★</span>
+          <div id="start-extra" class="hidden">
+            <p class="field-label">Rating</p>
+            <div class="rating-row">
+              <div class="stars stars-input" id="start-stars">
+                <span class="stars-base">★★★★★★★★★★</span>
+                <span class="stars-fill" id="start-stars-fill" style="width: 0%">★★★★★★★★★★</span>
+              </div>
+              <span class="stars-value" id="start-rating-value">0/10</span>
             </div>
-            <span class="stars-value" id="start-rating-value">0/10</span>
+
+            <label class="field-label" for="start-review">Review</label>
+            <textarea id="start-review" class="field-input" rows="4" placeholder="Your thoughts…"></textarea>
           </div>
 
-          <label class="field-label" for="start-review">Review</label>
-          <textarea id="start-review" class="field-input" rows="4" placeholder="Your thoughts…"></textarea>
-        </div>
-
-        <div class="update-actions">
-          <button type="button" class="delete-btn" id="start-delete">🗑 Delete</button>
-          <div class="update-actions-right">
-            <button type="button" class="cancel-btn" id="start-cancel">Cancel</button>
-            <button type="submit" class="modal-search-btn" id="start-save">Save Changes</button>
+          <div class="update-actions">
+            <button type="button" class="delete-btn" id="start-delete">🗑 Delete</button>
+            <div class="update-actions-right">
+              <button type="button" class="cancel-btn" id="start-cancel">Cancel</button>
+              <button type="submit" class="modal-search-btn" id="start-save">Save Changes</button>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -717,14 +722,14 @@
   <script src="js/detailModal.js?v=9"></script>
   <script src="js/starsInput.js?v=3"></script>
   <script src="js/updateModal.js?v=2"></script>
-  <script src="js/startModal.js?v=1"></script>
+  <script src="js/startModal.js?v=2"></script>
   <script src="js/confirmModal.js?v=7"></script>
   <script src="js/settings.js?v=6"></script>
   <script src="js/profile.js?v=3"></script>
   <script src="js/data.js?v=27"></script>
   <script src="js/sortMenu.js?v=6"></script>
   <script src="js/watchlistOrder.js?v=1"></script>
-  <script src="js/sectionHeaders.js?v=1"></script>
+  <script src="js/sectionHeaders.js?v=2"></script>
   <script src="js/auth.js?v=1"></script>
 </body>
 </html>

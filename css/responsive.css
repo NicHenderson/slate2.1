@@ -297,6 +297,13 @@
     width: 100%;
   }
 
+  /* Stretched full-width, the stickers' scattered tilt just reads as crooked. */
+  .update-actions .delete-btn,
+  .update-actions .cancel-btn,
+  .update-actions .modal-search-btn {
+    transform: none;
+  }
+
   .confirm-actions .cancel-btn,
   .confirm-actions .delete-btn-solid {
     flex: 1;

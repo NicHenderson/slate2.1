@@ -33,6 +33,12 @@ function openStartWatchingModal(row, isNewInsert = false) {
   document.getElementById("start-title").textContent = isNewInsert
     ? "Add TV Show"
     : "Start watching";
+  document.getElementById("start-show-title").textContent = row.title ?? "Untitled";
+  document.getElementById("start-show-meta").textContent =
+    `${row.release_year ?? "—"} · ${detailDurationLine("shows", row)}`;
+  document.getElementById("start-poster").innerHTML = row.poster
+    ? `<img class="update-poster-img" src="${row.poster}" alt="" />`
+    : `<div class="update-poster-img update-poster-empty"></div>`;
   document
     .getElementById("start-delete")
     .classList.toggle("hidden", isNewInsert);

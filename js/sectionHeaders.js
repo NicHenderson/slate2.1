@@ -40,11 +40,14 @@ function listRows(gridId) {
   return [...STORE[cfg.table].values()].filter(cfg.match);
 }
 
-function ratingItem(rows) {
+function ratingItem(rows, { showCount = true } = {}) {
   const rated = rows.filter((r) => r.rating != null);
   if (!rated.length) return hsItem("–", "No ratings yet");
   const avg = rated.reduce((sum, r) => sum + r.rating, 0) / rated.length;
-  return hsItem(`${avg.toFixed(1)}<small>/10</small>`, `Avg rating · ${rated.length} rated`);
+  return hsItem(
+    `${avg.toFixed(1)}<small>/10</small>`,
+    showCount ? `Avg rating · ${rated.length} rated` : "Avg rating"
+  );
 }
 
 // The genre the most titles in the list share, and the share of the list
@@ -80,8 +83,9 @@ function moviesWatchedStats() {
   const minutes = rows.reduce((sum, r) => sum + (r.duration || 0), 0);
   const rated = rows.filter((r) => r.rating != null).map((row) => ({ table: "movies", row }));
   return (
+    hsItem(rows.length, "Movies watched") +
     hsItem(formatWatchTime(minutes), "Time watched") +
-    ratingItem(rows) +
+    ratingItem(rows, { showCount: false }) +
     topGenreItem(rows) +
     `<div class="hs-item hs-extremes">${collectionExtremesHtml(rated)}</div>`
   );
@@ -90,7 +94,6 @@ function moviesWatchedStats() {
 function showsWatchedStats() {
   const rows = listRows("grid-shows-watched");
   if (!rows.length) return "";
-  const episodes = rows.reduce((sum, r) => sum + (r.total_episodes || 0), 0);
 
   // Start → finish, for the shows that have both dates.
   const spans = rows
@@ -103,7 +106,7 @@ function showsWatchedStats() {
     finish = hsItem(avg ? `${avg}<small>${avg === 1 ? " day" : " days"}</small>` : "Same day", "Avg time to finish");
   }
 
-  return hsItem(episodes, "Episodes watched") + ratingItem(rows) + topGenreItem(rows) + finish;
+  return hsItem(rows.length, "Shows finished") + ratingItem(rows) + topGenreItem(rows) + finish;
 }
 
 function moviesTowatchStats() {
@@ -149,7 +152,7 @@ function showsDroppedStats() {
 }
 
 function collectionsStats() {
-  const cols = [...STORE.collections.values()].sort(byPosition);
+  const cols = [...STORE.collections.values()];
   if (!cols.length) return "";
 
   // Per collection, and per distinct title across all of them (a title in
@@ -157,7 +160,7 @@ function collectionsStats() {
   const progress = cols.map((col) => {
     const resolved = collectionItemsFor(col.id).map(resolveItem).filter(Boolean);
     const watched = resolved.filter(({ table, row }) => isItemWatched(table, row)).length;
-    return { col, watched, total: resolved.length, resolved };
+    return { watched, total: resolved.length, resolved };
   });
   const titles = new Map();
   progress.forEach(({ resolved }) =>
@@ -167,18 +170,6 @@ function collectionsStats() {
 
   const filled = progress.filter((p) => p.total > 0);
   const complete = filled.filter((p) => p.watched === p.total).length;
-
-  // Closest to done: fewest titles left, then the furthest along.
-  const pending = filled
-    .filter((p) => p.watched < p.total)
-    .sort((a, b) => a.total - a.watched - (b.total - b.watched) || b.watched / b.total - a.watched / a.total);
-  const next = pending[0];
-  const closest = next
-    ? hsItem(escapeHtml(next.col.name ?? "Untitled"), `${next.total - next.watched} to go`, {
-        text: true,
-        attrs: `data-open-collection="${next.col.id}" title="Open ${escapeHtml(next.col.name ?? "")}"`,
-      })
-    : hsItem(filled.length ? "All done ✓" : "–", filled.length ? "Nothing left to finish" : "No titles yet", { text: true });
 
   const pct = titles.size ? Math.round((titlesWatched / titles.size) * 100) : 0;
   const overall = `
@@ -190,7 +181,6 @@ function collectionsStats() {
 
   return (
     hsItem(`${complete}<small>/${filled.length}</small>`, "Complete") +
-    closest +
     hsItem(titles.size, "Titles collected") +
     overall
   );
@@ -220,19 +210,15 @@ function renderHeaderStats(key) {
   el.hidden = !html;
 }
 
-// A title or collection a stat names opens on click.
+// A title a stat names (longest waiting, best / worst rated) opens on click.
 document.addEventListener("click", (e) => {
   if (!e.target.closest(".hstats")) return;
   const titleBtn = e.target.closest("[data-open-title], .extreme-row");
-  if (titleBtn) {
-    const { table } = titleBtn.dataset;
-    const id = titleBtn.dataset.openTitle ?? titleBtn.dataset.itemId;
-    const row = STORE[table]?.get(id);
-    if (row) openDetailModal(gridIdFor(table, row), id);
-    return;
-  }
-  const colBtn = e.target.closest("[data-open-collection]");
-  if (colBtn) openCollectionView(colBtn.dataset.openCollection);
+  if (!titleBtn) return;
+  const { table } = titleBtn.dataset;
+  const id = titleBtn.dataset.openTitle ?? titleBtn.dataset.itemId;
+  const row = STORE[table]?.get(id);
+  if (row) openDetailModal(gridIdFor(table, row), id);
 });
 
 /* ---------- Surprise Me on the watchlists ---------- */

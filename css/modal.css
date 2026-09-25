@@ -868,13 +868,11 @@
   width: min(480px, calc(100vw - 32px));
 }
 
-/* "Mark as watched" — Polaroid poster (like #detail-modal) on the left, a
+/* "Mark as watched" (#update-modal) and its series twin "Start watching"
+   (#start-modal) — Polaroid poster (like #detail-modal) on the left, a
    panel on the right whose own header is a die-cut violet ticket instead of
-   a plain heading, naming the actual movie instead of a generic "Mark as
-   watched" (that text becomes the eyebrow above the title). #start-modal
-   ("Start watching") deliberately still uses the plain .modal/.update-modal
-   shell — not asked to change, and it has no single title/poster to anchor
-   this treatment against yet. */
+   a plain heading, naming the actual title instead of a generic "Mark as
+   watched" (that text becomes the eyebrow above the title). */
 .update-layout {
   position: relative;
   display: flex;
@@ -1071,6 +1069,89 @@
 .delete-btn-solid:hover {
   background: #ef4444;
   border-color: #ef4444;
+}
+
+/* Mark as watched / Start watching action row: the same "raised sticker"
+   family as the detail modal's actions and the delete confirmation (hard
+   offset shadow, a slight scattered tilt, square corners, Oswald
+   uppercase) instead of flat rounded pills. Save is the solid primary,
+   Cancel the paper secondary, Delete the red-inked paper sticker the open
+   collection's own Delete uses (.sort-btn-danger) — it only opens the
+   confirmation, so it isn't the solid red of the final "Yes, delete". */
+.update-actions .delete-btn,
+.update-actions .cancel-btn,
+.update-actions .modal-search-btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 0;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  transition: transform var(--transition), box-shadow var(--transition),
+    background var(--transition);
+}
+
+.update-actions .modal-search-btn {
+  background: var(--accent-strong);
+  color: #fff;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(1deg);
+}
+
+.update-actions .cancel-btn {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(-1deg);
+}
+
+.update-actions .delete-btn {
+  background: var(--paper);
+  color: #b42318;
+  box-shadow: 3px 4px 0 #b42318;
+  transform: rotate(-1deg);
+}
+
+.update-actions .modal-search-btn:hover,
+.update-actions .cancel-btn:hover,
+.update-actions .delete-btn:hover {
+  filter: none;
+  transform: rotate(0deg) translateY(-2px);
+}
+
+.update-actions .modal-search-btn:hover,
+.update-actions .cancel-btn:hover {
+  box-shadow: 4px 6px 0 var(--accent-deep);
+}
+
+.update-actions .cancel-btn:hover {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.update-actions .delete-btn:hover {
+  background: var(--paper);
+  box-shadow: 4px 6px 0 #b42318;
+}
+
+.update-actions .modal-search-btn:active,
+.update-actions .cancel-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 var(--accent-deep);
+}
+
+.update-actions .delete-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 #b42318;
+}
+
+.update-actions .modal-search-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
 }
 
 .confirm-backdrop {
@@ -2235,9 +2316,9 @@ body:not(.no-hover) .col-item-card:hover .col-item-remove {
     width: 100%;
   }
 
-  /* The stacked layout leaves less room for the star row than the old plain
-     .update-modal shell did (that mobile padding tweak lives on .update-modal
-     for #start-modal, which still uses it — this is the new panel's own). */
+  /* The stacked layout leaves less room for the star row than a plain
+     .update-modal shell does (that mobile padding tweak lives on
+     .update-modal, now only the New Collection modal) — this is the panel's own. */
   .update-form-body {
     padding-left: 10px;
     padding-right: 10px;
