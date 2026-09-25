@@ -796,9 +796,10 @@ html.auth-open body {
 
 /* Stats: two strips, as if pinned under two list headers. */
 .lp-feature-board--stats {
+  container: lp-stats / inline-size;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
-  justify-items: start;
 }
 
 .lp-board-label {
@@ -812,8 +813,31 @@ html.auth-open body {
   margin-top: 0;
 }
 
+/* Exactly the panel's width, never wider: a grid item's minimum size is
+   its content's by default (every label on one line, plus the best/worst
+   block's fixed 230px), which pushed the strip out of the panel. The
+   numbers keep their natural width and the best/worst block takes what's
+   left (a long title gets an ellipsis); segments are a little tighter than
+   the app's own strip so all four fit one row in the desktop panel. */
 .lp-stats-strip {
-  max-width: 100%;
+  width: 100%;
+  min-width: 0;
+}
+
+.lp-stats-strip .hs-item {
+  flex: 0 0 auto;
+  padding: 2px 14px;
+}
+
+.lp-stats-strip .hs-extremes {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+/* The three-number Shows strip spreads out to the same width. */
+.lp-stats-strip--alt .hs-item {
+  flex: 1 1 auto;
 }
 
 .lp-stats-strip--alt {
@@ -1666,4 +1690,40 @@ html.auth-open body {
 /* The drag cursor only belongs to the card shown mid-drag. */
 .card:not(.is-lifted) > .lp-cursor {
   display: none;
+}
+
+/* Stats panel narrower than a one-row strip needs (tablets, the column
+   just above the one-column layout, phones): two segments per row, as the
+   app's own strips do on a phone. Last in the file so it beats the rules
+   above. */
+@container lp-stats (max-width: 548px) {
+  .lp-stats-strip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 2px 0;
+  }
+
+  .lp-stats-strip .hs-item {
+    padding: 10px 14px;
+  }
+
+  .lp-stats-strip .hs-item + .hs-item {
+    border-left: 0;
+  }
+
+  .lp-stats-strip .hs-item:nth-child(even) {
+    border-left: 2px dashed rgba(13, 12, 21, 0.22);
+  }
+
+  .lp-stats-strip .hs-item:nth-child(n + 3) {
+    border-top: 2px dashed rgba(13, 12, 21, 0.22);
+  }
+
+  .lp-stats-strip .hs-item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .lp-stats-strip .hs-label {
+    white-space: normal;
+  }
 }
