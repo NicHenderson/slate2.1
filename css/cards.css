@@ -75,9 +75,11 @@
 
 /* Sortable cards read as grabbable; the whole page shows "grabbing" for the
    duration of a drag so the cursor doesn't flicker as it crosses elements.
-   Drag-to-reorder is exclusive to Collections — nowhere else. */
+   Collections always; the watchlists only in "Custom order" (.is-sortable,
+   set by renderGrid in data.js). */
 #grid-collections .collection-card,
-#col-detail-grid .col-item-card {
+#col-detail-grid .col-item-card,
+.card-grid.is-sortable .card {
   cursor: grab;
   user-select: none;
 }

@@ -36,6 +36,7 @@ function updateSortLabel(gridId) {
 }
 
 function setGridSort(gridId, key) {
+  if (key === "custom") seedCustomOrder(gridId); // needs the outgoing sort still active
   activeSorts[gridId] = key;
   localStorage.setItem(GRID_SORTS[gridId].storageKey, key);
   const table = GRID_CONFIG[gridId].table;

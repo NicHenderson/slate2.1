@@ -451,7 +451,9 @@ function flipReorder(cards, mutate) {
   });
 }
 
-function setupDragReorder(grid, cardSelector, onReorder) {
+// canDrag: checked when a press starts, for a grid that's only sortable
+// some of the time (the watchlists, in "Custom order").
+function setupDragReorder(grid, cardSelector, onReorder, canDrag = () => true) {
   let pointerId = null;
   let card = null;
   let ghost = null;
@@ -684,6 +686,9 @@ function setupDragReorder(grid, cardSelector, onReorder) {
         pendingRender = false;
         renderCollections();
         if (openCollectionId) renderCollectionDetail();
+        Object.keys(GRID_CONFIG).forEach((id) =>
+          renderGrid(id, [...STORE[GRID_CONFIG[id].table].values()])
+        );
       }
     }
   }
@@ -701,6 +706,7 @@ function setupDragReorder(grid, cardSelector, onReorder) {
   grid.addEventListener("pointerdown", (e) => {
     if (e.button !== undefined && e.button !== 0) return;
     if (card) return; // a gesture is already being tracked
+    if (!canDrag()) return;
     if (e.target.closest("button, a, input")) return;
     const target = e.target.closest(cardSelector);
     if (!target) return;

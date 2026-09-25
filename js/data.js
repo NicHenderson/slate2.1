@@ -92,7 +92,7 @@ function makeSorts(dateField) {
 // To-watch items have no rating yet (that's only set once something's
 // actually watched) and no watched/started date, so makeSorts()'s options
 // don't fit — this is its own set, built around what a watchlist actually
-// has: when it was added, its title, its release year, and (new) a
+// has: when it was added, its title, its release year, and a
 // hand-picked order. Shared object: movies-towatch and shows-towatch sort
 // by the exact same fields, nothing table-specific about any of it.
 const WATCHLIST_SORTS = {
@@ -131,6 +131,16 @@ const WATCHLIST_SORTS = {
     group: "By release year",
     stub: "↑",
     cmp: (a, b) => (a.release_year ?? Infinity) - (b.release_year ?? Infinity),
+  },
+  // Drag-to-reorder (js/watchlistOrder.js). Titles with no position yet
+  // (anything added after the order was set) go last, in the order added.
+  custom: {
+    label: "Custom order",
+    group: "Custom",
+    stub: "≡",
+    cmp: (a, b) =>
+      (a.position ?? Infinity) - (b.position ?? Infinity) ||
+      (a.created_at ?? "").localeCompare(b.created_at ?? ""),
   },
 };
 
@@ -215,28 +225,58 @@ function getOrderedList(gridId) {
   return visible;
 }
 
-// A grid shows its whole list (the page itself scrolls), "+ Add" card last.
-function renderGrid(gridId, rows) {
-  const cfg = GRID_CONFIG[gridId];
-  const grid = document.getElementById(gridId);
+// Grids whose "Custom order" sort turns on drag-to-reorder, with the hint
+// shown above each while it's on.
+const CUSTOM_SORT_HINTS = {
+  "grid-movies-towatch": "movies-towatch-drag-hint",
+  "grid-shows-towatch": "shows-towatch-drag-hint",
+};
 
+function isCustomSorted(gridId) {
+  return gridId in CUSTOM_SORT_HINTS && activeSorts[gridId] === "custom";
+}
+
+function gridHtml(gridId, rows) {
+  const cfg = GRID_CONFIG[gridId];
   let visible = rows.filter(cfg.match);
   const sortCfg = GRID_SORTS[gridId];
   if (sortCfg) {
     visible = [...visible].sort(sortCfg.options[activeSorts[gridId]].cmp);
   }
-
   const showRating = cfg.state === "watched";
-  grid.innerHTML =
+  return (
     visible.map((row) => cardHtml(row, showRating)).join("") +
-    (NO_GHOST_GRIDS.has(gridId) ? "" : ghostCardHtml(cfg.type));
+    (NO_GHOST_GRIDS.has(gridId) ? "" : ghostCardHtml(cfg.type))
+  );
+}
+
+// A grid shows its whole list (the page itself scrolls), "+ Add" card last.
+// Like paintGrid in collections.js: a render that wouldn't change anything
+// leaves the DOM alone, and none happens mid-drag (it would pull the card
+// out from under the pointer); the drag's end catches up on it instead.
+function renderGrid(gridId, rows) {
+  if (dragActive) {
+    pendingRender = true;
+    return;
+  }
+  const grid = document.getElementById(gridId);
+  const custom = isCustomSorted(gridId);
+  grid.classList.toggle("is-sortable", custom);
+  const hint = CUSTOM_SORT_HINTS[gridId] && document.getElementById(CUSTOM_SORT_HINTS[gridId]);
+  if (hint) hint.hidden = !custom || rows.filter(GRID_CONFIG[gridId].match).length < 2;
+
+  const html = gridHtml(gridId, rows);
+  if (grid._html === html) return;
+  grid._html = html;
+  grid.innerHTML = html;
 }
 
 function renderError(gridIds, message) {
   gridIds.forEach((gridId) => {
     const cfg = GRID_CONFIG[gridId];
-    document.getElementById(gridId).innerHTML =
-      `<p class="grid-empty">${message}</p>` + ghostCardHtml(cfg.type);
+    const grid = document.getElementById(gridId);
+    grid.innerHTML = `<p class="grid-empty">${message}</p>` + ghostCardHtml(cfg.type);
+    grid._html = null;
   });
 }
 
@@ -290,7 +330,10 @@ async function loadData() {
 function resetGrids() {
   Object.keys(GRID_CONFIG).forEach((gridId) => {
     const grid = document.getElementById(gridId);
-    if (grid) grid.innerHTML = `<p class="loading">Loading…</p>`;
+    if (grid) {
+      grid.innerHTML = `<p class="loading">Loading…</p>`;
+      grid._html = null;
+    }
   });
   const colGrid = document.getElementById("grid-collections");
   if (colGrid) {

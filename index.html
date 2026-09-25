@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="css/base.css?v=7" />
   <link rel="stylesheet" href="css/sidebar.css?v=2" />
   <link rel="stylesheet" href="css/content.css?v=14" />
-  <link rel="stylesheet" href="css/cards.css?v=22" />
+  <link rel="stylesheet" href="css/cards.css?v=23" />
   <link rel="stylesheet" href="css/modal.css?v=40" />
   <link rel="stylesheet" href="css/dashboard.css?v=2" />
   <link rel="stylesheet" href="css/auth.css?v=3" />
@@ -316,6 +316,7 @@
             <button class="add-btn" data-type="movie">+ Add</button>
           </div>
         </header>
+        <p class="drag-hint" id="movies-towatch-drag-hint" hidden><span class="hint-pointer">Drag movies to reorder them.</span><span class="hint-touch">Press and hold a movie, then drag to reorder.</span></p>
         <div class="card-grid" id="grid-movies-towatch">
           <p class="loading">Loading…</p>
         </div>
@@ -339,6 +340,7 @@
             <button class="add-btn" data-type="tv">+ Add</button>
           </div>
         </header>
+        <p class="drag-hint" id="shows-towatch-drag-hint" hidden><span class="hint-pointer">Drag shows to reorder them.</span><span class="hint-touch">Press and hold a show, then drag to reorder.</span></p>
         <div class="card-grid" id="grid-shows-towatch">
           <p class="loading">Loading…</p>
         </div>
@@ -777,7 +779,7 @@
   <script src="js/iconData.js?v=1"></script>
   <script src="js/icons.js?v=1"></script>
   <script src="js/iconPicker.js?v=1"></script>
-  <script src="js/collections.js?v=38"></script>
+  <script src="js/collections.js?v=39"></script>
   <script src="js/infoModal.js?v=4"></script>
   <script src="js/detailModal.js?v=8"></script>
   <script src="js/starsInput.js?v=3"></script>
@@ -786,8 +788,9 @@
   <script src="js/confirmModal.js?v=7"></script>
   <script src="js/settings.js?v=5"></script>
   <script src="js/profile.js?v=3"></script>
-  <script src="js/data.js?v=25"></script>
-  <script src="js/sortMenu.js?v=4"></script>
+  <script src="js/data.js?v=26"></script>
+  <script src="js/sortMenu.js?v=5"></script>
+  <script src="js/watchlistOrder.js?v=1"></script>
   <script src="js/dashboard.js?v=4"></script>
   <script src="js/auth.js?v=1"></script>
 </body>
