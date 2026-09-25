@@ -243,6 +243,56 @@
   margin-top: 0;
 }
 
+/* ---------- show/hide password ---------- */
+
+.auth-password-wrap {
+  position: relative;
+}
+
+.auth-password-wrap .field-input {
+  padding-right: 42px;
+}
+
+.auth-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+
+.auth-password-toggle:hover,
+.auth-password-toggle:focus-visible {
+  color: var(--accent);
+}
+
+.auth-password-toggle svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Only one eye ever shows: the plain eye is the invitation to reveal the
+   password, the slashed one to hide it again once .is-visible is set. */
+.auth-password-toggle .icon-eye-off {
+  display: none;
+}
+
+.auth-password-toggle.is-visible .icon-eye {
+  display: none;
+}
+
+.auth-password-toggle.is-visible .icon-eye-off {
+  display: block;
+}
+
 .auth-field-error {
   margin-top: 6px;
   font-size: 12px;

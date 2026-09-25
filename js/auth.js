@@ -18,6 +18,39 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 let authMode = "login"; // "login" | "register"
 let authBusy = false;
 
+/* ---------- show/hide password ---------- */
+
+// One toggle per password field (Password, Confirm password) — each reveals
+// only its own input, independent of the other.
+function initPasswordToggle(inputId) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(`${inputId}-toggle`);
+  btn.addEventListener("click", () => {
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    btn.classList.toggle("is-visible", show);
+    btn.setAttribute("aria-pressed", String(show));
+    btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+  });
+}
+
+initPasswordToggle("auth-password");
+initPasswordToggle("auth-confirm");
+
+// Back to hidden — form.reset() clears the fields' values but not an input's
+// `type`, so without this a toggle left "shown" would survive a switch
+// between Login/Register (or a fresh visit to the screen) with nothing
+// left in the field to actually show.
+function hidePasswordFields() {
+  [authPassword, authConfirm].forEach((input) => {
+    input.type = "password";
+    const btn = document.getElementById(`${input.id}-toggle`);
+    btn.classList.remove("is-visible");
+    btn.setAttribute("aria-pressed", "false");
+    btn.setAttribute("aria-label", "Show password");
+  });
+}
+
 /* ---------- view toggling (driven only by session state) ---------- */
 
 function showAppView() {
@@ -72,6 +105,7 @@ function setAuthMode(mode) {
   authToggleBtn.textContent = register ? "Log In" : "Register";
   clearFieldErrors();
   clearMessage();
+  hidePasswordFields();
 }
 
 function setBusy(busy) {
