@@ -55,6 +55,94 @@
   --scrollbar-thumb-edge: var(--paper);
 }
 
+/* ---------- Themes ----------
+
+   :root's own values above are the "midnight" theme, unconditional — a
+   browser that hasn't run js/settings.js yet (or a user who never set a
+   preference) gets today's exact look with zero data-theme attribute
+   required. Each theme below only overrides the handful of raw color
+   tokens; --paper/--paper-dim/--ink (all var()-derived from --bg/--text)
+   and every component built on these tokens follow automatically — same
+   mechanism the paper-surface :where() block above already relies on. */
+:root[data-theme="midnight"] {
+  --bg: #0d0c15;
+  --bg-elevated: #17131f;
+  --sidebar-bg: #120e1b;
+  --surface: #1c1727;
+  --border: #2a2338;
+  --accent: #a78bfa;
+  --accent-strong: #8b5cf6;
+  --accent-deep: #6d28d9;
+  --accent-soft: rgba(167, 139, 246, 0.12);
+  --text: #ece8f5;
+  --text-muted: #9d94b3;
+  --ink-muted: #5c5470;
+}
+
+/* The only theme here with a light page background — --paper/--ink/
+   --paper-dim normally auto-derive from --bg/--text (var(--text) /
+   var(--bg)), which relies on --bg staying dark and --text staying light
+   (true for the other three themes below). Paper flips that, so it has to
+   set these explicitly instead of inheriting the derived values — without
+   this, "paper" cards would render dark-on-light-on-dark backwards. */
+:root[data-theme="paper"] {
+  --bg: #f6f1e7;
+  --bg-elevated: #efe7d8;
+  --sidebar-bg: #efe6d4;
+  --surface: #fbf7ee;
+  --border: #ddd0b4;
+  --accent: #c2703d;
+  --accent-strong: #b35f2c;
+  --accent-deep: #8f4620;
+  --accent-soft: rgba(194, 112, 61, 0.14);
+  --text: #2b2318;
+  --text-muted: #8a7c62;
+  --paper: #fffdf8;
+  --paper-dim: #f3ead8;
+  --ink: #2b2318;
+  --ink-muted: #8a7c62;
+}
+
+:root[data-theme="forest"] {
+  --bg: #0c1712;
+  --bg-elevated: #132119;
+  --sidebar-bg: #0f1a14;
+  --surface: #17261d;
+  --border: #25392c;
+  --accent: #6fcf9b;
+  --accent-strong: #4cb87f;
+  --accent-deep: #2f8f62;
+  --accent-soft: rgba(111, 207, 155, 0.14);
+  --text: #e9f3ec;
+  --text-muted: #93ab9d;
+  --ink-muted: #5c7268;
+}
+
+:root[data-theme="sunset"] {
+  --bg: #1c1015;
+  --bg-elevated: #26141b;
+  --sidebar-bg: #1f1218;
+  --surface: #2c1720;
+  --border: #3d2029;
+  --accent: #f0916a;
+  --accent-strong: #e87950;
+  --accent-deep: #c8542e;
+  --accent-soft: rgba(240, 145, 106, 0.14);
+  --text: #f7e9e2;
+  --text-muted: #ba9a91;
+  --ink-muted: #8a6a5c;
+}
+
+/* Settings > Reduce animations. Same near-zero-duration override the OS-level
+   prefers-reduced-motion rule below already uses — this just lets the app's
+   own toggle apply it too, independent of the OS setting. */
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+}
+
 * {
   margin: 0;
   padding: 0;

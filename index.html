@@ -5,16 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Slate</title>
   <link rel="icon" type="image/png" href="img/Slate-logo.png" />
+  <script>
+    // Applied before any CSS paints, from whatever theme was cached on the
+    // last login — otherwise the page would flash the "midnight" default
+    // for a frame before js/settings.js loads the real one from Supabase.
+    (function () {
+      try {
+        var cached = JSON.parse(localStorage.getItem("slate_settings_cache") || "null");
+        if (cached && cached.theme) {
+          document.documentElement.setAttribute("data-theme", cached.theme);
+        }
+        if (cached && cached.reduceMotion) {
+          document.documentElement.setAttribute("data-reduce-motion", "true");
+        }
+      } catch (e) {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Patrick+Hand&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/base.css?v=4" />
+  <link rel="stylesheet" href="css/base.css?v=5" />
   <link rel="stylesheet" href="css/sidebar.css?v=1" />
   <link rel="stylesheet" href="css/content.css?v=12" />
   <link rel="stylesheet" href="css/cards.css?v=19" />
   <link rel="stylesheet" href="css/modal.css?v=38" />
   <link rel="stylesheet" href="css/dashboard.css?v=2" />
   <link rel="stylesheet" href="css/auth.css?v=1" />
+  <link rel="stylesheet" href="css/settings.css?v=1" />
   <link rel="stylesheet" href="css/responsive.css?v=16" />
 </head>
 <body>
@@ -127,6 +144,16 @@
               <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.8 a1.6 1.6 0 0 1 1.6 -1.6 h4.6 l1.9 2.3 h9.3 a1.6 1.6 0 0 1 1.6 1.6 v9.1 a1.6 1.6 0 0 1 -1.6 1.6 h-15.8 a1.6 1.6 0 0 1 -1.6 -1.6 z"/></svg>
             </span>
             <span class="nav-label-text">Collections</span>
+          </span>
+        </button>
+
+        <p class="nav-label">You</p>
+        <button class="nav-btn" data-section="settings">
+          <span class="ticket">
+            <span class="nav-stub">
+              <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V19.4a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H4.6a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V4.6a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H19.4a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </span>
+            <span class="nav-label-text">Settings</span>
           </span>
         </button>
       </nav>
@@ -359,6 +386,33 @@
         </div>
         <p class="drag-hint" id="col-detail-drag-hint" hidden><span class="hint-pointer">Drag titles to reorder them.</span><span class="hint-touch">Press and hold a title, then drag to reorder.</span></p>
         <div class="card-grid" id="col-detail-grid"></div>
+      </section>
+
+      <section class="section" id="settings">
+        <header class="section-header">
+          <div>
+            <h1>Settings</h1>
+            <p class="section-sub">Make it yours</p>
+          </div>
+        </header>
+
+        <div class="settings-card">
+          <h2 class="settings-card-title">Appearance</h2>
+
+          <p class="settings-group-label">Theme</p>
+          <div class="theme-swatches" id="theme-swatches"></div>
+
+          <div class="settings-row">
+            <div>
+              <p class="settings-row-title">Reduce animations</p>
+              <p class="settings-row-hint">Turns off hover lifts, drag animation and confetti.</p>
+            </div>
+            <button class="settings-toggle" id="reduce-motion-toggle" type="button" aria-label="Toggle reduce animations">
+              <span class="settings-toggle-track"></span>
+              <span class="settings-toggle-thumb"></span>
+            </button>
+          </div>
+        </div>
       </section>
 
     </main>
@@ -606,6 +660,7 @@
   <script src="js/updateModal.js?v=2"></script>
   <script src="js/startModal.js?v=1"></script>
   <script src="js/confirmModal.js?v=6"></script>
+  <script src="js/settings.js?v=1"></script>
   <script src="js/data.js?v=21"></script>
   <script src="js/sortMenu.js?v=3"></script>
   <script src="js/dashboard.js?v=2"></script>
