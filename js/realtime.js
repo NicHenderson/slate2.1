@@ -24,7 +24,6 @@ function handleChange(storeKey, gridIds, payload) {
   if (typeof renderCollectionDetail === "function" && openCollectionId) {
     renderCollectionDetail();
   }
-  if (typeof renderDashboard === "function") renderDashboard();
 }
 
 function handleCollectionChange(storeKey, payload) {
@@ -35,7 +34,6 @@ function handleCollectionChange(storeKey, payload) {
   }
   renderCollections();
   refreshOpenCollection();
-  if (typeof renderDashboard === "function") renderDashboard();
 }
 
 function subscribeRealtime() {

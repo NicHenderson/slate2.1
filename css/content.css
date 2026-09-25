@@ -38,7 +38,9 @@
   margin-bottom: 28px;
 }
 
-.section-header > div:not(.header-actions) {
+/* The title block (sticker, h1, "Sorted by", drag hint) is always the
+   header's first child; the actions and a stat strip may follow it. */
+.section-header > div:first-child {
   display: flex;
   flex-direction: column-reverse;
   align-items: flex-start;
@@ -182,6 +184,48 @@
 
 .sort-btn-danger:active {
   box-shadow: 1px 2px 0 #b42318;
+}
+
+/* ---------- Surprise Me ---------- */
+
+.surprise-btn {
+  flex-shrink: 0;
+  padding: 11px 20px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #fff;
+  background: var(--accent-strong);
+  box-shadow: 3px 5px 0 var(--accent-deep);
+  transform: rotate(-1deg);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.surprise-btn:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 7px 0 var(--accent-deep);
+}
+
+.surprise-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 var(--accent-deep);
+}
+
+/* Played on a Surprise Me button while it's picking, so a
+   random choice reads as a little "roll" instead of an instant, flat swap. */
+@keyframes surprise-roll {
+  0% { transform: rotate(-1deg) scale(1); }
+  25% { transform: rotate(14deg) scale(1.08); }
+  50% { transform: rotate(-16deg) scale(1.05); }
+  75% { transform: rotate(10deg) scale(1.06); }
+  100% { transform: rotate(-1deg) scale(1); }
+}
+
+.surprise-btn.is-rolling {
+  animation: surprise-roll 0.32s ease;
 }
 
 /* Sort menu: each option reads as a mini movie-ticket row (a symbol
@@ -362,65 +406,6 @@
 .card-grid.subtab-hidden,
 .subtab-hidden {
   display: none !important;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.stat-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 18px 20px;
-  background: var(--paper);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.3);
-  transition: transform var(--transition), box-shadow var(--transition);
-}
-
-.stat-card::before {
-  content: "";
-  position: absolute;
-  top: -6px;
-  left: 16px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.4);
-}
-
-.stats-grid .stat-card:nth-child(1) { transform: rotate(-1.2deg); }
-.stats-grid .stat-card:nth-child(2) { transform: rotate(0.9deg); }
-.stats-grid .stat-card:nth-child(3) { transform: rotate(-0.7deg); }
-.stats-grid .stat-card:nth-child(4) { transform: rotate(1.1deg); }
-
-.stat-card:hover {
-  transform: rotate(0deg) translateY(-2px);
-  box-shadow: 3px 8px 14px rgba(0, 0, 0, 0.35);
-}
-
-.stat-value {
-  font-family: var(--font-display);
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-}
-
-.stat-label {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
 }
 
 /* ---------- open-collection stats strip (js/collections.js) ----------
@@ -672,4 +657,206 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: var(--text-muted);
+}
+
+/* ---------- Header stats (js/sectionHeaders.js) ----------
+   The list headers use the room right of the title for a slim stat strip:
+   the actions keep the top-right corner and the strip sits under them,
+   bottom-aligned with the title block. Same paper ticket as the open
+   collection's strip (.col-stats): segments split by dashed perforations. */
+.section {
+  container: section / inline-size;
+}
+
+.section-header.has-stats {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "title actions"
+    "title stats";
+  column-gap: 36px;
+  row-gap: 10px;
+}
+
+.section-header.has-stats > div:first-child {
+  grid-area: title;
+}
+
+.section-header.has-stats > .header-actions {
+  grid-area: actions;
+  justify-self: end;
+}
+
+.section-header.has-stats > .hstats {
+  grid-area: stats;
+  justify-self: end;
+  align-self: end;
+}
+
+.hstats {
+  display: flex;
+  align-items: stretch;
+  max-width: 100%;
+  padding: 7px 2px;
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+  transform: rotate(-0.4deg);
+}
+
+.hstats[hidden] {
+  display: none;
+}
+
+.hs-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 2px 18px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.hs-item + .hs-item {
+  border-left: 2px dashed rgba(13, 12, 21, 0.22);
+}
+
+.hs-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.hs-value small {
+  margin-left: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.hs-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* A name instead of a number (a genre, a title, a collection): smaller,
+   ink-colored, and cut short with an ellipsis rather than widening the strip. */
+.hs-text .hs-value {
+  display: block;
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 16px;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+button.hs-item {
+  cursor: pointer;
+}
+
+button.hs-item .hs-value {
+  transition: color var(--transition);
+}
+
+button.hs-item:hover .hs-value,
+button.hs-item:focus-visible .hs-value {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Shows Queue > Watching: shows started long ago get their count called out. */
+.hs-item.is-alert .hs-label {
+  color: var(--accent);
+}
+
+.hs-extremes {
+  gap: 1px;
+  width: 230px;
+}
+
+.hs-progress {
+  min-width: 130px;
+}
+
+/* Narrower sections: the strip drops under the title at full width, and the
+   header goes back to wrapping like the others (actions beside the title
+   while they fit). Last in the file so it beats the base rules above. */
+@container section (max-width: 900px) {
+  .section-header.has-stats {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 16px;
+    row-gap: 18px;
+  }
+
+  .section-header.has-stats > .hstats {
+    flex: 1 1 100%;
+    transform: none;
+  }
+
+  .hs-item {
+    flex: 1 1 0;
+  }
+
+  .hs-text .hs-value {
+    max-width: none;
+  }
+
+  .hs-extremes {
+    width: auto;
+  }
+}
+
+/* Phones: two segments per row, perforations between rows and columns; an
+   odd one out takes the whole last row. */
+@container section (max-width: 560px) {
+  .section-header.has-stats {
+    column-gap: 10px;
+  }
+
+  .hstats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 2px 0;
+  }
+
+  .hs-item {
+    padding: 10px 14px;
+  }
+
+  .hs-item + .hs-item {
+    border-left: 0;
+  }
+
+  .hs-item:nth-child(even) {
+    border-left: 2px dashed rgba(13, 12, 21, 0.22);
+  }
+
+  .hs-item:nth-child(n + 3) {
+    border-top: 2px dashed rgba(13, 12, 21, 0.22);
+  }
+
+  .hs-item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .hs-label {
+    white-space: normal;
+  }
 }

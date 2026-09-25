@@ -187,7 +187,26 @@ const SHOW_GRIDS = Object.keys(GRID_CONFIG).filter(
   (id) => GRID_CONFIG[id].table === "shows"
 );
 
-function cardHtml(item, showRating = false) {
+// Whole days from a date ("2026-06-10" or a full timestamp) until now.
+function daysSince(date) {
+  if (!date) return null;
+  return Math.max(0, Math.floor((Date.now() - new Date(date).getTime()) / 86400000));
+}
+
+// A show still "watching" this long after it was started reads as stalled:
+// its card (and Shows Queue > Watching's header stats) call it out.
+const STALE_WATCHING_DAYS = 30;
+
+function startedAgoHtml(row) {
+  const days = daysSince(row.started_watching_date);
+  if (days == null) return "";
+  const text = days === 0 ? "Started today" : days === 1 ? "Started yesterday" : `Started ${days}d ago`;
+  const stale = days >= STALE_WATCHING_DAYS ? " is-stale" : "";
+  return `<p class="card-meta${stale}">${text}</p>`;
+}
+
+// extra: markup for under the title (the rating, a "Started 12d ago" line).
+function cardHtml(item, showRating = false, extra = "") {
   const poster = item.poster
     ? `<img class="card-poster" src="${item.poster}" alt="" loading="lazy" />`
     : `<div class="card-poster card-poster-empty"></div>`;
@@ -198,7 +217,7 @@ function cardHtml(item, showRating = false) {
     <article class="card" data-id="${item.id}">
       ${poster}
       <p class="card-title">${escapeHtml(item.title ?? "Untitled")}</p>
-      ${rating}
+      ${rating}${extra}
     </article>`;
 }
 
@@ -244,8 +263,9 @@ function gridHtml(gridId, rows) {
     visible = [...visible].sort(sortCfg.options[activeSorts[gridId]].cmp);
   }
   const showRating = cfg.state === "watched";
+  const extra = cfg.state === "watching" ? startedAgoHtml : () => "";
   return (
-    visible.map((row) => cardHtml(row, showRating)).join("") +
+    visible.map((row) => cardHtml(row, showRating, extra(row))).join("") +
     (NO_GHOST_GRIDS.has(gridId) ? "" : ghostCardHtml(cfg.type))
   );
 }
@@ -259,6 +279,7 @@ function renderGrid(gridId, rows) {
     pendingRender = true;
     return;
   }
+  if (typeof renderHeaderStats === "function") renderHeaderStats(gridId);
   const grid = document.getElementById(gridId);
   const custom = isCustomSorted(gridId);
   grid.classList.toggle("is-sortable", custom);
@@ -318,7 +339,6 @@ async function loadData() {
     colItemsRes.data.forEach((row) => STORE.collectionItems.set(row.id, row));
   }
   renderCollections();
-  if (typeof renderDashboard === "function") renderDashboard();
   renderProfilePreview(); // its library counts
 
   subscribeRealtime();
@@ -340,6 +360,12 @@ function resetGrids() {
     colGrid.innerHTML = `<p class="loading">Loading…</p>`;
     colGrid._html = null; // see paintGrid in collections.js
   }
+  // Header stats describe the signed-in library; none until the next load.
+  document.querySelectorAll(".hstats").forEach((el) => {
+    el.innerHTML = "";
+    el._html = null;
+    el.hidden = true;
+  });
 }
 
 // Wipe all in-memory data and rendered cards left over from a previous session.
@@ -351,5 +377,4 @@ function clearAppData() {
   resetSettingsState();
   resetProfileState();
   resetGrids();
-  if (typeof renderDashboard === "function") renderDashboard();
 }

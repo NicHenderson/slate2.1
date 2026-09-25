@@ -108,7 +108,7 @@ function renderDetail(cfg, row) {
         <p class="detail-date-value">${formatDate(row.started_watching_date)}</p>
       </div>
       <div class="detail-actions detail-actions-start">
-        <button class="complete-btn" type="button" data-action="send-to-watchlist">↩ Send to "Shows to Watch"</button>
+        <button class="complete-btn" type="button" data-action="send-to-watchlist">↩ Back to "To Watch"</button>
         ${addToColHtml}
         <button class="delete-btn icon-delete-btn" type="button" data-action="delete" aria-label="Delete">🗑</button>
       </div>`;
@@ -395,7 +395,7 @@ async function sendToWatchlist(row, btn) {
     return;
   }
   closeDetailModal();
-  showToast('Sent to "Shows to Watch".');
+  showToast('Moved back to "To Watch".');
 }
 
 async function addItemToCollection(colId, table, row, btn) {

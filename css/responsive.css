@@ -250,43 +250,6 @@
     min-height: 180px;
   }
 
-  /* ---------- Quick Stats: 2×2 grid instead of a squeezed row ---------- */
-  .stats-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  .stat-card {
-    padding: 16px;
-  }
-
-  .stat-value {
-    font-size: 24px;
-  }
-
-  /* ---------- Dashboard rows (stay horizontally scrollable) ---------- */
-  .dash-block {
-    margin-top: 26px;
-  }
-
-  .dash-block-title {
-    font-size: 16px;
-  }
-
-  .dash-row .card {
-    flex: 0 0 140px;
-    width: 140px;
-  }
-
-  .genre-chart {
-    padding: 16px;
-  }
-
-  .genre-row {
-    grid-template-columns: 82px 1fr 28px;
-    gap: 10px;
-  }
-
   /* ---------- Modals: near full-width with small margins ---------- */
   .modal {
     width: calc(100vw - 20px);

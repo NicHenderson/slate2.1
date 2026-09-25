@@ -39,11 +39,10 @@
     .sort-menu,
     .toast,
     .card,
-    .stat-card,
-    .genre-chart,
     .collection-card,
     .col-item-card,
     .col-stats,
+    .hstats,
     .auth-card,
     .ghost-card
   ) {

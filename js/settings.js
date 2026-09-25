@@ -11,7 +11,7 @@ const DEFAULT_SETTINGS = {
   theme: "midnight",
   reduceMotion: false,
   density: "comfortable",
-  openTo: "dashboard",
+  openTo: "last",
   defaultSort: "recent",
   confirmDeletes: true,
 };
@@ -35,7 +35,7 @@ const THEME_META = {
 
 // The sections "Open to" can land on (and "last page viewed" can remember):
 // the sidebar's own destinations, minus Settings itself.
-const START_SECTIONS = ["dashboard", "movies-watched", "shows-watched", "movies-towatch", "shows-towatch", "collections"];
+const START_SECTIONS = ["movies-watched", "shows-watched", "movies-towatch", "shows-towatch", "collections"];
 
 // Every setting with a fixed set of values. Anything else — a stale cache,
 // a hand-edited row — falls back to the default; several of these end up
@@ -123,7 +123,7 @@ function applyDefaultSort() {
     if (grid && !grid.querySelector(".loading")) {
       renderGrid(gridId, [...STORE[GRID_CONFIG[gridId].table].values()]);
     }
-    // The three Shows subtabs share one "Sorted by" label — only the
+    // The three Shows Queue subtabs share one "Sorted by" label — only the
     // visible one may write to it.
     if (grid && !grid.classList.contains("subtab-hidden")) updateSortLabel(gridId);
   });
@@ -137,7 +137,7 @@ function applyStartSection() {
     try {
       last = localStorage.getItem(LAST_SECTION_KEY);
     } catch {}
-    target = START_SECTIONS.includes(last) ? last : "dashboard";
+    target = START_SECTIONS.includes(last) ? last : "movies-watched";
   }
   if (document.getElementById(target)?.classList.contains("active")) return;
   document.querySelector(`.nav-btn[data-section="${target}"]`)?.click();

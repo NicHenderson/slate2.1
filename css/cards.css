@@ -44,6 +44,20 @@
   color: var(--accent);
 }
 
+/* Shows Queue > Watching: "Started 12d ago" under the title; a show started
+   STALE_WATCHING_DAYS (data.js) ago or more reads as stalled, so its line
+   switches to the accent instead of looking like one started yesterday. */
+.card-meta {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.card-meta.is-stale {
+  font-weight: 700;
+  color: var(--accent);
+}
+
 /* The dragged card becomes a dashed "drop slot" — it still occupies its
    grid slot (so siblings keep reflowing around it) and now shows where the
    card will land, while a floating .drag-ghost clone tracks the pointer.
@@ -176,21 +190,10 @@ body.is-dragging * {
   transform: rotate(-0.7deg);
 }
 
-.dash-row .card:nth-child(3n) {
-  transform: rotate(-1.6deg);
-}
-.dash-row .card:nth-child(3n + 1) {
-  transform: rotate(1.3deg);
-}
-.dash-row .card:nth-child(3n + 2) {
-  transform: rotate(-0.7deg);
-}
-
 /* body.no-hover is set by setupDragReorder (collections.js) only while a
    drag is in progress: cards sliding under a stationary cursor would
    otherwise each fire their bouncy hover lift. */
-body:not(.no-hover) .card-grid .card:hover,
-body:not(.no-hover) .dash-row .card:hover {
+body:not(.no-hover) .card-grid .card:hover {
   transform: rotate(0deg) translateY(-6px) scale(1.035);
   box-shadow: 0 0 0 2px var(--accent-strong), 0 0 30px 6px color-mix(in srgb, var(--accent-glow) 55%, transparent),
     0 0 60px 10px color-mix(in srgb, var(--accent-strong) 25%, transparent), 4px 12px 22px rgba(0, 0, 0, 0.5);

@@ -129,6 +129,7 @@ function renderCollections() {
     return;
   }
   document.getElementById("collections-drag-hint").hidden = STORE.collections.size < 2;
+  if (typeof renderHeaderStats === "function") renderHeaderStats("collections");
   paintGrid(document.getElementById("grid-collections"), collectionsGridHtml());
 }
 
@@ -874,15 +875,33 @@ colDeleteBtn.addEventListener("click", () => {
 });
 
 // "Surprise Me": picks a random not-yet-watched title from whichever tab
-// (Movies / Shows) is currently open in this collection — same "to watch"
-// pool the dashboard's own Surprise Me draws from, just scoped to this
-// collection instead of the whole library.
+// (Movies / Shows) is currently open in this collection.
 function surprisePoolForOpenCollection() {
   return collectionItemsFor(openCollectionId)
     .filter((item) => itemType(item) === colTab)
     .map(resolveItem)
     .filter(Boolean)
     .filter(({ table, row }) => itemStatus(table, row) === "towatch");
+}
+
+// Shared by every Surprise Me button (this one and the watchlists' in
+// sectionHeaders.js): a quick dice-roll flourish on the button — same easing
+// family as the rest of the app's "sticker" buttons, just a playful spin
+// instead of a lift — then the random pick is handed to openPick.
+function rollSurprise(btn, pool, openPick) {
+  btn.classList.remove("is-rolling");
+  void btn.offsetWidth; // restart the animation if clicked again mid-roll
+  btn.classList.add("is-rolling");
+
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  // With just one candidate there's nothing to actually shuffle between —
+  // say so, instead of pretending a "random" draw happened when it didn't.
+  const onlyOption = pool.length === 1;
+  setTimeout(() => {
+    btn.classList.remove("is-rolling");
+    if (onlyOption) showToast("Only one pick in the queue — this is it!");
+    openPick(pick);
+  }, 280);
 }
 
 colSurpriseBtn.addEventListener("click", () => {
@@ -895,20 +914,7 @@ colSurpriseBtn.addEventListener("click", () => {
     );
     return;
   }
-
-  // A quick dice-roll flourish before the reveal — same easing family as the
-  // rest of the app's "sticker" buttons, just a playful spin instead of a lift.
-  colSurpriseBtn.classList.remove("is-rolling");
-  void colSurpriseBtn.offsetWidth; // restart the animation if clicked again mid-roll
-  colSurpriseBtn.classList.add("is-rolling");
-
-  const pick = pool[Math.floor(Math.random() * pool.length)];
-  // With just one candidate there's nothing to actually shuffle between —
-  // say so, instead of pretending a "random" draw happened when it didn't.
-  const onlyOption = pool.length === 1;
-  setTimeout(() => {
-    colSurpriseBtn.classList.remove("is-rolling");
-    if (onlyOption) showToast("Only one pick in the queue — this is it!");
+  rollSurprise(colSurpriseBtn, pool, (pick) =>
     openDetailModal(
       gridIdFor(pick.table, pick.row),
       pick.row.id,
@@ -917,8 +923,8 @@ colSurpriseBtn.addEventListener("click", () => {
           .filter((item) => itemType(item) === colTab)
           .map(resolveItem)
           .filter(Boolean)
-    );
-  }, 280);
+    )
+  );
 });
 
 // Escape steps back out of the collection, unless a modal is open on top
