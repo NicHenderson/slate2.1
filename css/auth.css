@@ -8,6 +8,30 @@
    screens (see responsive.css). */
 
 .auth-screen {
+  /* Always Slate's own look, never whatever theme the account (or just this
+     device's cache — the inline snippet in <head> applies it before there's
+     even been a chance to check for a session) last had active: logging out
+     of a "paper" or "arcade" account shouldn't hand the next sign-in a
+     different-colored door. Same token set as :root[data-theme="midnight"]
+     in base.css, copied rather than referenced so it can't drift out of
+     sync with a `data-theme` this screen is meant to ignore. Every other
+     token used under .auth-screen (--paper, --ink, --accent-glow, the
+     scrollbar trio…) derives from these via var(), so they fall in line
+     for free. */
+  --bg: #0d0c15;
+  --bg-elevated: #17131f;
+  --sidebar-bg: #120e1b;
+  --surface: #1c1727;
+  --border: #2a2338;
+  --accent: #a78bfa;
+  --accent-strong: #8b5cf6;
+  --accent-deep: #6d28d9;
+  --accent-soft: rgba(167, 139, 246, 0.12);
+  --pop: #2979ff;
+  --text: #ece8f5;
+  --text-muted: #9d94b3;
+  --ink-muted: #5c5470;
+
   position: fixed;
   inset: 0;
   z-index: 300;
