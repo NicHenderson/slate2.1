@@ -40,10 +40,100 @@
   border-top: none;
 }
 
+/* The label side gives way first, so a small control (the toggle) stays on
+   the same line; wider ones wrap underneath on narrow screens. */
+.settings-row > :first-child {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
 .settings-row-title {
+  display: block;
   margin: 0;
   font-size: 14px;
   font-weight: 600;
+}
+
+/* ---------- Select ---------- */
+
+.settings-select-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.settings-select-wrap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 7px;
+  height: 7px;
+  margin-top: -6px;
+  border: solid var(--ink-muted);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.settings-select {
+  appearance: none;
+  min-width: 220px;
+  min-height: 44px;
+  padding: 0 38px 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  /* Every theme's settings card is light paper, so the native option
+     list should be too, whatever the page's own theme is. */
+  color-scheme: light;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.settings-select:hover {
+  border-color: var(--accent-deep);
+}
+
+.settings-select:focus-visible {
+  outline: none;
+  border-color: var(--accent-deep);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-deep) 25%, transparent);
+}
+
+/* ---------- Segmented control ---------- */
+
+.settings-segmented {
+  display: flex;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.settings-segmented button {
+  min-height: 44px;
+  padding: 0 16px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background var(--transition), color var(--transition);
+}
+
+.settings-segmented button + button {
+  border-left: 1px solid var(--border);
+}
+
+.settings-segmented button:hover:not(.is-active) {
+  background: color-mix(in srgb, var(--accent-deep) 8%, transparent);
+}
+
+.settings-segmented button.is-active {
+  background: var(--accent-strong);
+  color: #fff;
 }
 
 .settings-row-hint {

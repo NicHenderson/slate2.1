@@ -460,7 +460,7 @@
   background: var(--accent);
   transform: translateY(-50%) scale(1.14);
   box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent-strong) 18%, transparent),
-    0 0 26px rgba(167, 139, 250, 0.65), 0 10px 24px rgba(0, 0, 0, 0.5);
+    0 0 26px color-mix(in srgb, var(--accent-glow) 65%, transparent), 0 10px 24px rgba(0, 0, 0, 0.5);
 }
 
 .detail-nav-btn:active:not(:disabled) {

@@ -109,6 +109,18 @@
     gap: 16px;
   }
 
+  [data-density="compact"] .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  /* Collection booklets (spine, collage, progress footer) get too cramped
+     at compact widths on small screens, so they keep their normal size. */
+  [data-density="compact"] #grid-collections {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+  }
+
   /* ---------- Forms & touch targets ---------- */
 
   /* 16px prevents iOS Safari from zooming in on focus. */
@@ -177,6 +189,25 @@
     gap: 12px;
   }
 
+  [data-density="compact"] .card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  [data-density="compact"] #grid-collections {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  [data-density="compact"] .card {
+    gap: 5px;
+    padding: 6px 6px 9px;
+  }
+
+  [data-density="compact"] .card-title {
+    font-size: 13px;
+  }
+
   /* Leaves room for two theme swatches per row. */
   .settings-card {
     padding: 22px 18px;
@@ -185,6 +216,25 @@
   .theme-swatches {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
+  }
+
+  /* Label on top, control full-width underneath. */
+  .settings-row {
+    flex-wrap: wrap;
+  }
+
+  .settings-select-wrap,
+  .settings-segmented {
+    flex: 1 1 100%;
+  }
+
+  .settings-segmented button {
+    flex: 1;
+  }
+
+  .settings-select {
+    width: 100%;
+    min-width: 0;
   }
 
   .ghost-card {

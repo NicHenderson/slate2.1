@@ -868,15 +868,15 @@ colDeleteBtn.addEventListener("click", () => {
 });
 
 // "Surprise Me": picks a random not-yet-watched title from whichever tab
-// (Movies / Shows) is currently open in this collection — same "to watch"
-// pool the dashboard's own Surprise Me draws from, just scoped to this
-// collection instead of the whole library.
+// (Movies / Shows) is currently open in this collection — same pool the
+// dashboard's own Surprise Me draws from (to watch, plus dropped shows if
+// Settings > Defaults says so), just scoped to this collection.
 function surprisePoolForOpenCollection() {
   return collectionItemsFor(openCollectionId)
     .filter((item) => itemType(item) === colTab)
     .map(resolveItem)
     .filter(Boolean)
-    .filter(({ table, row }) => itemStatus(table, row) === "towatch");
+    .filter(({ table, row }) => isSurpriseEligible(itemStatus(table, row)));
 }
 
 colSurpriseBtn.addEventListener("click", () => {

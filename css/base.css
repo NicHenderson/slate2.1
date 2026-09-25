@@ -8,6 +8,10 @@
   --accent-strong: #8b5cf6;
   --accent-deep: #6d28d9;
   --accent-soft: rgba(167, 139, 246, 0.12);
+  /* The page-level accent, for glows drawn by paper surfaces: those remap
+     --accent to --accent-deep (see the :where() block below), but this is
+     resolved here on the root, so children inherit the theme's own accent. */
+  --accent-glow: var(--accent);
   --pop: #2979ff;
   --text: #ece8f5;
   --text-muted: #9d94b3;

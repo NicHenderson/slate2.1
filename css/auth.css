@@ -70,7 +70,7 @@
 
 .auth-message-ok {
   background: var(--accent-soft);
-  border-color: rgba(167, 139, 250, 0.4);
+  border-color: color-mix(in srgb, var(--accent-glow) 40%, transparent);
   color: var(--accent);
 }
 

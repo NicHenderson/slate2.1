@@ -12,6 +12,42 @@
   align-content: start;
 }
 
+/* Settings > Card density: compact (data-density on <html>, set by
+   js/settings.js). The tablet/mobile variants live in responsive.css. */
+[data-density="compact"] .card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 14px;
+}
+
+[data-density="compact"] .card {
+  gap: 7px;
+  padding: 9px 9px 12px;
+}
+
+[data-density="compact"] .card-title {
+  font-size: 15px;
+}
+
+/* Ten stars plus "9/10" don't fit a compact card's width (they'd overlap),
+   so the rating collapses to a single star and the number. */
+[data-density="compact"] .card-rating .stars {
+  display: none;
+}
+
+[data-density="compact"] .card-rating .rating-row {
+  justify-content: flex-start;
+}
+
+[data-density="compact"] .card-rating .stars-value {
+  font-size: 12px;
+  color: var(--ink);
+}
+
+[data-density="compact"] .card-rating .stars-value::before {
+  content: "★ ";
+  color: var(--accent);
+}
+
 .card-grid.subtab-hidden + .pagination-slot {
   display: none;
 }
@@ -100,7 +136,7 @@
    collections.js). */
 .card.dragging,
 .booklet-card.dragging {
-  background: rgba(167, 139, 250, 0.08);
+  background: color-mix(in srgb, var(--accent-glow) 8%, transparent);
   outline: 2px dashed var(--accent-strong);
   outline-offset: -2px;
   box-shadow: none !important;
@@ -212,7 +248,7 @@ body.is-dragging * {
 body:not(.no-hover) .card-grid .card:hover,
 body:not(.no-hover) .dash-row .card:hover {
   transform: rotate(0deg) translateY(-6px) scale(1.035);
-  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 30px 6px rgba(167, 139, 250, 0.55),
+  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 30px 6px color-mix(in srgb, var(--accent-glow) 55%, transparent),
     0 0 60px 10px color-mix(in srgb, var(--accent-strong) 25%, transparent), 4px 12px 22px rgba(0, 0, 0, 0.5);
   z-index: 2;
 }
@@ -288,7 +324,7 @@ body:not(.no-hover) .dash-row .card:hover {
 
 body:not(.no-hover) .card-grid .booklet-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 26px 6px rgba(167, 139, 250, 0.5),
+  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 26px 6px color-mix(in srgb, var(--accent-glow) 50%, transparent),
     4px 10px 18px rgba(0, 0, 0, 0.4);
   z-index: 2;
 }
@@ -590,7 +626,7 @@ body:not(.no-hover) .card-grid .ghost-card:hover {
 
 body:not(.no-hover) .card-grid .booklet-ghost:hover {
   transform: translateY(-6px);
-  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 22px 5px rgba(167, 139, 250, 0.4),
+  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 22px 5px color-mix(in srgb, var(--accent-glow) 40%, transparent),
     4px 10px 18px rgba(0, 0, 0, 0.35);
 }
 
@@ -676,6 +712,6 @@ body > .drag-ghost {
 .drag-ghost.lifted {
   scale: 1.06;
   rotate: -2.5deg;
-  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 30px 8px rgba(167, 139, 250, 0.55),
+  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 30px 8px color-mix(in srgb, var(--accent-glow) 55%, transparent),
     10px 22px 34px rgba(0, 0, 0, 0.55);
 }

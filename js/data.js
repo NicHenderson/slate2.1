@@ -161,10 +161,13 @@ const GRID_SORTS = {
   },
 };
 
+// A sort picked in a list's own menu wins; otherwise the account's default
+// sort (Settings > Defaults, via js/settings.js), otherwise most recent.
 const activeSorts = {};
 Object.entries(GRID_SORTS).forEach(([gridId, cfg]) => {
   const saved = localStorage.getItem(cfg.storageKey);
-  activeSorts[gridId] = cfg.options[saved] ? saved : "recent";
+  const fallback = cfg.options[currentSettings.defaultSort] ? currentSettings.defaultSort : "recent";
+  activeSorts[gridId] = cfg.options[saved] ? saved : fallback;
 });
 
 const MOVIE_GRIDS = Object.keys(GRID_CONFIG).filter(
@@ -335,6 +338,16 @@ function remeasureVisibleGrids() {
     gridPageState[gridId] = { page: 1, itemsPerPage: null };
     renderGrid(gridId, [...STORE[GRID_CONFIG[gridId].table].values()]);
   });
+}
+
+// Settings > Card density changes every grid's column count, not just the
+// visible ones: hidden grids forget their measurement too, so
+// ensureGridMeasured() measures them again the first time they're shown.
+function remeasureAllGrids() {
+  Object.keys(GRID_CONFIG).forEach((gridId) => {
+    delete gridPageState[gridId];
+  });
+  remeasureVisibleGrids();
 }
 
 // Column count is a function of width, so an actual window resize (not

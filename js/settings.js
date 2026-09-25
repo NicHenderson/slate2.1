@@ -1,4 +1,4 @@
-/* ---------- Account settings (theme, reduce motion, …) ----------
+/* ---------- Account settings ----------
 
    Kept as its own small module rather than folded into STORE (data.js):
    settings are a single row per account, not a collection keyed by id, so
@@ -7,8 +7,16 @@
    loadData()/clearAppData() to stay on the same session lifecycle as
    everything else. */
 
-const DEFAULT_SETTINGS = { theme: "midnight", reduceMotion: false };
+const DEFAULT_SETTINGS = {
+  theme: "midnight",
+  reduceMotion: false,
+  density: "comfortable",
+  openTo: "dashboard",
+  defaultSort: "recent",
+  surpriseScope: "towatch",
+};
 const SETTINGS_CACHE_KEY = "slate_settings_cache";
+const LAST_SECTION_KEY = "slate_last_section";
 
 // Preview colors for the theme swatches — duplicated from css/base.css
 // rather than read from the live CSS variables, since a swatch has to show
@@ -25,13 +33,59 @@ const THEME_META = {
   glacier: { label: "Glacier", mode: "Light", bg: "#eef3f8", sidebar: "#e3ebf3", text: "#16233a", paper: "#ffffff", ink: "#16233a", accent: "#2f6fd6", strong: "#2459b8", deep: "#1a3f85", pop: "#c9542f" },
 };
 
-let currentSettings = { ...DEFAULT_SETTINGS };
+// The sections "Open to" can land on (and "last page viewed" can remember):
+// the sidebar's own destinations, minus Settings itself.
+const START_SECTIONS = ["dashboard", "movies-watched", "shows-watched", "movies-towatch", "shows-towatch", "collections"];
 
+// Every setting with a fixed set of values. Anything else — a stale cache,
+// a hand-edited row — falls back to the default; several of these end up
+// inside DOM selectors, so they must never be arbitrary strings.
+const SETTING_CHOICES = {
+  theme: Object.keys(THEME_META),
+  density: ["comfortable", "compact"],
+  openTo: ["last", ...START_SECTIONS],
+  defaultSort: ["recent", "oldest", "alpha-asc", "alpha-desc"],
+  surpriseScope: ["towatch", "with-dropped"],
+};
+
+function normalizeSettings(raw) {
+  const s = { ...DEFAULT_SETTINGS, ...(raw && typeof raw === "object" ? raw : {}) };
+  Object.entries(SETTING_CHOICES).forEach(([key, allowed]) => {
+    if (!allowed.includes(s[key])) s[key] = DEFAULT_SETTINGS[key];
+  });
+  s.reduceMotion = s.reduceMotion === true;
+  return s;
+}
+
+function readCachedSettings() {
+  try {
+    return JSON.parse(localStorage.getItem(SETTINGS_CACHE_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+
+// Starts from the cache so data.js (loaded right after this file) sorts its
+// grids by the saved default on the very first render.
+let currentSettings = normalizeSettings(readCachedSettings());
+
+// Set by any real click or key press in the app. "Open to" only acts
+// before that — settings arriving from Supabase a moment after login must
+// never yank someone off a page they already went to themselves.
+let userInteracted = false;
+
+const appRootEl = document.getElementById("app");
 const themeSwatchesEl = document.getElementById("theme-swatches");
 const reduceMotionToggle = document.getElementById("reduce-motion-toggle");
+const densityControl = document.getElementById("density-control");
+const openToSelect = document.getElementById("setting-open-to");
+const defaultSortSelect = document.getElementById("setting-default-sort");
+const surpriseScopeSelect = document.getElementById("setting-surprise-scope");
+
+/* ---------- applying settings ---------- */
 
 function applyTheme(key) {
-  document.documentElement.setAttribute("data-theme", THEME_META[key] ? key : "midnight");
+  document.documentElement.setAttribute("data-theme", key);
 }
 
 function applyReduceMotion(on) {
@@ -39,11 +93,78 @@ function applyReduceMotion(on) {
   else document.documentElement.removeAttribute("data-reduce-motion");
 }
 
+function applyDensity(density) {
+  const root = document.documentElement;
+  const was = root.getAttribute("data-density") ?? "comfortable";
+  if (density === "compact") root.setAttribute("data-density", "compact");
+  else root.removeAttribute("data-density");
+  // Card size changes how many columns fit, which every paginated grid
+  // measured once and kept (see gridPageState in data.js).
+  if (was !== density && typeof remeasureAllGrids === "function") remeasureAllGrids();
+}
+
+// Grids whose sort was never picked by hand (no per-grid key saved by
+// sortMenu.js) follow the default. A sort chosen in a list's own menu
+// always wins over it.
+function applyDefaultSort() {
+  if (typeof GRID_SORTS === "undefined") return;
+  Object.entries(GRID_SORTS).forEach(([gridId, cfg]) => {
+    let pickedByHand = null;
+    try {
+      pickedByHand = localStorage.getItem(cfg.storageKey);
+    } catch {}
+    if (cfg.options[pickedByHand]) return;
+    const key = cfg.options[currentSettings.defaultSort] ? currentSettings.defaultSort : "recent";
+    if (activeSorts[gridId] === key) return;
+    activeSorts[gridId] = key;
+    if (gridPageState[gridId]) gridPageState[gridId].page = 1;
+    const grid = document.getElementById(gridId);
+    // Still showing "Loading…": loadData() renders it with the new sort.
+    if (grid && !grid.querySelector(".loading")) {
+      renderGrid(gridId, [...STORE[GRID_CONFIG[gridId].table].values()]);
+    }
+    // The three Shows subtabs share one "Sorted by" label — only the
+    // visible one may write to it.
+    if (grid && !grid.classList.contains("subtab-hidden")) updateSortLabel(gridId);
+  });
+}
+
+function applyStartSection() {
+  if (userInteracted) return;
+  let target = currentSettings.openTo;
+  if (target === "last") {
+    let last = null;
+    try {
+      last = localStorage.getItem(LAST_SECTION_KEY);
+    } catch {}
+    target = START_SECTIONS.includes(last) ? last : "dashboard";
+  }
+  if (document.getElementById(target)?.classList.contains("active")) return;
+  document.querySelector(`.nav-btn[data-section="${target}"]`)?.click();
+}
+
+function applySettings() {
+  applyTheme(currentSettings.theme);
+  applyReduceMotion(currentSettings.reduceMotion);
+  applyDensity(currentSettings.density);
+  applyDefaultSort();
+  applyStartSection();
+  renderSettingsPage();
+}
+
+// Read by collections.js (and dashboard.js) when building a Surprise Me
+// pool. Movies are never "dropped", so the setting only widens shows.
+function isSurpriseEligible(status) {
+  return status === "towatch" || (status === "dropped" && currentSettings.surpriseScope === "with-dropped");
+}
+
 function cacheSettings() {
   try {
     localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(currentSettings));
   } catch {}
 }
+
+/* ---------- the Settings page ---------- */
 
 function renderSettingsPage() {
   themeSwatchesEl.innerHTML = Object.keys(THEME_META)
@@ -88,6 +209,17 @@ function renderSettingsPage() {
     .join("");
 
   reduceMotionToggle.classList.toggle("is-on", currentSettings.reduceMotion);
+  reduceMotionToggle.setAttribute("aria-pressed", String(currentSettings.reduceMotion));
+
+  densityControl.querySelectorAll("[data-density-value]").forEach((btn) => {
+    const on = btn.dataset.densityValue === currentSettings.density;
+    btn.classList.toggle("is-active", on);
+    btn.setAttribute("aria-pressed", String(on));
+  });
+
+  openToSelect.value = currentSettings.openTo;
+  defaultSortSelect.value = currentSettings.defaultSort;
+  surpriseScopeSelect.value = currentSettings.surpriseScope;
 }
 
 themeSwatchesEl.addEventListener("click", (e) => {
@@ -99,14 +231,47 @@ reduceMotionToggle.addEventListener("click", () => {
   saveSetting("reduceMotion", !currentSettings.reduceMotion);
 });
 
+densityControl.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-density-value]");
+  if (btn) saveSetting("density", btn.dataset.densityValue);
+});
+
+openToSelect.addEventListener("change", () => saveSetting("openTo", openToSelect.value));
+defaultSortSelect.addEventListener("change", () => saveSetting("defaultSort", defaultSortSelect.value));
+surpriseScopeSelect.addEventListener("change", () => saveSetting("surpriseScope", surpriseScopeSelect.value));
+
+/* ---------- session wiring ---------- */
+
+["pointerdown", "keydown"].forEach((type) =>
+  appRootEl.addEventListener(
+    type,
+    (e) => {
+      if (e.isTrusted) userInteracted = true;
+    },
+    true
+  )
+);
+
+// Remembered per device, for "Open to: Last page you viewed". Only real
+// clicks count — applyStartSection's own programmatic click isn't a visit.
+document.querySelectorAll(".nav-btn").forEach((btn) =>
+  btn.addEventListener("click", (e) => {
+    if (!e.isTrusted || !START_SECTIONS.includes(btn.dataset.section)) return;
+    try {
+      localStorage.setItem(LAST_SECTION_KEY, btn.dataset.section);
+    } catch {}
+  })
+);
+
 // Optimistic: applies and renders immediately, persists after. A failed
 // write is quiet (still applied locally, still cached) rather than
-// snapping the toggle back — losing "reduce motion" for one save error
-// isn't worth interrupting the user over.
+// snapping the control back — the toast says it didn't reach the account.
 async function saveSetting(key, value) {
-  currentSettings = { ...currentSettings, [key]: value };
-  if (key === "theme") applyTheme(value);
-  if (key === "reduceMotion") applyReduceMotion(value);
+  currentSettings = normalizeSettings({ ...currentSettings, [key]: value });
+  if (key === "theme") applyTheme(currentSettings.theme);
+  if (key === "reduceMotion") applyReduceMotion(currentSettings.reduceMotion);
+  if (key === "density") applyDensity(currentSettings.density);
+  if (key === "defaultSort") applyDefaultSort();
   cacheSettings();
   renderSettingsPage();
 
@@ -126,26 +291,29 @@ async function saveSetting(key, value) {
   }
 }
 
+// Two passes: the cached settings right away (so "Open to" and the rest
+// apply without waiting on the network), then the account's real ones.
 async function loadSettings() {
+  currentSettings = normalizeSettings(readCachedSettings());
+  applySettings();
+
   const { data, error } = await db.from("user_settings").select("settings").maybeSingle();
   if (error) {
     console.error("Settings load error:", error.message);
-    currentSettings = { ...DEFAULT_SETTINGS };
-  } else {
-    currentSettings = { ...DEFAULT_SETTINGS, ...(data?.settings ?? {}) };
+    return; // keep the cached settings rather than resetting to defaults
   }
-  applyTheme(currentSettings.theme);
-  applyReduceMotion(currentSettings.reduceMotion);
+  currentSettings = normalizeSettings(data?.settings);
   cacheSettings();
-  renderSettingsPage();
+  applySettings();
 }
 
 // Called from data.js's clearAppData() on logout. Deliberately doesn't
-// revert the applied theme/motion — the cached (still on-screen) look stays
-// until the next loadSettings() replaces it, so the auth screen and a
-// same-account re-login don't flash back to the "midnight" default first.
+// revert the applied theme/motion/density — the cached (still on-screen)
+// look stays until the next loadSettings() replaces it, so the auth screen
+// and a same-account re-login don't flash back to the defaults first.
 function resetSettingsState() {
   currentSettings = { ...DEFAULT_SETTINGS };
+  userInteracted = false;
 }
 
 renderSettingsPage();

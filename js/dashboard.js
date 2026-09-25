@@ -13,9 +13,6 @@ const surpriseBtn = document.getElementById("surprise-btn");
 function isMovieWatched(m) {
   return m.watched_date != null;
 }
-function isMovieToWatch(m) {
-  return m.watched_date == null;
-}
 function isShowWatched(s) {
   return s.finished_watching_date != null;
 }
@@ -25,9 +22,6 @@ function isShowWatching(s) {
     s.finished_watching_date == null &&
     !s.is_dropped
   );
-}
-function isShowToWatch(s) {
-  return s.started_watching_date == null && s.finished_watching_date == null;
 }
 
 /* ---------- helpers ---------- */
@@ -228,13 +222,9 @@ dashSection.addEventListener("click", (e) => {
 
 surpriseBtn.addEventListener("click", () => {
   const pool = [
-    ...[...STORE.movies.values()]
-      .filter(isMovieToWatch)
-      .map((row) => ({ row, table: "movies" })),
-    ...[...STORE.shows.values()]
-      .filter(isShowToWatch)
-      .map((row) => ({ row, table: "shows" })),
-  ];
+    ...[...STORE.movies.values()].map((row) => ({ row, table: "movies" })),
+    ...[...STORE.shows.values()].map((row) => ({ row, table: "shows" })),
+  ].filter(({ table, row }) => isSurpriseEligible(itemStatus(table, row)));
 
   if (!pool.length) {
     showToast("Add something to your watchlist first.");
