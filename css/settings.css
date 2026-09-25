@@ -877,8 +877,8 @@
   -webkit-box-orient: vertical;
 }
 
-/* Your Data: one row per action (export now, import next to it later),
-   each an icon, what it does, and its button. */
+/* Your Data: one row per action (export, import), each an icon, what it
+   does, and its button. */
 .data-actions {
   display: flex;
   flex-direction: column;
@@ -889,8 +889,12 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px 0 2px;
+  padding: 16px 0;
   border-top: 1px dashed var(--border);
+}
+
+.data-action:last-child {
+  padding-bottom: 2px;
 }
 
 .data-action-icon {

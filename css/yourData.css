@@ -1,0 +1,434 @@
+/* ---------- Settings > Your Data: the import window ----------
+
+   Same family as "Mark as watched": a paper panel under a die-cut violet
+   ticket (.update-ticket, from modal.css), sticker buttons in the action
+   row (.update-actions). The body swaps between three views, set on the
+   backdrop as data-view by js/yourData.js:
+
+     reading   an envelope of cards being sorted, while the file is checked
+     summary   what's inside: a fan of posters, the counts, the collections
+     error     why the file can't be used — nothing was touched */
+
+.import-backdrop {
+  z-index: 125;
+}
+
+.import-panel {
+  position: relative;
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 4px 10px 24px rgba(0, 0, 0, 0.4);
+  animation: modal-in 0.2s ease;
+}
+
+.import-panel .update-movie-title {
+  overflow-wrap: anywhere;
+}
+
+.import-body {
+  padding: 26px 26px 24px;
+}
+
+/* Each view fades up into place as it replaces the last one. */
+.import-backdrop[data-view] .import-body > * {
+  animation: import-view-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes import-view-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.import-note {
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.import-actions {
+  margin-top: 20px;
+}
+
+/* ---------- reading ---------- */
+
+.import-reading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0 6px;
+  text-align: center;
+}
+
+/* An envelope (back, three cards, front pocket): the cards rise out of it
+   one after another, tilt, and drop back in, over and over. */
+.import-envelope {
+  position: relative;
+  width: 132px;
+  height: 118px;
+  margin-bottom: 18px;
+}
+
+.import-env-back,
+.import-env-front {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.import-env-back {
+  height: 78px;
+  background: var(--accent-deep);
+  border-radius: 4px;
+}
+
+.import-env-front {
+  height: 56px;
+  background: var(--accent-strong);
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.18);
+  z-index: 2;
+}
+
+/* The pocket's flap: a V cut into its top edge. */
+.import-env-front::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom right, transparent 49.5%, rgba(0, 0, 0, 0.12) 50%) left / 50% 100% no-repeat,
+    linear-gradient(to bottom left, transparent 49.5%, rgba(0, 0, 0, 0.12) 50%) right / 50% 100% no-repeat;
+}
+
+.import-env-card {
+  position: absolute;
+  bottom: 18px;
+  left: calc(50% - 26px);
+  width: 52px;
+  height: 70px;
+  padding: 4px 4px 12px;
+  background: #fff;
+  box-shadow: 1px 3px 6px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  animation: import-card-rise 1.8s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+
+/* The "poster" on each card. */
+.import-env-card::before {
+  content: "";
+  display: block;
+  height: 100%;
+  background: linear-gradient(160deg, var(--accent) 0%, var(--accent-deep) 100%);
+}
+
+.import-env-card:nth-of-type(3)::before {
+  background: linear-gradient(160deg, #f59e0b 0%, #b45309 100%);
+}
+
+.import-env-card:nth-of-type(4)::before {
+  background: linear-gradient(160deg, #22d3ee 0%, #0e7490 100%);
+}
+
+.import-env-card:nth-of-type(2) {
+  --tilt: -9deg;
+  --dx: -26px;
+}
+
+.import-env-card:nth-of-type(3) {
+  --tilt: 2deg;
+  --dx: 0px;
+  animation-delay: 0.3s;
+}
+
+.import-env-card:nth-of-type(4) {
+  --tilt: 10deg;
+  --dx: 26px;
+  animation-delay: 0.6s;
+}
+
+@keyframes import-card-rise {
+  0%,
+  8% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  45%,
+  62% {
+    transform: translate(var(--dx), -44px) rotate(var(--tilt));
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+.import-reading-title {
+  font-family: var(--font-hand);
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+.import-reading-hint {
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--ink-muted);
+}
+
+/* An indeterminate bar: a short stripe sliding across, back and forth. */
+.import-progress {
+  position: relative;
+  width: min(240px, 80%);
+  height: 6px;
+  margin-top: 18px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.import-progress span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 38%;
+  border-radius: inherit;
+  background: var(--accent-strong);
+  animation: import-progress-slide 1.2s cubic-bezier(0.45, 0, 0.25, 1) infinite alternate;
+}
+
+@keyframes import-progress-slide {
+  from {
+    left: -10%;
+  }
+  to {
+    left: 72%;
+  }
+}
+
+/* ---------- summary ---------- */
+
+/* Up to five of the file's posters, fanned like a hand of cards. */
+.import-fan {
+  display: flex;
+  justify-content: center;
+  height: 128px;
+  margin: 2px 0 22px;
+}
+
+.import-fan-card {
+  --i: 0;
+  flex-shrink: 0;
+  width: 72px;
+  margin: 0 -10px;
+  padding: 4px 4px 12px;
+  background: #fff;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+  transform-origin: 50% 120%;
+  animation: import-fan-deal 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  animation-delay: calc(var(--i) * 70ms + 0.1s);
+}
+
+.import-fan-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  background: var(--surface);
+}
+
+.import-fan-card:nth-child(1) { --i: 0; --r: -14deg; --y: 14px; }
+.import-fan-card:nth-child(2) { --i: 1; --r: -7deg; --y: 4px; }
+.import-fan-card:nth-child(3) { --i: 2; --r: 0deg; --y: 0px; z-index: 1; }
+.import-fan-card:nth-child(4) { --i: 3; --r: 7deg; --y: 4px; }
+.import-fan-card:nth-child(5) { --i: 4; --r: 14deg; --y: 14px; }
+
+/* Fewer than five: the middle one stays upright. */
+.import-fan-card:only-child { --r: 0deg; --y: 0px; }
+
+.import-fan-card {
+  transform: translateY(var(--y)) rotate(var(--r));
+}
+
+@keyframes import-fan-deal {
+  from {
+    opacity: 0;
+    transform: translateY(40px) rotate(0deg) scale(0.9);
+  }
+}
+
+.import-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px dashed color-mix(in srgb, var(--ink) 28%, transparent);
+}
+
+.import-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 14px 8px 12px;
+  text-align: center;
+}
+
+.import-stat + .import-stat {
+  border-left: 1px dashed color-mix(in srgb, var(--ink) 28%, transparent);
+}
+
+.import-stat-num {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent-deep);
+}
+
+.import-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.import-stat-sub {
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--ink-muted);
+}
+
+.import-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  list-style: none;
+  padding: 0;
+}
+
+.import-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  background: var(--paper-dim);
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.import-chip-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  font-size: 15px;
+}
+
+.import-chip-icon:empty {
+  display: none;
+}
+
+.import-chip-count {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent-deep);
+  font-size: 11px;
+}
+
+.import-chip-more {
+  color: var(--ink-muted);
+}
+
+.import-warn {
+  margin-top: 14px;
+  padding: 8px 12px;
+  border-left: 3px solid #d97706;
+  background: rgba(217, 119, 6, 0.1);
+  font-size: 12.5px;
+}
+
+/* ---------- error ---------- */
+
+.import-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 4px;
+}
+
+.import-error-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: rgba(220, 38, 38, 0.14);
+  color: #dc2626;
+}
+
+.import-error-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.import-error-text {
+  max-width: 380px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  font-weight: 600;
+}
+
+/* ---------- small screens / reduced motion ---------- */
+
+@media (max-width: 480px) {
+  .import-body {
+    padding: 22px 18px 20px;
+  }
+
+  .import-fan-card {
+    width: 58px;
+  }
+
+  .import-fan {
+    height: 106px;
+  }
+
+  .import-stat-num {
+    font-size: 24px;
+  }
+
+  /* Buttons share the row evenly instead of overflowing it. */
+  .import-actions .update-actions-right {
+    flex: 1;
+  }
+
+  .import-actions .update-actions-right button {
+    flex: 1;
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .import-env-card,
+  .import-progress span,
+  .import-fan-card,
+  .import-backdrop[data-view] .import-body > * {
+    animation: none;
+  }
+}
+
+:root[data-reduce-motion="true"] .import-env-card,
+:root[data-reduce-motion="true"] .import-progress span,
+:root[data-reduce-motion="true"] .import-fan-card,
+:root[data-reduce-motion="true"] .import-backdrop[data-view] .import-body > * {
+  animation: none;
+}
