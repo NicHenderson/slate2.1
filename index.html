@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="css/auth.css?v=10" />
   <link rel="stylesheet" href="css/landing.css?v=7" />
   <link rel="stylesheet" href="css/transitions.css?v=1" />
-  <link rel="stylesheet" href="css/settings.css?v=8" />
+  <link rel="stylesheet" href="css/settings.css?v=9" />
   <link rel="stylesheet" href="css/responsive.css?v=25" />
 </head>
 <body>
@@ -1064,6 +1064,23 @@
                 </div>
               </div>
             </div>
+
+            <div class="settings-tile tile-data">
+              <h2 class="settings-tile-title">Your Data</h2>
+              <p class="settings-row-hint">Everything you've logged, in one file you keep. Titles and collections only — your profile and settings stay out of it.</p>
+              <div class="data-actions">
+                <div class="data-action">
+                  <span class="data-action-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
+                  </span>
+                  <div class="data-action-text">
+                    <p class="settings-row-title">Export data</p>
+                    <p class="settings-row-hint">Downloads a <span class="data-ext">.slate</span> file with <span id="data-export-summary">your whole library</span> — ratings, reviews, dates and custom order included.</p>
+                  </div>
+                  <button class="data-btn" id="data-export-btn" type="button">Export data</button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -1331,7 +1348,7 @@
   <script src="js/iconData.js?v=1"></script>
   <script src="js/icons.js?v=1"></script>
   <script src="js/iconPicker.js?v=1"></script>
-  <script src="js/collections.js?v=41"></script>
+  <script src="js/collections.js?v=42"></script>
   <script src="js/infoModal.js?v=4"></script>
   <script src="js/detailModal.js?v=9"></script>
   <script src="js/starsInput.js?v=3"></script>
@@ -1340,10 +1357,11 @@
   <script src="js/confirmModal.js?v=7"></script>
   <script src="js/settings.js?v=6"></script>
   <script src="js/profile.js?v=3"></script>
-  <script src="js/data.js?v=28"></script>
+  <script src="js/data.js?v=29"></script>
   <script src="js/sortMenu.js?v=6"></script>
   <script src="js/watchlistOrder.js?v=2"></script>
   <script src="js/sectionHeaders.js?v=2"></script>
+  <script src="js/yourData.js?v=1"></script>
   <script src="js/landing.js?v=1"></script>
   <script src="js/auth.js?v=4"></script>
 </body>

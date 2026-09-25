@@ -162,6 +162,7 @@ function renderCollections() {
   }
   document.getElementById("collections-drag-hint").hidden = STORE.collections.size < 2;
   if (typeof renderHeaderStats === "function") renderHeaderStats("collections");
+  if (typeof renderDataSummary === "function") renderDataSummary();
   paintGrid(document.getElementById("grid-collections"), collectionsGridHtml());
 }
 

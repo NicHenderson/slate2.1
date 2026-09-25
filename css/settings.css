@@ -8,6 +8,7 @@
      Theme (2 rows)            | Animations
                                | Card density
      Defaults -----------------------------------
+     Your Data ----------------------------------
 
    Layout reacts to the width the grid actually gets (container queries),
    not the viewport — the sidebar takes a varying share of it. */
@@ -52,7 +53,8 @@
 }
 
 .tile-profile,
-.tile-defaults {
+.tile-defaults,
+.tile-data {
   grid-column: 1 / -1;
 }
 
@@ -511,7 +513,8 @@
 }
 
 /* The same raised "sticker" as .add-btn, the app's primary action. */
-.profile-save-btn {
+.profile-save-btn,
+.data-btn {
   min-height: 44px;
   padding: 0 22px;
   border-radius: var(--radius-sm);
@@ -527,17 +530,20 @@
   transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
 }
 
-.profile-save-btn:hover:not(:disabled) {
+.profile-save-btn:hover:not(:disabled),
+.data-btn:hover:not(:disabled) {
   transform: rotate(0deg) translateY(-2px);
   box-shadow: 4px 6px 0 var(--accent-deep);
 }
 
-.profile-save-btn:active:not(:disabled) {
+.profile-save-btn:active:not(:disabled),
+.data-btn:active:not(:disabled) {
   transform: rotate(0deg) translateY(0);
   box-shadow: 1px 2px 0 var(--accent-deep);
 }
 
-.profile-save-btn:disabled {
+.profile-save-btn:disabled,
+.data-btn:disabled {
   opacity: 0.45;
   cursor: default;
 }
@@ -871,6 +877,58 @@
   -webkit-box-orient: vertical;
 }
 
+/* Your Data: one row per action (export now, import next to it later),
+   each an icon, what it does, and its button. */
+.data-actions {
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+}
+
+.data-action {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0 2px;
+  border-top: 1px dashed var(--border);
+}
+
+.data-action-icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent-deep);
+}
+
+.data-action-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.data-action-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.data-action-text .settings-row-hint {
+  margin-top: 2px;
+}
+
+.data-ext {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--accent-deep);
+}
+
+.data-btn {
+  flex-shrink: 0;
+  min-width: 150px;
+}
+
 /* ---------- Narrow layouts ----------
    Last in the file on purpose: these override base rules above with the
    same specificity, so they have to come after them. */
@@ -909,5 +967,18 @@
   .tile-motion,
   .tile-density {
     grid-column: 1 / -1;
+  }
+
+  /* The button drops under the text, full width. */
+  .data-action {
+    flex-wrap: wrap;
+  }
+
+  .data-action-text {
+    flex-basis: calc(100% - 58px);
+  }
+
+  .data-btn {
+    width: 100%;
   }
 }

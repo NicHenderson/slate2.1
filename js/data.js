@@ -280,6 +280,7 @@ function renderGrid(gridId, rows) {
     return;
   }
   if (typeof renderHeaderStats === "function") renderHeaderStats(gridId);
+  if (typeof renderDataSummary === "function") renderDataSummary();
   const grid = document.getElementById(gridId);
   const custom = isCustomSorted(gridId);
   grid.classList.toggle("is-sortable", custom);
