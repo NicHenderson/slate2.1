@@ -13,6 +13,15 @@ files, numbered in the order they apply:
 The data itself isn't here: that's what **Settings → Your Data → Export
 data** is for (a `.slate` file per account).
 
+## Edge Functions
+
+`functions/` holds code that runs on Supabase's servers instead of in the
+browser — for anything that needs a secret:
+
+| Function | What it does |
+| --- | --- |
+| [`tmdb`](functions/tmdb/README.md) | Proxies the app's TMDB requests, keeping the TMDB API key server-side |
+
 ## Rebuilding the database from scratch
 
 1. Create a new project at [supabase.com](https://supabase.com).
@@ -22,7 +31,9 @@ data** is for (a `.slate` file per account).
    `js/supabaseClient.js`.
 4. Under **Authentication → URL Configuration**, add the address the app is
    served from to the Site URL / Redirect URLs.
-5. Sign up, then bring your library back with **Settings → Your Data →
+5. Deploy the Edge Functions in `functions/` and set their secrets (each
+   one's README says how).
+6. Sign up, then bring your library back with **Settings → Your Data →
    Import data**.
 
 ## Changing the database
