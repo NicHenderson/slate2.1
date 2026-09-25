@@ -4,6 +4,9 @@
    component stylesheets. Loaded last so these rules win on override.
 
    Breakpoints:
+     Auth screen    : max-width 860px  (its own tier — the hero pane and the
+                       440px form column need more room than the generic
+                       tablet tier gives them)
      Tablet & below : max-width 768px  (off-canvas drawer nav, tuned grids)
      Mobile         : max-width 480px  (1–2 col grids, full-width modals)
    ===================================================================== */
@@ -22,6 +25,54 @@
 .menu-toggle,
 .sidebar-backdrop {
   display: none;
+}
+
+/* =============================== AUTH SCREEN (≤860px) =============================== */
+@media (max-width: 860px) {
+  .auth-screen {
+    flex-direction: column;
+  }
+
+  .auth-hero {
+    flex: none;
+    min-height: 0;
+    padding: 44px 28px 32px;
+  }
+
+  .auth-hero-title {
+    font-size: 40px;
+  }
+
+  .auth-hero-copy {
+    max-width: none;
+  }
+
+  /* The collage needs the hero's full height to scatter across — gone once
+     that height collapses to its content, and there's no library yet to
+     make a smaller version of it worth keeping. */
+  .auth-hero-collage {
+    display: none;
+  }
+
+  .auth-panel {
+    flex: 1;
+    min-height: 0;
+    padding: 36px 28px 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-hero {
+    padding: 36px 22px 26px;
+  }
+
+  .auth-hero-title {
+    font-size: 32px;
+  }
+
+  .auth-card {
+    padding: 28px 22px 24px;
+  }
 }
 
 /* =========================== TABLET & BELOW (≤768px) =========================== */

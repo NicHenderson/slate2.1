@@ -28,50 +28,65 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Patrick+Hand&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/base.css?v=8" />
-  <link rel="stylesheet" href="css/sidebar.css?v=2" />
+  <link rel="stylesheet" href="css/sidebar.css?v=3" />
   <link rel="stylesheet" href="css/content.css?v=15" />
   <link rel="stylesheet" href="css/cards.css?v=25" />
   <link rel="stylesheet" href="css/modal.css?v=41" />
-  <link rel="stylesheet" href="css/auth.css?v=3" />
+  <link rel="stylesheet" href="css/auth.css?v=4" />
   <link rel="stylesheet" href="css/settings.css?v=8" />
-  <link rel="stylesheet" href="css/responsive.css?v=23" />
+  <link rel="stylesheet" href="css/responsive.css?v=24" />
 </head>
 <body>
   <div class="auth-screen hidden" id="auth-screen">
-    <div class="auth-card">
-      <div class="auth-brand">
-        <span class="brand-tag">Slate</span>
+    <div class="auth-hero">
+      <div class="auth-hero-collage" aria-hidden="true">
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
       </div>
-      <p class="auth-subtitle" id="auth-subtitle">Log in to your library</p>
+      <div class="auth-hero-content">
+        <p class="auth-hero-eyebrow">Every movie. Every show.</p>
+        <h1 class="auth-hero-title">Slate</h1>
+        <p class="auth-hero-copy">Your corkboard for everything you've watched, dropped, and can't wait to start.</p>
+      </div>
+    </div>
 
-      <form id="auth-form" novalidate>
-        <div class="auth-field">
-          <label class="field-label" for="auth-email">Email</label>
-          <input type="email" id="auth-email" class="field-input" autocomplete="email" placeholder="you@example.com" />
-          <p class="auth-field-error hidden" id="auth-email-error"></p>
-        </div>
+    <div class="auth-panel">
+      <div class="auth-card">
+        <span class="auth-card-tape" aria-hidden="true"></span>
+        <p class="auth-eyebrow" id="auth-subtitle">Welcome back</p>
+        <h2 class="auth-title" id="auth-title">Log In</h2>
 
-        <div class="auth-field">
-          <label class="field-label" for="auth-password">Password</label>
-          <input type="password" id="auth-password" class="field-input" autocomplete="current-password" placeholder="At least 8 characters" />
-          <p class="auth-field-error hidden" id="auth-password-error"></p>
-        </div>
+        <form id="auth-form" novalidate>
+          <div class="auth-field">
+            <label class="field-label" for="auth-email">Email</label>
+            <input type="email" id="auth-email" class="field-input" autocomplete="email" placeholder="you@example.com" />
+            <p class="auth-field-error hidden" id="auth-email-error"></p>
+          </div>
 
-        <div class="auth-field hidden" id="auth-confirm-field">
-          <label class="field-label" for="auth-confirm">Confirm password</label>
-          <input type="password" id="auth-confirm" class="field-input" autocomplete="new-password" placeholder="Repeat your password" />
-          <p class="auth-field-error hidden" id="auth-confirm-error"></p>
-        </div>
+          <div class="auth-field">
+            <label class="field-label" for="auth-password">Password</label>
+            <input type="password" id="auth-password" class="field-input" autocomplete="current-password" placeholder="At least 8 characters" />
+            <p class="auth-field-error hidden" id="auth-password-error"></p>
+          </div>
 
-        <p class="auth-message hidden" id="auth-message"></p>
+          <div class="auth-field hidden" id="auth-confirm-field">
+            <label class="field-label" for="auth-confirm">Confirm password</label>
+            <input type="password" id="auth-confirm" class="field-input" autocomplete="new-password" placeholder="Repeat your password" />
+            <p class="auth-field-error hidden" id="auth-confirm-error"></p>
+          </div>
 
-        <button type="submit" class="auth-submit" id="auth-submit">Log In</button>
-      </form>
+          <p class="auth-message hidden" id="auth-message"></p>
 
-      <p class="auth-toggle">
-        <span id="auth-toggle-text">Don't have an account?</span>
-        <button type="button" class="auth-toggle-btn" id="auth-toggle-btn">Register</button>
-      </p>
+          <button type="submit" class="auth-submit" id="auth-submit">Log In</button>
+        </form>
+
+        <p class="auth-toggle">
+          <span id="auth-toggle-text">Don't have an account?</span>
+          <button type="button" class="auth-toggle-btn" id="auth-toggle-btn">Register</button>
+        </p>
+      </div>
     </div>
   </div>
 

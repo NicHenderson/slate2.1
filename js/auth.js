@@ -6,6 +6,7 @@ const authPassword = document.getElementById("auth-password");
 const authConfirm = document.getElementById("auth-confirm");
 const authConfirmField = document.getElementById("auth-confirm-field");
 const authSubtitle = document.getElementById("auth-subtitle");
+const authTitle = document.getElementById("auth-title");
 const authSubmit = document.getElementById("auth-submit");
 const authMessage = document.getElementById("auth-message");
 const authToggleBtn = document.getElementById("auth-toggle-btn");
@@ -62,9 +63,8 @@ function setAuthMode(mode) {
   authMode = mode;
   const register = mode === "register";
   authConfirmField.classList.toggle("hidden", !register);
-  authSubtitle.textContent = register
-    ? "Create your account"
-    : "Log in to your library";
+  authSubtitle.textContent = register ? "New here?" : "Welcome back";
+  authTitle.textContent = register ? "Create Account" : "Log In";
   authSubmit.textContent = register ? "Create Account" : "Log In";
   authToggleText.textContent = register
     ? "Already have an account?"
