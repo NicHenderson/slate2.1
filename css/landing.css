@@ -450,10 +450,6 @@ html.auth-open {
   animation: lp-marquee 40s linear infinite;
 }
 
-.lp-filmstrip:hover .lp-filmstrip-track {
-  animation-play-state: paused;
-}
-
 .lp-fs-set {
   display: flex;
   align-items: center;
@@ -1137,6 +1133,13 @@ html.auth-open {
     var(--paper);
   box-shadow: 4px 14px 34px rgba(0, 0, 0, 0.45);
   transform: rotate(-1deg);
+}
+
+/* A new paragraph is indented, as in a handwritten letter, rather than
+   spaced out: a gap would knock the text off the ruled lines. Not the
+   greeting, and not the signature. */
+.lp-letter p + p:not(.lp-letter-sign) {
+  text-indent: 1.6em;
 }
 
 .lp-letter-sign {
