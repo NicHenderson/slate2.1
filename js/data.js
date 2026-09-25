@@ -203,161 +203,6 @@ function ghostCardHtml(type) {
 
 const NO_GHOST_GRIDS = new Set(["grid-shows-watching", "grid-shows-dropped"]);
 
-function ensureGhost(grid, type) {
-  if (NO_GHOST_GRIDS.has(grid.id)) {
-    grid.querySelectorAll(".ghost-card").forEach((g) => g.remove());
-    return;
-  }
-  const ghosts = grid.querySelectorAll(".ghost-card");
-  ghosts.forEach((ghost, i) => {
-    if (i > 0) ghost.remove();
-  });
-  if (!ghosts.length) {
-    grid.insertAdjacentHTML("beforeend", ghostCardHtml(type));
-  } else if (grid.lastElementChild !== ghosts[0]) {
-    grid.appendChild(ghosts[0]);
-  }
-}
-
-/* ---------- pagination ----------
-
-   Card grids page instead of scrolling forever, so a huge library doesn't
-   turn into endless scrolling. Earlier this measured the actual viewport
-   height and fit as many rows as would visually fit above the pagination
-   bar — precise, but it meant every render depended on real card height
-   (which a placeholder probe card could only estimate, not match exactly),
-   on web fonts having actually finished loading (metrics differ before/
-   after), and on the .content scrollbar's own width (which changes
-   depending on whether THIS page happens to need scrolling). Every one of
-   those turned into a real bug at some point: wrong-sized flashes on first
-   load, the pagination bar jumping between pages, an unnecessary near-
-   empty trailing page. Rows per page are fixed instead now — not measured
-   at all — so none of that can happen again; the trade-off is that a very
-   tall screen can be left with a little empty space below the last row,
-   and a short one may need a touch of scrolling to see it. Only the column
-   count is still measured (from the grid's own resolved track list), since
-   that's a plain function of width, not of content, fonts, or scrollbars —
-   nothing about it can come out "wrong" the way row height could. */
-
-const PAGE_GROUP_SIZE = 3;
-const ROWS_PER_PAGE = 2;
-const DEFAULT_ITEMS_PER_PAGE = 24; // used only while a grid is still hidden
-
-const gridPageState = {}; // gridId -> { page, itemsPerPage }
-
-function isGridVisible(grid) {
-  return !!grid && grid.offsetParent !== null;
-}
-
-function measureItemsPerPage(grid) {
-  const columns = Math.max(
-    getComputedStyle(grid).gridTemplateColumns.split(" ").filter(Boolean).length,
-    1
-  );
-  return { itemsPerPage: columns * ROWS_PER_PAGE, columns };
-}
-
-function paginationHtml(page, totalPages) {
-  if (totalPages <= 1) return "";
-  const groupStart = Math.floor((page - 1) / PAGE_GROUP_SIZE) * PAGE_GROUP_SIZE + 1;
-  const groupEnd = Math.min(groupStart + PAGE_GROUP_SIZE - 1, totalPages);
-
-  let numbers = "";
-  for (let p = groupStart; p <= groupEnd; p++) {
-    numbers += `<button class="page-num${p === page ? " active" : ""}" type="button" data-page="${p}">${p}</button>`;
-  }
-
-  const prevPage = Math.max(1, groupStart - PAGE_GROUP_SIZE);
-  const nextPage = groupEnd + 1;
-  const prevDisabled = groupStart === 1 ? "disabled" : "";
-  const nextDisabled = groupEnd >= totalPages ? "disabled" : "";
-
-  return `
-    <div class="pagination">
-      <button class="page-nav" type="button" data-page="${prevPage}" ${prevDisabled} aria-label="Previous pages">‹</button>
-      ${numbers}
-      <button class="page-nav" type="button" data-page="${nextPage}" ${nextDisabled} aria-label="Next pages">›</button>
-    </div>`;
-}
-
-function renderPaginationBar(gridId, grid, page, totalPages) {
-  let slot = grid.nextElementSibling;
-  if (!slot || !slot.classList.contains("pagination-slot")) {
-    slot = document.createElement("div");
-    slot.className = "pagination-slot";
-    grid.insertAdjacentElement("afterend", slot);
-  }
-  slot.dataset.grid = gridId;
-  slot.innerHTML = paginationHtml(page, totalPages);
-}
-
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest(".pagination-slot button[data-page]");
-  if (!btn || btn.disabled) return;
-  const gridId = btn.closest(".pagination-slot").dataset.grid;
-  const state = (gridPageState[gridId] ??= { page: 1, itemsPerPage: null });
-  state.page = Number(btn.dataset.page);
-  renderGrid(gridId, [...STORE[GRID_CONFIG[gridId].table].values()]);
-  // Only worth resetting scroll if the user actually scrolled away from the
-  // top of a long list — snapping back is what makes "page 2" start from
-  // the top instead of leaving them looking at whatever happened to be at
-  // their old scroll offset. At scrollTop 0 the grid is already fully in
-  // view, so this used to fire anyway and scroll by whatever sliver of
-  // room .content had (a couple px from rounding, or more since the
-  // min-height reservation above can itself put .content just barely past
-  // one screen) — invisible as "scrolling" but very visible as the
-  // pagination bar (and everything below the fold) shifting for no
-  // apparent reason on every single page change.
-  const content = document.querySelector(".content");
-  if (content && content.scrollTop > 0) {
-    document.getElementById(gridId)?.scrollIntoView({ block: "start" });
-  }
-});
-
-// Called by navigation.js / subtabs.js once a section or subtab actually
-// reveals a grid — grids hidden at load time can't measure their column
-// count (a hidden element has no resolved width), so that's deferred until
-// they're first shown. Column count depends only on the grid's own width,
-// which is already correct the instant the section's `display` switches on
-// (getComputedStyle forces a synchronous layout, so there's nothing to wait
-// for here) — no fonts, no animation, no timer.
-function ensureGridMeasured(gridId) {
-  const cfg = GRID_CONFIG[gridId];
-  if (!cfg) return;
-  const grid = document.getElementById(gridId);
-  if (!isGridVisible(grid)) return;
-  const state = gridPageState[gridId];
-  if (state && state.itemsPerPage != null) return;
-  renderGrid(gridId, [...STORE[cfg.table].values()]);
-}
-
-function remeasureVisibleGrids() {
-  Object.keys(GRID_CONFIG).forEach((gridId) => {
-    const grid = document.getElementById(gridId);
-    if (!isGridVisible(grid)) return;
-    gridPageState[gridId] = { page: 1, itemsPerPage: null };
-    renderGrid(gridId, [...STORE[GRID_CONFIG[gridId].table].values()]);
-  });
-}
-
-// Settings > Card density changes every grid's column count, not just the
-// visible ones: hidden grids forget their measurement too, so
-// ensureGridMeasured() measures them again the first time they're shown.
-function remeasureAllGrids() {
-  Object.keys(GRID_CONFIG).forEach((gridId) => {
-    delete gridPageState[gridId];
-  });
-  remeasureVisibleGrids();
-}
-
-// Column count is a function of width, so an actual window resize (not
-// fonts, not an animation frame) is the only thing left that can change it.
-let resizeTimer;
-window.addEventListener("resize", () => {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(remeasureVisibleGrids, 200);
-});
-
 // Shared by renderGrid and the detail modal's prev/next navigation, so
 // "the card next to this one" always means the same thing in both places.
 function getOrderedList(gridId) {
@@ -370,10 +215,10 @@ function getOrderedList(gridId) {
   return visible;
 }
 
+// A grid shows its whole list (the page itself scrolls), "+ Add" card last.
 function renderGrid(gridId, rows) {
   const cfg = GRID_CONFIG[gridId];
   const grid = document.getElementById(gridId);
-  const state = (gridPageState[gridId] ??= { page: 1, itemsPerPage: null });
 
   let visible = rows.filter(cfg.match);
   const sortCfg = GRID_SORTS[gridId];
@@ -382,57 +227,9 @@ function renderGrid(gridId, rows) {
   }
 
   const showRating = cfg.state === "watched";
-  if (state.itemsPerPage == null && isGridVisible(grid)) {
-    const measured = measureItemsPerPage(grid);
-    state.itemsPerPage = measured.itemsPerPage;
-    state.columns = measured.columns;
-  }
-  const capacity = state.itemsPerPage ?? DEFAULT_ITEMS_PER_PAGE;
-  const showsGhost = !NO_GHOST_GRIDS.has(gridId);
-
-  // The "+ Add" ghost card only belongs on the true last page — every other
-  // page is packed with real items at full capacity. If the list happens to
-  // fill the last page exactly, the ghost gets a page of its own rather than
-  // spilling that page into a 3rd row. A short last page (1-2 leftover
-  // items) used to get folded into the previous one instead of standing on
-  // its own — reasonable when pages could still grow a bit to absorb it,
-  // but with a fixed row count there's no slack to absorb *into*: tacking a
-  // couple more items onto an already-full page just pushes it into a 3rd
-  // row, needing exactly the scroll this whole redesign was meant to avoid.
-  // A short trailing page is the smaller cost.
-  const realPages = Math.max(1, Math.ceil(visible.length / capacity));
-  const lastPageCount = visible.length - (realPages - 1) * capacity;
-  const ghostNeedsOwnPage =
-    showsGhost && visible.length > 0 && lastPageCount === capacity;
-  const totalPages = ghostNeedsOwnPage ? realPages + 1 : realPages;
-  state.page = Math.min(Math.max(state.page, 1), totalPages);
-
-  const pageItems =
-    state.page <= realPages
-      ? visible.slice((state.page - 1) * capacity, state.page * capacity)
-      : [];
-
-  grid.innerHTML = pageItems.map((row) => cardHtml(row, showRating)).join("");
-  if (showsGhost && state.page === totalPages) {
-    ensureGhost(grid, cfg.type);
-  } else {
-    grid.querySelectorAll(".ghost-card").forEach((g) => g.remove());
-  }
-  // Keeps a short last page (or a lone ghost card bumped to its own page)
-  // from rendering a shorter grid than a full page would, which would
-  // otherwise leave everything pinned below it (the pagination bar) sitting
-  // at a different height depending on the page — measured from a genuinely
-  // full page of real cards (real poster art included) the first time one
-  // renders, and only ever grown from there, never shrunk.
-  if (pageItems.length === capacity) {
-    grid.style.minHeight = "";
-    const naturalHeight = grid.getBoundingClientRect().height;
-    if (!state.minHeight || naturalHeight > state.minHeight) {
-      state.minHeight = naturalHeight;
-    }
-  }
-  grid.style.minHeight = state.minHeight ? `${state.minHeight}px` : "";
-  renderPaginationBar(gridId, grid, state.page, totalPages);
+  grid.innerHTML =
+    visible.map((row) => cardHtml(row, showRating)).join("") +
+    (NO_GHOST_GRIDS.has(gridId) ? "" : ghostCardHtml(cfg.type));
 }
 
 function renderError(gridIds, message) {

@@ -100,13 +100,8 @@ function applyReduceMotion(on) {
 }
 
 function applyDensity(density) {
-  const root = document.documentElement;
-  const was = root.getAttribute("data-density") ?? "comfortable";
-  if (density === "compact") root.setAttribute("data-density", "compact");
-  else root.removeAttribute("data-density");
-  // Card size changes how many columns fit, which every paginated grid
-  // measured once and kept (see gridPageState in data.js).
-  if (was !== density && typeof remeasureAllGrids === "function") remeasureAllGrids();
+  if (density === "compact") document.documentElement.setAttribute("data-density", "compact");
+  else document.documentElement.removeAttribute("data-density");
 }
 
 // Grids whose sort was never picked by hand (no per-grid key saved by
@@ -123,7 +118,6 @@ function applyDefaultSort() {
     const key = cfg.options[currentSettings.defaultSort] ? currentSettings.defaultSort : "recent";
     if (activeSorts[gridId] === key) return;
     activeSorts[gridId] = key;
-    if (gridPageState[gridId]) gridPageState[gridId].page = 1;
     const grid = document.getElementById(gridId);
     // Still showing "Loading…": loadData() renders it with the new sort.
     if (grid && !grid.querySelector(".loading")) {

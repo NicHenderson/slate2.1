@@ -37,14 +37,6 @@ navButtons.forEach((btn) => {
     navButtons.forEach((b) => b.classList.toggle("active", b === btn));
     sections.forEach((s) => s.classList.toggle("active", s.id === target));
 
-    // Grids hidden until now couldn't measure their page size — do it now.
-    if (typeof ensureGridMeasured === "function") {
-      document
-        .getElementById(target)
-        ?.querySelectorAll(".card-grid")
-        .forEach((grid) => ensureGridMeasured(grid.id));
-    }
-
     // Selecting a destination closes the mobile drawer.
     closeSidebar();
   });

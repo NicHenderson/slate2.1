@@ -2,13 +2,9 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
   gap: 20px;
-  /* Without this, the grid's default row alignment ("normal", which acts
-     like stretch here) takes any extra room from the min-height reserved
-     in renderGrid (js/data.js) and stretches the actual card ROWS to fill
-     it — harmless on a full page (no extra room to stretch into), but a
-     page with just one short row balloons that row (and every card in it)
-     to fill the whole reserved height instead of leaving the leftover
-     space empty below, like it's supposed to. */
+  /* Keeps rows at their natural height: without it the grid's default
+     row alignment ("normal", which acts like stretch) would stretch the
+     card rows to fill any extra height the grid is given. */
   align-content: start;
 }
 
@@ -46,83 +42,6 @@
 [data-density="compact"] .card-rating .stars-value::before {
   content: "★ ";
   color: var(--accent);
-}
-
-.card-grid.subtab-hidden + .pagination-slot {
-  display: none;
-}
-
-/* Pins pagination to the same spot at the bottom of the section regardless
-   of how many rows the current page actually has (a last page with 3 cards
-   shouldn't leave the controls floating higher up than a full page does). */
-.pagination-slot {
-  margin-top: auto;
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 24px;
-}
-
-/* Same "raised sticker" family as .add-btn / .sort-btn elsewhere (paper
-   background + hard offset shadow, popped against the dark corkboard) —
-   these were still the old flat outline-on-dark pills, which is also why
-   they read as nearly invisible against the page background. */
-.page-num,
-.page-nav {
-  min-width: 36px;
-  height: 36px;
-  padding: 0 10px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 600;
-  box-shadow: 3px 4px 0 var(--accent-deep);
-  transform: rotate(-1deg);
-  transition: transform var(--transition), box-shadow var(--transition),
-    background var(--transition), color var(--transition);
-}
-
-.page-num:nth-child(even),
-.page-nav:nth-child(even) {
-  transform: rotate(1deg);
-}
-
-.page-num:hover,
-.page-nav:hover:not(:disabled) {
-  background: var(--paper);
-  color: var(--ink);
-  transform: rotate(0deg) translateY(-2px);
-  box-shadow: 4px 6px 0 var(--accent-deep);
-}
-
-.page-num:active,
-.page-nav:active:not(:disabled) {
-  transform: rotate(0deg) translateY(0);
-  box-shadow: 1px 2px 0 var(--accent-deep);
-}
-
-.page-num.active {
-  background: var(--accent-strong);
-  color: #fff;
-}
-
-.page-num.active:hover {
-  background: var(--accent-strong);
-  color: #fff;
-}
-
-.page-nav:disabled {
-  opacity: 0.35;
-  cursor: default;
-  transform: none;
-  box-shadow: none;
 }
 
 /* The dragged card becomes a dashed "drop slot" — it still occupies its

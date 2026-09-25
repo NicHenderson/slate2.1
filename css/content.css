@@ -1,14 +1,9 @@
 .content {
   flex: 1;
   overflow-y: auto;
-  /* Without this, .content's available width depends on whether ITS OWN
-     scrollbar happens to be showing — which page you're on (a shorter
-     last page vs a full one) can flip that, changing how many grid
-     columns fit and every row-height measurement downstream of it. That's
-     a second, independent cause of the pagination-bar-shifts-between-pages
-     bug alongside the min-height reservation below: reserving the
-     scrollbar's space unconditionally means the width never depends on
-     which page happens to be showing. */
+  /* Reserves the scrollbar's space even when the content is short enough
+     not to scroll, so the grids' width (and how many columns fit) doesn't
+     jump when a list grows past one screen. */
   scrollbar-gutter: stable;
   padding: 36px 40px;
 }

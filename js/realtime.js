@@ -1,8 +1,6 @@
-// Grids now page instead of rendering the full list, so a realtime change
-// always re-runs renderGrid (filter + sort + slice to the current page)
-// rather than patching a single card in place — with a bounded page size
-// this is cheap, and it's the only way an insert/delete lands on the right
-// page and updates the pagination bar's page count.
+// A realtime change re-runs renderGrid (filter + sort) for every grid of that
+// table rather than patching one card in place, so a title that changed
+// status lands in the right grid, at its sorted position.
 function rerenderGrids(gridIds) {
   gridIds.forEach((gridId) => {
     renderGrid(gridId, [...STORE[GRID_CONFIG[gridId].table].values()]);

@@ -23,17 +23,6 @@ document.querySelectorAll(".subtabs [data-subtab]").forEach((btn) => {
       );
 
     const gridId = btn.dataset.subtab;
-    // Each subtab is its own filtered list with its own page count, so
-    // switching category always lands on that grid's page 1 — otherwise
-    // paging to, say, page 2 of Watched and then clicking Watching (which
-    // may only have one page) leaves it stuck on a page that doesn't exist.
-    const state = (gridPageState[gridId] ??= { page: 1, itemsPerPage: null });
-    state.page = 1;
-    if (state.itemsPerPage == null) {
-      if (typeof ensureGridMeasured === "function") ensureGridMeasured(gridId);
-    } else {
-      renderGrid(gridId, [...STORE[GRID_CONFIG[gridId].table].values()]);
-    }
 
     const addBtn = section.querySelector(".add-btn");
     if (addBtn) {

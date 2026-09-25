@@ -38,7 +38,6 @@ function updateSortLabel(gridId) {
 function setGridSort(gridId, key) {
   activeSorts[gridId] = key;
   localStorage.setItem(GRID_SORTS[gridId].storageKey, key);
-  if (gridPageState[gridId]) gridPageState[gridId].page = 1;
   const table = GRID_CONFIG[gridId].table;
   renderGrid(gridId, [...STORE[table].values()]);
   updateSortLabel(gridId);
