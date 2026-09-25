@@ -47,6 +47,15 @@ function byCreatedDesc(a, b) {
   return (b.created_at ?? "").localeCompare(a.created_at ?? "");
 }
 
+// A show sitting in "watching" this long without being finished or dropped
+// gets a nudge on its Continue Watching card instead of a silent forever-open tab.
+const STALE_WATCHING_DAYS = 30;
+
+function daysSince(dateStr) {
+  if (!dateStr) return null;
+  return Math.max(0, Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000));
+}
+
 /* ---------- section renderers ---------- */
 
 function renderDashStats() {
@@ -81,13 +90,31 @@ function renderDashStats() {
   }
 }
 
+// Like cardHtml, but with a "started N days ago" line instead of a rating —
+// what turns this row from a trophy shelf into something worth checking.
+function dashContinueCardHtml(show) {
+  const poster = show.poster
+    ? `<img class="card-poster" src="${show.poster}" alt="" loading="lazy" />`
+    : `<div class="card-poster card-poster-empty"></div>`;
+  const days = daysSince(show.started_watching_date);
+  const stale = days != null && days >= STALE_WATCHING_DAYS;
+  const meta =
+    days == null ? "" : days === 0 ? "Started today" : days === 1 ? "Started yesterday" : `Started ${days}d ago`;
+  return `
+    <article class="card dash-continue-card${stale ? " is-stale" : ""}" data-id="${show.id}">
+      ${poster}
+      <p class="card-title">${escapeHtml(show.title ?? "Untitled")}</p>
+      ${meta ? `<p class="dash-continue-meta">${meta}</p>` : ""}
+    </article>`;
+}
+
 function renderDashContinue() {
   const el = document.getElementById("dash-continue");
   const shows = [...STORE.shows.values()]
     .filter(isShowWatching)
     .sort((a, b) =>
-      (b.started_watching_date ?? "").localeCompare(a.started_watching_date ?? "")
-    );
+      (a.started_watching_date ?? "").localeCompare(b.started_watching_date ?? "")
+    ); // oldest start first: the most overdue show leads, not the newest.
 
   if (!shows.length) {
     el.innerHTML = `
@@ -99,7 +126,118 @@ function renderDashContinue() {
       </div>`;
     return;
   }
-  el.innerHTML = shows.map((row) => cardHtml(row, false)).join("");
+  el.innerHTML = shows.map(dashContinueCardHtml).join("");
+}
+
+/* ---------- Up Next: the head of each watchlist, plus a standing pick ---------- */
+
+// Kept across renders (a realtime update to some unrelated title shouldn't
+// reshuffle it); only a fresh roll — or the current pick no longer being
+// to-watch — replaces it. { table, id }, not the row itself, so it always
+// reads the row's current data instead of a possibly stale copy.
+let tonightPick = null;
+
+function towatchPool() {
+  return [
+    ...[...STORE.movies.values()].map((row) => ({ table: "movies", id: row.id })),
+    ...[...STORE.shows.values()].map((row) => ({ table: "shows", id: row.id })),
+  ].filter(({ table, id }) => itemStatus(table, STORE[table].get(id)) === "towatch");
+}
+
+function rollTonightPick() {
+  const pool = towatchPool();
+  tonightPick = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+}
+
+function dashFeatureHtml(label, row, extra = "") {
+  return `
+    <div class="dash-feature">
+      <div class="dash-feature-label-row">
+        <p class="dash-feature-label">${label}</p>
+        ${extra}
+      </div>
+      ${cardHtml(row, false)}
+    </div>`;
+}
+
+function renderDashUpNext() {
+  const el = document.getElementById("dash-upnext");
+  // getOrderedList (data.js) applies each grid's own active sort — Custom
+  // order included, so a hand-arranged watchlist really does say what's next.
+  const nextMovie = getOrderedList("grid-movies-towatch")[0];
+  const nextShow = getOrderedList("grid-shows-towatch")[0];
+
+  let pickRow = tonightPick && STORE[tonightPick.table].get(tonightPick.id);
+  if (!pickRow || itemStatus(tonightPick.table, pickRow) !== "towatch") {
+    rollTonightPick();
+    pickRow = tonightPick && STORE[tonightPick.table].get(tonightPick.id);
+  }
+
+  const features = [];
+  if (nextMovie) features.push(dashFeatureHtml("Next Movie", nextMovie));
+  if (nextShow) features.push(dashFeatureHtml("Next Show", nextShow));
+  if (pickRow) {
+    features.push(
+      dashFeatureHtml(
+        "Tonight's Pick",
+        pickRow,
+        `<button class="dash-reroll-btn" type="button" title="Reroll">🎲</button>`
+      )
+    );
+  }
+
+  if (!features.length) {
+    el.innerHTML = `
+      <div class="dash-empty">
+        <p>Your watchlists are empty.</p>
+        <button class="dash-empty-btn" type="button" data-goto="movies-towatch">
+          Browse Movies to Watch →
+        </button>
+      </div>`;
+    return;
+  }
+  el.innerHTML = features.join("");
+}
+
+/* ---------- Almost Done: collections one or two titles from complete ---------- */
+
+const ALMOST_DONE_MIN_ITEMS = 2; // a single-title collection can't be "almost" anything
+
+function collectionProgress(colId) {
+  const resolved = collectionItemsFor(colId).map(resolveItem).filter(Boolean);
+  const watched = resolved.filter(({ table, row }) => isItemWatched(table, row)).length;
+  return { watched, total: resolved.length };
+}
+
+function renderDashNudges() {
+  const el = document.getElementById("dash-nudges");
+  const almost = [...STORE.collections.values()]
+    .map((col) => ({ col, ...collectionProgress(col.id) }))
+    .filter(({ watched, total }) => total >= ALMOST_DONE_MIN_ITEMS && watched > 0 && watched < total)
+    .sort(
+      (a, b) =>
+        b.watched / b.total - a.watched / a.total || // closest to finished first…
+        a.total - a.watched - (b.total - b.watched) // …then fewest titles left
+    )
+    .slice(0, 4);
+
+  if (!almost.length) {
+    el.innerHTML = `<p class="dash-empty-text">Nothing close to finishing right now.</p>`;
+    return;
+  }
+
+  el.innerHTML = almost
+    .map(
+      ({ col, watched, total }) => `
+      <button class="dash-nudge" type="button" data-col-id="${col.id}">
+        <span class="dash-nudge-icon" aria-hidden="true">${iconHtml(col.icon || "🎬")}</span>
+        <span class="dash-nudge-body">
+          <span class="dash-nudge-name">${escapeHtml(col.name ?? "Untitled")}</span>
+          <span class="dash-nudge-progress">${watched}/${total} watched — ${total - watched} to go</span>
+        </span>
+      </button>`
+    )
+    .join("");
 }
 
 function renderDashRecent() {
@@ -187,6 +325,8 @@ function renderDashCollections() {
 function renderDashboard() {
   renderDashStats();
   renderDashContinue();
+  renderDashUpNext();
+  renderDashNudges();
   renderDashRecent();
   renderDashTopRated();
   renderDashGenres();
@@ -200,6 +340,20 @@ dashSection.addEventListener("click", (e) => {
   const goto = e.target.closest("[data-goto]");
   if (goto) {
     document.querySelector(`.nav-btn[data-section="${goto.dataset.goto}"]`)?.click();
+    return;
+  }
+
+  // Tonight's Pick's own dice re-rolls just that card, not the whole board.
+  if (e.target.closest(".dash-reroll-btn")) {
+    rollTonightPick();
+    renderDashUpNext();
+    return;
+  }
+
+  // Almost Done nudges open straight into that collection.
+  const nudge = e.target.closest(".dash-nudge");
+  if (nudge) {
+    openCollectionView(nudge.dataset.colId);
     return;
   }
 
@@ -221,16 +375,15 @@ dashSection.addEventListener("click", (e) => {
 });
 
 surpriseBtn.addEventListener("click", () => {
-  const pool = [
-    ...[...STORE.movies.values()].map((row) => ({ row, table: "movies" })),
-    ...[...STORE.shows.values()].map((row) => ({ row, table: "shows" })),
-  ].filter(({ table, row }) => itemStatus(table, row) === "towatch");
-
+  const pool = towatchPool();
   if (!pool.length) {
     showToast("Add something to your watchlist first.");
     return;
   }
-
-  const pick = pool[Math.floor(Math.random() * pool.length)];
-  openDetailModal(gridIdFor(pick.table, pick.row), pick.row.id);
+  // Shares its pick with the Tonight's Pick card below, so the header
+  // shortcut and the board don't disagree about what got rolled.
+  tonightPick = pool[Math.floor(Math.random() * pool.length)];
+  renderDashUpNext();
+  const row = STORE[tonightPick.table].get(tonightPick.id);
+  openDetailModal(gridIdFor(tonightPick.table, row), tonightPick.id);
 });

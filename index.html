@@ -29,10 +29,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Patrick+Hand&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/base.css?v=7" />
   <link rel="stylesheet" href="css/sidebar.css?v=2" />
-  <link rel="stylesheet" href="css/content.css?v=14" />
+  <link rel="stylesheet" href="css/content.css?v=15" />
   <link rel="stylesheet" href="css/cards.css?v=24" />
   <link rel="stylesheet" href="css/modal.css?v=40" />
-  <link rel="stylesheet" href="css/dashboard.css?v=2" />
+  <link rel="stylesheet" href="css/dashboard.css?v=3" />
   <link rel="stylesheet" href="css/auth.css?v=3" />
   <link rel="stylesheet" href="css/settings.css?v=8" />
   <link rel="stylesheet" href="css/responsive.css?v=21" />
@@ -174,15 +174,29 @@
             <h1>Dashboard</h1>
             <p class="section-sub">Your watching at a glance</p>
           </div>
-          <button class="surprise-btn" id="surprise-btn" type="button" hidden>🎲 Surprise Me</button>
+          <button class="surprise-btn" id="surprise-btn" type="button">🎲 Surprise Me</button>
         </header>
 
-        <div class="placeholder-panel under-construction">
-          <span class="under-construction-icon">🚧</span>
-          <p class="under-construction-text">This page is under construction</p>
-        </div>
+        <div class="dashboard-content">
+          <!-- ---------- "Now" zone: things to actually do, not just admire ---------- -->
 
-        <div class="dashboard-content" hidden>
+          <div class="dash-block">
+            <h2 class="dash-block-title">Continue Watching</h2>
+            <div class="dash-row" id="dash-continue"></div>
+          </div>
+
+          <div class="dash-block">
+            <h2 class="dash-block-title">Up Next</h2>
+            <div class="dash-row dash-row-upnext" id="dash-upnext"></div>
+          </div>
+
+          <div class="dash-block">
+            <h2 class="dash-block-title">Almost Done</h2>
+            <div class="dash-nudges" id="dash-nudges"></div>
+          </div>
+
+          <!-- ---------- "Recap" zone: the trophy shelf, kept but demoted ---------- -->
+
           <div class="stats-grid">
             <div class="stat-card">
               <span class="stat-value" id="stat-movies">0</span>
@@ -200,11 +214,6 @@
               <span class="stat-value" id="stat-rating">–</span>
               <span class="stat-label">Average Rating</span>
             </div>
-          </div>
-
-          <div class="dash-block">
-            <h2 class="dash-block-title">Continue Watching</h2>
-            <div class="dash-row" id="dash-continue"></div>
           </div>
 
           <div class="dash-block">
@@ -791,7 +800,7 @@
   <script src="js/data.js?v=26"></script>
   <script src="js/sortMenu.js?v=5"></script>
   <script src="js/watchlistOrder.js?v=1"></script>
-  <script src="js/dashboard.js?v=4"></script>
+  <script src="js/dashboard.js?v=5"></script>
   <script src="js/auth.js?v=1"></script>
 </body>
 </html>

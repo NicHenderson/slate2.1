@@ -181,3 +181,142 @@
 .genre-chart .dash-empty-text {
   padding: 0;
 }
+
+/* ---------- Continue Watching: "started N days ago" ---------- */
+
+.dash-continue-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Sitting in "watching" this long (STALE_WATCHING_DAYS, dashboard.js) reads
+   as forgotten rather than in progress, so its own line calls that out
+   instead of leaving it looking identical to a show started yesterday. */
+.dash-continue-card.is-stale .dash-continue-meta {
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+/* ---------- Up Next: head-of-queue picks + a standing random one ---------- */
+
+.dash-row-upnext {
+  flex-wrap: wrap;
+  overflow: visible; /* a handful of feature cards, not a scrolling shelf */
+}
+
+.dash-feature {
+  flex: 0 0 150px;
+  width: 150px;
+}
+
+/* Tilt moves from the card (cards.css's .dash-row .card:nth-child rules) to
+   this wrapper, so each feature keeps its own independent of how many cards
+   come before it in the DOM. */
+.dash-feature .card {
+  width: 100%;
+  transform: none !important;
+}
+
+.dash-feature:nth-child(3n) {
+  transform: rotate(-1.6deg);
+}
+.dash-feature:nth-child(3n + 1) {
+  transform: rotate(1.3deg);
+}
+.dash-feature:nth-child(3n + 2) {
+  transform: rotate(-0.7deg);
+}
+
+.dash-feature-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dash-feature-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.dash-reroll-btn {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  line-height: 1;
+  transition: transform var(--transition), background var(--transition);
+}
+
+.dash-reroll-btn:hover {
+  transform: rotate(-18deg) scale(1.08);
+  background: var(--accent-soft);
+}
+
+/* ---------- Almost Done: collections a title or two from complete ---------- */
+
+.dash-nudges {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dash-nudge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.22);
+  text-align: left;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.dash-nudge:hover {
+  transform: translateY(-2px);
+  box-shadow: 3px 6px 12px rgba(0, 0, 0, 0.28);
+}
+
+.dash-nudge-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  font-size: 20px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+}
+
+.dash-nudge-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dash-nudge-name {
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash-nudge-progress {
+  font-size: 12px;
+  color: var(--text-muted);
+}
