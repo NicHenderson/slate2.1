@@ -54,76 +54,183 @@
 
 /* ---------- Theme swatches ---------- */
 
+/* Each swatch is a miniature Slate screen painted in its own theme's
+   colors (the --sw-* values set inline per swatch by js/settings.js), so
+   the choice is judged on how the app will actually look, not a dot. */
 .theme-swatches {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
   margin-bottom: 22px;
 }
 
 .theme-swatch {
-  width: 114px;
-  padding: 10px;
-  border-radius: var(--radius);
-  border: 3px solid transparent;
-  background: transparent;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  align-items: center;
-  transition: border-color var(--transition);
+  padding: 7px 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.theme-swatch:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
 }
 
 .theme-swatch.is-active {
-  border-color: var(--swatch-accent, var(--accent));
+  border-color: transparent;
+  box-shadow: 0 0 0 3px var(--sw-accent);
+}
+
+.theme-swatch.is-active:hover {
+  box-shadow: 0 0 0 3px var(--sw-accent), 0 6px 14px rgba(0, 0, 0, 0.18);
 }
 
 .theme-swatch-preview {
   position: relative;
-  width: 100%;
-  height: 54px;
-  border-radius: var(--radius-sm);
   display: flex;
-  align-items: flex-end;
+  height: 96px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--sw-bg);
+  /* Light themes' page color sits close to this card's own paper. */
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.tsp-sidebar {
+  flex: 0 0 32%;
+  display: flex;
+  flex-direction: column;
   gap: 5px;
-  padding: 6px;
-  background: var(--swatch-bg);
+  padding: 8px 6px;
+  background: var(--sw-sidebar);
 }
 
-.theme-swatch-dot {
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: var(--swatch-accent);
+.tsp-tag {
+  width: 62%;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--sw-pop);
 }
 
-.theme-swatch-bar {
+.tsp-nav {
+  height: 10px;
+  border-radius: 2px;
+  background: var(--sw-paper);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.tsp-nav.is-active {
+  background: var(--sw-strong);
+}
+
+.tsp-main {
   flex: 1;
-  height: 13px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+}
+
+.tsp-sub {
+  width: 46%;
+  height: 6px;
+  background: var(--sw-accent);
+  transform: rotate(-3deg);
+}
+
+.tsp-title {
+  width: 64%;
+  height: 7px;
+  border-radius: 1px;
+  background: var(--sw-text);
+}
+
+.tsp-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
   border-radius: 3px;
-  background: var(--swatch-paper);
+  background: var(--sw-paper);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.tsp-line {
+  height: 4px;
+  border-radius: 1px;
+  background: var(--sw-ink);
+  opacity: 0.55;
+}
+
+.tsp-line.is-short {
+  width: 60%;
+}
+
+.tsp-btn {
+  margin-top: auto;
+  align-self: flex-end;
+  width: 42%;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--sw-strong);
+  box-shadow: 1px 1.5px 0 var(--sw-deep);
 }
 
 .theme-swatch-check {
   position: absolute;
-  top: 5px;
-  right: 5px;
-  font-size: 11px;
-  color: var(--swatch-accent);
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--sw-strong);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
   opacity: 0;
+  transform: scale(0.6);
+  transition: opacity var(--transition), transform var(--transition);
 }
 
 .theme-swatch.is-active .theme-swatch-check {
   opacity: 1;
+  transform: scale(1);
+}
+
+.theme-swatch-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 2px;
 }
 
 .theme-swatch-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
+  color: var(--ink);
 }
 
 .theme-swatch.is-active .theme-swatch-label {
   font-weight: 700;
+}
+
+.theme-swatch-mode {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
 }
 
 /* ---------- Toggle switch ---------- */

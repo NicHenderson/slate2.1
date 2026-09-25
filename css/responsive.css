@@ -177,6 +177,16 @@
     gap: 12px;
   }
 
+  /* Leaves room for two theme swatches per row. */
+  .settings-card {
+    padding: 22px 18px;
+  }
+
+  .theme-swatches {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
   .ghost-card {
     min-height: 180px;
   }

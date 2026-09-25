@@ -213,7 +213,7 @@ body:not(.no-hover) .card-grid .card:hover,
 body:not(.no-hover) .dash-row .card:hover {
   transform: rotate(0deg) translateY(-6px) scale(1.035);
   box-shadow: 0 0 0 2px var(--accent-strong), 0 0 30px 6px rgba(167, 139, 250, 0.55),
-    0 0 60px 10px rgba(139, 92, 246, 0.25), 4px 12px 22px rgba(0, 0, 0, 0.5);
+    0 0 60px 10px color-mix(in srgb, var(--accent-strong) 25%, transparent), 4px 12px 22px rgba(0, 0, 0, 0.5);
   z-index: 2;
 }
 
@@ -428,7 +428,7 @@ body:not(.no-hover) .card-grid .booklet-card:hover {
   place-items: center;
   aspect-ratio: 1;
   border: 2px dashed var(--ink-muted);
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(139, 92, 246, 0.03));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent-strong) 12%, transparent), color-mix(in srgb, var(--accent-strong) 3%, transparent));
 }
 
 .booklet-empty-icon .ico {
@@ -440,7 +440,7 @@ body:not(.no-hover) .card-grid .booklet-card:hover {
 .booklet-empty-icon {
   font-size: 56px;
   line-height: 1;
-  filter: drop-shadow(2px 3px 0 rgba(109, 40, 217, 0.25));
+  filter: drop-shadow(2px 3px 0 color-mix(in srgb, var(--accent-deep) 25%, transparent));
 }
 
 .booklet-title {
@@ -598,7 +598,12 @@ body:not(.no-hover) .card-grid .booklet-ghost:hover {
 .booklet-ghost-spine {
   width: 16px;
   flex-shrink: 0;
-  background: linear-gradient(90deg, #d4cee3 0%, #e6e1f1 50%, #d4cee3 100%);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent-deep) 12%, var(--paper)) 0%,
+    color-mix(in srgb, var(--accent-deep) 5%, var(--paper)) 50%,
+    color-mix(in srgb, var(--accent-deep) 12%, var(--paper)) 100%
+  );
   border-right: 1px solid rgba(13, 12, 21, 0.2);
   box-shadow: inset -3px 0 4px rgba(13, 12, 21, 0.14);
 }

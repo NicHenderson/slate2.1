@@ -7,7 +7,7 @@
   padding: 24px;
   background: radial-gradient(
       120% 120% at 50% 0%,
-      rgba(139, 92, 246, 0.14),
+      color-mix(in srgb, var(--accent-strong) 14%, transparent),
       transparent 60%
     ),
     var(--bg);

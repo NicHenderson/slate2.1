@@ -60,10 +60,18 @@
    :root's own values above are the "midnight" theme, unconditional — a
    browser that hasn't run js/settings.js yet (or a user who never set a
    preference) gets today's exact look with zero data-theme attribute
-   required. Each theme below only overrides the handful of raw color
-   tokens; --paper/--paper-dim/--ink (all var()-derived from --bg/--text)
-   and every component built on these tokens follow automatically — same
-   mechanism the paper-surface :where() block above already relies on. */
+   required. Each theme below only overrides the raw color tokens; every
+   component built on them follows automatically. --accent-strong and --pop
+   always carry white text (active nav tickets, primary buttons, sidebar
+   group tags), so each theme keeps them dark enough for that to read.
+
+   Dark themes leave --paper/--paper-dim/--ink alone: those derive from
+   --text/--bg (var(--text) / var(--bg)), which gives light "paper" cards on
+   a dark page. Light themes flip --bg and --text, which would flip those
+   derived values too (dark cards), so they set all three explicitly. */
+
+/* ----- dark ----- */
+
 :root[data-theme="midnight"] {
   --bg: #0d0c15;
   --bg-elevated: #17131f;
@@ -74,33 +82,26 @@
   --accent-strong: #8b5cf6;
   --accent-deep: #6d28d9;
   --accent-soft: rgba(167, 139, 246, 0.12);
+  --pop: #2979ff;
   --text: #ece8f5;
   --text-muted: #9d94b3;
   --ink-muted: #5c5470;
 }
 
-/* The only theme here with a light page background — --paper/--ink/
-   --paper-dim normally auto-derive from --bg/--text (var(--text) /
-   var(--bg)), which relies on --bg staying dark and --text staying light
-   (true for the other three themes below). Paper flips that, so it has to
-   set these explicitly instead of inheriting the derived values — without
-   this, "paper" cards would render dark-on-light-on-dark backwards. */
-:root[data-theme="paper"] {
-  --bg: #f6f1e7;
-  --bg-elevated: #efe7d8;
-  --sidebar-bg: #efe6d4;
-  --surface: #fbf7ee;
-  --border: #ddd0b4;
-  --accent: #c2703d;
-  --accent-strong: #b35f2c;
-  --accent-deep: #8f4620;
-  --accent-soft: rgba(194, 112, 61, 0.14);
-  --text: #2b2318;
-  --text-muted: #8a7c62;
-  --paper: #fffdf8;
-  --paper-dim: #f3ead8;
-  --ink: #2b2318;
-  --ink-muted: #8a7c62;
+:root[data-theme="ocean"] {
+  --bg: #07131c;
+  --bg-elevated: #0d1d29;
+  --sidebar-bg: #0a1822;
+  --surface: #112534;
+  --border: #1e3a4d;
+  --accent: #4fd1e0;
+  --accent-strong: #0b8a9c;
+  --accent-deep: #07606e;
+  --accent-soft: rgba(79, 209, 224, 0.14);
+  --pop: #e05a47;
+  --text: #e4f3f7;
+  --text-muted: #8aa9b5;
+  --ink-muted: #4f6b77;
 }
 
 :root[data-theme="forest"] {
@@ -110,9 +111,10 @@
   --surface: #17261d;
   --border: #25392c;
   --accent: #6fcf9b;
-  --accent-strong: #4cb87f;
-  --accent-deep: #2f8f62;
+  --accent-strong: #2f9e68;
+  --accent-deep: #1f7a4e;
   --accent-soft: rgba(111, 207, 155, 0.14);
+  --pop: #2f7fbf;
   --text: #e9f3ec;
   --text-muted: #93ab9d;
   --ink-muted: #5c7268;
@@ -125,12 +127,88 @@
   --surface: #2c1720;
   --border: #3d2029;
   --accent: #f0916a;
-  --accent-strong: #e87950;
-  --accent-deep: #c8542e;
+  --accent-strong: #d9623a;
+  --accent-deep: #b0441f;
   --accent-soft: rgba(240, 145, 106, 0.14);
+  --pop: #7b4dd6;
   --text: #f7e9e2;
   --text-muted: #ba9a91;
   --ink-muted: #8a6a5c;
+}
+
+:root[data-theme="arcade"] {
+  --bg: #110a24;
+  --bg-elevated: #1a1033;
+  --sidebar-bg: #150c2b;
+  --surface: #211440;
+  --border: #35205e;
+  --accent: #ff5fb0;
+  --accent-strong: #e0368e;
+  --accent-deep: #b01f6c;
+  --accent-soft: rgba(255, 95, 176, 0.15);
+  --pop: #2d6cff;
+  --text: #f4ecff;
+  --text-muted: #a996c9;
+  --ink-muted: #5e4b80;
+}
+
+/* ----- light ----- */
+
+:root[data-theme="paper"] {
+  --bg: #f6f1e7;
+  --bg-elevated: #efe7d8;
+  --sidebar-bg: #efe6d4;
+  --surface: #fbf7ee;
+  --border: #ddd0b4;
+  --accent: #c2703d;
+  --accent-strong: #b35f2c;
+  --accent-deep: #8f4620;
+  --accent-soft: rgba(194, 112, 61, 0.14);
+  --pop: #3f7d6e;
+  --text: #2b2318;
+  --text-muted: #8a7c62;
+  --paper: #fffdf8;
+  --paper-dim: #f3ead8;
+  --ink: #2b2318;
+  --ink-muted: #8a7c62;
+}
+
+:root[data-theme="blossom"] {
+  --bg: #fbf0f2;
+  --bg-elevated: #f6e3e7;
+  --sidebar-bg: #f5dfe4;
+  --surface: #fff6f8;
+  --border: #ecc9d1;
+  --accent: #d6457a;
+  --accent-strong: #c2356a;
+  --accent-deep: #93224d;
+  --accent-soft: rgba(214, 69, 122, 0.12);
+  --pop: #4f8a66;
+  --text: #3a1f29;
+  --text-muted: #946673;
+  --paper: #fffafb;
+  --paper-dim: #f7e8ec;
+  --ink: #3a1f29;
+  --ink-muted: #946673;
+}
+
+:root[data-theme="glacier"] {
+  --bg: #eef3f8;
+  --bg-elevated: #e2eaf2;
+  --sidebar-bg: #e3ebf3;
+  --surface: #f7fafc;
+  --border: #c9d6e3;
+  --accent: #2f6fd6;
+  --accent-strong: #2459b8;
+  --accent-deep: #1a3f85;
+  --accent-soft: rgba(47, 111, 214, 0.12);
+  --pop: #c9542f;
+  --text: #16233a;
+  --text-muted: #607089;
+  --paper: #ffffff;
+  --paper-dim: #edf2f7;
+  --ink: #16233a;
+  --ink-muted: #607089;
 }
 
 /* Settings > Reduce animations. Same near-zero-duration override the OS-level

@@ -449,7 +449,7 @@
   color: #fff;
   font-size: 28px;
   line-height: 1;
-  box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.5), 0 8px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-strong) 50%, transparent), 0 8px 20px rgba(0, 0, 0, 0.5);
   transform: translateY(-50%) scale(1);
   transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
     box-shadow 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -459,7 +459,7 @@
 .detail-nav-btn:hover:not(:disabled) {
   background: var(--accent);
   transform: translateY(-50%) scale(1.14);
-  box-shadow: 0 0 0 10px rgba(139, 92, 246, 0.18),
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent-strong) 18%, transparent),
     0 0 26px rgba(167, 139, 250, 0.65), 0 10px 24px rgba(0, 0, 0, 0.5);
 }
 
@@ -745,7 +745,7 @@
   color: #fff;
   padding: 11px 22px;
   border-radius: 7px;
-  box-shadow: 0 3px 10px rgba(139, 92, 246, 0.35);
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--accent-strong) 35%, transparent);
 }
 
 .detail-actions-review [data-action="add-to-collection"]:hover {
@@ -1853,27 +1853,27 @@ body:not(.no-hover) .col-item-card:hover .col-item-remove {
   width: 100%;
   padding: 11px 12px;
   margin-bottom: 22px;
-  background: rgba(139, 92, 246, 0.07);
-  border: 1.5px dashed rgba(109, 40, 217, 0.35);
+  background: color-mix(in srgb, var(--accent-strong) 7%, transparent);
+  border: 1.5px dashed color-mix(in srgb, var(--accent-deep) 35%, transparent);
   cursor: pointer;
   font-family: var(--font-hand);
   font-size: 16px;
   color: var(--ink-muted);
-  box-shadow: 2px 3px 0 rgba(109, 40, 217, 0.3);
+  box-shadow: 2px 3px 0 color-mix(in srgb, var(--accent-deep) 30%, transparent);
   transform: rotate(-0.4deg);
   transition: background var(--transition), border-color var(--transition),
     box-shadow var(--transition), transform var(--transition);
 }
 
 .add-hint:hover {
-  background: rgba(139, 92, 246, 0.14);
+  background: color-mix(in srgb, var(--accent-strong) 14%, transparent);
   border-color: var(--accent-deep);
-  box-shadow: 3px 5px 0 rgba(109, 40, 217, 0.42);
+  box-shadow: 3px 5px 0 color-mix(in srgb, var(--accent-deep) 42%, transparent);
   transform: rotate(0deg) translateY(-2px);
 }
 
 .add-hint:active {
-  box-shadow: 1px 2px 0 rgba(109, 40, 217, 0.42);
+  box-shadow: 1px 2px 0 color-mix(in srgb, var(--accent-deep) 42%, transparent);
   transform: rotate(0deg) translateY(0);
 }
 
@@ -1973,7 +1973,7 @@ body:not(.no-hover) .col-item-card:hover .col-item-remove {
 .add-card.selected .add-card-inner {
   outline: 3px solid var(--accent-strong);
   outline-offset: 1px;
-  box-shadow: 0 0 0 5px rgba(139, 92, 246, 0.22), 3px 8px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent-strong) 22%, transparent), 3px 8px 16px rgba(0, 0, 0, 0.4);
 }
 
 .add-check {

@@ -253,7 +253,7 @@
 }
 
 .sort-option:not(.active):hover {
-  background: rgba(139, 92, 246, 0.1);
+  background: color-mix(in srgb, var(--accent-strong) 10%, transparent);
 }
 
 .sort-option.active {
@@ -355,7 +355,7 @@
 }
 
 .status-tab:hover:not(.active) {
-  background: rgba(139, 92, 246, 0.1);
+  background: color-mix(in srgb, var(--accent-strong) 10%, transparent);
   color: var(--ink);
 }
 
