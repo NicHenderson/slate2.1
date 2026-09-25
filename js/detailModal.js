@@ -80,7 +80,8 @@ function renderDetail(cfg, row) {
         <p class="detail-meta-runtime">${detailDurationLine(cfg.table, row)}</p>
       </div>
     </div>
-    <p class="detail-synopsis">${escapeHtml(row.synopsis || "No synopsis available.")}</p>`;
+    <p class="detail-synopsis">${escapeHtml(row.synopsis || "No synopsis available.")}</p>
+    <div class="detail-trailer"></div>`;
 
   const addToColHtml = `<button class="edit-btn" type="button" data-action="add-to-collection">🗂 Add to collection</button>`;
 
@@ -195,6 +196,7 @@ function openDetailModal(gridId, id, listProvider) {
 
   currentDetail = { cfg, row, gridId, listProvider: listProvider ?? null };
   renderDetail(cfg, row);
+  loadDetailTrailer(cfg.table, row);
   updateDetailNav();
   detailModal.classList.remove("hidden");
 }
@@ -215,11 +217,96 @@ function navigateDetail(delta) {
   const gridId = gridIdFor(table, row);
   currentDetail = { ...currentDetail, row, gridId, cfg: GRID_CONFIG[gridId] };
   renderDetail(currentDetail.cfg, row);
+  loadDetailTrailer(table, row);
   updateDetailNav();
 }
 
 function closeDetailModal() {
   detailModal.classList.add("hidden");
+  // A hidden modal still plays audio, so an open trailer has to go with it.
+  const trailerBtn = detailBody.querySelector('[data-action="toggle-trailer"]');
+  if (trailerBtn && detailBody.querySelector(".detail-trailer-frame")) toggleTrailer(trailerBtn);
+}
+
+/* ---------- trailer ----------
+
+   Looked up on TMDB each time a title is shown, without holding up the
+   modal: the "Watch trailer" button only appears once the lookup finds one.
+   The YouTube player itself isn't loaded until that button is clicked. */
+
+// Keyed by type + TMDB id, since a movie and a show can share a TMDB id.
+// Holds the promise, so a title reopened mid-lookup doesn't fetch twice.
+const trailerCache = new Map();
+
+const YOUTUBE_KEY_RE = /^[A-Za-z0-9_-]+$/;
+
+function pickTrailer(videos) {
+  const youtube = videos.filter(
+    (v) => v.site === "YouTube" && YOUTUBE_KEY_RE.test(v.key ?? "")
+  );
+  return (
+    youtube.find((v) => v.type === "Trailer" && v.official) ??
+    youtube.find((v) => v.type === "Trailer") ??
+    youtube.find((v) => v.type === "Teaser") ??
+    null
+  );
+}
+
+function fetchTrailerKey(table, tmdbId) {
+  const type = table === "movies" ? "movie" : "tv";
+  const cacheKey = `${type}:${tmdbId}`;
+  if (!trailerCache.has(cacheKey)) {
+    const request = tmdbVideos(type, tmdbId)
+      .then((videos) => pickTrailer(videos)?.key ?? null)
+      .catch((err) => {
+        trailerCache.delete(cacheKey); // a failed lookup can be retried on the next open
+        throw err;
+      });
+    trailerCache.set(cacheKey, request);
+  }
+  return trailerCache.get(cacheKey);
+}
+
+async function loadDetailTrailer(table, row) {
+  if (!row.tmdb_id) return;
+  let key;
+  try {
+    key = await fetchTrailerKey(table, row.tmdb_id);
+  } catch (err) {
+    console.error("Trailer error:", err.message);
+    return;
+  }
+  // By the time TMDB answers, the modal may be showing a different title.
+  if (!key || currentDetail?.row.id !== row.id) return;
+  const slot = detailBody.querySelector(".detail-trailer");
+  if (!slot || slot.childElementCount) return;
+  slot.dataset.key = key;
+  slot.innerHTML = `<button class="trailer-btn" type="button" data-action="toggle-trailer" aria-expanded="false">▶ Watch trailer</button>`;
+}
+
+function toggleTrailer(btn) {
+  const slot = btn.closest(".detail-trailer");
+  const frame = slot.querySelector(".detail-trailer-frame");
+  if (frame) {
+    frame.remove();
+    btn.textContent = "▶ Watch trailer";
+    btn.setAttribute("aria-expanded", "false");
+    return;
+  }
+  const wrap = document.createElement("div");
+  wrap.className = "detail-trailer-frame";
+  const iframe = document.createElement("iframe");
+  // autoplay only ever follows this explicit click — nothing plays on open.
+  iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(slot.dataset.key)}?autoplay=1&rel=0`;
+  iframe.title = "Trailer";
+  iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+  iframe.allowFullscreen = true;
+  iframe.referrerPolicy = "strict-origin-when-cross-origin";
+  wrap.appendChild(iframe);
+  slot.appendChild(wrap);
+  btn.textContent = "✕ Hide trailer";
+  btn.setAttribute("aria-expanded", "true");
+  wrap.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
 
 detailNavPrev.addEventListener("click", () => navigateDetail(-1));
@@ -346,6 +433,11 @@ async function addItemToCollection(colId, table, row, btn) {
 
 detailBody.addEventListener("click", (e) => {
   if (!currentDetail) return;
+  const trailerBtn = e.target.closest('[data-action="toggle-trailer"]');
+  if (trailerBtn) {
+    toggleTrailer(trailerBtn);
+    return;
+  }
   if (e.target.closest('[data-action="mark-watched"]')) {
     openMarkAsWatchedModal(currentDetail.row);
     // This row's own delete icon is right there in the towatch detail

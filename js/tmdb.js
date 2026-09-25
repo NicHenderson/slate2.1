@@ -23,3 +23,12 @@ async function tmdbDetails(type, id) {
   if (!res.ok) throw new Error(`TMDB responded ${res.status}`);
   return res.json();
 }
+
+async function tmdbVideos(type, id) {
+  const url = `${TMDB_BASE}/${type}/${id}/videos?api_key=${TMDB_API_KEY}&language=en-US`;
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`TMDB responded ${res.status}`);
+  const data = await res.json();
+  return data.results ?? [];
+}
