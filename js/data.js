@@ -482,6 +482,7 @@ async function loadData() {
   }
   renderCollections();
   if (typeof renderDashboard === "function") renderDashboard();
+  renderProfilePreview(); // its library counts
 
   subscribeRealtime();
 }

@@ -160,6 +160,16 @@
   .detail-panel {
     padding: 24px 20px;
   }
+
+  /* ---------- Settings > Profile ---------- */
+  /* Too narrow for the preview beside the two Polaroids: it moves below. */
+  .profile-favorites {
+    grid-template-columns: repeat(2, 150px);
+  }
+
+  .profile-preview-slot {
+    grid-column: 1 / -1;
+  }
 }
 
 /* =============================== MOBILE (≤480px) =============================== */
