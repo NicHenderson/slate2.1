@@ -1,4 +1,5 @@
 const authScreen = document.getElementById("auth-screen");
+const landingScreen = document.getElementById("landing-screen");
 const appRoot = document.getElementById("app");
 const authForm = document.getElementById("auth-form");
 const authEmail = document.getElementById("auth-email");
@@ -51,21 +52,93 @@ function hidePasswordFields() {
   });
 }
 
-/* ---------- view toggling (driven only by session state) ---------- */
+/* ---------- view toggling (driven only by session state) ----------
+
+   Signed in: the app. Signed out: the landing page, with the login card
+   laid over it while the URL is #login or #signup. The hash is the route
+   so the browser's back button steps from the card back to the page (at
+   the same scroll position — the page stays rendered underneath) and a
+   "log in" link can be shared or bookmarked. */
+
+const AUTH_ROUTES = { login: "login", signup: "register" };
+
+function authRouteFromHash() {
+  return AUTH_ROUTES[location.hash.slice(1)] ?? null;
+}
+
+function clearAuthRoute() {
+  if (authRouteFromHash()) history.replaceState(null, "", location.pathname + location.search);
+}
 
 function showAppView() {
+  landingScreen.classList.add("hidden");
   authScreen.classList.add("hidden");
+  document.documentElement.classList.remove("auth-open");
   appRoot.classList.remove("hidden");
   logoutBtn.disabled = false;
+  clearAuthRoute(); // a later logout should land on the page, not the card
 }
 
-function showAuthView() {
+function showGuestView() {
   appRoot.classList.add("hidden");
-  authScreen.classList.remove("hidden");
+  landingScreen.classList.remove("hidden");
   logoutBtn.disabled = false;
-  authForm.reset();
-  setAuthMode("login");
+  const mode = authRouteFromHash();
+  document.documentElement.classList.toggle("auth-open", Boolean(mode));
+  if (!mode) {
+    authScreen.classList.add("hidden");
+    return;
+  }
+  if (authScreen.classList.contains("hidden") || authMode !== mode) {
+    authForm.reset();
+    setAuthMode(mode);
+  }
+  authScreen.classList.remove("hidden");
+  // Straight to typing on a desktop; on a phone that would pop the keyboard
+  // over the card before it's even been seen.
+  if (matchMedia("(pointer: fine)").matches) authEmail.focus();
 }
+
+// Login ⇄ Register inside the card: same card, new route (replaced, not
+// pushed — back still leads out to the page, not through every toggle).
+function setAuthRoute(mode) {
+  setAuthMode(mode);
+  history.replaceState(null, "", mode === "register" ? "#signup" : "#login");
+}
+
+// Whether the card was opened from the page (so "back" is a real history
+// step) or reached directly through a shared #login link.
+let openedFromLanding = false;
+let lastAuthRoute = authRouteFromHash();
+
+window.addEventListener("hashchange", () => {
+  const route = authRouteFromHash();
+  if (route && !lastAuthRoute) openedFromLanding = true;
+  if (!route) openedFromLanding = false;
+  lastAuthRoute = route;
+  if (authInitialized && !currentUserId) showGuestView();
+});
+
+function leaveAuthCard() {
+  if (openedFromLanding) {
+    history.back();
+  } else {
+    clearAuthRoute();
+    lastAuthRoute = null;
+    showGuestView();
+  }
+}
+
+document.getElementById("auth-back").addEventListener("click", (e) => {
+  e.preventDefault();
+  leaveAuthCard();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !currentUserId && !authScreen.classList.contains("hidden")) {
+    leaveAuthCard();
+  }
+});
 
 /* ---------- form helpers ---------- */
 
@@ -175,7 +248,7 @@ authForm.addEventListener("submit", async (e) => {
       }
       // signUp with email confirmation enabled returns no active session.
       if (!data.session) {
-        setAuthMode("login");
+        setAuthRoute("login");
         showMessage(
           "Check your email to confirm your account before logging in.",
           false
@@ -192,7 +265,7 @@ authForm.addEventListener("submit", async (e) => {
 });
 
 authToggleBtn.addEventListener("click", () => {
-  setAuthMode(authMode === "login" ? "register" : "login");
+  setAuthRoute(authMode === "login" ? "register" : "login");
 });
 
 logoutBtn.addEventListener("click", async () => {
@@ -243,7 +316,7 @@ db.auth.onAuthStateChange((_event, session) => {
   } else {
     // Session ended (logout) or none to begin with.
     currentUserId = null;
-    showAuthView();
+    showGuestView();
     setTimeout(teardownSession, 0);
   }
 });

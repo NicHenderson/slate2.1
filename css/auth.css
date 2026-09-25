@@ -8,30 +8,7 @@
    screens (see responsive.css). */
 
 .auth-screen {
-  /* Always Slate's own look, never whatever theme the account (or just this
-     device's cache — the inline snippet in <head> applies it before there's
-     even been a chance to check for a session) last had active: logging out
-     of a "paper" or "arcade" account shouldn't hand the next sign-in a
-     different-colored door. Same token set as :root[data-theme="midnight"]
-     in base.css, copied rather than referenced so it can't drift out of
-     sync with a `data-theme` this screen is meant to ignore. Every other
-     token used under .auth-screen (--paper, --ink, --accent-glow, the
-     scrollbar trio…) derives from these via var(), so they fall in line
-     for free. */
-  --bg: #0d0c15;
-  --bg-elevated: #17131f;
-  --sidebar-bg: #120e1b;
-  --surface: #1c1727;
-  --border: #2a2338;
-  --accent: #a78bfa;
-  --accent-strong: #8b5cf6;
-  --accent-deep: #6d28d9;
-  --accent-soft: rgba(167, 139, 246, 0.12);
-  --pop: #2979ff;
-  --text: #ece8f5;
-  --text-muted: #9d94b3;
-  --ink-muted: #5c5470;
-
+  /* Colors: .brand-theme (base.css), set on the element in index.html. */
   position: fixed;
   inset: 0;
   z-index: 300;
@@ -42,11 +19,6 @@
 /* ---------- hero (brand) ---------- */
 
 .auth-hero {
-  /* Explicit, not inherited: body's own `color: var(--text)` (base.css)
-     resolves outside .auth-screen's pinned scope, using whatever theme is
-     actually cached — .auth-hero-title had no color of its own and was
-     quietly inheriting that unpinned value instead. */
-  color: var(--text);
   flex: 1 1 56%;
   position: relative;
   display: flex;
@@ -387,4 +359,43 @@
 
 .auth-toggle-btn:hover {
   color: var(--text);
+}
+
+/* ---------- way back to the landing page ---------- */
+
+.auth-back {
+  position: absolute;
+  top: 26px;
+  left: 30px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px 7px 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 2px 3px 0 var(--accent-deep);
+  transform: rotate(-1.5deg);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.auth-back:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 3px 5px 0 var(--accent-deep);
+}
+
+.auth-back:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.auth-back svg {
+  width: 15px;
+  height: 15px;
 }

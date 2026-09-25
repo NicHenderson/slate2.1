@@ -361,7 +361,8 @@ function resetGrids() {
     colGrid._html = null; // see paintGrid in collections.js
   }
   // Header stats describe the signed-in library; none until the next load.
-  document.querySelectorAll(".hstats").forEach((el) => {
+  // (#app only: the landing page's mockups use the same strip.)
+  document.querySelectorAll("#app .hstats").forEach((el) => {
     el.innerHTML = "";
     el._html = null;
     el.hidden = true;
