@@ -240,9 +240,14 @@ function readCollection(col) {
     }));
   return {
     name: name.trim(),
-    // An emoji or one of the app's own "icon:name:color" values: short, and
-    // nothing that could read as markup.
-    icon: typeof col.icon === "string" && col.icon.length <= 32 && !/[<>"'&]/.test(col.icon) ? col.icon : null,
+    // An emoji or one of the app's own "icon:name:color" values, with
+    // nothing that could read as markup. The column is required (not null,
+    // no default: see supabase/migrations/0003_library.sql), so one that
+    // can't be used becomes a star rather than failing the whole import.
+    icon:
+      typeof col.icon === "string" && col.icon.trim() && col.icon.length <= 64 && !/[<>"'&]/.test(col.icon)
+        ? col.icon
+        : "⭐",
     position: optInt(col.position, 1),
     created_at: optTimestamp(col.created_at),
     items,
@@ -569,7 +574,7 @@ async function insertRows(table, rows, created, onRows) {
   for (let i = 0; i < rows.length; i += IMPORT_CHUNK) {
     const chunk = rows.slice(i, i + IMPORT_CHUNK);
     // defaultToNull: false — in a multi-row insert, a column some rows leave
-    // out (created_at, a collection's icon) gets its database default, not null.
+    // out (created_at) gets its database default, not null.
     const { data, error } = await db.from(table).insert(chunk, { defaultToNull: false }).select();
     if (error) throw new Error(`${table}: ${error.message}`);
     (data ?? []).forEach((row) => created[table].push(row.id));
@@ -599,8 +604,8 @@ async function deleteCreated(created) {
   return true;
 }
 
-// A value the database fills in by itself (created_at, a collection's icon)
-// is left out rather than sent as null.
+// A value the database fills in by itself (created_at) is left out rather
+// than sent as null.
 function withoutNulls(row, keys) {
   const copy = { ...row };
   keys.forEach((key) => {
@@ -667,7 +672,7 @@ async function importAdd(parsed, onProgress) {
     if (byName.has(key) || seenKeys.has(key)) return;
     seenKeys.add(key);
     colsToCreate.push(
-      withoutNulls({ name: col.name, icon: col.icon, position: colPos++, created_at: col.created_at }, ["icon", "created_at"])
+      withoutNulls({ name: col.name, icon: col.icon, position: colPos++, created_at: col.created_at }, ["created_at"])
     );
   });
   const mergedInto = new Set(
@@ -1116,7 +1121,7 @@ async function importReplace(parsed, backupFirst, onProgress) {
     for (const col of parsed.collections) {
       const [row] = await insertRows(
         "collections",
-        [withoutNulls({ name: col.name, icon: col.icon, position: col.position, created_at: col.created_at }, ["icon", "position", "created_at"])],
+        [withoutNulls({ name: col.name, icon: col.icon, position: col.position, created_at: col.created_at }, ["position", "created_at"])],
         created,
         tick("Rebuilding your collections…")
       );
