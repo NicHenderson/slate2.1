@@ -897,8 +897,12 @@ colSurpriseBtn.addEventListener("click", () => {
   colSurpriseBtn.classList.add("is-rolling");
 
   const pick = pool[Math.floor(Math.random() * pool.length)];
+  // With just one candidate there's nothing to actually shuffle between —
+  // say so, instead of pretending a "random" draw happened when it didn't.
+  const onlyOption = pool.length === 1;
   setTimeout(() => {
     colSurpriseBtn.classList.remove("is-rolling");
+    if (onlyOption) showToast("Only one pick in the queue — this is it!");
     openDetailModal(
       gridIdFor(pick.table, pick.row),
       pick.row.id,
