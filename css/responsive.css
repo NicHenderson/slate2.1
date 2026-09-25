@@ -160,6 +160,12 @@
     gap: 10px;
   }
 
+  /* The open-collection header now carries 4 buttons (Surprise Me, Edit,
+     Delete, + Add) — too many to stay on one row at this width. */
+  .header-actions {
+    flex-wrap: wrap;
+  }
+
   .section-header h1 {
     font-size: 22px;
   }

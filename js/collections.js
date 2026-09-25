@@ -16,6 +16,7 @@ const colDetailGrid = document.getElementById("col-detail-grid");
 const colCrumbBack = document.getElementById("col-crumb-back");
 const colEditBtn = document.getElementById("col-edit-btn");
 const colDeleteBtn = document.getElementById("col-delete-btn");
+const colSurpriseBtn = document.getElementById("col-surprise-btn");
 
 
 let openCollectionId = null;
@@ -864,6 +865,50 @@ colEditBtn.addEventListener("click", () => {
 colDeleteBtn.addEventListener("click", () => {
   const col = STORE.collections.get(openCollectionId);
   if (col) openDeleteConfirm("collections", col);
+});
+
+// "Surprise Me": picks a random not-yet-watched title from whichever tab
+// (Movies / Shows) is currently open in this collection — same "to watch"
+// pool the dashboard's own Surprise Me draws from, just scoped to this
+// collection instead of the whole library.
+function surprisePoolForOpenCollection() {
+  return collectionItemsFor(openCollectionId)
+    .filter((item) => itemType(item) === colTab)
+    .map(resolveItem)
+    .filter(Boolean)
+    .filter(({ table, row }) => itemStatus(table, row) === "towatch");
+}
+
+colSurpriseBtn.addEventListener("click", () => {
+  const pool = surprisePoolForOpenCollection();
+  if (!pool.length) {
+    showToast(
+      colTab === "movie"
+        ? "No movies to watch in this collection yet."
+        : "No shows to watch in this collection yet."
+    );
+    return;
+  }
+
+  // A quick dice-roll flourish before the reveal — same easing family as the
+  // rest of the app's "sticker" buttons, just a playful spin instead of a lift.
+  colSurpriseBtn.classList.remove("is-rolling");
+  void colSurpriseBtn.offsetWidth; // restart the animation if clicked again mid-roll
+  colSurpriseBtn.classList.add("is-rolling");
+
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  setTimeout(() => {
+    colSurpriseBtn.classList.remove("is-rolling");
+    openDetailModal(
+      gridIdFor(pick.table, pick.row),
+      pick.row.id,
+      () =>
+        collectionItemsFor(openCollectionId)
+          .filter((item) => itemType(item) === colTab)
+          .map(resolveItem)
+          .filter(Boolean)
+    );
+  }, 280);
 });
 
 // Escape steps back out of the collection, unless a modal is open on top

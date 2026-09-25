@@ -26,6 +26,20 @@
   box-shadow: 1px 2px 0 var(--accent-deep);
 }
 
+/* Played on the per-collection Surprise Me button while it's picking, so a
+   random choice reads as a little "roll" instead of an instant, flat swap. */
+@keyframes surprise-roll {
+  0% { transform: rotate(-1deg) scale(1); }
+  25% { transform: rotate(14deg) scale(1.08); }
+  50% { transform: rotate(-16deg) scale(1.05); }
+  75% { transform: rotate(10deg) scale(1.06); }
+  100% { transform: rotate(-1deg) scale(1); }
+}
+
+.surprise-btn.is-rolling {
+  animation: surprise-roll 0.32s ease;
+}
+
 /* ---------- Dashboard blocks ---------- */
 
 .dash-block {
