@@ -34,7 +34,7 @@
   <link rel="stylesheet" href="css/modal.css?v=40" />
   <link rel="stylesheet" href="css/dashboard.css?v=2" />
   <link rel="stylesheet" href="css/auth.css?v=3" />
-  <link rel="stylesheet" href="css/settings.css?v=6" />
+  <link rel="stylesheet" href="css/settings.css?v=7" />
   <link rel="stylesheet" href="css/responsive.css?v=21" />
 </head>
 <body>
@@ -401,11 +401,10 @@
 
         <div class="settings-bento">
           <div class="settings-grid">
-            <!-- display: contents — its tiles are grid items; one submit saves them all -->
-            <form class="profile-form" id="profile-form" novalidate>
-              <div class="settings-tile tile-profile">
-                <h2 class="settings-tile-title">Profile</h2>
+            <div class="settings-tile tile-profile">
+              <h2 class="settings-tile-title">Profile</h2>
 
+              <form class="profile-form" id="profile-form" novalidate>
                 <div class="profile-field">
                   <label class="settings-row-title" for="profile-username">Username</label>
                   <div class="profile-username-wrap">
@@ -416,17 +415,15 @@
                   <p class="profile-error hidden" id="profile-username-error" role="alert"></p>
                 </div>
 
-                <div class="profile-field profile-bio-field">
+                <div class="profile-field">
                   <div class="profile-label-row">
                     <label class="settings-row-title" for="profile-bio">Bio</label>
                     <span class="profile-counter" id="profile-bio-count" aria-live="polite">0/160</span>
                   </div>
                   <textarea class="profile-input profile-bio" id="profile-bio" rows="3" maxlength="160" placeholder="A line or two about what you love to watch."></textarea>
                 </div>
-              </div>
 
-              <div class="settings-tile tile-favorites">
-                <h2 class="settings-tile-title">Favorites</h2>
+                <p class="settings-group-label profile-favorites-label">Favorites</p>
                 <div class="profile-favorites" id="profile-favorites">
                   <div class="favorite-slot" data-fav-slot="movie">
                     <p class="favorite-kind">Movie</p>
@@ -436,62 +433,17 @@
                     <p class="favorite-kind">Show</p>
                     <div class="favorite-body"></div>
                   </div>
+                  <div class="favorite-slot profile-preview-slot">
+                    <p class="favorite-kind">Preview</p>
+                    <div class="profile-preview" id="profile-preview"></div>
+                  </div>
                 </div>
 
                 <div class="profile-actions">
                   <p class="profile-dirty hidden" id="profile-dirty">Unsaved changes</p>
                   <button class="profile-save-btn" id="profile-save" type="submit" disabled>Save profile</button>
                 </div>
-              </div>
-            </form>
-
-            <div class="settings-tile tile-preview">
-              <h2 class="settings-tile-title">Preview</h2>
-              <div class="profile-preview" id="profile-preview"></div>
-            </div>
-
-            <div class="settings-tile tile-defaults">
-              <h2 class="settings-tile-title">Defaults</h2>
-
-              <div class="settings-field">
-                <label class="settings-row-title" for="setting-open-to">Open to</label>
-                <p class="settings-row-hint">The page you land on when you log in.</p>
-                <div class="settings-select-wrap">
-                  <select class="settings-select" id="setting-open-to">
-                    <option value="dashboard">Dashboard</option>
-                    <option value="last">Last page you viewed</option>
-                    <option value="movies-watched">Movies</option>
-                    <option value="shows-watched">Shows</option>
-                    <option value="movies-towatch">Movies To Watch</option>
-                    <option value="shows-towatch">Shows To Watch</option>
-                    <option value="collections">Collections</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="settings-field">
-                <label class="settings-row-title" for="setting-default-sort">Default sort</label>
-                <p class="settings-row-hint">For lists you haven't sorted yourself.</p>
-                <div class="settings-select-wrap">
-                  <select class="settings-select" id="setting-default-sort">
-                    <option value="recent">Most recent first</option>
-                    <option value="oldest">Oldest first</option>
-                    <option value="alpha-asc">A to Z</option>
-                    <option value="alpha-desc">Z to A</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="settings-field">
-                <label class="settings-row-title" for="setting-surprise-scope">"Surprise Me" picks from</label>
-                <p class="settings-row-hint">Titles inside each collection.</p>
-                <div class="settings-select-wrap">
-                  <select class="settings-select" id="setting-surprise-scope">
-                    <option value="towatch">To watch only</option>
-                    <option value="with-dropped">To watch + dropped shows</option>
-                  </select>
-                </div>
-              </div>
+              </form>
             </div>
 
             <div class="settings-tile tile-theme">
@@ -519,6 +471,51 @@
               <div class="settings-segmented" id="density-control" role="group" aria-label="Card density">
                 <button type="button" data-density-value="comfortable">Comfortable</button>
                 <button type="button" data-density-value="compact">Compact</button>
+              </div>
+            </div>
+
+            <div class="settings-tile tile-defaults">
+              <h2 class="settings-tile-title">Defaults</h2>
+              <div class="settings-fields">
+                <div class="settings-field">
+                  <label class="settings-row-title" for="setting-open-to">Open to</label>
+                  <p class="settings-row-hint">The page you land on when you log in.</p>
+                  <div class="settings-select-wrap">
+                    <select class="settings-select" id="setting-open-to">
+                      <option value="dashboard">Dashboard</option>
+                      <option value="last">Last page you viewed</option>
+                      <option value="movies-watched">Movies</option>
+                      <option value="shows-watched">Shows</option>
+                      <option value="movies-towatch">Movies To Watch</option>
+                      <option value="shows-towatch">Shows To Watch</option>
+                      <option value="collections">Collections</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="settings-field">
+                  <label class="settings-row-title" for="setting-default-sort">Default sort</label>
+                  <p class="settings-row-hint">For lists you haven't sorted yourself.</p>
+                  <div class="settings-select-wrap">
+                    <select class="settings-select" id="setting-default-sort">
+                      <option value="recent">Most recent first</option>
+                      <option value="oldest">Oldest first</option>
+                      <option value="alpha-asc">A to Z</option>
+                      <option value="alpha-desc">Z to A</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="settings-field">
+                  <label class="settings-row-title" for="setting-surprise-scope">"Surprise Me" picks from</label>
+                  <p class="settings-row-hint">Titles inside each collection.</p>
+                  <div class="settings-select-wrap">
+                    <select class="settings-select" id="setting-surprise-scope">
+                      <option value="towatch">To watch only</option>
+                      <option value="with-dropped">To watch + dropped shows</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
