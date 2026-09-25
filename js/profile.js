@@ -22,7 +22,7 @@ const emptyProfile = () => ({ username: null, bio: null, favorite_movie: null, f
 
 let savedProfile = emptyProfile(); // what the account holds
 let draftFavorites = { favorite_movie: null, favorite_show: null }; // username/bio drafts live in the inputs
-let accountInfo = { email: "", createdAt: null };
+let accountInfo = { email: "", createdAt: null, defaultUsername: "" };
 let profileSaving = false;
 
 const profileForm = document.getElementById("profile-form");
@@ -113,16 +113,13 @@ async function upsertProfile(fields) {
     .upsert({ user_id: userId, ...fields, updated_at: new Date().toISOString() });
 }
 
+// A username left empty isn't an error: saving fills in the default one
+// (see below), so every account always ends up with a username.
 profileForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (profileSaving || !isProfileDirty()) return;
   const draft = draftProfile();
-  if (!draft.username) {
-    showUsernameError("Pick a username — it can't be empty.");
-    usernameInput.focus();
-    return;
-  }
-  if (!USERNAME_RE.test(draft.username)) {
+  if (draft.username && !USERNAME_RE.test(draft.username)) {
     showUsernameError("Use 3–20 letters, numbers, _ or . (no spaces).");
     usernameInput.focus();
     return;
@@ -131,31 +128,35 @@ profileForm.addEventListener("submit", async (e) => {
   profileSaving = true;
   profileSaveBtn.textContent = "Saving…";
   updateProfileFormState();
-  const { error } = await upsertProfile(draft);
+  const result = draft.username
+    ? { ...(await upsertProfile(draft)), username: draft.username }
+    : await upsertWithDefaultUsername(draft);
   profileSaving = false;
   profileSaveBtn.textContent = "Save profile";
 
-  if (error) {
-    if (error.code === "23505") {
+  if (result.error) {
+    if (result.error.code === "23505" && draft.username) {
       showUsernameError("That username is already taken.");
       usernameInput.focus();
     } else {
-      console.error("Profile save error:", error.message);
+      console.error("Profile save error:", result.error.message);
       showToast("Could not save your profile — try again.", true);
     }
     updateProfileFormState();
     return;
   }
-  savedProfile = draft;
+  savedProfile = { ...draft, username: result.username };
+  usernameInput.value = result.username;
   updateProfileFormState();
-  showToast("Profile saved.");
+  showToast(draft.username ? "Profile saved." : `Profile saved — your username is @${result.username}.`);
 });
 
 /* ---------- default username ----------
 
-   An account without a username gets the part of its email before the
-   "@" ("juan.aguilera@hotmail.com" -> "juan.aguilera"), cleaned up to fit
-   the username rules. If someone already has it, a few random digits are
+   The part of the account's email before the "@"
+   ("juan.aguilera@hotmail.com" -> "juan.aguilera"), cleaned up to fit the
+   username rules. Used when an account has no username yet, and whenever
+   the field is saved empty. If someone already has it, random digits are
    appended until the unique index lets one through. */
 
 const randomDigits = (n) => String(Math.floor(Math.random() * 10 ** n)).padStart(n, "0");
@@ -166,20 +167,18 @@ function usernameFromEmail(email) {
   return name;
 }
 
-async function claimDefaultUsername(user) {
-  const base = usernameFromEmail(user.email);
+// Resolves to { username } on success, { error } otherwise.
+async function upsertWithDefaultUsername(fields) {
+  const base = accountInfo.defaultUsername || usernameFromEmail(accountInfo.email);
+  let lastError = null;
   for (let attempt = 0; attempt < 6; attempt++) {
-    const candidate = attempt === 0 ? base : `${base.slice(0, 15)}_${randomDigits(4)}`;
-    const { error } = await upsertProfile({ username: candidate });
-    if (!error) {
-      savedProfile = { ...savedProfile, username: candidate };
-      return;
-    }
-    if (error.code !== "23505") {
-      console.error("Default username error:", error.message);
-      return;
-    }
+    const username = attempt === 0 ? base : `${base.slice(0, 15)}_${randomDigits(4)}`;
+    const { error } = await upsertProfile({ ...fields, username });
+    if (!error) return { username };
+    if (error.code !== "23505") return { error };
+    lastError = error;
   }
+  return { error: lastError };
 }
 
 /* ---------- favorites ---------- */
@@ -229,14 +228,32 @@ favoritesEl.addEventListener("click", (e) => {
 
 /* ---------- profile preview ----------
 
-   How the profile reads, live from the draft: username, bio, member-since
-   and a few library counts (from STORE, already in memory). The circle
-   shows the username's first character until avatars exist. */
+   How the profile reads, live from the draft: username, bio, favorites,
+   member-since and a few library counts (from STORE, already in memory).
+   The circle shows the username's first character until avatars exist. */
+
+function previewFavoriteHtml(fav, kind) {
+  if (!fav) return "";
+  const poster = POSTER_PATH_RE.test(fav.poster_path ?? "")
+    ? `<img class="pp-fav-poster" src="${TMDB_IMG}${fav.poster_path}" alt="" loading="lazy" />`
+    : `<span class="pp-fav-poster favorite-poster-empty"></span>`;
+  return `
+    <div class="pp-fav">
+      ${poster}
+      <div class="pp-fav-text">
+        <span class="pp-fav-kind">${kind}</span>
+        <span class="pp-fav-title">${escapeHtml(fav.title ?? "Untitled")}</span>
+      </div>
+    </div>`;
+}
 
 function renderProfilePreview() {
   const draft = draftProfile();
-  const username = draft.username ?? "";
+  // An empty field previews the name saving it would fill in.
+  const username = draft.username ?? accountInfo.defaultUsername;
   const initial = escapeHtml((username.match(/[A-Za-z0-9]/)?.[0] ?? "?").toUpperCase());
+  const favorites =
+    previewFavoriteHtml(draft.favorite_movie, "Movie") + previewFavoriteHtml(draft.favorite_show, "Show");
   const since = accountInfo.createdAt
     ? new Date(accountInfo.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })
     : null;
@@ -258,6 +275,7 @@ function renderProfilePreview() {
       </div>
     </div>
     <p class="pp-bio${draft.bio ? "" : " is-empty"}">${draft.bio ? escapeHtml(draft.bio) : "No bio yet."}</p>
+    ${favorites ? `<div class="pp-favs">${favorites}</div>` : ""}
     <div class="pp-stats">
       ${stat(movies, movies === 1 ? "Movie" : "Movies")}
       ${stat(shows, shows === 1 ? "Show" : "Shows")}
@@ -393,7 +411,14 @@ function renderProfile() {
 async function loadProfile() {
   const { data: sessionData } = await db.auth.getSession();
   const user = sessionData.session?.user;
-  accountInfo = { email: user?.email ?? "", createdAt: user?.created_at ?? null };
+  // Computed once per session: for very short emails it includes random
+  // digits, which would otherwise change on every render.
+  accountInfo = {
+    email: user?.email ?? "",
+    createdAt: user?.created_at ?? null,
+    defaultUsername: user ? usernameFromEmail(user.email) : "",
+  };
+  usernameInput.placeholder = accountInfo.defaultUsername || "yourname";
 
   const { data, error } = await db
     .from("profiles")
@@ -404,13 +429,18 @@ async function loadProfile() {
     return;
   }
   savedProfile = { ...emptyProfile(), ...(data ?? {}) };
-  if (!savedProfile.username && user) await claimDefaultUsername(user);
+  if (!savedProfile.username && user) {
+    const { username, error: claimError } = await upsertWithDefaultUsername({});
+    if (username) savedProfile.username = username;
+    else console.error("Default username error:", claimError?.message);
+  }
   renderProfile();
 }
 
 function resetProfileState() {
   savedProfile = emptyProfile();
-  accountInfo = { email: "", createdAt: null };
+  accountInfo = { email: "", createdAt: null, defaultUsername: "" };
+  usernameInput.placeholder = "yourname";
   closeFavoritePicker();
   renderProfile();
 }
