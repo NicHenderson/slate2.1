@@ -22,7 +22,18 @@ function isAlreadyWatched(table, row) {
   return false;
 }
 
+// Settings > Defaults > "Confirm before deleting" off: delete right away,
+// watched titles included (the setting's hint says so).
 function openDeleteConfirm(table, row) {
+  if (!currentSettings.confirmDeletes) {
+    deleteRecord(table, row).then((error) => {
+      if (!error) return;
+      console.error("Delete error:", error.message);
+      showToast("Could not delete — please try again.", true);
+    });
+    return;
+  }
+
   pendingDelete = { table, row };
   const noun = DELETE_NOUNS[table] ?? "item";
   const title = row.title ?? row.name;
@@ -71,10 +82,7 @@ confirmYes.addEventListener("click", async () => {
   confirmYes.disabled = true;
   confirmYes.textContent = "Deleting…";
 
-  const { error } = await db
-    .from(pendingDelete.table)
-    .delete()
-    .eq("id", pendingDelete.row.id);
+  const error = await deleteRecord(pendingDelete.table, pendingDelete.row);
 
   confirmYes.disabled = false;
   confirmYes.textContent = "Yes, delete";
@@ -83,17 +91,21 @@ confirmYes.addEventListener("click", async () => {
     console.error("Delete error:", error.message);
     confirmError.textContent = "Could not delete — please try again.";
     confirmError.classList.remove("hidden");
-    return;
   }
+});
 
-  const deletedTable = pendingDelete.table;
-  const deletedId = pendingDelete.row.id;
+// Deletes the row, closes every modal that was showing it and tidies up
+// what referenced it. Resolves to the Supabase error, or null on success.
+async function deleteRecord(table, row) {
+  const { error } = await db.from(table).delete().eq("id", row.id);
+  if (error) return error;
+
   closeConfirmModal();
   closeUpdateModal();
   closeStartModal();
   closeDetailModal();
-  if (deletedTable === "collections") {
-    STORE.collections.delete(deletedId);
+  if (table === "collections") {
+    STORE.collections.delete(row.id);
     closeCollectionView();
     renderCollections();
   } else {
@@ -105,13 +117,14 @@ confirmYes.addEventListener("click", async () => {
     const { error: cleanupError } = await db
       .from("collection_items")
       .delete()
-      .eq("item_id", deletedId);
+      .eq("item_id", row.id);
     if (cleanupError) {
       console.error("Collection cleanup error:", cleanupError.message);
     }
   }
   showToast("Deleted from your library.");
-});
+  return null;
+}
 
 confirmCancel.addEventListener("click", closeConfirmModal);
 

@@ -13,7 +13,7 @@ const DEFAULT_SETTINGS = {
   density: "comfortable",
   openTo: "dashboard",
   defaultSort: "recent",
-  surpriseScope: "towatch",
+  confirmDeletes: true,
 };
 const SETTINGS_CACHE_KEY = "slate_settings_cache";
 const LAST_SECTION_KEY = "slate_last_section";
@@ -45,15 +45,21 @@ const SETTING_CHOICES = {
   density: ["comfortable", "compact"],
   openTo: ["last", ...START_SECTIONS],
   defaultSort: ["recent", "oldest", "alpha-asc", "alpha-desc"],
-  surpriseScope: ["towatch", "with-dropped"],
 };
 
+// Keeps only settings that still exist, so a retired one saved in an older
+// row is dropped from the account on its next save.
 function normalizeSettings(raw) {
-  const s = { ...DEFAULT_SETTINGS, ...(raw && typeof raw === "object" ? raw : {}) };
+  const src = raw && typeof raw === "object" ? raw : {};
+  const s = {};
+  Object.keys(DEFAULT_SETTINGS).forEach((key) => {
+    s[key] = key in src ? src[key] : DEFAULT_SETTINGS[key];
+  });
   Object.entries(SETTING_CHOICES).forEach(([key, allowed]) => {
     if (!allowed.includes(s[key])) s[key] = DEFAULT_SETTINGS[key];
   });
   s.reduceMotion = s.reduceMotion === true;
+  s.confirmDeletes = s.confirmDeletes !== false;
   return s;
 }
 
@@ -80,7 +86,7 @@ const reduceMotionToggle = document.getElementById("reduce-motion-toggle");
 const densityControl = document.getElementById("density-control");
 const openToSelect = document.getElementById("setting-open-to");
 const defaultSortSelect = document.getElementById("setting-default-sort");
-const surpriseScopeSelect = document.getElementById("setting-surprise-scope");
+const confirmDeletesToggle = document.getElementById("confirm-deletes-toggle");
 
 /* ---------- applying settings ---------- */
 
@@ -152,12 +158,6 @@ function applySettings() {
   renderSettingsPage();
 }
 
-// Read by collections.js (and dashboard.js) when building a Surprise Me
-// pool. Movies are never "dropped", so the setting only widens shows.
-function isSurpriseEligible(status) {
-  return status === "towatch" || (status === "dropped" && currentSettings.surpriseScope === "with-dropped");
-}
-
 function cacheSettings() {
   try {
     localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(currentSettings));
@@ -219,7 +219,8 @@ function renderSettingsPage() {
 
   openToSelect.value = currentSettings.openTo;
   defaultSortSelect.value = currentSettings.defaultSort;
-  surpriseScopeSelect.value = currentSettings.surpriseScope;
+  confirmDeletesToggle.classList.toggle("is-on", currentSettings.confirmDeletes);
+  confirmDeletesToggle.setAttribute("aria-pressed", String(currentSettings.confirmDeletes));
 }
 
 themeSwatchesEl.addEventListener("click", (e) => {
@@ -238,7 +239,9 @@ densityControl.addEventListener("click", (e) => {
 
 openToSelect.addEventListener("change", () => saveSetting("openTo", openToSelect.value));
 defaultSortSelect.addEventListener("change", () => saveSetting("defaultSort", defaultSortSelect.value));
-surpriseScopeSelect.addEventListener("change", () => saveSetting("surpriseScope", surpriseScopeSelect.value));
+confirmDeletesToggle.addEventListener("click", () => {
+  saveSetting("confirmDeletes", !currentSettings.confirmDeletes);
+});
 
 /* ---------- session wiring ---------- */
 

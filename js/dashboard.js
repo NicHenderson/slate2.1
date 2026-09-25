@@ -224,7 +224,7 @@ surpriseBtn.addEventListener("click", () => {
   const pool = [
     ...[...STORE.movies.values()].map((row) => ({ row, table: "movies" })),
     ...[...STORE.shows.values()].map((row) => ({ row, table: "shows" })),
-  ].filter(({ table, row }) => isSurpriseEligible(itemStatus(table, row)));
+  ].filter(({ table, row }) => itemStatus(table, row) === "towatch");
 
   if (!pool.length) {
     showToast("Add something to your watchlist first.");

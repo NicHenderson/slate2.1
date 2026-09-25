@@ -805,6 +805,11 @@
   min-width: 0;
 }
 
+.settings-field-toggle {
+  display: block;
+  margin-top: 6px;
+}
+
 .tile-motion .settings-row {
   padding: 0;
 }
