@@ -232,6 +232,15 @@
     flex: 1;
   }
 
+  .profile-favorites {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .profile-username-wrap {
+    max-width: none;
+  }
+
   .settings-select {
     width: 100%;
     min-width: 0;

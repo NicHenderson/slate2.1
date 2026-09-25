@@ -34,8 +34,8 @@
   <link rel="stylesheet" href="css/modal.css?v=40" />
   <link rel="stylesheet" href="css/dashboard.css?v=2" />
   <link rel="stylesheet" href="css/auth.css?v=3" />
-  <link rel="stylesheet" href="css/settings.css?v=3" />
-  <link rel="stylesheet" href="css/responsive.css?v=18" />
+  <link rel="stylesheet" href="css/settings.css?v=4" />
+  <link rel="stylesheet" href="css/responsive.css?v=19" />
 </head>
 <body>
   <div class="auth-screen hidden" id="auth-screen">
@@ -400,6 +400,46 @@
         </header>
 
         <div class="settings-card">
+          <h2 class="settings-card-title">Profile</h2>
+
+          <form class="profile-form" id="profile-form" novalidate>
+            <div class="profile-field">
+              <label class="settings-row-title" for="profile-username">Username</label>
+              <div class="profile-username-wrap">
+                <span class="profile-at" aria-hidden="true">@</span>
+                <input class="profile-input profile-username" id="profile-username" type="text" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="yourname" aria-describedby="profile-username-hint profile-username-error" />
+              </div>
+              <p class="settings-row-hint" id="profile-username-hint">3–20 characters: letters, numbers, _ and .</p>
+              <p class="profile-error hidden" id="profile-username-error" role="alert"></p>
+            </div>
+
+            <div class="profile-field">
+              <div class="profile-label-row">
+                <label class="settings-row-title" for="profile-bio">Bio</label>
+                <span class="profile-counter" id="profile-bio-count" aria-live="polite">0/160</span>
+              </div>
+              <textarea class="profile-input profile-bio" id="profile-bio" rows="3" maxlength="160" placeholder="A line or two about what you love to watch."></textarea>
+            </div>
+
+            <div class="profile-actions">
+              <button class="profile-save-btn" id="profile-save" type="submit" disabled>Save profile</button>
+            </div>
+          </form>
+
+          <p class="settings-group-label profile-favorites-label">Favorites</p>
+          <div class="profile-favorites" id="profile-favorites">
+            <div class="favorite-slot" data-fav-slot="movie">
+              <p class="favorite-kind">Movie</p>
+              <div class="favorite-body"></div>
+            </div>
+            <div class="favorite-slot" data-fav-slot="tv">
+              <p class="favorite-kind">Show</p>
+              <div class="favorite-body"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card">
           <h2 class="settings-card-title">Appearance</h2>
 
           <p class="settings-group-label">Theme</p>
@@ -505,6 +545,25 @@
         <span class="batch-count" id="batch-count">0 selected</span>
         <button class="tmdb-go-btn" id="batch-add-btn" type="button" disabled>Add Selected (0)</button>
       </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="favorite-modal">
+    <div class="modal modal-add" role="dialog" aria-modal="true" aria-labelledby="favorite-modal-title">
+      <div class="modal-head">
+        <div class="modal-head-left">
+          <h2 id="favorite-modal-title">Favorite movie</h2>
+        </div>
+        <button class="modal-close" id="favorite-close" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="tmdb-search-row">
+        <input id="favorite-input" type="text" placeholder="Search movies" autocomplete="off" aria-label="Search TMDB" />
+        <button class="tmdb-go-btn" id="favorite-search-btn" type="button">Search</button>
+      </div>
+      <p class="modal-error hidden" id="favorite-error"></p>
+      <div class="tmdb-list" id="favorite-results"></div>
     </div>
   </div>
 
@@ -725,7 +784,8 @@
   <script src="js/startModal.js?v=1"></script>
   <script src="js/confirmModal.js?v=6"></script>
   <script src="js/settings.js?v=3"></script>
-  <script src="js/data.js?v=22"></script>
+  <script src="js/profile.js?v=1"></script>
+  <script src="js/data.js?v=23"></script>
   <script src="js/sortMenu.js?v=3"></script>
   <script src="js/dashboard.js?v=3"></script>
   <script src="js/auth.js?v=1"></script>

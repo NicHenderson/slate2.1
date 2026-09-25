@@ -445,6 +445,7 @@ function renderError(gridIds, message) {
 
 async function loadData() {
   loadSettings(); // independent of everything below; applies the theme as soon as it resolves
+  loadProfile();
 
   const [moviesRes, showsRes, colsRes, colItemsRes] = await Promise.all([
     db.from("movies").select("*"),
@@ -507,6 +508,7 @@ function clearAppData() {
   STORE.collections.clear();
   STORE.collectionItems.clear();
   resetSettingsState();
+  resetProfileState();
   resetGrids();
   if (typeof renderDashboard === "function") renderDashboard();
 }
