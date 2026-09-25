@@ -25,6 +25,38 @@ let editingCollectionId = null;
 let dragActive = false;
 let pendingRender = false;
 
+// A drop saves the new order at once, and every row it moved comes back a
+// moment later as a realtime echo. Drop again quickly and the previous
+// drop's echoes land after this one: applied as they are, they'd put titles
+// back where that drop left them and rebuild the grid under the pointer.
+// So until a row's echo of the position this tab last saved for it arrives
+// (or a while has passed, in case it never does), that saved position wins.
+const PENDING_POSITION_MS = 10000;
+const pendingPositions = new Map(); // "storeKey:id" → { position, at }
+
+function notePendingPositions(storeKey, rows) {
+  const at = Date.now();
+  rows.forEach((row) => pendingPositions.set(`${storeKey}:${row.id}`, { position: row.position, at }));
+}
+
+function forgetPendingPositions(storeKey) {
+  [...pendingPositions.keys()].forEach((key) => {
+    if (key.startsWith(`${storeKey}:`)) pendingPositions.delete(key);
+  });
+}
+
+// Runs on each realtime INSERT/UPDATE row before it reaches STORE.
+function keepLocalPosition(storeKey, row) {
+  const key = `${storeKey}:${row.id}`;
+  const pending = pendingPositions.get(key);
+  if (!pending) return;
+  if (row.position === pending.position || Date.now() - pending.at > PENDING_POSITION_MS) {
+    pendingPositions.delete(key);
+    return;
+  }
+  row.position = pending.position;
+}
+
 const byPosition = (a, b) =>
   (a.position ?? 0) - (b.position ?? 0) ||
   (a.created_at ?? "").localeCompare(b.created_at ?? "");
@@ -496,6 +528,11 @@ function setupDragReorder(grid, cardSelector, onReorder, canDrag = () => true) {
     const g = card.cloneNode(true);
     g.classList.remove("dragging");
     g.classList.add("drag-ghost");
+    // A card grabbed while it's still sliding into a new slot (flipReorder)
+    // carries that slide inline: the clone must not keep the offset, nor a
+    // transition that would replace the ghost's own.
+    g.style.transform = "";
+    g.style.transition = "";
     g.style.width = `${rect.width}px`;
     g.style.height = `${rect.height}px`;
     // `translate` (not `transform`): the individual translate/rotate/scale
@@ -538,8 +575,20 @@ function setupDragReorder(grid, cardSelector, onReorder, canDrag = () => true) {
   }
 
   function activate() {
+    // Renders are held from the press on, so the card can't be swapped out
+    // before this — but if something else rebuilt the grid anyway, the
+    // pressed card is gone from the page: it has no size to clone (the
+    // ghost came out giant, stuck in the corner) and would be put back as
+    // a duplicate. Drop the gesture instead.
+    if (!card.isConnected) {
+      teardown();
+      releaseRenders();
+      return;
+    }
+    // Picked up again while the last drop was still flying home: finish
+    // that landing now, or it would un-hide this card mid-drag.
+    card._settle?.();
     dragging = true;
-    dragActive = true;
     document.body.classList.add("is-dragging", "no-hover");
     if (pointerType === "touch") navigator.vibrate?.(10);
     scroller = scrollParent(grid);
@@ -614,6 +663,7 @@ function setupDragReorder(grid, cardSelector, onReorder, canDrag = () => true) {
           clearTimeout(holdTimer);
           holdTimer = null;
           teardown();
+          releaseRenders();
         }
         return;
       }
@@ -641,14 +691,23 @@ function setupDragReorder(grid, cardSelector, onReorder, canDrag = () => true) {
     // and a new gesture can overwrite `ghost` before this fires.
     const el = card;
     const g = ghost;
-    const rect = el.getBoundingClientRect();
     let done = false;
+    // Only the latest landing of a card may un-hide it: this one is also
+    // cut short (el._settle) when the card is grabbed again mid-flight.
     const finish = () => {
       if (done) return;
       done = true;
       g.remove();
+      if (el._settle !== finish) return;
+      el._settle = null;
       el.classList.remove("dragging");
     };
+    el._settle = finish;
+    if (!el.isConnected) {
+      finish(); // nowhere to fly back to
+      return;
+    }
+    const rect = el.getBoundingClientRect();
     const ease = "0.22s cubic-bezier(0.22, 1, 0.36, 1)";
     g.style.transition = `translate ${ease}, scale ${ease}, rotate ${ease}, box-shadow ${ease}`;
     g.classList.remove("lifted"); // set the card back down as it flies home
@@ -666,11 +725,26 @@ function setupDragReorder(grid, cardSelector, onReorder, canDrag = () => true) {
     scrollRaf = null;
     document.body.classList.remove("is-dragging", "no-hover");
     grid.removeEventListener("pointermove", onPointerMove);
-    grid.removeEventListener("pointerup", onPointerUp);
-    grid.removeEventListener("pointercancel", onPointerUp);
+    window.removeEventListener("pointerup", onPointerUp);
+    window.removeEventListener("pointercancel", onPointerUp);
     try { grid.releasePointerCapture(pointerId); } catch {}
     pointerId = null;
     card = null;
+  }
+
+  // Renders are held (dragActive) from the press, not just once a drag
+  // starts: a realtime echo rebuilding the grid between the press and the
+  // first move used to swap the pressed card out from under the gesture.
+  // Released at the end of every gesture, after the drop is recorded.
+  function releaseRenders() {
+    dragActive = false;
+    if (!pendingRender) return;
+    pendingRender = false;
+    renderCollections();
+    if (openCollectionId) renderCollectionDetail();
+    Object.keys(GRID_CONFIG).forEach((id) =>
+      renderGrid(id, [...STORE[GRID_CONFIG[id].table].values()])
+    );
   }
 
   function onPointerUp(e) {
@@ -678,20 +752,12 @@ function setupDragReorder(grid, cardSelector, onReorder, canDrag = () => true) {
     const wasDragging = dragging;
     if (wasDragging) settle();
     dragging = false;
-    dragActive = false;
     teardown();
     if (wasDragging) {
       suppressNextClick();
       onReorder(siblings());
-      if (pendingRender) {
-        pendingRender = false;
-        renderCollections();
-        if (openCollectionId) renderCollectionDetail();
-        Object.keys(GRID_CONFIG).forEach((id) =>
-          renderGrid(id, [...STORE[GRID_CONFIG[id].table].values()])
-        );
-      }
     }
+    releaseRenders();
   }
 
   // touch-action is only read when a touch starts, so it can't stop the page
@@ -718,10 +784,13 @@ function setupDragReorder(grid, cardSelector, onReorder, canDrag = () => true) {
     startY = lastY = e.clientY;
     pointerType = e.pointerType;
     dragging = false;
+    dragActive = true; // hold renders (see releaseRenders)
 
     grid.addEventListener("pointermove", onPointerMove);
-    grid.addEventListener("pointerup", onPointerUp);
-    grid.addEventListener("pointercancel", onPointerUp);
+    // On window: a release anywhere must end the gesture (and release the
+    // held renders), even before the grid has captured the pointer.
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
 
     if (e.pointerType === "touch") {
       holdTimer = setTimeout(() => {
@@ -772,6 +841,7 @@ async function persistOrder(table, storeKey, orderedIds) {
   // policy doesn't allow succeeds with ZERO rows and no error, which would
   // look saved here and then revert on the next reload.
   const rows = changed.map(([id]) => STORE[storeKey].get(id));
+  notePendingPositions(storeKey, rows);
   const { data, error } = await db.from(table).upsert(rows).select("id");
   if (error || (data?.length ?? 0) !== changed.length) {
     console.error(
@@ -780,6 +850,7 @@ async function persistOrder(table, storeKey, orderedIds) {
     );
     showToast("Could not save the new order.", true);
     // Show what the database really holds, not the order we optimistically drew.
+    forgetPendingPositions(storeKey);
     const { data: fresh } = await db.from(table).select("*");
     if (fresh) fresh.forEach((row) => STORE[storeKey].set(row.id, row));
     gridEl._html = null; // force a rebuild

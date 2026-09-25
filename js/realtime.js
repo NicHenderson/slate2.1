@@ -11,6 +11,7 @@ function handleChange(storeKey, gridIds, payload) {
   switch (payload.eventType) {
     case "INSERT":
     case "UPDATE":
+      keepLocalPosition(storeKey, payload.new);
       STORE[storeKey].set(payload.new.id, payload.new);
       break;
     case "DELETE":
@@ -30,6 +31,7 @@ function handleCollectionChange(storeKey, payload) {
   if (payload.eventType === "DELETE") {
     STORE[storeKey].delete(payload.old.id);
   } else {
+    keepLocalPosition(storeKey, payload.new);
     STORE[storeKey].set(payload.new.id, payload.new);
   }
   renderCollections();

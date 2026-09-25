@@ -14,6 +14,7 @@ async function saveCustomOrder(gridId, orderedIds) {
     changed.push(row);
   });
   if (!changed.length) return;
+  notePendingPositions(table, changed); // see keepLocalPosition in collections.js
 
   // One upsert of the full rows (see persistOrder in collections.js for why
   // full rows, and why .select() checks how many were really written).
@@ -25,6 +26,7 @@ async function saveCustomOrder(gridId, orderedIds) {
     );
     showToast("Could not save the new order.", true);
     // Show what the database really holds, not the order we optimistically drew.
+    forgetPendingPositions(table);
     const { data: fresh } = await db.from(table).select("*");
     if (fresh) fresh.forEach((row) => STORE[table].set(row.id, row));
     rerenderGrids(Object.keys(GRID_CONFIG).filter((id) => GRID_CONFIG[id].table === table));
