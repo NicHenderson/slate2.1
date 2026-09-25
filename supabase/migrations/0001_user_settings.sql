@@ -22,3 +22,10 @@ create policy "Users can update their own settings"
   on public.user_settings for update
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- RLS policies only govern which ROWS a query can touch, not whether the
+-- role can query the table at all — a table created by hand via the SQL
+-- editor (unlike one made in the Table Editor UI) has no grants on it by
+-- default, so every request comes back "permission denied" regardless of
+-- the policies above until these run.
+grant select, insert, update on public.user_settings to authenticated;
