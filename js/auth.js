@@ -70,40 +70,56 @@ function clearAuthRoute() {
   if (authRouteFromHash()) history.replaceState(null, "", location.pathname + location.search);
 }
 
+// Every change of screen goes through swapView (js/viewTransitions.js),
+// named for the choreography it gets in css/transitions.css.
+
 function showAppView() {
-  landingScreen.classList.add("hidden");
-  authScreen.classList.add("hidden");
-  document.documentElement.classList.remove("auth-open");
-  appRoot.classList.remove("hidden");
-  logoutBtn.disabled = false;
-  clearAuthRoute(); // a later logout should land on the page, not the card
+  return swapView("enter-app", () => {
+    landingScreen.classList.add("hidden");
+    authScreen.classList.add("hidden");
+    document.documentElement.classList.remove("auth-open");
+    appRoot.classList.remove("hidden");
+    logoutBtn.disabled = false;
+    clearAuthRoute(); // a later logout should land on the page, not the card
+  });
 }
 
 function showGuestView() {
-  appRoot.classList.add("hidden");
-  landingScreen.classList.remove("hidden");
-  logoutBtn.disabled = false;
   const mode = authRouteFromHash();
-  document.documentElement.classList.toggle("auth-open", Boolean(mode));
-  if (!mode) {
-    authScreen.classList.add("hidden");
-    return;
-  }
-  if (authScreen.classList.contains("hidden") || authMode !== mode) {
-    authForm.reset();
-    setAuthMode(mode);
-  }
-  authScreen.classList.remove("hidden");
-  // Straight to typing on a desktop; on a phone that would pop the keyboard
-  // over the card before it's even been seen.
-  if (matchMedia("(pointer: fine)").matches) authEmail.focus();
+  const cardShown = !authScreen.classList.contains("hidden");
+  let kind = null;
+  if (!appRoot.classList.contains("hidden")) kind = "logout";
+  else if (mode && !cardShown) kind = "open-auth";
+  else if (!mode && cardShown) kind = "close-auth";
+  else if (mode && authMode !== mode) kind = "auth-swap";
+
+  const update = () => {
+    appRoot.classList.add("hidden");
+    landingScreen.classList.remove("hidden");
+    logoutBtn.disabled = false;
+    document.documentElement.classList.toggle("auth-open", Boolean(mode));
+    if (!mode) {
+      authScreen.classList.add("hidden");
+      return;
+    }
+    if (authScreen.classList.contains("hidden") || authMode !== mode) {
+      authForm.reset();
+      setAuthMode(mode);
+    }
+    authScreen.classList.remove("hidden");
+    // Straight to typing on a desktop; on a phone that would pop the
+    // keyboard over the card before it's even been seen.
+    if (matchMedia("(pointer: fine)").matches) authEmail.focus();
+  };
+
+  return swapView(kind, update);
 }
 
 // Login ⇄ Register inside the card: same card, new route (replaced, not
 // pushed — back still leads out to the page, not through every toggle).
 function setAuthRoute(mode) {
-  setAuthMode(mode);
   history.replaceState(null, "", mode === "register" ? "#signup" : "#login");
+  return swapView("auth-swap", () => setAuthMode(mode));
 }
 
 // Whether the card was opened from the page (so "back" is a real history
@@ -248,10 +264,9 @@ authForm.addEventListener("submit", async (e) => {
       }
       // signUp with email confirmation enabled returns no active session.
       if (!data.session) {
-        setAuthRoute("login");
-        showMessage(
-          "Check your email to confirm your account before logging in.",
-          false
+        // After the swap: switching modes clears the card's messages.
+        setAuthRoute("login").then(() =>
+          showMessage("Check your email to confirm your account before logging in.", false)
         );
       }
       // If a session was returned, onAuthStateChange takes over.
@@ -308,15 +323,16 @@ db.auth.onAuthStateChange((_event, session) => {
     // a different account. Toggle the view synchronously; defer Supabase calls
     // out of the auth callback to avoid SDK re-entrancy deadlocks.
     currentUserId = nextUserId;
-    showAppView();
-    setTimeout(() => {
-      teardownSession(); // clear anything left from a previous account
-      loadData(); // fetch all tables + open realtime for this user
-    }, 0);
+    showAppView().then(() =>
+      setTimeout(() => {
+        teardownSession(); // clear anything left from a previous account
+        loadData(); // fetch all tables + open realtime for this user
+      }, 0)
+    );
   } else {
-    // Session ended (logout) or none to begin with.
+    // Session ended (logout) or none to begin with. Cleared only once the
+    // app is off screen, so its exit animation shows it as it was.
     currentUserId = null;
-    showGuestView();
-    setTimeout(teardownSession, 0);
+    showGuestView().then(() => setTimeout(teardownSession, 0));
   }
 });
