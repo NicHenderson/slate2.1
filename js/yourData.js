@@ -309,13 +309,8 @@ async function readSlateFile(file) {
 
 let importToken = 0; // a newer file (or closing) makes an older read's result moot
 let importParsed = null;
-
-function importReduceMotion() {
-  return (
-    matchMedia("(prefers-reduced-motion: reduce)").matches ||
-    document.documentElement.getAttribute("data-reduce-motion") === "true"
-  );
-}
+let importFileName = "";
+let importBusy = false; // writing to the account: the window can't be closed
 
 function setImportHeader(eyebrow, title, meta) {
   importEyebrow.textContent = eyebrow;
@@ -333,6 +328,7 @@ function openImportModal() {
 }
 
 function closeImportModal() {
+  if (importBusy) return;
   importToken++;
   importParsed = null;
   importModal.classList.add("hidden");
@@ -389,6 +385,7 @@ function breakdown(parts) {
 
 function showImportSummary(fileName, parsed) {
   importParsed = parsed;
+  importFileName = fileName;
   const { movies, shows, collections, skipped } = parsed;
   const count = (rows, gridId) => rows.filter(GRID_CONFIG[gridId].match).length;
   const itemCount = collections.reduce((n, col) => n + col.items.length, 0);
@@ -458,8 +455,9 @@ async function startImport(file) {
     message =
       err instanceof ImportError ? err.message : "This file couldn't be read. Try exporting it again.";
   }
-  const minimum = importReduceMotion() ? 0 : IMPORT_MIN_READING_MS;
-  const left = minimum - (performance.now() - started);
+  // Always shown for the same time, reduced motion included (the envelope
+  // just holds still then): a file "read" in a blink reads as nothing done.
+  const left = IMPORT_MIN_READING_MS - (performance.now() - started);
   if (left > 0) await new Promise((resolve) => setTimeout(resolve, left));
   if (token !== importToken) return; // closed, or another file was picked meanwhile
   if (message) showImportError(file.name, message);
@@ -487,11 +485,10 @@ importBody?.addEventListener("click", (e) => {
   const action = e.target.closest("[data-import-action]")?.dataset.importAction;
   if (action === "close") closeImportModal();
   if (action === "pick") pickImportFile();
-  if (action === "continue") {
-    // Stage 2 stops here: choosing how to import (add / replace) comes next.
-    closeImportModal();
-    showToast("Choosing how to import comes in the next step — nothing was changed.");
-  }
+  if (action === "continue") showImportModes();
+  if (action === "back") showImportSummary(importFileName, importParsed);
+  if (action === "mode") selectImportMode(e.target.closest("[data-import-mode]"));
+  if (action === "run") runImport();
 });
 
 document.getElementById("import-close")?.addEventListener("click", closeImportModal);
@@ -505,3 +502,377 @@ document.addEventListener("keydown", (e) => {
     closeImportModal();
   }
 });
+
+/* ---------- Import: choosing how ---------- */
+
+let importMode = null;
+
+function showImportModes() {
+  importMode = null;
+  setImportHeader("Import data · How to import", importFileName.replace(/\.slate$/i, ""), "Choose one");
+  setImportView(
+    "modes",
+    `<div class="import-modes" role="radiogroup" aria-label="How to import">
+      <button type="button" class="import-mode" role="radio" aria-checked="false" data-import-action="mode" data-import-mode="add">
+        <span class="import-mode-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </span>
+        <span class="import-mode-text">
+          <span class="import-mode-title">Add to my library</span>
+          <span class="import-mode-desc">Everything you have stays. New titles and collections are added; anything already in your library is left exactly as it is.</span>
+        </span>
+      </button>
+      <button type="button" class="import-mode import-mode-danger" role="radio" aria-checked="false" data-import-action="mode" data-import-mode="replace" disabled>
+        <span class="import-mode-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
+        </span>
+        <span class="import-mode-text">
+          <span class="import-mode-title">Replace everything <span class="import-mode-soon">Next step</span></span>
+          <span class="import-mode-desc">Deletes everything in your account and brings in only this file.</span>
+        </span>
+      </button>
+    </div>
+    <div class="update-actions import-actions">
+      <button type="button" class="cancel-btn" data-import-action="back">Back</button>
+      <div class="update-actions-right">
+        <button type="button" class="modal-search-btn" data-import-action="run" disabled>Import</button>
+      </div>
+    </div>`
+  );
+  importBody.querySelector('[data-import-mode="add"]').focus();
+}
+
+function selectImportMode(option) {
+  if (!option || option.disabled) return;
+  importMode = option.dataset.importMode;
+  importBody.querySelectorAll("[data-import-mode]").forEach((el) => {
+    el.setAttribute("aria-checked", String(el === option));
+  });
+  importBody.querySelector('[data-import-action="run"]').disabled = false;
+}
+
+/* ---------- Import: writing ---------- */
+
+const IMPORT_CHUNK = 200; // rows per insert
+const IMPORT_MIN_WORKING_MS = 1200;
+
+// Inserts rows in chunks and returns every row the database wrote. Each new
+// id goes into `created` as soon as it exists, so a failure further on can
+// take the import back out.
+async function insertRows(table, rows, created, onRows) {
+  const written = [];
+  for (let i = 0; i < rows.length; i += IMPORT_CHUNK) {
+    const chunk = rows.slice(i, i + IMPORT_CHUNK);
+    const { data, error } = await db.from(table).insert(chunk).select();
+    if (error) throw new Error(`${table}: ${error.message}`);
+    (data ?? []).forEach((row) => created[table].push(row.id));
+    // With row-level security a refused insert can "succeed" with nothing
+    // written; treat anything short as a failure.
+    if ((data?.length ?? 0) !== chunk.length) {
+      throw new Error(`${table}: the insert wrote fewer rows than expected`);
+    }
+    written.push(...data);
+    onRows(chunk.length);
+  }
+  return written;
+}
+
+// Undoes a failed import: the items first, then what they pointed at.
+async function deleteCreated(created) {
+  for (const table of ["collection_items", "collections", "movies", "shows"]) {
+    const ids = created[table];
+    for (let i = 0; i < ids.length; i += IMPORT_CHUNK) {
+      const { error } = await db.from(table).delete().in("id", ids.slice(i, i + IMPORT_CHUNK));
+      if (error) {
+        console.error("Import rollback failed:", table, error.message);
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+// A value the database fills in by itself (created_at, a collection's icon)
+// is left out rather than sent as null.
+function withoutNulls(row, keys) {
+  const copy = { ...row };
+  keys.forEach((key) => {
+    if (copy[key] == null) delete copy[key];
+  });
+  return copy;
+}
+
+// The file's titles as rows to insert. Their custom order among themselves
+// is kept, after everything already in the account — but only when the
+// account uses a custom order in that table at all: one that never has
+// would otherwise open with the imported titles pinned first on the day it
+// switches to one. Without positions they go last, oldest first.
+function titleRowsToInsert(fileRows, accountRows) {
+  const accountOrdered = accountRows.some((row) => row.position != null);
+  const ranked = fileRows
+    .filter((row) => row.position != null)
+    .sort((a, b) => a.position - b.position);
+  const rank = new Map(ranked.map((row, i) => [row, i]));
+  const start = nextPos(accountRows);
+  return fileRows.map((row) => {
+    const { ref, ...rest } = row;
+    rest.position = accountOrdered && rank.has(row) ? start + rank.get(row) : null;
+    return withoutNulls(rest, ["created_at"]);
+  });
+}
+
+const collectionKey = (name) => name.trim().toLowerCase();
+
+// Add mode: the account keeps everything it has. A title it already has
+// (same TMDB id) is skipped and the account's copy wins; a collection with
+// the same name (ignoring case) takes in the file's titles it doesn't have
+// yet. Reads the account fresh first, then writes titles → collections →
+// collection items. If anything fails, whatever this import created is
+// deleted again.
+async function importAdd(parsed, onProgress) {
+  const created = { movies: [], shows: [], collections: [], collection_items: [] };
+  onProgress("Checking your library…", 0);
+  const [accMovies, accShows, accCols, accItems] = await Promise.all(
+    ["movies", "shows", "collections", "collection_items"].map(fetchAllRows)
+  );
+
+  const idByTmdb = {
+    movie: new Map(accMovies.map((row) => [row.tmdb_id, row.id])),
+    show: new Map(accShows.map((row) => [row.tmdb_id, row.id])),
+  };
+  const newMovies = parsed.movies.filter((row) => !idByTmdb.movie.has(row.tmdb_id));
+  const newShows = parsed.shows.filter((row) => !idByTmdb.show.has(row.tmdb_id));
+
+  // Collections: the account's, by name (the first one if it has two with
+  // the same name), each with the titles it already holds.
+  const byName = new Map();
+  [...accCols].sort(byPosition).forEach((col) => {
+    const key = collectionKey(col.name);
+    if (byName.has(key)) return;
+    const items = accItems.filter((item) => item.collection_id === col.id);
+    byName.set(key, { id: col.id, has: new Set(items.map((item) => item.item_id)), next: nextPos(items), existed: true });
+  });
+  const colsToCreate = [];
+  const seenKeys = new Set();
+  let colPos = nextPos(accCols);
+  parsed.collections.forEach((col) => {
+    const key = collectionKey(col.name);
+    if (byName.has(key) || seenKeys.has(key)) return;
+    seenKeys.add(key);
+    colsToCreate.push(
+      withoutNulls({ name: col.name, icon: col.icon, position: colPos++, created_at: col.created_at }, ["icon", "created_at"])
+    );
+  });
+  const mergedInto = new Set(
+    parsed.collections.map((col) => collectionKey(col.name)).filter((key) => byName.has(key))
+  );
+
+  const itemTotal = parsed.collections.reduce((n, col) => n + col.items.length, 0);
+  const total = Math.max(1, newMovies.length + newShows.length + colsToCreate.length + itemTotal);
+  let done = 0;
+  const tick = (label) => (n) => {
+    done += n;
+    onProgress(label, done / total);
+  };
+
+  const written = { movies: [], shows: [], collections: [], collectionItems: [] };
+  try {
+    onProgress("Adding movies…", 0);
+    written.movies = await insertRows("movies", titleRowsToInsert(newMovies, accMovies), created, tick("Adding movies…"));
+    onProgress("Adding shows…", done / total);
+    written.shows = await insertRows("shows", titleRowsToInsert(newShows, accShows), created, tick("Adding shows…"));
+    written.movies.forEach((row) => idByTmdb.movie.set(row.tmdb_id, row.id));
+    written.shows.forEach((row) => idByTmdb.show.set(row.tmdb_id, row.id));
+
+    onProgress("Filling collections…", done / total);
+    written.collections = await insertRows("collections", colsToCreate, created, tick("Filling collections…"));
+    written.collections.forEach((col) => {
+      byName.set(collectionKey(col.name), { id: col.id, has: new Set(), next: 1, existed: false });
+    });
+
+    // A collection item in the file names a title of the same file by its
+    // id there; it's found in the account by that title's TMDB id.
+    const tmdbByRef = {
+      movie: new Map(parsed.movies.map((row) => [row.ref, row.tmdb_id])),
+      show: new Map(parsed.shows.map((row) => [row.ref, row.tmdb_id])),
+    };
+    const itemRows = [];
+    parsed.collections.forEach((col) => {
+      const target = byName.get(collectionKey(col.name));
+      [...col.items]
+        .sort((a, b) => (a.position ?? Infinity) - (b.position ?? Infinity))
+        .forEach((item) => {
+          const itemId = idByTmdb[item.item_type].get(tmdbByRef[item.item_type].get(item.item_ref));
+          if (!itemId || target.has.has(itemId)) return;
+          target.has.add(itemId);
+          itemRows.push(
+            withoutNulls(
+              { collection_id: target.id, item_id: itemId, item_type: item.item_type, position: target.next++, created_at: item.created_at },
+              ["created_at"]
+            )
+          );
+        });
+    });
+    done = total - itemRows.length; // items skipped as already there count as done
+    written.collectionItems = await insertRows("collection_items", itemRows, created, tick("Filling collections…"));
+  } catch (err) {
+    onProgress("Something went wrong — undoing…", done / total);
+    err.undone = await deleteCreated(created);
+    throw err;
+  }
+
+  onProgress("Done", 1);
+  return {
+    written,
+    report: {
+      movies: written.movies.length,
+      shows: written.shows.length,
+      alreadyHad: parsed.movies.length - newMovies.length + (parsed.shows.length - newShows.length),
+      newCollections: written.collections.length,
+      mergedCollections: mergedInto.size,
+      placed: written.collectionItems.length,
+    },
+  };
+}
+
+// The rows the import wrote go straight into STORE and every view redraws
+// (the realtime echoes that follow find nothing left to change).
+function applyImported(written) {
+  written.movies.forEach((row) => STORE.movies.set(row.id, row));
+  written.shows.forEach((row) => STORE.shows.set(row.id, row));
+  written.collections.forEach((row) => STORE.collections.set(row.id, row));
+  written.collectionItems.forEach((row) => STORE.collectionItems.set(row.id, row));
+  rerenderGrids(Object.keys(GRID_CONFIG));
+  renderCollections();
+  refreshOpenCollection();
+  if (typeof renderProfilePreview === "function") renderProfilePreview();
+}
+
+function showImportWorking() {
+  setImportHeader("Import data · Importing", importFileName.replace(/\.slate$/i, ""), "Keep this page open");
+  setImportView(
+    "working",
+    `<div class="import-reading" role="status">
+      <div class="import-envelope is-filing" aria-hidden="true">
+        <span class="import-env-back"></span>
+        <span class="import-env-card"></span>
+        <span class="import-env-card"></span>
+        <span class="import-env-card"></span>
+        <span class="import-env-front"></span>
+      </div>
+      <p class="import-reading-title" id="import-step">Checking your library…</p>
+      <p class="import-reading-hint" id="import-percent">0%</p>
+      <div class="import-progress is-determinate" aria-hidden="true"><span id="import-bar"></span></div>
+    </div>`
+  );
+}
+
+function setImportProgress(label, fraction) {
+  const step = document.getElementById("import-step");
+  if (!step) return;
+  step.textContent = label;
+  const pct = Math.round(Math.min(1, Math.max(0, fraction)) * 100);
+  document.getElementById("import-percent").textContent = `${pct}%`;
+  document.getElementById("import-bar").style.width = `${pct}%`;
+}
+
+function showImportDone(report) {
+  const titles = report.movies + report.shows;
+  const lines = [];
+  if (titles) {
+    lines.push(
+      `<strong>${breakdown([[report.movies, report.movies === 1 ? "movie" : "movies"], [report.shows, report.shows === 1 ? "show" : "shows"]]).replace(" · ", " and ")}</strong> added to your library.`
+    );
+  }
+  if (report.alreadyHad) {
+    lines.push(`${report.alreadyHad} ${report.alreadyHad === 1 ? "title was" : "titles were"} already there and stayed exactly as ${report.alreadyHad === 1 ? "it was" : "they were"}.`);
+  }
+  const colParts = [];
+  if (report.newCollections) colParts.push(`${plural(report.newCollections, "new collection")}`);
+  if (report.mergedCollections) {
+    colParts.push(`${report.mergedCollections} merged into ${report.mergedCollections === 1 ? "one" : "ones"} you had`);
+  }
+  if (colParts.length || report.placed) {
+    lines.push(
+      `${colParts.join(", ")}${colParts.length && report.placed ? " — " : ""}${report.placed ? `${plural(report.placed, "title")} placed in collections` : ""}.`.replace(/^./, (c) => c.toUpperCase())
+    );
+  }
+  const nothing = !titles && !report.newCollections && !report.placed;
+
+  setImportHeader(
+    "Import data · Done",
+    nothing ? "Nothing new to add" : "Import complete",
+    importFileName.replace(/\.slate$/i, "")
+  );
+  setImportView(
+    "done",
+    `<div class="import-done">
+      <span class="import-done-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </span>
+      ${nothing ? `<p class="import-done-line">Everything in this file was already in your library. Nothing was changed.</p>` : lines.map((line) => `<p class="import-done-line">${line}</p>`).join("")}
+    </div>
+    <div class="update-actions import-actions">
+      <span></span>
+      <div class="update-actions-right">
+        <button type="button" class="modal-search-btn" data-import-action="close">Done</button>
+      </div>
+    </div>`
+  );
+  importBody.querySelector('[data-import-action="close"]').focus();
+}
+
+function showImportFailed(undone) {
+  setImportHeader("Import data", "The import didn't finish", importFileName.replace(/\.slate$/i, ""));
+  setImportView(
+    "error",
+    `<div class="import-error">
+      <span class="import-error-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 L21.5 20 L2.5 20 Z"/><line x1="12" y1="9.7" x2="12" y2="14.2"/><circle cx="12" cy="17.2" r="0.75" fill="currentColor" stroke="none"/></svg>
+      </span>
+      <p class="import-error-text" role="alert">${
+        undone
+          ? "Something went wrong while importing, so it was undone: your library is exactly as it was."
+          : "Something went wrong while importing, and not everything could be undone. Some titles from the file may be in your library now — nothing you already had was changed."
+      }</p>
+      <p class="import-note">Check your connection and try again.</p>
+    </div>
+    <div class="update-actions import-actions">
+      <span></span>
+      <div class="update-actions-right">
+        <button type="button" class="cancel-btn" data-import-action="close">Close</button>
+        <button type="button" class="modal-search-btn" data-import-action="back">Try again</button>
+      </div>
+    </div>`
+  );
+}
+
+function warnBeforeLeaving(e) {
+  e.preventDefault();
+  e.returnValue = "";
+}
+
+async function runImport() {
+  if (importBusy || !importParsed || importMode !== "add") return;
+  importBusy = true;
+  window.addEventListener("beforeunload", warnBeforeLeaving);
+  showImportWorking();
+  const started = performance.now();
+  let outcome;
+  try {
+    outcome = { ok: true, ...(await importAdd(importParsed, setImportProgress)) };
+  } catch (err) {
+    console.error("Import failed:", err);
+    outcome = { ok: false, undone: err.undone === true };
+  }
+  const left = IMPORT_MIN_WORKING_MS - (performance.now() - started);
+  if (left > 0) await new Promise((resolve) => setTimeout(resolve, left));
+  importBusy = false;
+  window.removeEventListener("beforeunload", warnBeforeLeaving);
+  if (outcome.ok) {
+    applyImported(outcome.written);
+    showImportDone(outcome.report);
+  } else {
+    showImportFailed(outcome.undone);
+  }
+}

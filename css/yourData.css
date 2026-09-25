@@ -387,6 +387,161 @@
   font-weight: 600;
 }
 
+/* ---------- modes ---------- */
+
+.import-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Each way to import is a big card to pick (radio-like); Import runs it. */
+.import-mode {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  border: 2px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.import-mode:hover:not(:disabled) {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.import-mode[aria-checked="true"] {
+  border-color: var(--accent-strong);
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  background: color-mix(in srgb, var(--accent) 8%, var(--paper));
+}
+
+.import-mode:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.import-mode-icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent-deep);
+}
+
+.import-mode-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.import-mode-danger .import-mode-icon {
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+}
+
+.import-mode-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.import-mode-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.import-mode-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.import-mode-soon {
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  vertical-align: 2px;
+}
+
+/* ---------- working ---------- */
+
+/* Writing can't be stopped halfway: no close button while it runs (Escape
+   and the backdrop are ignored too, in js/yourData.js). */
+.import-backdrop[data-view="working"] .update-close-btn {
+  display: none;
+}
+
+/* The cards go into the envelope this time: filing the titles away. */
+.import-envelope.is-filing .import-env-card {
+  animation-direction: reverse;
+}
+
+.import-progress.is-determinate span {
+  left: 0;
+  width: 0;
+  animation: none;
+  transition: width 0.3s ease;
+}
+
+/* ---------- done ---------- */
+
+.import-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.import-done-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  background: color-mix(in srgb, #16a34a 16%, transparent);
+  color: #16a34a;
+  animation: import-done-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.import-done-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+@keyframes import-done-pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+
+.import-done-line {
+  max-width: 420px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.import-done-line strong {
+  color: var(--accent-deep);
+}
+
 /* ---------- small screens / reduced motion ---------- */
 
 @media (max-width: 480px) {
@@ -421,6 +576,7 @@
   .import-env-card,
   .import-progress span,
   .import-fan-card,
+  .import-done-icon,
   .import-backdrop[data-view] .import-body > * {
     animation: none;
   }
@@ -429,6 +585,7 @@
 :root[data-reduce-motion="true"] .import-env-card,
 :root[data-reduce-motion="true"] .import-progress span,
 :root[data-reduce-motion="true"] .import-fan-card,
+:root[data-reduce-motion="true"] .import-done-icon,
 :root[data-reduce-motion="true"] .import-backdrop[data-view] .import-body > * {
   animation: none;
 }
