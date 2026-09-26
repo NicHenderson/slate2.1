@@ -43,7 +43,8 @@ const foldText = (text) =>
    lists the options titles in the section actually have, with how many.
    Picking several options of one filter keeps titles with any of them —
    except genres, where a title needs all of them (Horror + Comedy: horror
-   comedies). The minimum rating is one choice, not several. */
+   comedies). The rating is one number compared one way — at least, at
+   most or exactly — or Unrated (see RATING_MODES). */
 
 const yearOf = (date) => (date ? Number(String(date).slice(0, 4)) : null);
 
@@ -85,13 +86,18 @@ const LIBRARY_FILTERS = {
     order: (a, b) => ["mini", "some", "many"].indexOf(a.value) - ["mini", "some", "many"].indexOf(b.value),
   },
   rating: {
-    label: "Minimum rating",
+    label: "Rating",
     single: true,
-    // A title "has" every threshold it clears: an 8 counts under 6+, 7+ and 8+.
-    optionsOf: (row) =>
-      row.rating == null ? ["unrated"] : ["6", "7", "8", "9", "10"].filter((n) => row.rating >= Number(n)),
-    name: (value) => (value === "unrated" ? "Unrated" : value === "10" ? "10/10" : `${value}+`),
-    tag: (value) => (value === "unrated" ? "Unrated" : value === "10" ? "Rated 10/10" : `Rated ${value}+`),
+    // Which of the numbers 1–10 a title counts under depends on the mode
+    // picked: an 8 is "at least" 1–8, "at most" 8–10, "exactly" 8.
+    optionsOf: (row, sectionId) => {
+      if (row.rating == null) return ["unrated"];
+      const rated = Math.round(row.rating); // as the stars show it (an imported 7.5 reads as 8)
+      const test = RATING_MODES[ratingModeOf(sectionId)].test;
+      return RATING_VALUES.filter((n) => test(rated, Number(n)));
+    },
+    name: (value) => (value === "unrated" ? "Unrated" : value),
+    tag: (value, sectionId) => (value === "unrated" ? "Unrated" : RATING_MODES[ratingModeOf(sectionId)].tag(Number(value))),
     order: (a, b) => (a.value === "unrated") - (b.value === "unrated") || Number(a.value) - Number(b.value),
   },
   watchedIn: {
@@ -105,6 +111,14 @@ const LIBRARY_FILTERS = {
   },
 };
 
+const RATING_VALUES = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+
+const RATING_MODES = {
+  atLeast: { label: "At least", test: (rated, n) => rated >= n, tag: (n) => (n === 10 ? "Rated 10" : `Rated ${n}+`) },
+  atMost: { label: "At most", test: (rated, n) => rated <= n, tag: (n) => (n === 1 ? "Rated 1" : `Rated ${n} or less`) },
+  exactly: { label: "Exactly", test: (rated, n) => rated === n, tag: (n) => `Rated exactly ${n}` },
+};
+
 // Which filters each section offers.
 const SECTION_FILTERS = {
   "movies-watched": ["genres", "decades", "runtime", "rating", "watchedIn"],
@@ -114,17 +128,20 @@ const SECTION_FILTERS = {
 };
 
 const optionName = (key, value) => LIBRARY_FILTERS[key].name?.(value) ?? value;
-const optionTag = (key, value) => LIBRARY_FILTERS[key].tag?.(value) ?? optionName(key, value);
+const optionTag = (key, value, sectionId) => LIBRARY_FILTERS[key].tag?.(value, sectionId) ?? optionName(key, value);
 
 /* ---------- state ---------- */
 
-// Section id -> { terms: the words typed, folded; picks: filter -> Set }.
+// Section id -> { terms: the words typed, folded; picks: filter -> Set;
+// ratingMode: how the rating picked compares }.
 const libraryState = {};
 
 function stateOf(sectionId) {
-  if (!libraryState[sectionId]) libraryState[sectionId] = { terms: [], picks: {} };
+  if (!libraryState[sectionId]) libraryState[sectionId] = { terms: [], picks: {}, ratingMode: "atLeast" };
   return libraryState[sectionId];
 }
+
+const ratingModeOf = (sectionId) => stateOf(sectionId).ratingMode;
 
 const picksOf = (sectionId, key) => stateOf(sectionId).picks[key] ?? new Set();
 
@@ -151,7 +168,7 @@ function libraryMatches(gridId, row) {
   }
   return Object.entries(picks).every(([key, picked]) => {
     if (!picked.size) return true;
-    const has = LIBRARY_FILTERS[key].optionsOf(row);
+    const has = LIBRARY_FILTERS[key].optionsOf(row, sectionId);
     return LIBRARY_FILTERS[key].matchAll
       ? [...picked].every((value) => has.includes(value))
       : [...picked].some((value) => has.includes(value));
@@ -172,8 +189,11 @@ function sectionRows(sectionId) {
 function filterOptions(sectionId, key) {
   const counts = new Map();
   sectionRows(sectionId).forEach((row) => {
-    LIBRARY_FILTERS[key].optionsOf(row).forEach((value) => counts.set(value, (counts.get(value) ?? 0) + 1));
+    LIBRARY_FILTERS[key].optionsOf(row, sectionId).forEach((value) => counts.set(value, (counts.get(value) ?? 0) + 1));
   });
+  // The rating's numbers are always all there, so the row doesn't reshuffle
+  // as the mode changes; a number no title counts under shows 0.
+  if (key === "rating") RATING_VALUES.forEach((value) => counts.set(value, counts.get(value) ?? 0));
   return [...counts].map(([value, count]) => ({ value, count })).sort(LIBRARY_FILTERS[key].order);
 }
 
@@ -223,10 +243,10 @@ function renderActiveFilters(sectionId) {
   badge.textContent = n ? ` · ${n}` : "";
   badge.hidden = !n;
   const tags = (SECTION_FILTERS[sectionId] ?? []).flatMap((key) =>
-    [...picksOf(sectionId, key)].map(
-      (value) =>
-        `<button class="lib-tag" type="button" data-remove-filter="${key}" data-value="${escapeHtml(value)}" aria-label="Remove filter: ${escapeHtml(optionTag(key, value))}">${escapeHtml(optionTag(key, value))}<span aria-hidden="true">✕</span></button>`
-    )
+    [...picksOf(sectionId, key)].map((value) => {
+      const tag = optionTag(key, value, sectionId);
+      return `<button class="lib-tag" type="button" data-remove-filter="${key}" data-value="${escapeHtml(value)}" aria-label="Remove filter: ${escapeHtml(tag)}">${escapeHtml(tag)}<span aria-hidden="true">✕</span></button>`;
+    })
   );
   const active = tools.querySelector(".lib-active");
   active.innerHTML = tags.length ? `${tags.join("")}<button class="lib-tags-clear" type="button" data-clear-filters>Clear filters</button>` : "";
@@ -241,9 +261,15 @@ function renderFilterPanel(sectionId) {
       if (!options.length) return "";
       const picked = picksOf(sectionId, key);
       const filter = LIBRARY_FILTERS[key];
-      const any = filter.single
-        ? `<button class="lf-chip" type="button" data-filter="${key}" data-value="" aria-pressed="${!picked.size}">Any</button>`
-        : "";
+      const modes =
+        key === "rating"
+          ? `<div class="lf-modes" role="group" aria-label="Compare the rating">${Object.entries(RATING_MODES)
+              .map(
+                ([mode, { label }]) =>
+                  `<button class="lf-mode" type="button" data-rating-mode="${mode}" aria-pressed="${mode === ratingModeOf(sectionId)}">${label}</button>`
+              )
+              .join("")}</div>`
+          : "";
       const chips = options
         .map(
           ({ value, count }) =>
@@ -251,7 +277,7 @@ function renderFilterPanel(sectionId) {
         )
         .join("");
       const hint = filter.matchAll ? `<span class="lf-hint">titles with all you pick</span>` : "";
-      return `<fieldset class="lf-group"><legend class="lf-label">${filter.label}${hint}</legend><div class="lf-chips">${any}${chips}</div></fieldset>`;
+      return `<fieldset class="lf-group"><legend class="lf-label">${filter.label}${hint}</legend>${modes}<div class="lf-chips">${chips}</div></fieldset>`;
     })
     .join("");
   panel.innerHTML = `
@@ -301,9 +327,10 @@ function toggleFilter(sectionId, key, value) {
   changeLibrary(sectionId, (state) => {
     const picked = new Set(state.picks[key] ?? []);
     if (LIBRARY_FILTERS[key].single) {
+      // One at a time; the one already picked, tapped again, comes off.
       const already = picked.has(value);
       picked.clear();
-      if (value && !already) picked.add(value);
+      if (!already) picked.add(value);
     } else if (picked.has(value)) {
       picked.delete(value);
     } else {
@@ -311,6 +338,11 @@ function toggleFilter(sectionId, key, value) {
     }
     state.picks[key] = picked;
   });
+}
+
+function setRatingMode(sectionId, mode) {
+  if (!RATING_MODES[mode] || ratingModeOf(sectionId) === mode) return;
+  changeLibrary(sectionId, (state) => (state.ratingMode = mode));
 }
 
 function clearLibraryFilters(sectionId) {
@@ -407,6 +439,8 @@ document.querySelectorAll(".lib-tools").forEach((tools) => {
   tools.addEventListener("click", (e) => {
     const chip = e.target.closest(".lf-chip");
     if (chip) toggleFilter(sectionId, chip.dataset.filter, chip.dataset.value);
+    const mode = e.target.closest("[data-rating-mode]");
+    if (mode) setRatingMode(sectionId, mode.dataset.ratingMode);
     const tag = e.target.closest("[data-remove-filter]");
     if (tag) toggleFilter(sectionId, tag.dataset.removeFilter, tag.dataset.value);
     if (e.target.closest("[data-clear-filters]")) clearLibraryFilters(sectionId);

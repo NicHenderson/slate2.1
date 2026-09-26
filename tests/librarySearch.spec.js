@@ -92,7 +92,7 @@ const WATCHED = [
   { tmdb_id: 949, title: "Heat", release_year: 1995, duration: 170, genres: "Crime, Drama, Action", rating: 9, watched_date: "2024-05-05" },
 ];
 
-test("filters narrow Movies: all the genres picked, any of the decades or lengths, one minimum rating, the year watched", async ({ page, backend }) => {
+test("filters narrow Movies: all the genres picked, any of the decades or lengths, a rating at least / at most / exactly, the year watched", async ({ page, backend }) => {
   backend.seed("movies", WATCHED, backend.user.id);
   await logIn(page);
   const tools = page.locator('[data-lib-section="movies-watched"]');
@@ -102,7 +102,7 @@ test("filters narrow Movies: all the genres picked, any of the decades or length
   await expect(shown()).toHaveCount(5);
 
   await tools.locator(".lib-filter-btn").click();
-  await expect(panel.locator(".lf-label")).toHaveText([/^Genre/, "Decade", "Length", "Minimum rating", "Watched in"]);
+  await expect(panel.locator(".lf-label")).toHaveText([/^Genre/, "Decade", "Length", "Rating", "Watched in"]);
   // Most common genres first, each with how many titles have it.
   await expect(panel.locator(".lf-group").first().locator(".lf-chip").first()).toHaveText(/^Comedy\s*3$/);
 
@@ -135,16 +135,29 @@ test("filters narrow Movies: all the genres picked, any of the decades or length
   await expect(shown()).toHaveText(["Tucker and Dale vs. Evil", "Heat"]);
   await panel.locator(".lf-clear").click();
 
-  // Minimum rating: one choice, which the next replaces.
-  await chip("Minimum rating", "9+").click();
-  await expect(shown()).toHaveCount(3); // Alien 9, Paddington 2's 10, Heat 9
-  await chip("Minimum rating", "10/10").click();
+  // Rating: one number, compared at least / at most / exactly. Ratings:
+  // Alien 9, Shaun 8, Paddington 2 10, Heat 9, Tucker and Dale unrated.
+  const rating = (value) => panel.locator(`.lf-chip[data-filter="rating"][data-value="${value}"]`);
+  const mode = (name) => panel.locator(".lf-mode", { hasText: name });
+  await expect(mode("At least")).toHaveAttribute("aria-pressed", "true");
+  await expect(rating("8")).toHaveText(/^8\s*4$/); // what each number would leave, in this mode
+  await rating("9").click();
+  await expect(shown()).toHaveCount(3);
+  await expect(tools.locator(".lib-tag")).toHaveText(["Rated 9+✕"]);
+  await mode("At most").click();
+  await expect(rating("8")).toHaveText(/^8\s*1$/);
+  await expect(shown()).toHaveText(["Alien", "Shaun of the Dead", "Heat"]);
+  await expect(tools.locator(".lib-tag")).toHaveText(["Rated 9 or less✕"]);
+  await mode("Exactly").click();
+  await expect(shown()).toHaveText(["Alien", "Heat"]);
+  await expect(tools.locator(".lib-tag")).toHaveText(["Rated exactly 9✕"]);
+  await rating("10").click(); // one number at a time
   await expect(shown()).toHaveText(["Paddington 2"]);
-  await expect(tools.locator(".lib-tag")).toHaveText(["Rated 10/10✕"]);
-  await chip("Minimum rating", "Unrated").click();
-  await expect(shown()).toHaveText(["Tucker and Dale vs. Evil"]);
-  await chip("Minimum rating", "Any").click();
+  await rating("10").click(); // tapped again, it comes off
   await expect(shown()).toHaveCount(5);
+  await rating("unrated").click();
+  await expect(shown()).toHaveText(["Tucker and Dale vs. Evil"]);
+  await rating("unrated").click();
 
   // The year it was watched, with the search on top: each narrows further.
   await chip("Watched in", "2025").click();
