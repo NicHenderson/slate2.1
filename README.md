@@ -68,6 +68,8 @@ your data and don't break when your password does.
 | `customOrder.spec.js` | Drag and drop in Custom order, and the drag bugs it once had |
 | `collections.spec.js` | Creating collections and filling them |
 | `yourData.spec.js` | Export, and import in both Add and Replace modes |
+| `account.spec.js` | Deleting an account: the locks, a wrong password, a server failure, and the account gone |
+| `bigLibrary.spec.js` | Libraries past 1,000 rows load whole |
 | `stamps.spec.js` | Every CSS/JS link in `index.html` has its file's current stamp |
 
 The TMDB Edge Function has its own tests (Deno):

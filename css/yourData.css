@@ -672,6 +672,17 @@
   }
 }
 
+/* Why the last attempt to delete the account stopped. */
+.delete-error {
+  margin-top: 14px;
+  padding: 8px 12px;
+  border-left: 3px solid #dc2626;
+  background: rgba(220, 38, 38, 0.08);
+  color: #b42318;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 /* The final button: solid red sticker, like the delete confirmation's. */
 .import-actions .import-replace-btn {
   background: #dc2626;
