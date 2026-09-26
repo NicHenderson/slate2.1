@@ -118,16 +118,36 @@ directly.
 ## Where things stand
 
 - Everything so far is in `main`: invite-only access, the welcome-email
-  tool, the review note redesign, and the trailer button that waits,
-  disabled.
+  tool, the review note redesign, the trailer button that waits, disabled,
+  and search + filters.
 - Search and filters (`js/librarySearch.js`) cover Movies, Shows, Movies To
   Watch and the Shows Queue; the owner chose to leave collections for later.
   Their decisions:
   - several genres picked means titles with all of them;
+  - the rating filter is one number compared ≥ / ≤ / = (or Unrated);
   - while any search or filter is on, Custom order is paused (no dragging,
     the default sort instead, "Custom" locked in the Sort menu) and comes
     back once everything is cleared.
-- **Next: publish on Cloudflare Pages** (free, chosen over Netlify and
+- **Next: v3.0.0**, in this order, one at a time and each only with the
+  owner's go-ahead:
+  1. **Where to watch:** in the detail window of titles not yet watched,
+     the streaming services from TMDB's watch providers (grouped
+     subscription / rent / buy / free), for a country detected from the
+     browser and changeable in Settings, credited to JustWatch as TMDB
+     requires. When TMDB has nothing, a friendly "we couldn't find where to
+     watch this". Needs `(movie|tv)/<id>/watch/providers` allowed in the
+     `tmdb` Edge Function, which the owner then has to redeploy.
+  2. **Rewatches** (movies first; shows later, designed apart): a new
+     viewings table (date + optional note), backfilled with one viewing per
+     watched movie; `watched_date` stays the latest viewing so sorts, stats
+     and filters keep working; the `.slate` backup must carry viewings.
+  3. **Import from other apps:** IMDb (CSV with IMDb ids → TMDB `find`),
+     Letterboxd (ZIP of CSVs, title + year matching, diary rewatches),
+     Trakt (JSON with TMDB ids); TV Time only after seeing a real export.
+     Reuse the `.slate` import flow, with a review of what didn't match.
+     Needs real export files from the owner.
+- Then: translate the app, then publish.
+- **Publishing on Cloudflare Pages** (free, chosen over Netlify and
   Vercel). The steps:
   1. Connect the GitHub repo. There's no build command, and the output
      directory is the repo root.
@@ -140,8 +160,7 @@ directly.
      and `X-Content-Type-Options: nosniff`. The owner and Claude decided
      against a full Content-Security-Policy for now: the risk of breaking
      part of Slate outweighs the benefit for a small private app.
-- After that, the owner wants the app translated into Spanish, German and
-  Italian (besides English), in a new session.
+- Translation: Spanish, German and Italian, besides English.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - a privacy policy page;
