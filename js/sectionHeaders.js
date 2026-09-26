@@ -226,9 +226,10 @@ document.addEventListener("click", (e) => {
 function initWatchlistSurprise(btnId, gridId, emptyMessage) {
   const btn = document.getElementById(btnId);
   btn.addEventListener("click", () => {
+    // From what the search leaves showing, when there is one.
     const pool = getOrderedList(gridId);
     if (!pool.length) {
-      showToast(emptyMessage);
+      showToast(isLibraryFiltered(gridId) ? "Nothing in your search to pick from." : emptyMessage);
       return;
     }
     rollSurprise(btn, pool, (row) => openDetailModal(gridId, row.id));

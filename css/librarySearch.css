@@ -1,0 +1,384 @@
+/* ---------- Searching your library (js/librarySearch.js) ----------
+
+   A paper strip between a section's header and its grid, in the same
+   sticker language as the Sort button beside it: paper, ink, a hard
+   offset shadow and a slight tilt. */
+
+.lib-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin: -10px 0 26px;
+}
+
+.lib-search {
+  position: relative;
+  flex: 0 1 380px;
+  min-width: 0;
+  transform: rotate(-0.4deg);
+}
+
+.lib-search-input {
+  width: 100%;
+  padding: 10px 38px 10px 40px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  outline: none;
+  appearance: none;
+  transition: box-shadow var(--transition);
+}
+
+.lib-search-input::placeholder {
+  color: var(--ink-muted);
+}
+
+.lib-search-input:focus {
+  box-shadow: 0 0 0 2px var(--accent), 3px 4px 0 var(--accent-deep);
+}
+
+/* The box's own ✕ stands in for the browser's. */
+.lib-search-input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.lib-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  width: 17px;
+  height: 17px;
+  transform: translateY(-50%);
+  color: var(--ink-muted);
+  pointer-events: none;
+}
+
+.lib-search-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  transform: translateY(-50%);
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  font-size: 13px;
+  transition: color var(--transition);
+}
+
+.lib-search-clear:hover,
+.lib-search-clear:focus-visible {
+  color: var(--accent-deep);
+}
+
+.lib-search-clear[hidden] {
+  display: none;
+}
+
+.lib-count {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* A search that found nothing. */
+.lib-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.lib-empty-clear {
+  padding: 9px 16px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(-1deg);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.lib-empty-clear:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 6px 0 var(--accent-deep);
+}
+
+/* ---------- Filters ---------- */
+
+.lib-filter-wrap {
+  position: relative;
+}
+
+.lib-filter-btn[aria-expanded="true"],
+.lib-filter-btn:has(.lib-filter-badge:not([hidden])) {
+  background: var(--accent-strong);
+  color: #fff;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+}
+
+.lib-filter-badge[hidden] {
+  display: none;
+}
+
+/* The panel: the Sort menu's paper, wider, in groups of chips. */
+.lib-filter-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 50;
+  width: min(460px, calc(100vw - 32px));
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.lib-filter-panel.hidden {
+  display: none;
+}
+
+.lf-body {
+  max-height: min(60vh, 460px);
+  overflow-y: auto;
+  padding: 16px 18px 6px;
+}
+
+.lf-group {
+  margin: 0 0 16px;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+.lf-label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.lf-hint {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.lf-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.lf-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 11px;
+  border: 1.5px dashed color-mix(in srgb, var(--accent-deep) 35%, transparent);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--accent-strong) 6%, transparent);
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 15px;
+  line-height: 1.2;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.lf-chip:hover {
+  background: color-mix(in srgb, var(--accent-strong) 14%, transparent);
+  border-color: var(--accent-deep);
+}
+
+.lf-chip[aria-pressed="true"] {
+  background: var(--accent-strong);
+  border: 1.5px solid var(--accent-deep);
+  color: #fff;
+}
+
+/* Rating: at least / at most / exactly, as one segmented strip. */
+.lf-modes {
+  display: inline-flex;
+  margin-bottom: 9px;
+  border: 1.5px solid var(--accent-deep);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.lf-mode {
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+  transition: background var(--transition), color var(--transition);
+}
+
+/* ≥ ≤ =: the math sign first, big enough to read at a glance. */
+.lf-mode-symbol {
+  display: inline-block;
+  min-width: 0.9em;
+  margin-right: 6px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  color: var(--accent-deep);
+}
+
+.lf-mode[aria-pressed="true"] .lf-mode-symbol {
+  color: #fff;
+}
+
+.lf-mode + .lf-mode {
+  border-left: 1.5px solid var(--accent-deep);
+}
+
+.lf-mode:hover {
+  background: color-mix(in srgb, var(--accent-strong) 12%, transparent);
+}
+
+.lf-mode[aria-pressed="true"] {
+  background: var(--accent-deep);
+  color: #fff;
+}
+
+.lf-n {
+  font-family: var(--font-body);
+  font-size: 11px;
+  opacity: 0.65;
+}
+
+.lf-empty {
+  padding: 8px 0 14px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.lf-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px 14px;
+  border-top: 2px dashed color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+.lf-clear {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.lf-clear:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.lf-done {
+  padding: 8px 18px;
+  background: var(--accent-strong);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(-1deg);
+}
+
+/* ---------- the filters on, as removable tags ---------- */
+
+.lib-active {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  flex-basis: 100%;
+}
+
+.lib-active[hidden] {
+  display: none;
+}
+
+.lib-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 9px 5px 11px;
+  background: var(--accent-strong);
+  color: #fff;
+  font-family: var(--font-hand);
+  font-size: 15px;
+  line-height: 1.2;
+  border-radius: 2px;
+  box-shadow: 2px 3px 0 var(--accent-deep);
+  transition: filter var(--transition);
+}
+
+.lib-tag span {
+  font-family: var(--font-body);
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.lib-tag:hover {
+  filter: brightness(1.12);
+}
+
+.lib-tags-clear {
+  margin-left: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.lib-tags-clear:hover {
+  color: var(--accent);
+}
+
+/* ---------- Sort menu: Custom order, locked while narrowed ---------- */
+
+.sort-option.is-locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sort-option.is-locked:hover {
+  background: none;
+}
+
+.sort-locked-note {
+  max-width: 215px;
+  margin: 0 4px 6px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .lib-search {
+    flex-basis: 100%;
+  }
+}

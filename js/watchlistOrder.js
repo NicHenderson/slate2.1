@@ -37,7 +37,7 @@ async function saveCustomOrder(gridId, orderedIds) {
 // position yet: freeze the order currently on screen (the sort being
 // switched away from) so nothing jumps. Must run before activeSorts changes.
 function seedCustomOrder(gridId) {
-  const rows = getOrderedList(gridId);
+  const rows = getOrderedList(gridId, { searched: false }); // every title, searched or not
   if (rows.some((row) => row.position != null)) return;
   saveCustomOrder(gridId, rows.map((row) => row.id));
 }
@@ -55,6 +55,6 @@ Object.keys(CUSTOM_SORT_HINTS).forEach((gridId) => {
       // rebuild the grid (and yank the card that's still settling).
       grid._html = gridHtml(gridId, [...STORE[GRID_CONFIG[gridId].table].values()]);
     },
-    () => isCustomSorted(gridId)
+    () => isCustomSorted(gridId) && !isLibraryFiltered(gridId)
   );
 });

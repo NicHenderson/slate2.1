@@ -41,6 +41,7 @@
   <link rel="stylesheet" href="css/transitions.css?v=bf37ef65" />
   <link rel="stylesheet" href="css/settings.css?v=76a3748b" />
   <link rel="stylesheet" href="css/yourData.css?v=14774a1f" />
+  <link rel="stylesheet" href="css/librarySearch.css?v=cce1cb12" />
   <link rel="stylesheet" href="css/responsive.css?v=1d55d7b9" />
 </head>
 <body>
@@ -830,6 +831,22 @@
           </div>
           <div class="hstats" id="hstats-movies-watched" hidden></div>
         </header>
+        <div class="lib-tools" data-lib-section="movies-watched">
+          <div class="lib-search">
+            <svg class="lib-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20 L15.8 15.8"/></svg>
+            <input type="search" class="lib-search-input" id="lib-search-movies-watched" placeholder="Search your movies" aria-label="Search your movies" autocomplete="off" spellcheck="false" enterkeyhint="search" />
+            <button type="button" class="lib-search-clear" aria-label="Clear search" hidden>✕</button>
+          </div>
+          <div class="lib-filter-wrap">
+            <button type="button" class="sort-btn lib-filter-btn" aria-expanded="false" aria-haspopup="dialog">
+              <svg class="sort-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5 H20 L14 12.5 V19 L10 17 V12.5 Z"/></svg>
+              Filters<span class="lib-filter-badge" hidden></span>
+            </button>
+            <div class="lib-filter-panel hidden" role="dialog" aria-label="Filters"></div>
+          </div>
+          <p class="lib-count" aria-live="polite" hidden></p>
+          <div class="lib-active" hidden></div>
+        </div>
         <div class="card-grid" id="grid-movies-watched">
           <p class="loading">Loading…</p>
         </div>
@@ -854,6 +871,22 @@
           </div>
           <div class="hstats" id="hstats-shows-watched" hidden></div>
         </header>
+        <div class="lib-tools" data-lib-section="shows-watched">
+          <div class="lib-search">
+            <svg class="lib-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20 L15.8 15.8"/></svg>
+            <input type="search" class="lib-search-input" id="lib-search-shows-watched" placeholder="Search your shows" aria-label="Search your shows" autocomplete="off" spellcheck="false" enterkeyhint="search" />
+            <button type="button" class="lib-search-clear" aria-label="Clear search" hidden>✕</button>
+          </div>
+          <div class="lib-filter-wrap">
+            <button type="button" class="sort-btn lib-filter-btn" aria-expanded="false" aria-haspopup="dialog">
+              <svg class="sort-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5 H20 L14 12.5 V19 L10 17 V12.5 Z"/></svg>
+              Filters<span class="lib-filter-badge" hidden></span>
+            </button>
+            <div class="lib-filter-panel hidden" role="dialog" aria-label="Filters"></div>
+          </div>
+          <p class="lib-count" aria-live="polite" hidden></p>
+          <div class="lib-active" hidden></div>
+        </div>
         <div class="card-grid" id="grid-shows-watched">
           <p class="loading">Loading…</p>
         </div>
@@ -880,6 +913,22 @@
           </div>
           <div class="hstats" id="hstats-movies-towatch" hidden></div>
         </header>
+        <div class="lib-tools" data-lib-section="movies-towatch">
+          <div class="lib-search">
+            <svg class="lib-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20 L15.8 15.8"/></svg>
+            <input type="search" class="lib-search-input" id="lib-search-movies-towatch" placeholder="Search your watchlist" aria-label="Search your watchlist" autocomplete="off" spellcheck="false" enterkeyhint="search" />
+            <button type="button" class="lib-search-clear" aria-label="Clear search" hidden>✕</button>
+          </div>
+          <div class="lib-filter-wrap">
+            <button type="button" class="sort-btn lib-filter-btn" aria-expanded="false" aria-haspopup="dialog">
+              <svg class="sort-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5 H20 L14 12.5 V19 L10 17 V12.5 Z"/></svg>
+              Filters<span class="lib-filter-badge" hidden></span>
+            </button>
+            <div class="lib-filter-panel hidden" role="dialog" aria-label="Filters"></div>
+          </div>
+          <p class="lib-count" aria-live="polite" hidden></p>
+          <div class="lib-active" hidden></div>
+        </div>
         <div class="card-grid" id="grid-movies-towatch">
           <p class="loading">Loading…</p>
         </div>
@@ -908,6 +957,22 @@
           <div class="hstats subtab-hidden" id="hstats-shows-watching" data-subtab-panel="grid-shows-watching" hidden></div>
           <div class="hstats subtab-hidden" id="hstats-shows-dropped" data-subtab-panel="grid-shows-dropped" hidden></div>
         </header>
+        <div class="lib-tools" data-lib-section="shows-towatch">
+          <div class="lib-search">
+            <svg class="lib-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20 L15.8 15.8"/></svg>
+            <input type="search" class="lib-search-input" id="lib-search-shows-towatch" placeholder="Search your queue" aria-label="Search your queue" autocomplete="off" spellcheck="false" enterkeyhint="search" />
+            <button type="button" class="lib-search-clear" aria-label="Clear search" hidden>✕</button>
+          </div>
+          <div class="lib-filter-wrap">
+            <button type="button" class="sort-btn lib-filter-btn" aria-expanded="false" aria-haspopup="dialog">
+              <svg class="sort-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5 H20 L14 12.5 V19 L10 17 V12.5 Z"/></svg>
+              Filters<span class="lib-filter-badge" hidden></span>
+            </button>
+            <div class="lib-filter-panel hidden" role="dialog" aria-label="Filters"></div>
+          </div>
+          <p class="lib-count" aria-live="polite" hidden></p>
+          <div class="lib-active" hidden></div>
+        </div>
         <div class="subtabs status-strip" role="tablist" aria-label="Show status">
           <button class="status-tab active" type="button" data-subtab="grid-shows-towatch" role="tab">
             <svg class="status-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5 H17.5 V20.5 L12 16.5 L6.5 20.5 Z"/></svg>
@@ -1440,10 +1505,11 @@
   <script src="js/confirmModal.js?v=e3035a86"></script>
   <script src="js/settings.js?v=4a727577"></script>
   <script src="js/profile.js?v=47b4a649"></script>
-  <script src="js/data.js?v=bcf824cd"></script>
-  <script src="js/sortMenu.js?v=9f28d5be"></script>
-  <script src="js/watchlistOrder.js?v=8763c385"></script>
-  <script src="js/sectionHeaders.js?v=71188709"></script>
+  <script src="js/librarySearch.js?v=b0e773f4"></script>
+  <script src="js/data.js?v=e74ecc73"></script>
+  <script src="js/sortMenu.js?v=51895950"></script>
+  <script src="js/watchlistOrder.js?v=c4c30070"></script>
+  <script src="js/sectionHeaders.js?v=17ed22a9"></script>
   <script src="js/yourData.js?v=8485eb3a"></script>
   <script src="js/deleteAccount.js?v=78a6ba0b"></script>
   <script src="js/landing.js?v=d4d172b3"></script>
