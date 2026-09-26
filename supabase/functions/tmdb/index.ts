@@ -8,8 +8,10 @@
 //   POST { "path": "search/movie", "query": "alien" }   → TMDB's search JSON
 //   POST { "path": "movie/348" }                          → the title's details
 //   POST { "path": "tv/1399/videos" }                     → its trailers
+//   POST { "path": "movie/348/watch/providers" }          → where to watch it
+//   POST { "path": "watch/providers/regions" }            → the countries that covers
 //
-// Only those three kinds of request, and only for a signed-in user: the
+// Only those kinds of request, and only for a signed-in user: the
 // caller's session token is checked with Supabase Auth, so the function
 // can't be used as a free TMDB key by anyone who finds its address.
 // Posters don't come through here: image.tmdb.org needs no key.
@@ -25,6 +27,8 @@ const ALLOWED_PATHS = [
   /^search\/(movie|tv)$/,
   /^(movie|tv)\/\d{1,10}$/,
   /^(movie|tv)\/\d{1,10}\/videos$/,
+  /^(movie|tv)\/\d{1,10}\/watch\/providers$/,
+  /^watch\/providers\/regions$/,
 ];
 
 const MAX_QUERY_LENGTH = 200;

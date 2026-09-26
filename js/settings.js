@@ -14,6 +14,7 @@ const DEFAULT_SETTINGS = {
   openTo: "last",
   defaultSort: "recent",
   confirmDeletes: true,
+  watchRegion: "", // "" = the browser's country (js/whereToWatch.js)
 };
 const SETTINGS_CACHE_KEY = "slate_settings_cache";
 const LAST_SECTION_KEY = "slate_last_section";
@@ -60,6 +61,8 @@ function normalizeSettings(raw) {
   });
   s.reduceMotion = s.reduceMotion === true;
   s.confirmDeletes = s.confirmDeletes !== false;
+  // A country code, as TMDB keys them ("CL"), or "" for automatic.
+  if (typeof s.watchRegion !== "string" || !/^([A-Z]{2})?$/.test(s.watchRegion)) s.watchRegion = "";
   return s;
 }
 
@@ -215,6 +218,7 @@ function renderSettingsPage() {
   defaultSortSelect.value = currentSettings.defaultSort;
   confirmDeletesToggle.classList.toggle("is-on", currentSettings.confirmDeletes);
   confirmDeletesToggle.setAttribute("aria-pressed", String(currentSettings.confirmDeletes));
+  if (typeof renderWatchRegionOptions === "function") renderWatchRegionOptions();
 }
 
 themeSwatchesEl.addEventListener("click", (e) => {

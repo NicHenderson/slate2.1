@@ -119,7 +119,7 @@ directly.
 
 - Everything so far is in `main`: invite-only access, the welcome-email
   tool, the review note redesign, the trailer button that waits, disabled,
-  and search + filters.
+  search + filters, and where to watch.
 - Search and filters (`js/librarySearch.js`) cover Movies, Shows, Movies To
   Watch and the Shows Queue; the owner chose to leave collections for later.
   Their decisions:
@@ -130,13 +130,15 @@ directly.
     back once everything is cleared.
 - **Next: v3.0.0**, in this order, one at a time and each only with the
   owner's go-ahead:
-  1. **Where to watch:** in the detail window of titles not yet watched,
-     the streaming services from TMDB's watch providers (grouped
-     subscription / rent / buy / free), for a country detected from the
-     browser and changeable in Settings, credited to JustWatch as TMDB
-     requires. When TMDB has nothing, a friendly "we couldn't find where to
-     watch this". Needs `(movie|tv)/<id>/watch/providers` allowed in the
-     `tmdb` Edge Function, which the owner then has to redeploy.
+  1. **Where to watch** (`js/whereToWatch.js`) — done: below the buttons of
+     the detail window (to watch, watching, dropped) and of the search's
+     info window; Stream / Free / Rent / Buy logos linking to TMDB's watch
+     page, credited to JustWatch; the country is the browser's unless
+     picked in Settings → Defaults (`watchRegion`). The `tmdb` Edge
+     Function allows `(movie|tv)/<id>/watch/providers` and
+     `watch/providers/regions`; the owner redeployed the live function with
+     them. Any later change to `supabase/functions/tmdb/index.ts` needs the
+     same redeploy (its README says how).
   2. **Rewatches** (movies first; shows later, designed apart): a new
      viewings table (date + optional note), backfilled with one viewing per
      watched movie; `watched_date` stays the latest viewing so sorts, stats
