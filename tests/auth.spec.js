@@ -22,8 +22,10 @@ test.describe("requesting access", () => {
     await expect(page.locator("#auth-submit")).toHaveText(/^Send again in \d+s$/);
     await expect(page.locator("#auth-name")).toHaveValue("");
     expect(backend.accessRequests).toEqual([
-      expect.objectContaining({ subject: "Slate access request: Ana", name: "Ana", email: "ana@slate.test", message: "Friend of Nico's." }),
+      expect.objectContaining({ subject: "Slate access request: Ana", replyto: "ana@slate.test", name: "Ana", email: "ana@slate.test", message: "Friend of Nico's." }),
     ]);
+    expect(backend.accessRequests[0]["Requested on"]).toMatch(/\d{4}/);
+    expect(backend.accessRequests[0]["Next step"]).toContain("Add user");
     expect(backend.accessRequests[0].access_key).toMatch(/^[0-9a-f-]{36}$/);
     expect(backend.users.size).toBe(1); // only the seeded one
   });

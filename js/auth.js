@@ -456,13 +456,24 @@ async function sendAccessRequest(email) {
     const res = await fetch(ACCESS_REQUEST_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
+      // From `name` on, every field shows up in the email, in this order.
       body: JSON.stringify({
         access_key: WEB3FORMS_ACCESS_KEY,
         subject: `Slate access request: ${name}`,
         from_name: "Slate",
+        replyto: email, // "Reply" in the inbox writes to them
         name,
         email,
         message: note || "(no message)",
+        "Requested on": new Date().toLocaleString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          timeZoneName: "short",
+        }),
+        "Next step": "To let them in: Supabase → Authentication → Users → Add user, with this email and a temporary password. Then send the welcome email.",
       }),
     });
     const result = await res.json().catch(() => ({}));
