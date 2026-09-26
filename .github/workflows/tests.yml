@@ -1,0 +1,69 @@
+# Runs every test on each push and pull request; the result shows as a
+# check (✓ / ✗) next to the commit on GitHub. Nothing here needs secrets:
+# the browser tests run against a fake Supabase (tests/support/), never the
+# real one.
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch: # a "Run workflow" button in the Actions tab
+
+permissions:
+  contents: read
+
+# A newer push to the same branch makes an older run pointless.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser:
+    name: App (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install test tools
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run the tests
+        run: npx playwright test
+
+      # On a failure: the report with a screenshot and a step-by-step trace
+      # of every failed test, downloadable from the run's summary page.
+      - name: Keep the report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+
+  functions:
+    name: Edge Functions (Deno)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Check, lint and test
+        run: |
+          deno check supabase/functions/tmdb/index.ts
+          deno lint supabase/functions/
+          TMDB_PROXY_TEST=1 deno test --allow-env supabase/functions/
