@@ -139,10 +139,29 @@ directly.
      `watch/providers/regions`; the owner redeployed the live function with
      them. Any later change to `supabase/functions/tmdb/index.ts` needs the
      same redeploy (its README says how).
-  2. **Rewatches** (movies first; shows later, designed apart): a new
-     viewings table (date + optional note), backfilled with one viewing per
-     watched movie; `watched_date` stays the latest viewing so sorts, stats
-     and filters keep working; the `.slate` backup must carry viewings.
+  2. **Rewatches** (movies only for now; shows get planned apart once
+     movies work well). Stage 1 is done: `0007_viewings.sql`, verified on a
+     local Postgres, **not yet applied live**. The database keeps
+     `movies.watched_date` = the latest viewing, refuses to drop a movie's
+     last viewing or clear its date, and turns a direct `watched_date`
+     write (the current app, a v1 `.slate`) into the matching viewing — so
+     it's safe to apply before the app's new code. The owner's decisions:
+     - one rating and one review per movie (their current opinion); each
+       viewing has a date and an optional note of up to 200 characters;
+     - a watched movie can never lose its date: Edit changes it but can't
+       empty it, and the only way back is deleting the movie;
+     - viewings can be deleted with a strong confirmation (type the title),
+       except the last one;
+     - the detail window shows the latest date; with more than one
+       viewing, a "N viewings" button lists them, and picking one swaps the
+       window's content to that viewing (date, note, save, delete, back);
+       with a single viewing, Edit holds its date and note;
+     - "↻ Watched it again" beside Edit adds one; cards show ×N;
+     - Time watched counts every viewing, plus a Rewatches stat; the
+       "Watched in" filter matches any viewing's year;
+     - `.slate` goes to version 2 carrying viewings; version 1 files still
+       import (one viewing per watched movie).
+     Next stages: 2 the app, 3 backup + stats + filter, 4 tests.
   3. **Import from other apps:** IMDb (CSV with IMDb ids → TMDB `find`),
      Letterboxd (ZIP of CSVs, title + year matching, diary rewatches),
      Trakt (JSON with TMDB ids); TV Time only after seeing a real export.
