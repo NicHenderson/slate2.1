@@ -1,0 +1,29 @@
+#!/bin/sh
+# Before each commit that includes a stylesheet or script: bring the cache
+# stamps in index.html up to date (scripts/stamp.js) and add them to the
+# commit. Switched on by `npm install` (scripts/install-hooks.js).
+#
+# It never blocks a commit: if it can't restamp safely it says why and lets
+# the commit through — GitHub's stamp check will still catch a stale one.
+
+changed=$(git diff --cached --name-only --diff-filter=ACMR -- css js index.html)
+[ -z "$changed" ] && exit 0
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "pre-commit: Node.js not found, cache stamps not updated (run npm run stamp)." >&2
+  exit 0
+fi
+
+# index.html is about to be rewritten and staged whole: edits to it that
+# aren't staged would ride along into this commit, so leave it alone then.
+if ! git diff --quiet -- index.html; then
+  echo "pre-commit: index.html has unstaged changes, cache stamps not updated (run npm run stamp)." >&2
+  exit 0
+fi
+
+before=$(git hash-object index.html)
+node scripts/stamp.js --staged >/dev/null || exit 1
+if [ "$(git hash-object index.html)" != "$before" ]; then
+  git add index.html
+  echo "pre-commit: cache stamps updated in index.html"
+fi

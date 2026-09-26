@@ -33,7 +33,7 @@ then open <http://127.0.0.1:8080>. After pulling changes, hard-refresh
 | `img/` | The logo and the OpenMoji emoji used for collection icons |
 | `supabase/` | The database structure (`migrations/`) and server-side code (`functions/`) — see [`supabase/README.md`](supabase/README.md) |
 | `tests/` | The automated tests (below) |
-| `scripts/stamp.js` | Keeps the cache stamps (`?v=…`) in `index.html` in step with the files |
+| `scripts/` | `stamp.js` keeps the cache stamps (`?v=…`) in `index.html` in step with the files; `install-hooks.js` switches on the git hook in `.githooks/` that runs it on each commit |
 | `.github/workflows/tests.yml` | Runs every test on GitHub on each push |
 
 ## Tests
@@ -102,10 +102,12 @@ reach any site outside the app.
 
 - **Every bug fixed gets a test** that fails on the broken code and passes
   on the fix, so it can't quietly come back.
-- **Change a CSS or JS file → run `npm run stamp`.** Each file is linked
-  from `index.html` as `file?v=<stamp>`, a fingerprint of its contents
-  (`scripts/stamp.js`), so browsers fetch it again exactly when it changed.
-  Forget, and the tests on GitHub fail, naming the file.
+- **CSS and JS files are cache-stamped.** Each is linked from `index.html`
+  as `file?v=<stamp>`, a fingerprint of its contents (`scripts/stamp.js`),
+  so browsers fetch it again exactly when it changed. After `npm install`
+  a git hook restamps on every commit by itself; without it, run
+  `npm run stamp`. Either way, a stale stamp fails the tests on GitHub,
+  naming the file.
 - **Database changes go in as a migration:** the next numbered file in
   `supabase/migrations/`, run in the Supabase SQL Editor and committed with
   the code that needs it. Never only in the dashboard.

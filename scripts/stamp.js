@@ -9,10 +9,15 @@
 //   npm run stamp          rewrite index.html with the current stamps
 //   npm run stamp:check    change nothing; exit 1 listing any stale stamp
 //                          (GitHub runs this on every push)
+//   node scripts/stamp.js --staged
+//                          stamp from the versions staged for the next
+//                          commit rather than the files on disk — what the
+//                          pre-commit hook (.githooks/pre-commit) runs
 
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const { execFileSync } = require("child_process");
 
 const ROOT = path.join(__dirname, "..");
 const INDEX = path.join(ROOT, "index.html");
@@ -21,9 +26,17 @@ const INDEX = path.join(ROOT, "index.html");
 // without a stamp yet.
 const REF = /(href|src)="((?:css|js)\/[\w./-]+\.(?:css|js))(?:\?v=([\w.-]*))?"/g;
 
+// Where file contents come from: the disk, or (--staged) git's index, so a
+// commit's stamps match the files it actually contains.
+let staged = false;
+
+function contentsOf(file) {
+  if (!staged) return fs.readFileSync(path.join(ROOT, file));
+  return execFileSync("git", ["show", `:${file}`], { cwd: ROOT, maxBuffer: 64 * 1024 * 1024 });
+}
+
 function stampOf(file) {
-  const bytes = fs.readFileSync(path.join(ROOT, file));
-  return crypto.createHash("sha256").update(bytes).digest("hex").slice(0, 8);
+  return crypto.createHash("sha256").update(contentsOf(file)).digest("hex").slice(0, 8);
 }
 
 // Every reference in the page: its file, the stamp it has, the one it should.
@@ -49,6 +62,7 @@ function stamp() {
 module.exports = { references, stale, stamp };
 
 if (require.main === module) {
+  staged = process.argv.includes("--staged");
   if (process.argv.includes("--check")) {
     const wrong = stale();
     if (!wrong.length) {
