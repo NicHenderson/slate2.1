@@ -180,6 +180,16 @@ Object.entries(GRID_SORTS).forEach(([gridId, cfg]) => {
   activeSorts[gridId] = cfg.options[saved] ? saved : fallback;
 });
 
+// The sort a grid is shown in: the one picked, except that Custom order is
+// paused while the section is searched or filtered (js/librarySearch.js) —
+// the account's default sort stands in until it's all cleared.
+function effectiveSort(gridId) {
+  const key = activeSorts[gridId];
+  if (key !== "custom" || !isLibraryFiltered(gridId)) return key;
+  const options = GRID_SORTS[gridId].options;
+  return options[currentSettings.defaultSort] && currentSettings.defaultSort !== "custom" ? currentSettings.defaultSort : "recent";
+}
+
 const MOVIE_GRIDS = Object.keys(GRID_CONFIG).filter(
   (id) => GRID_CONFIG[id].table === "movies"
 );
@@ -245,7 +255,7 @@ function getOrderedList(gridId, { searched = true } = {}) {
     .filter((row) => !searched || libraryMatches(gridId, row));
   const sortCfg = GRID_SORTS[gridId];
   if (sortCfg) {
-    visible = visible.sort(sortCfg.options[activeSorts[gridId]].cmp);
+    visible = visible.sort(sortCfg.options[effectiveSort(gridId)].cmp);
   }
   return visible;
 }
@@ -266,7 +276,7 @@ function gridHtml(gridId, rows) {
   let visible = rows.filter(cfg.match).filter((row) => libraryMatches(gridId, row));
   const sortCfg = GRID_SORTS[gridId];
   if (sortCfg) {
-    visible = [...visible].sort(sortCfg.options[activeSorts[gridId]].cmp);
+    visible = [...visible].sort(sortCfg.options[effectiveSort(gridId)].cmp);
   }
   const showRating = cfg.state === "watched";
   const extra = cfg.state === "watching" ? startedAgoHtml : () => "";

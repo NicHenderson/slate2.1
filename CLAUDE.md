@@ -120,6 +120,13 @@ directly.
 - Everything so far is in `main`: invite-only access, the welcome-email
   tool, the review note redesign, and the trailer button that waits,
   disabled.
+- Search and filters (`js/librarySearch.js`) cover Movies, Shows, Movies To
+  Watch and the Shows Queue; the owner chose to leave collections for later.
+  Their decisions:
+  - several genres picked means titles with all of them;
+  - while any search or filter is on, Custom order is paused (no dragging,
+    the default sort instead, "Custom" locked in the Sort menu) and comes
+    back once everything is cleared.
 - **Next: publish on Cloudflare Pages** (free, chosen over Netlify and
   Vercel). The steps:
   1. Connect the GitHub repo. There's no build command, and the output

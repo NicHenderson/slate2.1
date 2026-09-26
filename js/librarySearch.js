@@ -1,17 +1,23 @@
-/* ---------- Searching your library ----------
+/* ---------- Searching and filtering your library ----------
 
    Movies, Shows, Movies To Watch and the Shows Queue each have a search box
-   over their grid. It only changes which cards show: every title is in
-   memory already (STORE), so nothing is fetched and nothing is saved — a
-   reload starts from the whole list again.
+   and a Filters panel over their grid. They only change which cards show:
+   every title is in memory already (STORE), so nothing is fetched and
+   nothing is saved — a reload starts from the whole list again.
 
    data.js asks libraryMatches() while it builds a grid (and the list the
-   detail window's arrows and Surprise Me pick from), so a search holds
-   through sorting and realtime changes. While a section is searched, its
-   Custom order can't be dragged: moving a card among the few showing would
-   leave no telling where it belongs among the rest. */
+   detail window's arrows and Surprise Me pick from), so a search or filter
+   holds through sorting and realtime changes. Each filter narrows the
+   results, as each word of the search does.
 
-// The section each grid belongs to: the Shows Queue's three tabs share one box.
+   While anything narrows a section, its Custom order is paused: no card
+   can be dragged (moving one among the few showing would leave no telling
+   where it belongs among the rest), the list shows in the account's
+   default sort instead, and the Sort menu shows Custom as locked. Clearing
+   everything brings it back (data.js's effectiveSort). */
+
+// The section each grid belongs to: the Shows Queue's three tabs share one
+// search box and one set of filters.
 const LIBRARY_SECTION_OF_GRID = {
   "grid-movies-watched": "movies-watched",
   "grid-shows-watched": "shows-watched",
@@ -21,8 +27,8 @@ const LIBRARY_SECTION_OF_GRID = {
   "grid-shows-dropped": "shows-towatch",
 };
 
-// Section id -> the words typed, folded (see foldText).
-const librarySearch = {};
+const gridsOfSection = (sectionId) =>
+  Object.keys(LIBRARY_SECTION_OF_GRID).filter((gridId) => LIBRARY_SECTION_OF_GRID[gridId] === sectionId);
 
 // Case and accents don't count: "amelie" finds "Amélie".
 const foldText = (text) =>
@@ -31,27 +37,165 @@ const foldText = (text) =>
     .replace(/\p{Diacritic}/gu, "")
     .toLowerCase();
 
-const searchTermsFor = (gridId) => librarySearch[LIBRARY_SECTION_OF_GRID[gridId]] ?? [];
+/* ---------- the filters ----------
+
+   Each filter says which options a title has (`optionsOf`); the panel
+   lists the options titles in the section actually have, with how many.
+   Picking several options of one filter keeps titles with any of them —
+   except genres, where a title needs all of them (Horror + Comedy: horror
+   comedies). The minimum rating is one choice, not several. */
+
+const yearOf = (date) => (date ? Number(String(date).slice(0, 4)) : null);
+
+const LIBRARY_FILTERS = {
+  genres: {
+    label: "Genre",
+    matchAll: true,
+    optionsOf: (row) =>
+      String(row.genres ?? "")
+        .split(",")
+        .map((g) => g.trim())
+        .filter(Boolean),
+    order: (a, b) => b.count - a.count || a.value.localeCompare(b.value),
+  },
+  decades: {
+    label: "Decade",
+    optionsOf: (row) => (row.release_year ? [String(Math.floor(row.release_year / 10) * 10)] : []),
+    name: (value) => `${value}s`,
+    order: (a, b) => Number(a.value) - Number(b.value),
+  },
+  runtime: {
+    label: "Length",
+    optionsOf: (row) => {
+      if (!row.duration) return [];
+      if (row.duration < 90) return ["short"];
+      return [row.duration <= 120 ? "medium" : "long"];
+    },
+    name: (value) => ({ short: "Under 90 min", medium: "90 min – 2 h", long: "Over 2 h" })[value],
+    order: (a, b) => ["short", "medium", "long"].indexOf(a.value) - ["short", "medium", "long"].indexOf(b.value),
+  },
+  seasons: {
+    label: "Length",
+    optionsOf: (row) => {
+      if (!row.total_seasons) return [];
+      if (row.total_seasons === 1) return ["mini"];
+      return [row.total_seasons <= 4 ? "some" : "many"];
+    },
+    name: (value) => ({ mini: "Miniseries · 1 season", some: "2–4 seasons", many: "5+ seasons" })[value],
+    order: (a, b) => ["mini", "some", "many"].indexOf(a.value) - ["mini", "some", "many"].indexOf(b.value),
+  },
+  rating: {
+    label: "Minimum rating",
+    single: true,
+    // A title "has" every threshold it clears: an 8 counts under 6+, 7+ and 8+.
+    optionsOf: (row) =>
+      row.rating == null ? ["unrated"] : ["6", "7", "8", "9", "10"].filter((n) => row.rating >= Number(n)),
+    name: (value) => (value === "unrated" ? "Unrated" : value === "10" ? "10/10" : `${value}+`),
+    tag: (value) => (value === "unrated" ? "Unrated" : value === "10" ? "Rated 10/10" : `Rated ${value}+`),
+    order: (a, b) => (a.value === "unrated") - (b.value === "unrated") || Number(a.value) - Number(b.value),
+  },
+  watchedIn: {
+    label: "Watched in",
+    optionsOf: (row) => {
+      const year = yearOf(row.watched_date ?? row.finished_watching_date);
+      return year ? [String(year)] : [];
+    },
+    tag: (value) => `Watched in ${value}`,
+    order: (a, b) => Number(b.value) - Number(a.value),
+  },
+};
+
+// Which filters each section offers.
+const SECTION_FILTERS = {
+  "movies-watched": ["genres", "decades", "runtime", "rating", "watchedIn"],
+  "shows-watched": ["genres", "decades", "seasons", "rating", "watchedIn"],
+  "movies-towatch": ["genres", "decades", "runtime"],
+  "shows-towatch": ["genres", "decades", "seasons"],
+};
+
+const optionName = (key, value) => LIBRARY_FILTERS[key].name?.(value) ?? value;
+const optionTag = (key, value) => LIBRARY_FILTERS[key].tag?.(value) ?? optionName(key, value);
+
+/* ---------- state ---------- */
+
+// Section id -> { terms: the words typed, folded; picks: filter -> Set }.
+const libraryState = {};
+
+function stateOf(sectionId) {
+  if (!libraryState[sectionId]) libraryState[sectionId] = { terms: [], picks: {} };
+  return libraryState[sectionId];
+}
+
+const picksOf = (sectionId, key) => stateOf(sectionId).picks[key] ?? new Set();
+
+function pickCount(sectionId) {
+  return Object.values(stateOf(sectionId).picks).reduce((n, set) => n + set.size, 0);
+}
+
+function sectionNarrowed(sectionId) {
+  return stateOf(sectionId).terms.length > 0 || pickCount(sectionId) > 0;
+}
 
 function isLibraryFiltered(gridId) {
-  return searchTermsFor(gridId).length > 0;
+  const sectionId = LIBRARY_SECTION_OF_GRID[gridId];
+  return Boolean(sectionId) && sectionNarrowed(sectionId);
 }
 
-// Every word typed has to be somewhere in the title, in any order.
 function libraryMatches(gridId, row) {
-  const terms = searchTermsFor(gridId);
-  if (!terms.length) return true;
-  const title = foldText(row.title);
-  return terms.every((term) => title.includes(term));
+  const sectionId = LIBRARY_SECTION_OF_GRID[gridId];
+  if (!sectionId) return true;
+  const { terms, picks } = stateOf(sectionId);
+  if (terms.length) {
+    const title = foldText(row.title);
+    if (!terms.every((term) => title.includes(term))) return false;
+  }
+  return Object.entries(picks).every(([key, picked]) => {
+    if (!picked.size) return true;
+    const has = LIBRARY_FILTERS[key].optionsOf(row);
+    return LIBRARY_FILTERS[key].matchAll
+      ? [...picked].every((value) => has.includes(value))
+      : [...picked].some((value) => has.includes(value));
+  });
 }
 
-// What a searched grid says when nothing in it matches.
-function libraryEmptyHtml(gridId) {
-  const typed = document.querySelector(`[data-lib-section="${LIBRARY_SECTION_OF_GRID[gridId]}"] .lib-search-input`)?.value.trim() ?? "";
-  return `<p class="grid-empty lib-empty">Nothing here matches “${escapeHtml(typed)}”.<button class="lib-empty-clear" type="button" data-lib-clear>Clear search</button></p>`;
+// Every title in the section, whatever tab it's on.
+function sectionRows(sectionId) {
+  if (typeof STORE === "undefined") return [];
+  return gridsOfSection(sectionId).flatMap((gridId) => {
+    const cfg = GRID_CONFIG[gridId];
+    return [...STORE[cfg.table].values()].filter(cfg.match);
+  });
 }
+
+// The options a filter can offer in a section, most useful first, each
+// with how many titles have it.
+function filterOptions(sectionId, key) {
+  const counts = new Map();
+  sectionRows(sectionId).forEach((row) => {
+    LIBRARY_FILTERS[key].optionsOf(row).forEach((value) => counts.set(value, (counts.get(value) ?? 0) + 1));
+  });
+  return [...counts].map(([value, count]) => ({ value, count })).sort(LIBRARY_FILTERS[key].order);
+}
+
+/* ---------- what's on screen ---------- */
 
 const libraryTools = (sectionId) => document.querySelector(`[data-lib-section="${sectionId}"]`);
+
+const visibleGridOf = (sectionId) =>
+  document.getElementById(sectionId)?.querySelector(".card-grid:not(.subtab-hidden)") ?? null;
+
+// What a narrowed grid says when nothing in it matches.
+function libraryEmptyHtml(gridId) {
+  const sectionId = LIBRARY_SECTION_OF_GRID[gridId];
+  const typed = libraryTools(sectionId)?.querySelector(".lib-search-input").value.trim() ?? "";
+  const filtered = pickCount(sectionId) > 0;
+  const text = !filtered
+    ? `Nothing here matches “${escapeHtml(typed)}”.`
+    : typed
+      ? "Nothing here matches your search and filters."
+      : "Nothing here matches these filters.";
+  return `<p class="grid-empty lib-empty">${text}<button class="lib-empty-clear" type="button" data-lib-clear>${filtered ? "Clear all" : "Clear search"}</button></p>`;
+}
 
 // "Showing 3 of 120", for the grid on screen in that section (the Shows
 // Queue shows one tab at a time).
@@ -59,33 +203,118 @@ function updateLibraryCount(sectionId) {
   const tools = libraryTools(sectionId);
   if (!tools || typeof STORE === "undefined") return;
   const count = tools.querySelector(".lib-count");
-  const section = document.getElementById(sectionId);
-  const grid = section.querySelector(".card-grid:not(.subtab-hidden)");
-  if (!grid || !isLibraryFiltered(grid.id)) {
+  const grid = visibleGridOf(sectionId);
+  if (!grid || !sectionNarrowed(sectionId)) {
     count.hidden = true;
     return;
   }
   const cfg = GRID_CONFIG[grid.id];
   const all = [...STORE[cfg.table].values()].filter(cfg.match);
   const shown = all.filter((row) => libraryMatches(grid.id, row)).length;
-  const reorder = isCustomSorted(grid.id) ? " · clear the search to reorder" : "";
-  count.textContent = `Showing ${shown} of ${all.length}${reorder}`;
+  count.textContent = `Showing ${shown} of ${all.length}`;
   count.hidden = false;
 }
 
-function rerenderLibrarySection(sectionId) {
-  Object.entries(LIBRARY_SECTION_OF_GRID)
-    .filter(([, section]) => section === sectionId)
-    .forEach(([gridId]) => renderGrid(gridId, [...STORE[GRID_CONFIG[gridId].table].values()]));
+// The button's badge and the removable tags under the bar.
+function renderActiveFilters(sectionId) {
+  const tools = libraryTools(sectionId);
+  const badge = tools.querySelector(".lib-filter-badge");
+  const n = pickCount(sectionId);
+  badge.textContent = n ? ` · ${n}` : "";
+  badge.hidden = !n;
+  const tags = (SECTION_FILTERS[sectionId] ?? []).flatMap((key) =>
+    [...picksOf(sectionId, key)].map(
+      (value) =>
+        `<button class="lib-tag" type="button" data-remove-filter="${key}" data-value="${escapeHtml(value)}" aria-label="Remove filter: ${escapeHtml(optionTag(key, value))}">${escapeHtml(optionTag(key, value))}<span aria-hidden="true">✕</span></button>`
+    )
+  );
+  const active = tools.querySelector(".lib-active");
+  active.innerHTML = tags.length ? `${tags.join("")}<button class="lib-tags-clear" type="button" data-clear-filters>Clear filters</button>` : "";
+  active.hidden = !tags.length;
+}
+
+function renderFilterPanel(sectionId) {
+  const panel = libraryTools(sectionId).querySelector(".lib-filter-panel");
+  const groups = (SECTION_FILTERS[sectionId] ?? [])
+    .map((key) => {
+      const options = filterOptions(sectionId, key);
+      if (!options.length) return "";
+      const picked = picksOf(sectionId, key);
+      const filter = LIBRARY_FILTERS[key];
+      const any = filter.single
+        ? `<button class="lf-chip" type="button" data-filter="${key}" data-value="" aria-pressed="${!picked.size}">Any</button>`
+        : "";
+      const chips = options
+        .map(
+          ({ value, count }) =>
+            `<button class="lf-chip" type="button" data-filter="${key}" data-value="${escapeHtml(value)}" aria-pressed="${picked.has(value)}">${escapeHtml(optionName(key, value))}<span class="lf-n">${count}</span></button>`
+        )
+        .join("");
+      const hint = filter.matchAll ? `<span class="lf-hint">titles with all you pick</span>` : "";
+      return `<fieldset class="lf-group"><legend class="lf-label">${filter.label}${hint}</legend><div class="lf-chips">${any}${chips}</div></fieldset>`;
+    })
+    .join("");
+  panel.innerHTML = `
+    <div class="lf-body">${groups || `<p class="lf-empty">Nothing to filter yet.</p>`}</div>
+    <div class="lf-foot">
+      <button class="lf-clear" type="button" data-clear-filters ${pickCount(sectionId) ? "" : "disabled"}>Clear filters</button>
+      <button class="lf-done" type="button" data-close-filters>Done</button>
+    </div>`;
+}
+
+/* ---------- changing it ---------- */
+
+// Custom order is paused while a section is narrowed: say so the moment
+// that happens to a list that was on it.
+function pausesCustomOrder(sectionId) {
+  return gridsOfSection(sectionId).some((gridId) => isCustomSorted(gridId));
+}
+
+function refreshSection(sectionId) {
+  gridsOfSection(sectionId).forEach((gridId) => renderGrid(gridId, [...STORE[GRID_CONFIG[gridId].table].values()]));
+  const grid = visibleGridOf(sectionId);
+  if (grid) updateSortLabel(grid.id);
   updateLibraryCount(sectionId);
+  renderActiveFilters(sectionId);
+  const panel = libraryTools(sectionId).querySelector(".lib-filter-panel");
+  if (!panel.classList.contains("hidden")) renderFilterPanel(sectionId);
+}
+
+function changeLibrary(sectionId, change) {
+  const before = sectionNarrowed(sectionId);
+  change(stateOf(sectionId));
+  const after = sectionNarrowed(sectionId);
+  if (!before && after && pausesCustomOrder(sectionId)) {
+    showToast("Custom order is paused while you search or filter — clear them to use it again.");
+  }
+  refreshSection(sectionId);
 }
 
 function setLibrarySearch(sectionId, text) {
   const terms = foldText(text).split(/\s+/).filter(Boolean);
-  const before = (librarySearch[sectionId] ?? []).join(" ");
-  librarySearch[sectionId] = terms;
   libraryTools(sectionId).querySelector(".lib-search-clear").hidden = !text;
-  if (terms.join(" ") !== before) rerenderLibrarySection(sectionId);
+  if (terms.join(" ") === stateOf(sectionId).terms.join(" ")) return;
+  changeLibrary(sectionId, (state) => (state.terms = terms));
+}
+
+function toggleFilter(sectionId, key, value) {
+  changeLibrary(sectionId, (state) => {
+    const picked = new Set(state.picks[key] ?? []);
+    if (LIBRARY_FILTERS[key].single) {
+      const already = picked.has(value);
+      picked.clear();
+      if (value && !already) picked.add(value);
+    } else if (picked.has(value)) {
+      picked.delete(value);
+    } else {
+      picked.add(value);
+    }
+    state.picks[key] = picked;
+  });
+}
+
+function clearLibraryFilters(sectionId) {
+  changeLibrary(sectionId, (state) => (state.picks = {}));
 }
 
 function clearLibrarySearch(sectionId, { focus = false } = {}) {
@@ -95,16 +324,48 @@ function clearLibrarySearch(sectionId, { focus = false } = {}) {
   if (focus) input.focus();
 }
 
-// Signed out (data.js's clearAppData): the next account starts unsearched.
+// Search and filters both, from a grid that came up empty.
+function clearLibraryAll(sectionId) {
+  const input = libraryTools(sectionId).querySelector(".lib-search-input");
+  input.value = "";
+  libraryTools(sectionId).querySelector(".lib-search-clear").hidden = true;
+  changeLibrary(sectionId, (state) => {
+    state.terms = [];
+    state.picks = {};
+  });
+  input.focus();
+}
+
+function openFilterPanel(sectionId) {
+  const tools = libraryTools(sectionId);
+  closeFilterPanels();
+  renderFilterPanel(sectionId);
+  tools.querySelector(".lib-filter-panel").classList.remove("hidden");
+  tools.querySelector(".lib-filter-btn").setAttribute("aria-expanded", "true");
+}
+
+function closeFilterPanels() {
+  document.querySelectorAll(".lib-filter-panel:not(.hidden)").forEach((panel) => {
+    panel.classList.add("hidden");
+    panel.closest(".lib-tools").querySelector(".lib-filter-btn").setAttribute("aria-expanded", "false");
+  });
+}
+
+// Signed out (data.js's clearAppData): the next account starts with nothing
+// searched or filtered.
 function resetLibrarySearch() {
-  Object.keys(librarySearch).forEach((sectionId) => {
-    librarySearch[sectionId] = [];
-    const tools = libraryTools(sectionId);
+  Object.keys(libraryState).forEach((sectionId) => delete libraryState[sectionId]);
+  closeFilterPanels();
+  document.querySelectorAll(".lib-tools").forEach((tools) => {
     tools.querySelector(".lib-search-input").value = "";
     tools.querySelector(".lib-search-clear").hidden = true;
     tools.querySelector(".lib-count").hidden = true;
+    tools.querySelector(".lib-filter-badge").hidden = true;
+    tools.querySelector(".lib-active").hidden = true;
   });
 }
+
+/* ---------- wiring ---------- */
 
 // Typing re-draws the grid; a short pause first, so a library of thousands
 // isn't rebuilt on every keystroke.
@@ -113,6 +374,7 @@ let librarySearchTimer = null;
 document.querySelectorAll(".lib-tools").forEach((tools) => {
   const sectionId = tools.dataset.libSection;
   const input = tools.querySelector(".lib-search-input");
+
   input.addEventListener("input", () => {
     tools.querySelector(".lib-search-clear").hidden = !input.value;
     clearTimeout(librarySearchTimer);
@@ -135,14 +397,38 @@ document.querySelectorAll(".lib-tools").forEach((tools) => {
     clearTimeout(librarySearchTimer);
     clearLibrarySearch(sectionId, { focus: true });
   });
+
+  tools.querySelector(".lib-filter-btn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (tools.querySelector(".lib-filter-panel").classList.contains("hidden")) openFilterPanel(sectionId);
+    else closeFilterPanels();
+  });
+
+  tools.addEventListener("click", (e) => {
+    const chip = e.target.closest(".lf-chip");
+    if (chip) toggleFilter(sectionId, chip.dataset.filter, chip.dataset.value);
+    const tag = e.target.closest("[data-remove-filter]");
+    if (tag) toggleFilter(sectionId, tag.dataset.removeFilter, tag.dataset.value);
+    if (e.target.closest("[data-clear-filters]")) clearLibraryFilters(sectionId);
+    if (e.target.closest("[data-close-filters]")) closeFilterPanels();
+  });
 });
 
-// "Clear search" in a grid that came up empty.
+// "Clear search" / "Clear all" in a grid that came up empty.
 document.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-lib-clear]");
   if (!btn) return;
   const sectionId = btn.closest(".section")?.id;
-  if (sectionId && libraryTools(sectionId)) clearLibrarySearch(sectionId, { focus: true });
+  if (sectionId && libraryTools(sectionId)) clearLibraryAll(sectionId);
+});
+
+// A click anywhere else closes the Filters panel; so does Escape. The path
+// as the click happened, since picking a chip redraws the panel under it.
+document.addEventListener("click", (e) => {
+  if (!e.composedPath().some((el) => el.classList?.contains("lib-filter-wrap"))) closeFilterPanels();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeFilterPanels();
 });
 
 // Another tab of the Shows Queue: its own count.

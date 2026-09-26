@@ -1,11 +1,17 @@
+// Custom order is there but locked while the list is searched or filtered
+// (js/librarySearch.js): it can't be used on part of a list.
 function renderSortMenuFor(menuEl, gridId) {
   let lastGroup = null;
+  const locked = isLibraryFiltered(gridId);
   menuEl.innerHTML = Object.entries(GRID_SORTS[gridId].options)
     .map(([key, opt]) => {
       const heading =
         opt.group !== lastGroup ? `<p class="sort-group-label">${opt.group}</p>` : "";
       lastGroup = opt.group;
-      const active = key === activeSorts[gridId] ? " active" : "";
+      const active = key === effectiveSort(gridId) ? " active" : "";
+      if (key === "custom" && locked) {
+        return `${heading}<button class="sort-option is-locked" type="button" data-sort="${key}" disabled><span class="sort-stub">${opt.stub}</span><span class="sort-option-label">${opt.label}</span></button><p class="sort-locked-note">Temporarily locked — clear your search and filters first.</p>`;
+      }
       return `${heading}<button class="sort-option${active}" type="button" data-sort="${key}"><span class="sort-stub">${opt.stub}</span><span class="sort-option-label">${opt.label}</span></button>`;
     })
     .join("");
@@ -32,7 +38,7 @@ function updateSortLabel(gridId) {
   const elId = SORT_LABEL_TARGETS[gridId];
   const el = elId && document.getElementById(elId);
   if (!el) return;
-  el.textContent = GRID_SORTS[gridId].options[activeSorts[gridId]]?.label ?? "";
+  el.textContent = GRID_SORTS[gridId].options[effectiveSort(gridId)]?.label ?? "";
 }
 
 function setGridSort(gridId, key) {
@@ -63,7 +69,7 @@ function initSortMenu(btnId, menuId, resolveGridId) {
 
   menu.addEventListener("click", (e) => {
     const option = e.target.closest(".sort-option");
-    if (!option) return;
+    if (!option || option.disabled) return;
     setGridSort(resolveGridId(), option.dataset.sort);
     menu.classList.add("hidden");
   });
