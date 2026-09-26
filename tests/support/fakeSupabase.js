@@ -48,6 +48,12 @@ function createBackend() {
   const emails = []; // reset emails "sent": { email, redirectTo }
   const blocked = []; // outside requests the app shouldn't have made
   const channels = []; // joined realtime channels: { ws, topic, joinRef, userId, bindings }
+  // Set by a test to make writes fail: (method, table) → an error message,
+  // or nothing to let the write through.
+  // holdRealtime: queue the realtime pushes instead of sending them, until
+  // the test calls releaseRealtime() — to decide exactly when echoes land.
+  const hooks = { failWhen: null, holdRealtime: false };
+  const heldPushes = [];
 
   function issueSession(userId) {
     const user = users.get(userId);
@@ -164,7 +170,7 @@ function createBackend() {
       old_record: type === "INSERT" ? {} : { id: (before ?? row).id },
       errors: null,
     };
-    setTimeout(() => {
+    const deliver = () =>
       channels
         .filter((ch) => ch.userId && ch.userId === owner)
         .forEach((ch) => {
@@ -173,7 +179,13 @@ function createBackend() {
             .map((b) => b.id);
           if (ids.length) ch.ws.send(JSON.stringify([ch.joinRef, null, ch.topic, "postgres_changes", { ids, data }]));
         });
-    }, 20);
+    if (hooks.holdRealtime) heldPushes.push(deliver);
+    else setTimeout(deliver, 20);
+  }
+
+  // Sends the first `count` held pushes (all by default), oldest first.
+  function releaseRealtime(count = heldPushes.length) {
+    heldPushes.splice(0, count).forEach((deliver) => deliver());
   }
 
   /* ---------- database (PostgREST) ---------- */
@@ -284,6 +296,11 @@ function createBackend() {
     }
 
     if (!userId) return fail(401, "42501", "permission denied");
+    const injected = hooks.failWhen?.(method, table);
+    if (injected) {
+      log.push(`${method} ${table} FAILED`);
+      return fail(500, "XX000", injected);
+    }
 
     if (method === "POST") {
       const list = [].concat(req.postDataJSON());
@@ -439,7 +456,20 @@ function createBackend() {
     return made;
   }
 
-  return { install, addUser, seed, db, users, log, emails, blocked };
+  // The address a reset email would link to: this page, with a fresh
+  // session for the user in the fragment, as Supabase sends it.
+  function recoveryLink(email, base = "/") {
+    const user = [...users.values()].find((u) => u.email === email);
+    const s = issueSession(user.id);
+    return `${base}#access_token=${s.access_token}&expires_at=${s.expires_at}&expires_in=${s.expires_in}&refresh_token=${s.refresh_token}&token_type=bearer&type=recovery`;
+  }
+
+  // A deep copy of every table, to compare against later.
+  function snapshot() {
+    return JSON.parse(JSON.stringify(db));
+  }
+
+  return { install, addUser, seed, recoveryLink, snapshot, hooks, releaseRealtime, heldPushes, db, users, log, emails, blocked };
 }
 
 module.exports = { createBackend };
