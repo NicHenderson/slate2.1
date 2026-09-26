@@ -73,7 +73,7 @@
     input:focus { outline: 2px solid var(--strong); outline-offset: 1px; }
     #password { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
     .hint { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
-    button, .btn {
+    button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -87,11 +87,10 @@
       font-size: 13.5px;
       font-weight: 600;
       line-height: 1.2;
-      text-decoration: none;
       white-space: nowrap;
       cursor: pointer;
     }
-    button:hover, .btn:hover { border-color: var(--strong); }
+    button:hover { border-color: var(--strong); }
     .actions { display: grid; gap: 10px; margin-top: 28px; }
     .primary { background: var(--strong); border-color: var(--strong); color: #fff; }
     .primary:hover { background: var(--deep); border-color: var(--deep); }
@@ -117,7 +116,7 @@
       <ol class="steps">
         <li>Fill in their <strong>name</strong> and <strong>email</strong> from the request, and <strong>generate</strong> a temporary password.</li>
         <li>In Supabase: <strong>Authentication → Users → Add user</strong>, with that email and password, and <strong>Auto Confirm User</strong> ticked.</li>
-        <li><strong>Copy email</strong>, then <strong>Open in Gmail</strong> and paste it into the message (Ctrl+V).</li>
+        <li><strong>Copy email</strong> and paste it into a new message from Slate's Gmail (Ctrl+V), to their email, with the subject <strong>Your Slate account is ready</strong>.</li>
       </ol>
 
       <form id="form" autocomplete="off">
@@ -141,7 +140,6 @@
 
       <div class="actions">
         <button type="button" class="primary" id="copy-email">Copy email</button>
-        <a class="btn" id="open-gmail" href="#" target="_blank" rel="noopener">Open in Gmail</a>
       </div>
       <p class="status" id="status" role="status"></p>
     </section>
@@ -153,8 +151,6 @@
   </main>
 
   <script>
-    const SUBJECT = "Your Slate account is ready";
-    const SENDER = "slateappmail@gmail.com";
     const LINK_KEY = "slate-welcome-link";
 
     const $ = (id) => document.getElementById(id);
@@ -264,9 +260,6 @@
 
     function render() {
       $("preview").innerHTML = emailHtml(values());
-      const { email } = values();
-      const params = new URLSearchParams({ authuser: SENDER, view: "cm", fs: "1", to: email, su: SUBJECT });
-      $("open-gmail").href = `https://mail.google.com/mail/?${params}`;
     }
 
     function say(message) {
@@ -300,7 +293,7 @@
         selection.removeAllRanges();
         if (!ok) return say("Couldn't copy — select the preview by hand and copy it.");
       }
-      say("Copied! Paste it into the Gmail message with Ctrl+V.");
+      say("Copied! Paste it into a new Gmail message with Ctrl+V.");
     }
 
     try {

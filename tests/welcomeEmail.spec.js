@@ -25,13 +25,8 @@ test("builds the welcome email from what's typed, and copies it for Gmail", asyn
   await expect(preview).toContainText(await password.inputValue());
   await expect(preview.locator('a[href="https://slate.example"]')).toHaveCount(2);
 
-  const gmail = new URL(await page.locator("#open-gmail").getAttribute("href"));
-  expect(gmail.searchParams.get("authuser")).toBe("slateappmail@gmail.com");
-  expect(gmail.searchParams.get("to")).toBe("ana@example.com");
-  expect(gmail.searchParams.get("su")).toBe("Your Slate account is ready");
-
   await page.click("#copy-email");
-  await expect(page.locator("#status")).toHaveText("Copied! Paste it into the Gmail message with Ctrl+V.");
+  await expect(page.locator("#status")).toHaveText("Copied! Paste it into a new Gmail message with Ctrl+V.");
   const copied = await page.evaluate(async () => {
     const [item] = await navigator.clipboard.read();
     return (await item.getType("text/html")).text();
