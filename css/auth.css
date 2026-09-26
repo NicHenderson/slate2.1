@@ -344,8 +344,10 @@
   overflow: hidden;
 }
 
-/* Signed in by a reset link: no way back to the page but "Log out". */
-.auth-screen[data-mode="reset"] .auth-back {
+/* Signed in by a reset link or a temporary password: no way back to the
+   page but "Log out". */
+.auth-screen[data-mode="reset"] .auth-back,
+.auth-screen[data-mode="choose"] .auth-back {
   display: none;
 }
 

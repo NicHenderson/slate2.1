@@ -1,8 +1,9 @@
 // A stand-in for Slate's whole backend, installed into a Playwright page so
 // the tests never touch a real account, the real database or the internet.
 //
-//   Auth       /auth/v1/…      users with passwords, sessions, sign-up,
-//                              reset emails (recorded), password changes
+//   Auth       /auth/v1/…      users with passwords and metadata, sessions,
+//                              reset emails (recorded), password changes;
+//                              sign-up is off, as in production
 //   Database   /rest/v1/…      the tables of supabase/migrations/, in memory,
 //                              with the same ownership rules as the real
 //                              row-level security (each user sees only theirs)
@@ -96,7 +97,7 @@ function createBackend() {
       email: user.email,
       email_confirmed_at: "2026-01-01T00:00:00Z",
       app_metadata: { provider: "email", providers: ["email"] },
-      user_metadata: {},
+      user_metadata: { ...user.metadata },
       identities: [],
       created_at: "2026-01-01T00:00:00Z",
     };
@@ -126,11 +127,8 @@ function createBackend() {
       return reply(200, issueSession(userId));
     }
     if (path === "/signup") {
-      // Email confirmation on, as in production: a user comes back, no session.
-      const existing = [...users.values()].find((u) => u.email === body.email);
-      const user = existing ?? { id: crypto.randomUUID(), email: body.email, password: body.password, unconfirmed: true };
-      if (!existing) users.set(user.id, user);
-      return reply(200, publicUser(user));
+      // Slate is invite-only: "Allow new users to sign up" is off.
+      return reply(422, { code: 422, error_code: "signup_disabled", msg: "Signups not allowed for this instance" });
     }
     if (path === "/recover") {
       emails.push({ email: body.email, redirectTo: url.searchParams.get("redirect_to") });
@@ -152,6 +150,7 @@ function createBackend() {
         user.password = body.password;
         log.push("PASSWORD CHANGED");
       }
+      if (req.method() === "PUT" && body?.data) user.metadata = { ...user.metadata, ...body.data };
       return reply(200, publicUser(user));
     }
     return reply(404, { msg: `fake auth: no ${req.method()} ${path}` });
@@ -494,8 +493,12 @@ function createBackend() {
 
   /* ---------- test setup helpers ---------- */
 
-  function addUser(email, password) {
-    const user = { id: crypto.randomUUID(), email, password };
+  // An account as it is once its owner has chosen a password. `temporary`:
+  // as just made by hand in Supabase (Add user), still on the password it
+  // was given — Slate asks for a new one first (migration 0006).
+  function addUser(email, password, { temporary = false } = {}) {
+    const metadata = temporary ? {} : { password_chosen: true };
+    const user = { id: crypto.randomUUID(), email, password, metadata };
     users.set(user.id, user);
     return user;
   }

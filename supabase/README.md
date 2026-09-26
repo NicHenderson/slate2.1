@@ -11,6 +11,7 @@ files, numbered in the order they apply:
 | `0003_library.sql` | The library: movies, shows, collections and their items |
 | `0004_hardening.sql` | One title per account, indexes, deleting a user deletes their data, no unused privileges |
 | `0005_delete_account.sql` | `delete_my_account()`: lets a signed-in user delete their own account (Settings → Delete account) |
+| `0006_invite_only.sql` | Marks every existing account as having its own password (see [Letting someone in](#letting-someone-in)) |
 
 The data itself isn't here: that's what **Settings → Your Data → Export
 data** is for (a `.slate` file per account).
@@ -24,6 +25,19 @@ browser — for anything that needs a secret:
 | --- | --- |
 | [`tmdb`](functions/tmdb/README.md) | Proxies the app's TMDB requests, keeping the TMDB API key server-side |
 
+## Letting someone in
+
+Slate is invite-only: **Authentication → Sign In / Providers → Allow new
+users to sign up** is off, and the app's **Request access** form emails
+each request to Slate's inbox (through Web3Forms, `js/config.js`). To let
+someone in:
+
+1. **Authentication → Users → Add user → Create new user**: their email,
+   a temporary password, and **Auto Confirm User** ticked.
+2. Email them that their account is ready, with the temporary password.
+3. At their first login Slate asks them to choose a password of their own
+   before the app opens.
+
 ## Rebuilding the database from scratch
 
 1. Create a new project at [supabase.com](https://supabase.com).
@@ -35,8 +49,10 @@ browser — for anything that needs a secret:
    served from to the Site URL / Redirect URLs.
 5. Deploy the Edge Functions in `functions/` and set their secrets (each
    one's README says how).
-6. Sign up, then bring your library back with **Settings → Your Data →
-   Import data**.
+6. Turn off **Allow new users to sign up** (Authentication → Sign In /
+   Providers) and make your account by hand, as in
+   [Letting someone in](#letting-someone-in). Then bring your library back
+   with **Settings → Your Data → Import data**.
 
 ## Before running 0004
 

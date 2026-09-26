@@ -28,7 +28,7 @@ const authTrap = document.getElementById("auth-website");
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-let authMode = "login"; // "login" | "request" | "forgot" | "reset"
+let authMode = "login"; // "login" | "request" | "forgot" | "reset" | "choose"
 let authBusy = false;
 
 /* ---------- the card's four modes ----------
@@ -40,7 +40,10 @@ let authBusy = false;
              hand in Supabase, and the new member gets a temporary password.
    forgot    email only: sends a reset link (#forgot)
    reset     new password + confirm, reached from that link (signed in by
-             it, but kept out of the app until the new password is saved) */
+             it, but kept out of the app until the new password is saved)
+   choose    the same, the first time someone logs in with the temporary
+             password their account was made with: they pick their own
+             before the app opens. */
 
 const AUTH_MODES = {
   login: {
@@ -78,7 +81,32 @@ const AUTH_MODES = {
     toggleText: "Not you?",
     toggleBtn: "Log out",
   },
+  choose: {
+    eyebrow: "Welcome to Slate",
+    title: "Choose Your Password",
+    hint: "You logged in with a temporary password. Choose your own to finish setting up your account — it's the one you'll use from now on.",
+    submit: "Save password",
+    busy: "Saving…",
+    toggleText: "Not you?",
+    toggleBtn: "Log out",
+  },
 };
+
+// The two cards that set a password for someone already signed in: they
+// hide the email and the way back, and "Log out" is the only way out.
+const settingPassword = (mode) => mode === "reset" || mode === "choose";
+
+/* ---------- a password of their own ----------
+
+   Accounts are made by hand in Supabase with a temporary password. The
+   user metadata flag password_chosen marks the ones whose owner has since
+   picked their own (set when they do; every account made before this —
+   supabase/migrations/0006 — was marked at once). Without it, Slate asks
+   for a new password before opening. It only ever guards the account's
+   owner from keeping a password that was sent by email, so a user setting
+   the flag themselves gains nothing. */
+
+const hasOwnPassword = (user) => user?.user_metadata?.password_chosen === true;
 
 // A reset link was followed in this tab and the new password isn't saved
 // yet (set by the inline script in index.html, or by Supabase's
@@ -214,22 +242,25 @@ function setAuthRoute(mode) {
 }
 
 // The "new password" card, over the landing page, for a visitor signed in
-// by a reset link. Not a route: it lasts until the password is saved or
-// they log out.
-function showRecoveryView() {
+// by a reset link ("reset") or with a temporary password ("choose"). Not a
+// route: it lasts until the password is saved or they log out.
+function showPasswordView(mode) {
   const cardShown = !authScreen.classList.contains("hidden");
   let kind = "open-auth";
   if (!appRoot.classList.contains("hidden")) kind = "logout";
-  else if (cardShown) kind = authMode === "reset" ? null : "auth-swap";
+  else if (cardShown) kind = authMode === mode ? null : "auth-swap";
 
   return swapView(kind, () => {
     appRoot.classList.add("hidden");
     landingScreen.classList.remove("hidden");
     document.documentElement.classList.add("auth-open");
-    if (authMode !== "reset" || authScreen.classList.contains("hidden")) {
+    if (authMode !== mode || authScreen.classList.contains("hidden")) {
       authForm.reset();
-      setAuthMode("reset");
+      setAuthMode(mode);
     }
+    // Not a route: logging out from here leaves for the page, not the card.
+    clearAuthRoute();
+    lastAuthRoute = null;
     authScreen.classList.remove("hidden");
     if (matchMedia("(pointer: fine)").matches) authPassword.focus();
   });
@@ -260,7 +291,7 @@ function leaveAuthCard() {
 
 document.getElementById("auth-back").addEventListener("click", (e) => {
   e.preventDefault();
-  if (authMode === "reset") return; // hidden then: the way out is "Log out"
+  if (settingPassword(authMode)) return; // hidden then: the way out is "Log out"
   leaveAuthCard();
 });
 
@@ -301,13 +332,13 @@ function setAuthMode(mode) {
   const text = AUTH_MODES[mode];
   authScreen.dataset.mode = mode;
   authNameField.classList.toggle("hidden", mode !== "request");
-  authEmailField.classList.toggle("hidden", mode === "reset");
+  authEmailField.classList.toggle("hidden", settingPassword(mode));
   authPasswordField.classList.toggle("hidden", mode === "forgot" || mode === "request");
-  authConfirmField.classList.toggle("hidden", mode !== "reset");
+  authConfirmField.classList.toggle("hidden", !settingPassword(mode));
   authNoteField.classList.toggle("hidden", mode !== "request");
   authForgotBtn.classList.toggle("hidden", mode !== "login");
-  authPasswordLabel.textContent = mode === "reset" ? "New password" : "Password";
-  authConfirmLabel.textContent = mode === "reset" ? "Confirm new password" : "Confirm password";
+  authPasswordLabel.textContent = settingPassword(mode) ? "New password" : "Password";
+  authConfirmLabel.textContent = settingPassword(mode) ? "Confirm new password" : "Confirm password";
   authPassword.autocomplete = mode === "login" ? "current-password" : "new-password";
   authSubtitle.textContent = text.eyebrow;
   authTitle.textContent = text.title;
@@ -365,7 +396,7 @@ function validate() {
     setFieldError("auth-name-error", "Tell us your name.");
     ok = false;
   }
-  if (authMode !== "reset" && !EMAIL_RE.test(email)) {
+  if (!settingPassword(authMode) && !EMAIL_RE.test(email)) {
     setFieldError("auth-email-error", "Enter a valid email address.");
     ok = false;
   }
@@ -377,7 +408,7 @@ function validate() {
     );
     ok = false;
   }
-  if (authMode === "reset" && authConfirm.value !== password) {
+  if (settingPassword(authMode) && authConfirm.value !== password) {
     setFieldError("auth-confirm-error", "Passwords do not match.");
     ok = false;
   }
@@ -403,6 +434,8 @@ authForm.addEventListener("submit", async (e) => {
       await sendAccessRequest(email);
     } else if (authMode === "reset") {
       await saveNewPassword(password);
+    } else if (authMode === "choose") {
+      await saveChosenPassword(password);
     } else {
       const { error } = await db.auth.signInWithPassword({ email, password });
       if (error) {
@@ -489,21 +522,36 @@ async function sendAccessRequest(email) {
   showMessage(`Request sent! We'll write to ${email} once your account is ready.`, false);
 }
 
-async function saveNewPassword(password) {
-  const { error } = await db.auth.updateUser({ password });
-  if (error) {
-    if (error.code === "same_password") {
-      setFieldError("auth-password-error", "That's already your password — choose a different one.");
-    } else if (error.code === "weak_password") {
-      setFieldError("auth-password-error", error.message);
-    } else if (error.status === 401 || error.code === "session_not_found" || error.code === "session_expired") {
-      showMessage("This reset link has run out. Log out and ask for a new one.");
-    } else {
-      console.error("Password update error:", error.message);
-      showMessage("Couldn't save your new password. Please try again.");
-    }
-    return;
+// Saves the password and marks it as their own. False (and says why on
+// the card) if it wasn't saved.
+async function updatePassword(password, sessionGoneMessage) {
+  const { error } = await db.auth.updateUser({ password, data: { password_chosen: true } });
+  if (!error) return true;
+  if (error.code === "same_password") {
+    setFieldError("auth-password-error", "That's already your password — choose a different one.");
+  } else if (error.code === "weak_password") {
+    setFieldError("auth-password-error", error.message);
+  } else if (error.status === 401 || error.code === "session_not_found" || error.code === "session_expired") {
+    showMessage(sessionGoneMessage);
+  } else {
+    console.error("Password update error:", error.message);
+    showMessage("Couldn't save your new password. Please try again.");
   }
+  return false;
+}
+
+// First login: their own password replaces the temporary one, and the app
+// opens straight away — no need to log in again.
+async function saveChosenPassword(password) {
+  const saved = await updatePassword(password, "You've been signed out. Log out and log in again with your temporary password.");
+  if (!saved) return;
+  authForm.reset();
+  enterApp().then(() => showToast("Password saved. Welcome to Slate!"));
+}
+
+async function saveNewPassword(password) {
+  const saved = await updatePassword(password, "This reset link has run out. Log out and ask for a new one.");
+  if (!saved) return;
   // Done: sign out everywhere (anyone else who was in the account is out
   // too — often the reason for a reset) and log in again with the new one.
   const { data } = await db.auth.getSession();
@@ -523,7 +571,7 @@ async function saveNewPassword(password) {
 let authNotice = null;
 
 authToggleBtn.addEventListener("click", () => {
-  if (authMode === "reset") {
+  if (settingPassword(authMode)) {
     // Not saving a new password after all: leave signed out.
     setRecoveryPending(false);
     db.auth.signOut();
@@ -605,15 +653,30 @@ db.auth.onAuthStateChange((event, session) => {
   if (recovering) {
     // Signed in by a reset link: the new password comes first.
     currentUserId = nextUserId;
-    showRecoveryView();
+    showPasswordView("reset");
   } else if (nextUserId) {
-    // A session exists: login, registration, restored session, or a switch to
-    // a different account. Toggle the view synchronously.
+    // A session exists: login, restored session, or a switch to a different
+    // account. Into the app — unless it's still on its temporary password.
     currentUserId = nextUserId;
     const linkFailed = takeLinkError(true);
-    enterApp().then(() => {
-      if (linkFailed) showToast(LINK_EXPIRED, true);
-    });
+    const open = () =>
+      enterApp().then(() => {
+        if (linkFailed) showToast(LINK_EXPIRED, true);
+      });
+    if (hasOwnPassword(session.user)) {
+      open();
+    } else {
+      // A session saved on this device before the flag was set carries old
+      // metadata: ask the server before asking for a password. Deferred out
+      // of the callback, like every Supabase call from here.
+      setTimeout(async () => {
+        const { data, error } = await db.auth.getUser();
+        if (currentUserId !== nextUserId) return; // logged out meanwhile
+        if (error) console.error("User check error:", error.message);
+        if (error || hasOwnPassword(data.user)) open();
+        else showPasswordView("choose");
+      }, 0);
+    }
   } else {
     // Session ended (logout) or none to begin with. Cleared only once the
     // app is off screen, so its exit animation shows it as it was.

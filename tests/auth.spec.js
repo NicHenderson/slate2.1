@@ -141,3 +141,76 @@ test.describe("forgot password", () => {
     await expect(page).toHaveURL("http://127.0.0.1:4173/");
   });
 });
+
+// Accounts are made by hand in Supabase with a temporary password, emailed
+// to the new member: their first login asks for a password of their own.
+test.describe("first login with a temporary password", () => {
+  const NEW = { email: "ana@slate.test", password: "temporary-pass-1" };
+
+  // Through the login card, as logIn() does — but the app doesn't open.
+  async function logInWithTemporaryPassword(page) {
+    await page.goto("/#login");
+    await page.fill("#auth-email", NEW.email);
+    await page.fill("#auth-password", NEW.password);
+    await page.click("#auth-submit");
+    await expect(page.locator("#auth-title")).toHaveText("Choose Your Password");
+  }
+
+  test("asks for a password of their own before the app opens, then opens it", async ({ page, backend }) => {
+    const ana = backend.addUser(NEW.email, NEW.password, { temporary: true });
+    await logInWithTemporaryPassword(page);
+    await expect(page.locator("#app")).toBeHidden();
+    await expect(page.locator("#auth-back")).toBeHidden();
+    await expect(page.locator("#auth-email-field")).toBeHidden();
+
+    // A reload doesn't get around it.
+    await page.reload();
+    await expect(page.locator("#auth-title")).toHaveText("Choose Your Password");
+    await expect(page.locator("#app")).toBeHidden();
+
+    // Not the temporary one again, and both boxes must match.
+    await page.fill("#auth-password", NEW.password);
+    await page.fill("#auth-confirm", "something-else-1");
+    await page.click("#auth-submit");
+    await expect(page.locator("#auth-confirm-error")).toHaveText("Passwords do not match.");
+    await page.fill("#auth-confirm", NEW.password);
+    await page.click("#auth-submit");
+    await expect(page.locator("#auth-password-error")).toHaveText("That's already your password — choose a different one.");
+
+    await page.fill("#auth-password", "anas-own-password");
+    await page.fill("#auth-confirm", "anas-own-password");
+    await page.click("#auth-submit");
+    await expect(page.locator("#app")).toBeVisible();
+    await expect(page.locator(".toast").last()).toHaveText("Password saved. Welcome to Slate!");
+    expect(ana.password).toBe("anas-own-password");
+    expect(ana.metadata).toEqual({ password_chosen: true });
+
+    // From now on, straight in with it.
+    await page.click("#logout-btn");
+    await expect(page.locator("#landing-screen")).toBeVisible();
+    await logIn(page, { email: NEW.email, password: "anas-own-password" });
+    await expect(page.locator("#auth-screen")).toBeHidden();
+  });
+
+  test("“Log out” there leaves without changing anything", async ({ page, backend }) => {
+    const ana = backend.addUser(NEW.email, NEW.password, { temporary: true });
+    await logInWithTemporaryPassword(page);
+    await expect(page.locator("#auth-toggle-btn")).toHaveText("Log out");
+    await page.click("#auth-toggle-btn");
+    await expect(page.locator("#landing-screen")).toBeVisible();
+    await expect(page.locator("#auth-screen")).toBeHidden();
+    expect(ana.password).toBe(NEW.password);
+    expect(ana.metadata).toEqual({});
+  });
+
+  test("a session saved before the account was marked doesn't ask again", async ({ page, backend }) => {
+    const ana = backend.addUser(NEW.email, NEW.password, { temporary: true });
+    await logInWithTemporaryPassword(page);
+    // Marked on the server meanwhile (as migration 0006 does); this tab's
+    // saved session still has the old metadata.
+    ana.metadata = { password_chosen: true };
+    await page.reload();
+    await expect(page.locator("#app")).toBeVisible();
+    await expect(page.locator("#auth-screen")).toBeHidden();
+  });
+});
