@@ -449,7 +449,9 @@ function createBackend() {
         if (url.pathname.startsWith("/rest/v1/")) return handleRest(route, req, url);
         if (url.pathname.startsWith("/functions/v1/")) return handleFunction(route, req, url);
         if (url.hostname === "cdn.jsdelivr.net" && url.pathname.includes("supabase-js")) {
-          return route.fulfill({ contentType: "application/javascript", body: SUPABASE_JS });
+          // With CORS, as the CDN answers: index.html loads it with an
+          // integrity hash (crossorigin), so the bytes must match too.
+          return route.fulfill({ contentType: "application/javascript", headers: { "access-control-allow-origin": "*" }, body: SUPABASE_JS });
         }
         if (url.hostname === "fonts.googleapis.com") return route.fulfill({ contentType: "text/css", body: "" });
         if (url.hostname === "image.tmdb.org") return route.fulfill({ contentType: "image/png", body: BLANK_PNG });

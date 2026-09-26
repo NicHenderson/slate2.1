@@ -5,10 +5,18 @@ const fs = require("fs");
 const path = require("path");
 const { test, expect } = require("@playwright/test");
 const { references, stale } = require("../scripts/stamp");
+const { pinned, tagFor, currentTag } = require("../scripts/supabase-js");
 
 test("every stylesheet and script in index.html carries the stamp of its current contents", () => {
   const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
   expect(references(html).length).toBeGreaterThan(40);
   const wrong = stale(html).map((r) => `${r.file}: ?v=${r.current ?? "(none)"}, should be ?v=${r.expected} — run npm run stamp`);
   expect(wrong).toEqual([]);
+});
+
+// scripts/supabase-js.js: the app loads the very supabase-js the tests run
+// against (package.json), and the browser checks it's that exact file.
+test("index.html loads package.json's supabase-js, with that file's integrity hash", () => {
+  expect(pinned().version).toMatch(/^\d+\.\d+\.\d+$/); // exact, never a range
+  expect(currentTag(), "run npm run update-supabase -- <version>").toBe(tagFor(pinned()));
 });
