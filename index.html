@@ -41,6 +41,7 @@
   <link rel="stylesheet" href="css/transitions.css?v=bf37ef65" />
   <link rel="stylesheet" href="css/settings.css?v=76a3748b" />
   <link rel="stylesheet" href="css/yourData.css?v=14774a1f" />
+  <link rel="stylesheet" href="css/viewings.css?v=a6db52d7" />
   <link rel="stylesheet" href="css/whereToWatch.css?v=7528c42f" />
   <link rel="stylesheet" href="css/librarySearch.css?v=cce1cb12" />
   <link rel="stylesheet" href="css/responsive.css?v=1d55d7b9" />
@@ -1379,9 +1380,19 @@
           <p class="update-movie-title" id="update-movie-title"></p>
           <p class="update-movie-meta" id="update-movie-meta"></p>
         </div>
-        <form id="update-form" class="update-form-body">
-          <label class="field-label" for="update-date">Watched on</label>
-          <input type="date" id="update-date" class="field-input" />
+        <form id="update-form" class="update-form-body" novalidate>
+          <div id="update-viewing-fields">
+            <label class="field-label" for="update-date">Watched on</label>
+            <input type="date" id="update-date" class="field-input" required />
+            <p class="field-error hidden" id="update-date-error" role="alert">Pick the day you watched it.</p>
+
+            <div class="field-label-row">
+              <label class="field-label" for="update-viewing-note">Viewing note <span class="field-optional">(optional)</span></label>
+              <span class="field-counter" id="update-viewing-note-count">0/200</span>
+            </div>
+            <input type="text" id="update-viewing-note" class="field-input" maxlength="200" placeholder="At the cinema, with friends, the director's cut…" />
+          </div>
+          <p class="update-viewings-hint hidden" id="update-viewings-hint"></p>
 
           <p class="field-label">Rating</p>
           <div class="rating-row">
@@ -1496,7 +1507,7 @@
   <script src="js/navigation.js?v=39fe0a72"></script>
   <script src="js/subtabs.js?v=758a03f4"></script>
   <script src="js/imageGuard.js?v=3e57b5e2"></script>
-  <script src="js/realtime.js?v=1808fe8e"></script>
+  <script src="js/realtime.js?v=13b98b55"></script>
   <script src="js/tmdb.js?v=4c8efabe"></script>
   <script src="js/addItem.js?v=5671b011"></script>
   <script src="js/searchModal.js?v=a17558ba"></script>
@@ -1507,16 +1518,17 @@
   <script src="js/iconPicker.js?v=107ebbfb"></script>
   <script src="js/collections.js?v=914ed087"></script>
   <script src="js/infoModal.js?v=784ce8fd"></script>
-  <script src="js/detailModal.js?v=4bfe2c55"></script>
+  <script src="js/detailModal.js?v=bf8cbb61"></script>
   <script src="js/starsInput.js?v=4457c4a6"></script>
-  <script src="js/updateModal.js?v=c72f8162"></script>
+  <script src="js/updateModal.js?v=f0622157"></script>
   <script src="js/startModal.js?v=b49680ba"></script>
-  <script src="js/confirmModal.js?v=e3035a86"></script>
+  <script src="js/confirmModal.js?v=4d90076d"></script>
+  <script src="js/viewings.js?v=5c235b01"></script>
   <script src="js/settings.js?v=48e82541"></script>
   <script src="js/whereToWatch.js?v=6aa82a12"></script>
   <script src="js/profile.js?v=47b4a649"></script>
   <script src="js/librarySearch.js?v=b0e773f4"></script>
-  <script src="js/data.js?v=e74ecc73"></script>
+  <script src="js/data.js?v=5fd8da27"></script>
   <script src="js/sortMenu.js?v=51895950"></script>
   <script src="js/watchlistOrder.js?v=c4c30070"></script>
   <script src="js/sectionHeaders.js?v=17ed22a9"></script>

@@ -135,10 +135,11 @@ function renderDetail(cfg, row) {
     return;
   }
 
-  const dateValue =
+  // A movie's date part lists its viewings (js/viewings.js); a show's is its span.
+  const dateHtml =
     cfg.table === "movies"
-      ? formatDate(row.watched_date)
-      : `Started ${formatDate(row.started_watching_date)} · Finished ${formatDate(row.finished_watching_date)}`;
+      ? watchedDateBlockHtml(row)
+      : `<p class="detail-label">Watched on</p><p class="detail-date-value">Started ${formatDate(row.started_watching_date)} · Finished ${formatDate(row.finished_watching_date)}</p>`;
   const review = row.review
     ? `<p class="detail-review">${escapeHtml(row.review)}</p>`
     : `<p class="detail-review detail-review-empty">No review yet.</p>`;
@@ -147,20 +148,21 @@ function renderDetail(cfg, row) {
     ${head}
     <div class="detail-meta-strip">
       <div class="detail-field">
-        <p class="detail-label">Watched on</p>
-        <p class="detail-date-value">${dateValue}</p>
+        ${dateHtml}
       </div>
       <div class="detail-field">
         <p class="detail-label">Rating</p>
         ${starsHtml(row.rating)}
       </div>
     </div>
+    ${cfg.table === "movies" ? viewingsListHtml(row) : ""}
     <div class="detail-section">
       <p class="detail-label">Personal review</p>
       ${review}
     </div>
     <div class="detail-actions detail-actions-review">
       <button class="edit-btn" type="button" data-action="edit">✎ Edit</button>
+      ${cfg.table === "movies" ? `<button class="edit-btn" type="button" data-action="watched-again">↻ Watched it again</button>` : ""}
       ${addToColHtml}
     </div>`;
 }
@@ -181,7 +183,8 @@ function detailNavList() {
 }
 
 function updateDetailNav() {
-  if (!currentDetail?.gridId) {
+  // No stepping to another title while one of this one's viewings is open.
+  if (!currentDetail?.gridId || currentDetail.viewing) {
     detailNavPrev.classList.add("hidden");
     detailNavNext.classList.add("hidden");
     return;
@@ -199,12 +202,22 @@ function openDetailModal(gridId, id, listProvider) {
   const row = STORE[cfg.table].get(id);
   if (!row) return;
 
-  currentDetail = { cfg, row, gridId, listProvider: listProvider ?? null };
+  // viewing: one of the movie's viewings open in the window (js/viewings.js);
+  // viewingsOpen: its list of viewings unfolded.
+  currentDetail = { cfg, row, gridId, listProvider: listProvider ?? null, viewing: null, viewingsOpen: false };
+  showDetailMain();
+  detailModal.classList.remove("hidden");
+}
+
+// The title's summary, drawn from what STORE holds now.
+function showDetailMain() {
+  const { cfg } = currentDetail;
+  const row = STORE[cfg.table].get(currentDetail.row.id) ?? currentDetail.row;
+  currentDetail.row = row;
   renderDetail(cfg, row);
   loadDetailTrailer(cfg.table, row);
   loadDetailWhereToWatch(cfg.table, row);
   updateDetailNav();
-  detailModal.classList.remove("hidden");
 }
 
 function navigateDetail(delta) {
@@ -221,11 +234,8 @@ function navigateDetail(delta) {
   // show, which needs its own action buttons, not the previous title's.
   const { row, table } = list[nextIndex];
   const gridId = gridIdFor(table, row);
-  currentDetail = { ...currentDetail, row, gridId, cfg: GRID_CONFIG[gridId] };
-  renderDetail(currentDetail.cfg, row);
-  loadDetailTrailer(table, row);
-  loadDetailWhereToWatch(table, row);
-  updateDetailNav();
+  currentDetail = { ...currentDetail, row, gridId, cfg: GRID_CONFIG[gridId], viewing: null, viewingsOpen: false };
+  showDetailMain();
 }
 
 // Fills the "Where to watch" slot renderDetail left, if it left one.
@@ -350,6 +360,14 @@ document.addEventListener("keydown", (e) => {
   if (!document.getElementById("update-modal").classList.contains("hidden")) return;
   if (!document.getElementById("start-modal").classList.contains("hidden")) return;
 
+  if (!document.getElementById("confirm-modal").classList.contains("hidden")) return;
+
+  // A viewing open (js/viewings.js): Escape goes back to the summary, and
+  // the arrows are the date field's, not the window's.
+  if (currentDetail?.viewing) {
+    if (e.key === "Escape") backToSummary();
+    return;
+  }
   if (e.key === "Escape") closeDetailModal();
   if (e.key === "ArrowLeft") navigateDetail(-1);
   if (e.key === "ArrowRight") navigateDetail(1);

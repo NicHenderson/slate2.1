@@ -6,7 +6,9 @@
 //                              sign-up is off, as in production
 //   Database   /rest/v1/…      the tables of supabase/migrations/, in memory,
 //                              with the same ownership rules as the real
-//                              row-level security (each user sees only theirs)
+//                              row-level security (each user sees only theirs),
+//                              and 0007's rules keeping movies and viewings
+//                              in step
 //   Functions  /functions/v1/tmdb   a small fake TMDB catalog (./tmdbCatalog.js),
 //                              with where to watch a few of its titles
 //   Realtime   the websocket   channels join as on the real server, and every
@@ -45,6 +47,15 @@ const TABLES = {
   collection_items: { owner: null, required: ["collection_id", "item_type", "item_id"], defaults: () => ({}) },
   user_settings: { owner: "user_id", key: "user_id", required: [], defaults: () => ({ settings: {} }) },
   profiles: { owner: "user_id", key: "user_id", required: [], defaults: () => ({}) },
+  viewings: { owner: "user_id", required: ["movie_id", "watched_on"], defaults: () => ({ note: null }) },
+};
+
+// Migration 0007's rules, as the database enforces them (a refusal is
+// thrown as { status, code, message } and becomes the request's error).
+const LAST_VIEWING = "A watched movie keeps at least one viewing: change its date instead.";
+const KEEP_DATE = "A watched movie keeps its date: change it instead.";
+const refuse = (message, code = "P0001", status = 400) => {
+  throw { status, code, message };
 };
 
 const b64url = (value) => Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -199,6 +210,53 @@ function createBackend() {
     heldPushes.splice(0, count).forEach((deliver) => deliver());
   }
 
+  /* ---------- viewings (migration 0007) ---------- */
+
+  const viewingsOfMovie = (movieId) => db.viewings.filter((v) => v.movie_id === movieId);
+
+  // Rule 1: a movie's watched_date is its latest viewing.
+  function syncWatchedDate(movieId) {
+    const movie = db.movies.find((m) => m.id === movieId);
+    if (!movie) return;
+    const latest = viewingsOfMovie(movieId).map((v) => v.watched_on).sort().pop() ?? null;
+    if (movie.watched_date === latest) return;
+    movie.watched_date = latest;
+    pushChange("movies", "UPDATE", movie, movie);
+  }
+
+  function checkViewing(row, userId) {
+    const movie = db.movies.find((m) => m.id === row.movie_id);
+    if (!movie || movie.user_id !== userId) refuse('new row violates row-level security policy for table "viewings"', "42501", 403);
+    if (row.note != null && String(row.note).length > 200) refuse('new row for relation "viewings" violates check constraint "viewings_note_check"', "23514");
+  }
+
+  // Rule 3: a watched_date written straight onto a movie becomes its
+  // viewing (created, or the latest one moved); clearing one is refused.
+  function checkMovieDateChange(movie, changes) {
+    if ("watched_date" in changes && changes.watched_date == null && movie.watched_date != null) refuse(KEEP_DATE);
+  }
+
+  function movieDateWritten(movie, before) {
+    if (movie.watched_date == null || movie.watched_date === before) return;
+    const latest = viewingsOfMovie(movie.id).sort((a, b) => (b.watched_on + b.created_at).localeCompare(a.watched_on + a.created_at))[0];
+    if (latest) {
+      latest.watched_on = movie.watched_date;
+      pushChange("viewings", "UPDATE", latest, latest);
+    } else {
+      const viewing = { id: crypto.randomUUID(), created_at: new Date().toISOString(), user_id: movie.user_id, movie_id: movie.id, watched_on: movie.watched_date, note: null };
+      db.viewings.push(viewing);
+      pushChange("viewings", "INSERT", viewing);
+    }
+    syncWatchedDate(movie.id);
+  }
+
+  // Deleting a movie takes its viewings with it (on delete cascade).
+  function dropViewingsOf(movieIds) {
+    const gone = db.viewings.filter((v) => movieIds.includes(v.movie_id));
+    db.viewings = db.viewings.filter((v) => !gone.includes(v));
+    gone.forEach((v) => pushChange("viewings", "DELETE", null, v));
+  }
+
   /* ---------- database (PostgREST) ---------- */
 
   function canSee(table, row, userId) {
@@ -267,7 +325,7 @@ function createBackend() {
     users.delete(userId);
     for (const [token, id] of sessions) if (id === userId) sessions.delete(token);
     for (const [token, id] of refreshTokens) if (id === userId) refreshTokens.delete(token);
-    for (const table of ["movies", "shows", "collections", "user_settings", "profiles"]) {
+    for (const table of ["movies", "shows", "collections", "user_settings", "profiles", "viewings"]) {
       db[table] = db[table].filter((row) => row.user_id !== userId);
     }
     const colIds = new Set(db.collections.map((c) => c.id));
@@ -369,9 +427,16 @@ function createBackend() {
         const missing = spec.required.find((col) => row[col] == null);
         if (missing) return fail(400, "23502", `null value in column "${missing}" of relation "${table}" violates not-null constraint`);
         if (!canSee(table, row, userId)) return fail(403, "42501", `new row violates row-level security policy for table "${table}"`);
+        try {
+          if (table === "viewings") checkViewing(row, userId);
+        } catch (e) {
+          return fail(e.status, e.code, e.message);
+        }
         db[table].push(row);
         written.push(row);
         pushChange(table, "INSERT", row);
+        if (table === "viewings") syncWatchedDate(row.movie_id);
+        if (table === "movies") movieDateWritten(row, null);
       }
       log.push(`${upsert ? "UPSERT" : "INSERT"} ${table} ${written.length}`);
       return answer(written, 201);
@@ -380,9 +445,24 @@ function createBackend() {
     if (method === "PATCH") {
       const changes = req.postDataJSON();
       const rows = db[table].filter((row) => canSee(table, row, userId)).filter(rowFilter(url));
+      // All or nothing, as one statement: every row checked first.
+      try {
+        rows.forEach((row) => {
+          if (table === "movies") checkMovieDateChange(row, changes);
+          if (table === "viewings") checkViewing({ ...row, ...changes }, userId);
+        });
+      } catch (e) {
+        return fail(e.status, e.code, e.message);
+      }
       rows.forEach((row) => {
+        const before = { ...row };
         Object.assign(row, changes);
         pushChange(table, "UPDATE", row, row);
+        if (table === "viewings") {
+          syncWatchedDate(row.movie_id);
+          if (before.movie_id !== row.movie_id) syncWatchedDate(before.movie_id);
+        }
+        if (table === "movies" && "watched_date" in changes) movieDateWritten(row, before.watched_date);
       });
       log.push(`UPDATE ${table} ${rows.length}`);
       return answer(rows);
@@ -391,8 +471,15 @@ function createBackend() {
     if (method === "DELETE") {
       const match = rowFilter(url);
       const gone = db[table].filter((row) => canSee(table, row, userId) && match(row));
+      // Rule 2: never a watched movie's last viewing.
+      if (table === "viewings") {
+        const leftFor = (movieId) => viewingsOfMovie(movieId).filter((v) => !gone.includes(v)).length;
+        if (gone.some((v) => leftFor(v.movie_id) === 0)) return fail(400, "P0001", LAST_VIEWING);
+      }
       db[table] = db[table].filter((row) => !gone.includes(row));
       gone.forEach((row) => pushChange(table, "DELETE", null, row));
+      if (table === "movies") dropViewingsOf(gone.map((m) => m.id));
+      if (table === "viewings") new Set(gone.map((v) => v.movie_id)).forEach(syncWatchedDate);
       log.push(`DELETE ${table} ${gone.length}`);
       return answer(gone);
     }
@@ -523,6 +610,18 @@ function createBackend() {
       ...row,
     }));
     db[table].push(...made);
+    // As migration 0007 left the database: every watched movie has a viewing.
+    if (table === "movies") {
+      made
+        .filter((m) => m.watched_date != null && !viewingsOfMovie(m.id).length)
+        .forEach((m) => db.viewings.push({ id: crypto.randomUUID(), created_at: m.created_at, user_id: m.user_id, movie_id: m.id, watched_on: m.watched_date, note: null }));
+    }
+    if (table === "viewings") {
+      new Set(made.map((v) => v.movie_id)).forEach((movieId) => {
+        const movie = db.movies.find((m) => m.id === movieId);
+        if (movie) movie.watched_date = viewingsOfMovie(movieId).map((v) => v.watched_on).sort().pop() ?? null;
+      });
+    }
     return made;
   }
 

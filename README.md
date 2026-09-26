@@ -66,6 +66,7 @@ your data and don't break when your password does.
 | `auth.spec.js` | Requesting access, forgot password, the reset link, expired links |
 | `library.spec.js` | Marking titles watched, deleting safely, reviews shown as text |
 | `customOrder.spec.js` | Drag and drop in Custom order, and the drag bugs it once had |
+| `viewings.spec.js` | Rewatches: adding, changing and deleting a movie's viewings, and a watched movie never losing its date |
 | `whereToWatch.spec.js` | Where to watch titles not watched yet, by country |
 | `librarySearch.spec.js` | Searching and filtering Movies, Shows and the two watchlists, and Custom order pausing meanwhile |
 | `shows.spec.js` | A show from the queue to watching to finished |

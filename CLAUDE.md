@@ -96,7 +96,7 @@ directly.
 
 ## The live Supabase project
 
-- Migrations `0001`–`0006` in `supabase/migrations/` have all been applied
+- Migrations `0001`–`0007` in `supabase/migrations/` have all been applied
   to the live project. **Never re-run `0006_invite_only.sql`**: it would mark
   accounts made by hand as already having their own password.
 - Test a new migration on a throwaway local Postgres before the owner runs
@@ -140,8 +140,9 @@ directly.
      them. Any later change to `supabase/functions/tmdb/index.ts` needs the
      same redeploy (its README says how).
   2. **Rewatches** (movies only for now; shows get planned apart once
-     movies work well). Stage 1 is done: `0007_viewings.sql`, verified on a
-     local Postgres, **not yet applied live**. The database keeps
+     movies work well). Stages 1 (`0007_viewings.sql`, applied live: one
+     viewing per watched movie, counts checked) and 2 (the app,
+     `js/viewings.js`) are done. The database keeps
      `movies.watched_date` = the latest viewing, refuses to drop a movie's
      last viewing or clear its date, and turns a direct `watched_date`
      write (the current app, a v1 `.slate`) into the matching viewing — so
@@ -161,7 +162,10 @@ directly.
        "Watched in" filter matches any viewing's year;
      - `.slate` goes to version 2 carrying viewings; version 1 files still
        import (one viewing per watched movie).
-     Next stages: 2 the app, 3 backup + stats + filter, 4 tests.
+     Next: stage 3 — `.slate` version 2 with viewings (and Replace's
+     rollback restoring them), Time watched + Rewatches stats, "Watched in"
+     matching any viewing. Until then an export carries only each movie's
+     latest date.
   3. **Import from other apps:** IMDb (CSV with IMDb ids → TMDB `find`),
      Letterboxd (ZIP of CSVs, title + year matching, diary rewatches),
      Trakt (JSON with TMDB ids); TV Time only after seeing a real export.
