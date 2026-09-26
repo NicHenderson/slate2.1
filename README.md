@@ -71,6 +71,7 @@ your data and don't break when your password does.
 | `yourData.spec.js` | Export, and import in both Add and Replace modes |
 | `settings.spec.js` | Settings kept by the account, and saving the profile |
 | `account.spec.js` | Deleting an account: the locks, a wrong password, a server failure, and the account gone |
+| `mobile.spec.js` | Slate on a phone: nothing scrolls sideways, and the menu and adding a title work by tapping |
 | `bigLibrary.spec.js` | Libraries past 1,000 rows load whole |
 | `stamps.spec.js` | Every CSS/JS link in `index.html` has its file's current stamp |
 
