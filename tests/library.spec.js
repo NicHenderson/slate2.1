@@ -63,3 +63,22 @@ test("a review is shown as text, never run as HTML", async ({ page, backend }) =
   await expect(page.locator("#detail-modal .detail-review img")).toHaveCount(0);
   expect(await page.evaluate(() => window.__pwned)).toBeUndefined();
 });
+
+// The database keeps one copy of a title per account (migration 0004).
+// Added from another tab between the search and the click: Slate says so
+// instead of failing, and no second copy appears.
+test("adding a title another tab just added says it's already there", async ({ page, backend }) => {
+  await logIn(page);
+  await page.click('.nav-btn[data-section="movies-towatch"]');
+  await page.click("#movies-towatch .add-btn");
+  await page.fill("#modal-input", "paddington");
+  await page.click("#modal-search-btn");
+  await page.locator("#modal-results .tmdb-info-btn").first().click();
+  const add = page.locator('#info-modal .mini-add-btn:not([disabled])');
+  await expect(add).toBeVisible();
+
+  backend.seed("movies", [{ tmdb_id: 346648, title: "Paddington 2", watched_date: null }], backend.user.id);
+  await add.click();
+  await expect(page.locator(".toast")).toHaveText("Already in your library.");
+  expect(backend.db.movies.filter((m) => m.tmdb_id === 346648)).toHaveLength(1);
+});
