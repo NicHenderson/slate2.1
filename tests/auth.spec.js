@@ -18,7 +18,12 @@ test.describe("requesting access", () => {
     await expect(page.locator("#auth-note-count")).toHaveText("17/500");
     await page.click("#auth-submit");
 
-    await expect(page.locator("#auth-message")).toHaveText("Request sent! We'll write to ana@slate.test once your account is ready.");
+    // Not automatic, not instant — and it may land in spam.
+    const sent = page.locator("#auth-message");
+    await expect(sent).toContainText("Request sent!");
+    await expect(sent).toContainText("isn't instant — it usually takes anywhere from a few hours to a day");
+    await expect(sent).toContainText("We'll write to ana@slate.test once your account is ready.");
+    await expect(sent).toContainText("check your spam folder");
     await expect(page.locator("#auth-submit")).toHaveText(/^Send again in \d+s$/);
     await expect(page.locator("#auth-name")).toHaveValue("");
     expect(backend.accessRequests).toEqual([

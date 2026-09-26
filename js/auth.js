@@ -519,7 +519,10 @@ async function sendAccessRequest(email) {
   authForm.reset();
   syncNoteCount();
   startResendCooldown("request");
-  showMessage(`Request sent! We'll write to ${email} once your account is ready.`, false);
+  showMessage(
+    `Request sent! Every request is read by a person, so the answer isn't instant — it usually takes anywhere from a few hours to a day. We'll write to ${email} once your account is ready. Don't forget to check your spam folder if you can't find it.`,
+    false
+  );
 }
 
 // Saves the password and marks it as their own. False (and says why on

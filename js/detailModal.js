@@ -81,7 +81,7 @@ function renderDetail(cfg, row) {
       </div>
     </div>
     <p class="detail-synopsis">${escapeHtml(row.synopsis || "No synopsis available.")}</p>
-    <div class="detail-trailer"></div>`;
+    <div class="detail-trailer">${row.tmdb_id ? TRAILER_BTN_LOADING : ""}</div>`;
 
   const addToColHtml = `<button class="edit-btn" type="button" data-action="add-to-collection">🗂 Add to collection</button>`;
 
@@ -231,8 +231,12 @@ function closeDetailModal() {
 /* ---------- trailer ----------
 
    Looked up on TMDB each time a title is shown, without holding up the
-   modal: the "Watch trailer" button only appears once the lookup finds one.
-   The YouTube player itself isn't loaded until that button is clicked. */
+   modal. The "Watch trailer" button is there from the start, disabled,
+   so nothing shifts when the lookup answers: it turns on once a trailer
+   is found, or says there isn't one. The YouTube player itself isn't
+   loaded until that button is clicked. */
+
+const TRAILER_BTN_LOADING = `<button class="trailer-btn" type="button" data-action="toggle-trailer" aria-expanded="false" disabled aria-busy="true">▶ Watch trailer</button>`;
 
 // Keyed by type + TMDB id, since a movie and a show can share a TMDB id.
 // Holds the promise, so a title reopened mid-lookup doesn't fetch twice.
@@ -269,19 +273,26 @@ function fetchTrailerKey(table, tmdbId) {
 
 async function loadDetailTrailer(table, row) {
   if (!row.tmdb_id) return;
-  let key;
+  let key = null;
+  let failed = false;
   try {
     key = await fetchTrailerKey(table, row.tmdb_id);
   } catch (err) {
     console.error("Trailer error:", err.message);
-    return;
+    failed = true;
   }
   // By the time TMDB answers, the modal may be showing a different title.
-  if (!key || currentDetail?.row.id !== row.id) return;
+  if (currentDetail?.row.id !== row.id) return;
   const slot = detailBody.querySelector(".detail-trailer");
-  if (!slot || slot.childElementCount) return;
+  const btn = slot?.querySelector(".trailer-btn");
+  if (!btn || !btn.disabled) return;
+  btn.removeAttribute("aria-busy");
+  if (!key) {
+    btn.textContent = failed ? "Trailer unavailable" : "No trailer";
+    return;
+  }
   slot.dataset.key = key;
-  slot.innerHTML = `<button class="trailer-btn" type="button" data-action="toggle-trailer" aria-expanded="false">▶ Watch trailer</button>`;
+  btn.disabled = false;
 }
 
 function toggleTrailer(btn) {
