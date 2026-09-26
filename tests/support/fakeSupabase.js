@@ -256,7 +256,31 @@ function createBackend() {
     return rows.map((row) => Object.fromEntries(cols.map((c) => [c, row[c]])));
   }
 
+  // delete_my_account() (migration 0005): the caller's account and,
+  // by cascade, everything that's theirs.
+  function deleteUser(userId) {
+    users.delete(userId);
+    for (const [token, id] of sessions) if (id === userId) sessions.delete(token);
+    for (const [token, id] of refreshTokens) if (id === userId) refreshTokens.delete(token);
+    for (const table of ["movies", "shows", "collections", "user_settings", "profiles"]) {
+      db[table] = db[table].filter((row) => row.user_id !== userId);
+    }
+    const colIds = new Set(db.collections.map((c) => c.id));
+    db.collection_items = db.collection_items.filter((item) => colIds.has(item.collection_id));
+    log.push("ACCOUNT DELETED");
+  }
+
   function handleRest(route, req, url) {
+    if (url.pathname === "/rest/v1/rpc/delete_my_account") {
+      const userId = userFromRequest(req);
+      if (!userId) {
+        return route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ code: "42501", message: "permission denied for function delete_my_account" }) });
+      }
+      const injected = hooks.failWhen?.(req.method(), "rpc/delete_my_account");
+      if (injected) return route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ code: "XX000", message: injected }) });
+      deleteUser(userId);
+      return route.fulfill({ status: 204, body: "" });
+    }
     const table = url.pathname.replace(/^\/rest\/v1\//, "");
     const spec = TABLES[table];
     const headers = req.headers();

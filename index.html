@@ -39,8 +39,8 @@
   <link rel="stylesheet" href="css/auth.css?v=0468e5c7" />
   <link rel="stylesheet" href="css/landing.css?v=2e15fdb2" />
   <link rel="stylesheet" href="css/transitions.css?v=bf37ef65" />
-  <link rel="stylesheet" href="css/settings.css?v=378ba9d8" />
-  <link rel="stylesheet" href="css/yourData.css?v=c9f8e5f2" />
+  <link rel="stylesheet" href="css/settings.css?v=76a3748b" />
+  <link rel="stylesheet" href="css/yourData.css?v=14774a1f" />
   <link rel="stylesheet" href="css/responsive.css?v=1d55d7b9" />
 </head>
 <body>
@@ -1113,6 +1113,20 @@
                 </div>
               </div>
             </div>
+
+            <div class="settings-tile tile-danger">
+              <h2 class="settings-tile-title">Delete account</h2>
+              <div class="data-action">
+                <span class="data-action-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
+                </span>
+                <div class="data-action-text">
+                  <p class="settings-row-title">Delete your account for good</p>
+                  <p class="settings-row-hint">Your library, collections, profile and settings go with it, and you won't be able to log in again. You can download a backup first.</p>
+                </div>
+                <button class="data-btn danger-btn" id="delete-account-btn" type="button">Delete account</button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -1407,6 +1421,7 @@
   <script src="js/watchlistOrder.js?v=8763c385"></script>
   <script src="js/sectionHeaders.js?v=71188709"></script>
   <script src="js/yourData.js?v=8485eb3a"></script>
+  <script src="js/deleteAccount.js?v=78a6ba0b"></script>
   <script src="js/landing.js?v=fbf6e0e4"></script>
   <script src="js/auth.js?v=1e727218"></script>
 </body>

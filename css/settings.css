@@ -54,7 +54,8 @@
 
 .tile-profile,
 .tile-defaults,
-.tile-data {
+.tile-data,
+.tile-danger {
   grid-column: 1 / -1;
 }
 
@@ -931,6 +932,40 @@
 .data-btn {
   flex-shrink: 0;
   min-width: 150px;
+}
+
+/* Delete account: set apart in red, so it's never mistaken for the tiles
+   above it. */
+.tile-danger {
+  border: 1px dashed rgba(220, 38, 38, 0.55);
+}
+
+.tile-danger .settings-tile-title {
+  color: #b42318;
+}
+
+.tile-danger .data-action {
+  padding-top: 0;
+  border-top: none;
+}
+
+.tile-danger .data-action-icon {
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+}
+
+.data-btn.danger-btn {
+  background: #dc2626;
+  box-shadow: 3px 4px 0 #991b1b;
+}
+
+.data-btn.danger-btn:hover:not(:disabled) {
+  background: #ef4444;
+  box-shadow: 4px 6px 0 #991b1b;
+}
+
+.data-btn.danger-btn:active:not(:disabled) {
+  box-shadow: 1px 2px 0 #991b1b;
 }
 
 /* ---------- Narrow layouts ----------
