@@ -281,6 +281,38 @@
   display: block;
 }
 
+/* Forgot / New Password: a line saying what the card is for. */
+.auth-hint {
+  margin: -12px 0 20px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+/* "Forgot password?" under the password, on the right, quiet until hovered. */
+.auth-forgot-btn {
+  display: block;
+  margin: 8px 0 0 auto;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 2px;
+  transition: color var(--transition), text-decoration-color var(--transition);
+}
+
+.auth-forgot-btn:hover,
+.auth-forgot-btn:focus-visible {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+
+/* Signed in by a reset link: no way back to the page but "Log out". */
+.auth-screen[data-mode="reset"] .auth-back {
+  display: none;
+}
+
 .auth-field-error {
   margin-top: 6px;
   font-size: 12px;

@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="css/content.css?v=15" />
   <link rel="stylesheet" href="css/cards.css?v=25" />
   <link rel="stylesheet" href="css/modal.css?v=41" />
-  <link rel="stylesheet" href="css/auth.css?v=10" />
+  <link rel="stylesheet" href="css/auth.css?v=11" />
   <link rel="stylesheet" href="css/landing.css?v=7" />
   <link rel="stylesheet" href="css/transitions.css?v=1" />
   <link rel="stylesheet" href="css/settings.css?v=10" />
@@ -607,6 +607,24 @@
         if (!stored) document.getElementById("landing-screen").classList.remove("hidden");
       } catch (e) {}
     })();
+
+    // Coming back from a password-reset email: Supabase signs the visitor in
+    // from the link and only says it was a *reset* link a moment later, so
+    // js/auth.js would open the app first. Read the link now, before
+    // Supabase clears it from the address bar: a reset link opens the "new
+    // password" card instead (remembered for the tab, so a reload keeps it);
+    // an expired or used one is reported on the "reset password" card.
+    (function () {
+      var params = location.hash.slice(1) + "&" + location.search.slice(1);
+      var get = function (name) {
+        var m = params.match(new RegExp("(?:^|&)" + name + "=([^&]*)"));
+        return m ? decodeURIComponent(m[1].replace(/\+/g, " ")) : null;
+      };
+      window.slateAuthLink = { recovery: get("type") === "recovery", error: get("error_code") || get("error") };
+      try {
+        if (window.slateAuthLink.recovery) sessionStorage.setItem("slate-recovery", "1");
+      } catch (e) {}
+    })();
   </script>
 
   <div class="auth-screen brand-theme hidden" id="auth-screen">
@@ -644,16 +662,17 @@
         <span class="auth-card-tape" aria-hidden="true"></span>
         <p class="auth-eyebrow" id="auth-subtitle">Welcome back</p>
         <h2 class="auth-title" id="auth-title">Log In</h2>
+        <p class="auth-hint hidden" id="auth-hint"></p>
 
         <form id="auth-form" novalidate>
-          <div class="auth-field">
+          <div class="auth-field" id="auth-email-field">
             <label class="field-label" for="auth-email">Email</label>
             <input type="email" id="auth-email" class="field-input" autocomplete="email" placeholder="you@example.com" />
             <p class="auth-field-error hidden" id="auth-email-error"></p>
           </div>
 
-          <div class="auth-field">
-            <label class="field-label" for="auth-password">Password</label>
+          <div class="auth-field" id="auth-password-field">
+            <label class="field-label" for="auth-password" id="auth-password-label">Password</label>
             <div class="auth-password-wrap">
               <input type="password" id="auth-password" class="field-input" autocomplete="current-password" placeholder="At least 8 characters" />
               <button type="button" class="auth-password-toggle" id="auth-password-toggle" aria-label="Show password" aria-pressed="false">
@@ -662,10 +681,11 @@
             </button>
             </div>
             <p class="auth-field-error hidden" id="auth-password-error"></p>
+            <button type="button" class="auth-forgot-btn" id="auth-forgot-btn">Forgot password?</button>
           </div>
 
           <div class="auth-field hidden" id="auth-confirm-field">
-            <label class="field-label" for="auth-confirm">Confirm password</label>
+            <label class="field-label" for="auth-confirm" id="auth-confirm-label">Confirm password</label>
             <div class="auth-password-wrap">
               <input type="password" id="auth-confirm" class="field-input" autocomplete="new-password" placeholder="Repeat your password" />
               <button type="button" class="auth-password-toggle" id="auth-confirm-toggle" aria-label="Show password" aria-pressed="false">
@@ -1388,6 +1408,6 @@
   <script src="js/sectionHeaders.js?v=2"></script>
   <script src="js/yourData.js?v=6"></script>
   <script src="js/landing.js?v=1"></script>
-  <script src="js/auth.js?v=4"></script>
+  <script src="js/auth.js?v=5"></script>
 </body>
 </html>
