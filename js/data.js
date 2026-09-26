@@ -306,12 +306,16 @@ async function loadData() {
   loadSettings(); // independent of everything below; applies the theme as soon as it resolves
   loadProfile();
 
-  const [moviesRes, showsRes, colsRes, colItemsRes] = await Promise.all([
-    db.from("movies").select("*"),
-    db.from("shows").select("*"),
-    db.from("collections").select("*"),
-    db.from("collection_items").select("*"),
-  ]);
+  // Whole tables, however long (fetchAllRows, supabaseClient.js); each
+  // settles as { data, error } so one failing table doesn't sink the rest.
+  const [moviesRes, showsRes, colsRes, colItemsRes] = await Promise.all(
+    ["movies", "shows", "collections", "collection_items"].map((table) =>
+      fetchAllRows(table).then(
+        (data) => ({ data, error: null }),
+        (error) => ({ data: null, error })
+      )
+    )
+  );
 
   if (moviesRes.error) {
     renderError(MOVIE_GRIDS, "Could not load movies.");

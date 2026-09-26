@@ -852,7 +852,7 @@ async function persistOrder(table, storeKey, orderedIds) {
     showToast("Could not save the new order.", true);
     // Show what the database really holds, not the order we optimistically drew.
     forgetPendingPositions(storeKey);
-    const { data: fresh } = await db.from(table).select("*");
+    const fresh = await fetchAllRows(table).catch(() => null);
     if (fresh) fresh.forEach((row) => STORE[storeKey].set(row.id, row));
     gridEl._html = null; // force a rebuild
     renderCollections();

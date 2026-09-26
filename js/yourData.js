@@ -20,7 +20,6 @@
    The ids only tie a collection's items to the titles in the same file. */
 
 const SLATE_FILE_VERSION = 1;
-const EXPORT_PAGE_SIZE = 1000; // Supabase's default cap on rows per request
 
 const dataExportBtn = document.getElementById("data-export-btn");
 const dataExportSummary = document.getElementById("data-export-summary");
@@ -36,25 +35,6 @@ function renderDataSummary() {
   dataExportSummary.textContent =
     `${plural(STORE.movies.size, "movie")}, ${plural(STORE.shows.size, "show")} and ` +
     plural(STORE.collections.size, "collection");
-}
-
-// Every row of a table, however many: the app's own load reads one page,
-// which is fine for drawing grids but a backup must never come up short.
-// Pages until the exact count is reached (not until a short page, which a
-// lower server-side cap would fake).
-async function fetchAllRows(table) {
-  const rows = [];
-  for (;;) {
-    const { data, error, count } = await db
-      .from(table)
-      .select("*", { count: "exact" })
-      .order("created_at")
-      .order("id")
-      .range(rows.length, rows.length + EXPORT_PAGE_SIZE - 1);
-    if (error) throw new Error(`${table}: ${error.message}`);
-    rows.push(...data);
-    if (!data.length || rows.length >= (count ?? 0)) return rows;
-  }
 }
 
 function withoutKeys(row, keys) {
