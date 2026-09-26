@@ -3,7 +3,9 @@
 // Slate runs one exact version of supabase-js, the same one package.json
 // lists and the tests run against, with an integrity hash: the browser
 // refuses the file unless it's byte for byte the one expected. Nothing
-// changes until someone updates it on purpose:
+// changes until someone updates it on purpose. It's listed under
+// "dependencies", not devDependencies: it runs in users' browsers, and
+// GitHub's security alerts should treat it that way.
 //
 //   npm run update-supabase -- 2.118.0
 //                          install that version, point index.html at it
@@ -25,7 +27,7 @@ const TAG = /<script src="https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase
 // installed it (the CDN serves the very same bytes).
 function pinned() {
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
-  const version = pkg.devDependencies["@supabase/supabase-js"];
+  const version = pkg.dependencies["@supabase/supabase-js"];
   const file = fs.readFileSync(path.join(ROOT, "node_modules/@supabase/supabase-js", FILE));
   const integrity = `sha384-${crypto.createHash("sha384").update(file).digest("base64")}`;
   return { version, integrity };
@@ -45,7 +47,7 @@ function update(version) {
     console.error("Which version? For example: npm run update-supabase -- 2.118.0");
     process.exit(1);
   }
-  execFileSync("npm", ["install", "--save-dev", "--save-exact", `@supabase/supabase-js@${version}`], {
+  execFileSync("npm", ["install", "--save-prod", "--save-exact", `@supabase/supabase-js@${version}`], {
     cwd: ROOT,
     stdio: "inherit",
   });
