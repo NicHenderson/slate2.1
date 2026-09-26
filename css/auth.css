@@ -308,8 +308,46 @@
   text-decoration-color: currentColor;
 }
 
-/* Signed in by a reset link: no way back to the page but "Log out". */
-.auth-screen[data-mode="reset"] .auth-back {
+/* Request Access: the message box, its label row and character count. */
+.auth-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.auth-optional {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-muted);
+}
+
+.auth-counter {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.auth-note {
+  resize: vertical;
+  min-height: 76px;
+  line-height: 1.5;
+}
+
+/* The bot trap: in the form, never on screen. */
+.auth-trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Signed in by a reset link or a temporary password: no way back to the
+   page but "Log out". */
+.auth-screen[data-mode="reset"] .auth-back,
+.auth-screen[data-mode="choose"] .auth-back {
   display: none;
 }
 

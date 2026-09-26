@@ -63,7 +63,7 @@ your data and don't break when your password does.
 | File | Covers |
 | --- | --- |
 | `smoke.spec.js` | Landing page, logging in and out, adding a title from TMDB |
-| `auth.spec.js` | Registering, forgot password, the reset link, expired links |
+| `auth.spec.js` | Requesting access, forgot password, the reset link, expired links |
 | `library.spec.js` | Marking titles watched, deleting safely, reviews shown as text |
 | `customOrder.spec.js` | Drag and drop in Custom order, and the drag bugs it once had |
 | `shows.spec.js` | A show from the queue to watching to finished |
@@ -73,6 +73,7 @@ your data and don't break when your password does.
 | `account.spec.js` | Deleting an account: the locks, a wrong password, a server failure, and the account gone |
 | `mobile.spec.js` | Slate on a phone: nothing scrolls sideways, and the menu and adding a title work by tapping |
 | `bigLibrary.spec.js` | Libraries past 1,000 rows load whole |
+| `welcomeEmail.spec.js` | The welcome-email tool (`tools/welcome-email.html`) |
 | `stamps.spec.js` | Every CSS/JS link in `index.html` has its file's current stamp |
 
 The TMDB Edge Function has its own tests (Deno):

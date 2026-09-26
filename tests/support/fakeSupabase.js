@@ -1,8 +1,9 @@
 // A stand-in for Slate's whole backend, installed into a Playwright page so
 // the tests never touch a real account, the real database or the internet.
 //
-//   Auth       /auth/v1/…      users with passwords, sessions, sign-up,
-//                              reset emails (recorded), password changes
+//   Auth       /auth/v1/…      users with passwords and metadata, sessions,
+//                              reset emails (recorded), password changes;
+//                              sign-up is off, as in production
 //   Database   /rest/v1/…      the tables of supabase/migrations/, in memory,
 //                              with the same ownership rules as the real
 //                              row-level security (each user sees only theirs)
@@ -10,6 +11,9 @@
 //   Realtime   the websocket   channels join as on the real server, and every
 //                              write is pushed to its owner's open tabs as a
 //                              postgres_changes event, like the real one
+//
+//   Web3Forms  api.web3forms.com/submit   access requests, recorded in
+//                              `accessRequests` instead of emailed
 //
 // Anything else outside the app is answered locally too: supabase-js from
 // node_modules instead of the CDN, an empty stylesheet for Google Fonts, a
@@ -51,6 +55,7 @@ function createBackend() {
   const log = []; // every write, as "INSERT movies 1", for assertions
   const emails = []; // reset emails "sent": { email, redirectTo }
   const blocked = []; // outside requests the app shouldn't have made
+  const accessRequests = []; // "Request access" forms sent: what Web3Forms got
   const channels = []; // joined realtime channels: { ws, topic, joinRef, userId, bindings }
   // Set by a test to make writes fail: (method, table) → an error message,
   // or nothing to let the write through.
@@ -92,7 +97,7 @@ function createBackend() {
       email: user.email,
       email_confirmed_at: "2026-01-01T00:00:00Z",
       app_metadata: { provider: "email", providers: ["email"] },
-      user_metadata: {},
+      user_metadata: { ...user.metadata },
       identities: [],
       created_at: "2026-01-01T00:00:00Z",
     };
@@ -122,11 +127,8 @@ function createBackend() {
       return reply(200, issueSession(userId));
     }
     if (path === "/signup") {
-      // Email confirmation on, as in production: a user comes back, no session.
-      const existing = [...users.values()].find((u) => u.email === body.email);
-      const user = existing ?? { id: crypto.randomUUID(), email: body.email, password: body.password, unconfirmed: true };
-      if (!existing) users.set(user.id, user);
-      return reply(200, publicUser(user));
+      // Slate is invite-only: "Allow new users to sign up" is off.
+      return reply(422, { code: 422, error_code: "signup_disabled", msg: "Signups not allowed for this instance" });
     }
     if (path === "/recover") {
       emails.push({ email: body.email, redirectTo: url.searchParams.get("redirect_to") });
@@ -148,6 +150,7 @@ function createBackend() {
         user.password = body.password;
         log.push("PASSWORD CHANGED");
       }
+      if (req.method() === "PUT" && body?.data) user.metadata = { ...user.metadata, ...body.data };
       return reply(200, publicUser(user));
     }
     return reply(404, { msg: `fake auth: no ${req.method()} ${path}` });
@@ -418,6 +421,21 @@ function createBackend() {
     return reply(400, { error: "Not a TMDB request Slate makes." });
   }
 
+  /* ---------- Web3Forms (Request access) ---------- */
+
+  function handleWeb3Forms(route, req, url) {
+    const headers = { "access-control-allow-origin": "*", "access-control-allow-headers": "content-type, accept" };
+    if (req.method() === "OPTIONS") return route.fulfill({ status: 204, headers, body: "" });
+    const reply = (status, json) => route.fulfill({ status, headers, contentType: "application/json", body: JSON.stringify(json) });
+    if (req.method() !== "POST" || url.pathname !== "/submit") return reply(404, { success: false, message: "Not found" });
+    const injected = hooks.failWhen?.("POST", "web3forms");
+    if (injected) return reply(injected.status ?? 500, { success: false, message: injected.message ?? "Injected failure" });
+    const body = req.postDataJSON() ?? {};
+    if (!body.access_key) return reply(400, { success: false, message: "Access key missing" });
+    accessRequests.push(body);
+    return reply(200, { success: true, message: "Email sent successfully!" });
+  }
+
   /* ---------- installing it into a page ---------- */
 
   async function install(page) {
@@ -434,6 +452,7 @@ function createBackend() {
         }
         if (url.hostname === "fonts.googleapis.com") return route.fulfill({ contentType: "text/css", body: "" });
         if (url.hostname === "image.tmdb.org") return route.fulfill({ contentType: "image/png", body: BLANK_PNG });
+        if (url.hostname === "api.web3forms.com") return handleWeb3Forms(route, req, url);
         blocked.push(req.url());
         return route.abort();
       }
@@ -474,8 +493,12 @@ function createBackend() {
 
   /* ---------- test setup helpers ---------- */
 
-  function addUser(email, password) {
-    const user = { id: crypto.randomUUID(), email, password };
+  // An account as it is once its owner has chosen a password. `temporary`:
+  // as just made by hand in Supabase (Add user), still on the password it
+  // was given — Slate asks for a new one first (migration 0006).
+  function addUser(email, password, { temporary = false } = {}) {
+    const metadata = temporary ? {} : { password_chosen: true };
+    const user = { id: crypto.randomUUID(), email, password, metadata };
     users.set(user.id, user);
     return user;
   }
@@ -507,7 +530,7 @@ function createBackend() {
     return JSON.parse(JSON.stringify(db));
   }
 
-  return { install, addUser, seed, recoveryLink, snapshot, hooks, releaseRealtime, heldPushes, db, users, log, emails, blocked };
+  return { install, addUser, seed, recoveryLink, snapshot, hooks, releaseRealtime, heldPushes, db, users, log, emails, blocked, accessRequests };
 }
 
 module.exports = { createBackend };

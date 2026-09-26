@@ -1,30 +1,63 @@
-// Accounts: registering, logging in, and getting back in with a reset link.
+// Accounts: asking for one, logging in, and getting back in with a reset link.
 const { test, expect, logIn, USER } = require("./support/fixtures");
 
-test.describe("registering", () => {
-  test("creates the account and asks to confirm the email before logging in", async ({ page, backend }) => {
-    await page.goto("/#signup");
-    await expect(page.locator("#auth-title")).toHaveText("Create Account");
-    await page.fill("#auth-email", "new@slate.test");
-    await page.fill("#auth-password", "a-fine-password");
-    await page.fill("#auth-confirm", "a-fine-password");
+test.describe("requesting access", () => {
+  // Slate is invite-only: there's no way to make an account from the app.
+  // The card asks for access instead, emailed to Slate's inbox (Web3Forms).
+  test("the landing's button opens Request Access, which sends name, email and message — and makes no account", async ({ page, backend }) => {
+    await page.goto("/");
+    await page.locator('#lp-nav a[href="#request-access"]').click();
+    await expect(page).toHaveURL(/#request-access$/);
+    await expect(page.locator("#auth-title")).toHaveText("Request Access");
+    await expect(page.locator("#auth-password-field")).toBeHidden();
+    await expect(page.locator("#auth-confirm-field")).toBeHidden();
+
+    await page.fill("#auth-name", "Ana");
+    await page.fill("#auth-email", "ana@slate.test");
+    await page.fill("#auth-note", "Friend of Nico's.");
+    await expect(page.locator("#auth-note-count")).toHaveText("17/500");
     await page.click("#auth-submit");
 
-    await expect(page.locator("#auth-title")).toHaveText("Log In");
-    await expect(page.locator("#auth-message")).toHaveText("Check your email to confirm your account before logging in.");
-    expect([...backend.users.values()].some((u) => u.email === "new@slate.test")).toBe(true);
+    await expect(page.locator("#auth-message")).toHaveText("Request sent! We'll write to ana@slate.test once your account is ready.");
+    await expect(page.locator("#auth-submit")).toHaveText(/^Send again in \d+s$/);
+    await expect(page.locator("#auth-name")).toHaveValue("");
+    expect(backend.accessRequests).toEqual([
+      expect.objectContaining({ subject: "Slate access request: Ana", replyto: "ana@slate.test", name: "Ana", email: "ana@slate.test", message: "Friend of Nico's." }),
+    ]);
+    expect(backend.accessRequests[0]["Requested on"]).toMatch(/\d{4}/);
+    expect(backend.accessRequests[0]["Next step"]).toContain("Add user");
+    expect(backend.accessRequests[0].access_key).toMatch(/^[0-9a-f-]{36}$/);
+    expect(backend.users.size).toBe(1); // only the seeded one
   });
 
-  test("checks the fields before sending anything", async ({ page, backend }) => {
-    await page.goto("/#signup");
+  test("checks the fields first, and a bot filling the hidden field sends nothing", async ({ page, backend }) => {
+    await page.goto("/#signup"); // Create Account's old address asks for access now
+    await expect(page.locator("#auth-title")).toHaveText("Request Access");
     await page.fill("#auth-email", "not-an-email");
-    await page.fill("#auth-password", "short");
-    await page.fill("#auth-confirm", "different");
     await page.click("#auth-submit");
+    await expect(page.locator("#auth-name-error")).toHaveText("Tell us your name.");
     await expect(page.locator("#auth-email-error")).toHaveText("Enter a valid email address.");
-    await expect(page.locator("#auth-password-error")).toHaveText("Password must be at least 8 characters.");
-    await expect(page.locator("#auth-confirm-error")).toHaveText("Passwords do not match.");
-    expect(backend.users.size).toBe(1);
+    expect(backend.accessRequests).toEqual([]);
+
+    await page.fill("#auth-name", "Bot");
+    await page.fill("#auth-email", "bot@spam.test");
+    await page.locator("#auth-website").evaluate((el) => (el.value = "http://spam.test"));
+    await page.click("#auth-submit");
+    await expect(page.locator("#auth-message")).toContainText("Request sent!");
+    expect(backend.accessRequests).toEqual([]);
+  });
+
+  test("if the request can't be sent, it says so and keeps what was typed", async ({ page, backend }) => {
+    backend.hooks.failWhen = (method, target) => (target === "web3forms" ? { status: 500 } : null);
+    await page.goto("/#login");
+    await expect(page.locator("#auth-toggle-btn")).toHaveText("Request access");
+    await page.click("#auth-toggle-btn");
+    await page.fill("#auth-name", "Ana");
+    await page.fill("#auth-email", "ana@slate.test");
+    await page.click("#auth-submit");
+    await expect(page.locator("#auth-message")).toHaveText("Couldn't send your request. Please try again in a moment.");
+    await expect(page.locator("#auth-name")).toHaveValue("Ana");
+    await expect(page.locator("#auth-submit")).toBeEnabled();
   });
 });
 
@@ -106,5 +139,78 @@ test.describe("forgot password", () => {
     await expect(page.locator("#app")).toBeVisible();
     await expect(page.locator(".toast")).toHaveText("That reset link has expired or was already used.");
     await expect(page).toHaveURL("http://127.0.0.1:4173/");
+  });
+});
+
+// Accounts are made by hand in Supabase with a temporary password, emailed
+// to the new member: their first login asks for a password of their own.
+test.describe("first login with a temporary password", () => {
+  const NEW = { email: "ana@slate.test", password: "temporary-pass-1" };
+
+  // Through the login card, as logIn() does — but the app doesn't open.
+  async function logInWithTemporaryPassword(page) {
+    await page.goto("/#login");
+    await page.fill("#auth-email", NEW.email);
+    await page.fill("#auth-password", NEW.password);
+    await page.click("#auth-submit");
+    await expect(page.locator("#auth-title")).toHaveText("Choose Your Password");
+  }
+
+  test("asks for a password of their own before the app opens, then opens it", async ({ page, backend }) => {
+    const ana = backend.addUser(NEW.email, NEW.password, { temporary: true });
+    await logInWithTemporaryPassword(page);
+    await expect(page.locator("#app")).toBeHidden();
+    await expect(page.locator("#auth-back")).toBeHidden();
+    await expect(page.locator("#auth-email-field")).toBeHidden();
+
+    // A reload doesn't get around it.
+    await page.reload();
+    await expect(page.locator("#auth-title")).toHaveText("Choose Your Password");
+    await expect(page.locator("#app")).toBeHidden();
+
+    // Not the temporary one again, and both boxes must match.
+    await page.fill("#auth-password", NEW.password);
+    await page.fill("#auth-confirm", "something-else-1");
+    await page.click("#auth-submit");
+    await expect(page.locator("#auth-confirm-error")).toHaveText("Passwords do not match.");
+    await page.fill("#auth-confirm", NEW.password);
+    await page.click("#auth-submit");
+    await expect(page.locator("#auth-password-error")).toHaveText("That's already your password — choose a different one.");
+
+    await page.fill("#auth-password", "anas-own-password");
+    await page.fill("#auth-confirm", "anas-own-password");
+    await page.click("#auth-submit");
+    await expect(page.locator("#app")).toBeVisible();
+    await expect(page.locator(".toast").last()).toHaveText("Password saved. Welcome to Slate!");
+    expect(ana.password).toBe("anas-own-password");
+    expect(ana.metadata).toEqual({ password_chosen: true });
+
+    // From now on, straight in with it.
+    await page.click("#logout-btn");
+    await expect(page.locator("#landing-screen")).toBeVisible();
+    await logIn(page, { email: NEW.email, password: "anas-own-password" });
+    await expect(page.locator("#auth-screen")).toBeHidden();
+  });
+
+  test("“Log out” there leaves without changing anything", async ({ page, backend }) => {
+    const ana = backend.addUser(NEW.email, NEW.password, { temporary: true });
+    await logInWithTemporaryPassword(page);
+    await expect(page.locator("#auth-toggle-btn")).toHaveText("Log out");
+    await page.click("#auth-toggle-btn");
+    await expect(page.locator("#landing-screen")).toBeVisible();
+    await expect(page.locator("#auth-screen")).toBeHidden();
+    expect(ana.password).toBe(NEW.password);
+    expect(ana.metadata).toEqual({});
+  });
+
+  test("a session saved before the account was marked doesn't ask again", async ({ page, backend }) => {
+    const ana = backend.addUser(NEW.email, NEW.password, { temporary: true });
+    await logInWithTemporaryPassword(page);
+    // Marked on the server meanwhile (as migration 0006 does); this tab's
+    // saved session still has the old metadata.
+    ana.metadata = { password_chosen: true };
+    await page.reload();
+    await expect(page.locator("#app")).toBeVisible();
+    await expect(page.locator("#auth-screen")).toBeHidden();
   });
 });

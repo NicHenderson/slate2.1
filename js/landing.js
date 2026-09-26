@@ -17,7 +17,7 @@ landingEl.classList.add("lp-js"); // opts the .reveal elements into their entran
 document.getElementById("lp-year").textContent = String(new Date().getFullYear());
 
 /* ---------- in-page links ----------
-   Scroll without touching the URL hash: #login / #signup are auth.js's
+   Scroll without touching the URL hash: #login / #request-access are auth.js's
    routes, and a section anchor in the address bar is just noise. */
 
 landingEl.addEventListener("click", (e) => {
