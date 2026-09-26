@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Slate · Welcome email</title>
+  <!--
+    Letting someone into Slate (see supabase/README.md, "Letting someone in"):
+    this page makes their temporary password and the welcome email that
+    carries it, sent by hand from Slate's Gmail. It isn't part of the app
+    and talks to nothing: everything happens in this page.
+
+    The email is built from tables and inline styles only — what survives
+    being pasted into Gmail and opened in any mail app.
+  -->
+  <style>
+    :root {
+      --bg: #0d0c15;
+      --panel: #17131f;
+      --border: #2a2338;
+      --text: #ece8f5;
+      --muted: #9d94b3;
+      --accent: #a78bfa;
+      --strong: #8b5cf6;
+      --deep: #6d28d9;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.5 "Libre Franklin", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    }
+    main {
+      display: grid;
+      grid-template-columns: minmax(280px, 380px) 1fr;
+      gap: 32px;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 24px 48px;
+    }
+    h1 {
+      margin: 0 0 4px;
+      font: 700 26px/1.2 "Oswald", "Arial Narrow", Arial, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .lede { margin: 0 0 24px; color: var(--muted); font-size: 14px; }
+    .steps { margin: 0 0 24px; padding-left: 20px; color: var(--muted); font-size: 13.5px; }
+    .steps li { margin-bottom: 6px; }
+    .steps strong { color: var(--text); font-weight: 600; }
+    label {
+      display: block;
+      margin: 16px 0 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .row { display: flex; gap: 8px; }
+    input {
+      width: 100%;
+      min-width: 0;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+    }
+    input:focus { outline: 2px solid var(--strong); outline-offset: 1px; }
+    #password { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+    .hint { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
+    button, .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      line-height: 1.2;
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    button:hover, .btn:hover { border-color: var(--strong); }
+    .actions { display: grid; gap: 10px; margin-top: 28px; }
+    .primary { background: var(--strong); border-color: var(--strong); color: #fff; }
+    .primary:hover { background: var(--deep); border-color: var(--deep); }
+    .status { min-height: 20px; margin: 10px 0 0; font-size: 13px; color: var(--accent); }
+    .preview-label { margin-top: 0; }
+    .preview {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f3f0f9;
+    }
+    @media (max-width: 860px) {
+      main { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section>
+      <h1>Welcome email</h1>
+      <p class="lede">For letting someone into Slate, once their access request arrives.</p>
+
+      <ol class="steps">
+        <li>Fill in their <strong>name</strong> and <strong>email</strong> from the request, and <strong>generate</strong> a temporary password.</li>
+        <li>In Supabase: <strong>Authentication → Users → Add user</strong>, with that email and password, and <strong>Auto Confirm User</strong> ticked.</li>
+        <li><strong>Copy email</strong>, then <strong>Open in Gmail</strong> and paste it into the message (Ctrl+V).</li>
+      </ol>
+
+      <form id="form" autocomplete="off">
+        <label for="name">Their name</label>
+        <input id="name" type="text" placeholder="Ana" />
+
+        <label for="email">Their email</label>
+        <input id="email" type="email" placeholder="ana@example.com" />
+
+        <label for="password">Temporary password</label>
+        <div class="row">
+          <input id="password" type="text" spellcheck="false" />
+          <button type="button" id="generate">Generate</button>
+        </div>
+        <p class="hint">At least 8 characters. They'll replace it at their first login.</p>
+
+        <label for="link">Slate's address</label>
+        <input id="link" type="url" placeholder="https://…" />
+        <p class="hint">Where Slate is online. Remembered on this computer.</p>
+      </form>
+
+      <div class="actions">
+        <button type="button" class="primary" id="copy-email">Copy email</button>
+        <a class="btn" id="open-gmail" href="#" target="_blank" rel="noopener">Open in Gmail</a>
+      </div>
+      <p class="status" id="status" role="status"></p>
+    </section>
+
+    <section>
+      <label class="preview-label">Preview</label>
+      <div class="preview"><div id="preview"></div></div>
+    </section>
+  </main>
+
+  <script>
+    const SUBJECT = "Your Slate account is ready";
+    const SENDER = "slateappmail@gmail.com";
+    const LINK_KEY = "slate-welcome-link";
+
+    const $ = (id) => document.getElementById(id);
+    const fields = { name: $("name"), email: $("email"), password: $("password"), link: $("link") };
+
+    const escapeHtml = (text) =>
+      String(text).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+    // 12 characters in groups of four, from letters and digits that can't
+    // be mistaken for each other when read off an email (no 0/O, 1/l/I).
+    function generatePassword() {
+      const alphabet = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      const bytes = crypto.getRandomValues(new Uint32Array(12));
+      const chars = [...bytes].map((n) => alphabet[n % alphabet.length]).join("");
+      return chars.match(/.{4}/g).join("-");
+    }
+
+    function values() {
+      return {
+        name: fields.name.value.trim(),
+        email: fields.email.value.trim(),
+        password: fields.password.value.trim(),
+        link: fields.link.value.trim(),
+      };
+    }
+
+    // The email itself. Placeholders in [brackets] until a field is filled.
+    function emailHtml({ name, email, password, link }) {
+      const n = escapeHtml(name || "[name]");
+      const e = escapeHtml(email || "[email]");
+      const p = escapeHtml(password || "[temporary password]");
+      const href = /^https?:\/\//i.test(link) ? escapeHtml(link) : "#";
+      const linkText = escapeHtml(link || "[Slate's address]");
+      const font = "font-family:Arial,Helvetica,sans-serif;";
+      const display = "font-family:'Arial Narrow',Arial,Helvetica,sans-serif;";
+      return `
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f3f0f9;${font}">
+  <tr>
+    <td align="center" style="padding:32px 16px;">
+      <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:560px;background-color:#ffffff;border:1px solid #e2dcef;border-radius:14px;">
+        <tr>
+          <td style="background-color:#0d0c15;border-radius:13px 13px 0 0;padding:26px 32px 24px;">
+            <div style="${display}font-size:30px;line-height:1;font-weight:700;letter-spacing:3px;color:#ece8f5;">SLATE</div>
+            <div style="${font}font-size:13px;line-height:1.4;color:#a78bfa;padding-top:8px;">Every movie. Every show. Pinned to one board.</div>
+          </td>
+        </tr>
+        <tr>
+          <td style="height:4px;line-height:4px;font-size:0;background-color:#8b5cf6;">&nbsp;</td>
+        </tr>
+        <tr>
+          <td style="padding:32px 32px 8px;">
+            <div style="${font}font-size:11px;font-weight:700;letter-spacing:2px;color:#6d28d9;">WELCOME TO SLATE</div>
+            <div style="${display}font-size:26px;line-height:1.2;font-weight:700;color:#1b1726;padding-top:6px;">Your account is ready, ${n}!</div>
+            <p style="${font}font-size:15px;line-height:1.6;color:#3d3650;margin:16px 0 0;">Your request to join Slate was accepted. Here's how to log in:</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:20px 32px 4px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f6f3fc;border:2px dashed #c4b5fd;border-radius:10px;">
+              <tr>
+                <td style="padding:18px 20px 6px;">
+                  <div style="${font}font-size:11px;font-weight:700;letter-spacing:1.5px;color:#6b6480;">EMAIL</div>
+                  <div style="${font}font-size:16px;line-height:1.5;color:#1b1726;padding-top:2px;">${e}</div>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:12px 20px 18px;">
+                  <div style="${font}font-size:11px;font-weight:700;letter-spacing:1.5px;color:#6b6480;">TEMPORARY PASSWORD</div>
+                  <div style="font-family:'Courier New',Courier,monospace;font-size:20px;line-height:1.5;font-weight:700;letter-spacing:1px;color:#6d28d9;padding-top:2px;">${p}</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:28px 32px 8px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td align="center" style="background-color:#8b5cf6;border-radius:8px;border-bottom:4px solid #6d28d9;">
+                  <a href="${href}" target="_blank" style="display:inline-block;padding:14px 34px;${font}font-size:15px;font-weight:700;letter-spacing:1.5px;color:#ffffff;text-decoration:none;">OPEN SLATE</a>
+                </td>
+              </tr>
+            </table>
+            <div style="${font}font-size:12.5px;line-height:1.5;color:#6b6480;padding-top:12px;">or go to <a href="${href}" target="_blank" style="color:#6d28d9;">${linkText}</a></div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 32px 8px;">
+            <p style="${font}font-size:14.5px;line-height:1.6;color:#3d3650;margin:0;">The first time you log in, Slate will ask you to <strong style="color:#1b1726;">choose a password of your own</strong>. After that, the temporary one stops working — so there's no need to keep this email.</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 32px 32px;">
+            <p style="${font}font-size:14.5px;line-height:1.6;color:#3d3650;margin:0;">Happy watching! 🍿<br />Questions? Just reply to this email.</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="border-top:1px solid #ece7f5;padding:18px 32px 22px;">
+            <p style="${font}font-size:12px;line-height:1.5;color:#8a839c;margin:0;">You're getting this because you asked for access to Slate. If that wasn't you, you can ignore this email.</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`;
+    }
+
+    function render() {
+      $("preview").innerHTML = emailHtml(values());
+      const { email } = values();
+      const params = new URLSearchParams({ authuser: SENDER, view: "cm", fs: "1", to: email, su: SUBJECT });
+      $("open-gmail").href = `https://mail.google.com/mail/?${params}`;
+    }
+
+    function say(message) {
+      $("status").textContent = message;
+    }
+
+    // As rich text, the way Gmail takes a paste. The async clipboard where
+    // it's allowed; otherwise by selecting the preview and copying that.
+    async function copyEmail() {
+      const v = values();
+      const labels = { name: "their name", email: "their email", password: "a temporary password", link: "Slate's address" };
+      const missing = Object.keys(labels).filter((k) => !v[k]);
+      if (missing.length) return say(`Fill in ${missing.map((k) => labels[k]).join(", ")}.`);
+      if (v.password.length < 8) return say("The password needs at least 8 characters.");
+      const html = emailHtml(v);
+      const text = `Your account is ready, ${v.name}!\n\nEmail: ${v.email}\nTemporary password: ${v.password}\n\nLog in at ${v.link} — Slate will ask you to choose a password of your own.`;
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "text/html": new Blob([html], { type: "text/html" }),
+            "text/plain": new Blob([text], { type: "text/plain" }),
+          }),
+        ]);
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents($("preview"));
+        const selection = getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        const ok = document.execCommand("copy");
+        selection.removeAllRanges();
+        if (!ok) return say("Couldn't copy — select the preview by hand and copy it.");
+      }
+      say("Copied! Paste it into the Gmail message with Ctrl+V.");
+    }
+
+    try {
+      fields.link.value = localStorage.getItem(LINK_KEY) || "";
+    } catch {}
+    fields.password.value = generatePassword();
+
+    $("form").addEventListener("input", (e) => {
+      if (e.target === fields.link) {
+        try {
+          localStorage.setItem(LINK_KEY, fields.link.value.trim());
+        } catch {}
+      }
+      say("");
+      render();
+    });
+    $("generate").addEventListener("click", () => {
+      fields.password.value = generatePassword();
+      render();
+    });
+    $("copy-email").addEventListener("click", copyEmail);
+    render();
+  </script>
+</body>
+</html>

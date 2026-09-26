@@ -34,7 +34,10 @@ someone in:
 
 1. **Authentication → Users → Add user → Create new user**: their email,
    a temporary password, and **Auto Confirm User** ticked.
-2. Email them that their account is ready, with the temporary password.
+2. Email them that their account is ready, with the temporary password:
+   [`tools/welcome-email.html`](../tools/welcome-email.html) (open it
+   through the local server, e.g. `localhost:8080/tools/welcome-email.html`)
+   generates the password and the email, ready to paste into Gmail.
 3. At their first login Slate asks them to choose a password of their own
    before the app opens.
 

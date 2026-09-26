@@ -506,7 +506,7 @@ async function sendAccessRequest(email) {
           minute: "2-digit",
           timeZoneName: "short",
         }),
-        "Next step": "To let them in: Supabase → Authentication → Users → Add user, with this email and a temporary password. Then send the welcome email.",
+        "Next step": "To let them in: Supabase → Authentication → Users → Add user, with this email and a temporary password. Then send the welcome email (tools/welcome-email.html).",
       }),
     });
     const result = await res.json().catch(() => ({}));
