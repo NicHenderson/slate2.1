@@ -27,8 +27,8 @@ browser — for anything that needs a secret:
 1. Create a new project at [supabase.com](https://supabase.com).
 2. In its **SQL Editor**, run each file in `migrations/` in order
    (`0001`, `0002`, `0003`, …), one at a time.
-3. Point the app at the new project: update the URL and anon key in
-   `js/supabaseClient.js`.
+3. Point the app at the new project: put its URL and publishable key in
+   `js/config.js` (Project Settings → API Keys).
 4. Under **Authentication → URL Configuration**, add the address the app is
    served from to the Site URL / Redirect URLs.
 5. Deploy the Edge Functions in `functions/` and set their secrets (each
