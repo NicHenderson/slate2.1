@@ -4,7 +4,7 @@
   "description": "Slate's automated tests. The app itself has no build step and no dependencies: this file only exists for the test tools.",
   "scripts": {
     "test": "playwright test",
-    "test:functions": "TMDB_PROXY_TEST=1 deno test --allow-env supabase/functions/"
+    "test:functions": "cd supabase/functions/tmdb && TMDB_PROXY_TEST=1 deno test --allow-env"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",

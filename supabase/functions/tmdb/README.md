@@ -20,6 +20,10 @@ Updating it later: open the function in the editor, paste the new
 
 ## Tests
 
+From this folder (its `deno.json` maps the test's imports):
+
 ```sh
-TMDB_PROXY_TEST=1 deno test --allow-env supabase/functions/tmdb/
+TMDB_PROXY_TEST=1 deno test --allow-env
 ```
+
+or `npm run test:functions` from the repo root.

@@ -23,9 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -56,14 +56,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
 
+      # Inside the function's folder, where its deno.json is.
       - name: Check, lint and test
+        working-directory: supabase/functions/tmdb
         run: |
-          deno check supabase/functions/tmdb/index.ts
-          deno lint supabase/functions/
-          TMDB_PROXY_TEST=1 deno test --allow-env supabase/functions/
+          deno check index.ts
+          deno lint
+          TMDB_PROXY_TEST=1 deno test --allow-env

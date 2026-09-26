@@ -1,8 +1,7 @@
 // Tests for the "tmdb" function's handler, with fake sign-in and a fake TMDB.
-// Run from the repo root:
-//   TMDB_PROXY_TEST=1 deno test --allow-env supabase/functions/tmdb/
+// Run from this folder (see README.md), or `npm run test:functions`.
 
-import { assertEquals } from "jsr:@std/assert@1";
+import { assertEquals } from "@std/assert";
 import { type Deps, handle } from "./index.ts";
 
 const KEY = "test-tmdb-key";
