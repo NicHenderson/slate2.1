@@ -1,10 +1,12 @@
 {
   "name": "slate",
   "private": true,
-  "description": "Slate's automated tests. The app itself has no build step and no dependencies: this file only exists for the test tools.",
+  "description": "Slate's tooling: the automated tests and the cache-stamp script. The app itself has no build step and no dependencies.",
   "scripts": {
     "test": "playwright test",
-    "test:functions": "cd supabase/functions/tmdb && TMDB_PROXY_TEST=1 deno test --allow-env"
+    "test:functions": "cd supabase/functions/tmdb && TMDB_PROXY_TEST=1 deno test --allow-env",
+    "stamp": "node scripts/stamp.js",
+    "stamp:check": "node scripts/stamp.js --check"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",

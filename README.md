@@ -33,6 +33,7 @@ then open <http://127.0.0.1:8080>. After pulling changes, hard-refresh
 | `img/` | The logo and the OpenMoji emoji used for collection icons |
 | `supabase/` | The database structure (`migrations/`) and server-side code (`functions/`) — see [`supabase/README.md`](supabase/README.md) |
 | `tests/` | The automated tests (below) |
+| `scripts/stamp.js` | Keeps the cache stamps (`?v=…`) in `index.html` in step with the files |
 | `.github/workflows/tests.yml` | Runs every test on GitHub on each push |
 
 ## Tests
@@ -67,6 +68,7 @@ your data and don't break when your password does.
 | `customOrder.spec.js` | Drag and drop in Custom order, and the drag bugs it once had |
 | `collections.spec.js` | Creating collections and filling them |
 | `yourData.spec.js` | Export, and import in both Add and Replace modes |
+| `stamps.spec.js` | Every CSS/JS link in `index.html` has its file's current stamp |
 
 The TMDB Edge Function has its own tests (Deno):
 `npm run test:functions` — see [its README](supabase/functions/tmdb/README.md).
@@ -100,8 +102,10 @@ reach any site outside the app.
 
 - **Every bug fixed gets a test** that fails on the broken code and passes
   on the fix, so it can't quietly come back.
-- **Change a CSS or JS file → bump its `?v=N`** in `index.html`, or browsers
-  keep serving the old copy.
+- **Change a CSS or JS file → run `npm run stamp`.** Each file is linked
+  from `index.html` as `file?v=<stamp>`, a fingerprint of its contents
+  (`scripts/stamp.js`), so browsers fetch it again exactly when it changed.
+  Forget, and the tests on GitHub fail, naming the file.
 - **Database changes go in as a migration:** the next numbered file in
   `supabase/migrations/`, run in the Supabase SQL Editor and committed with
   the code that needs it. Never only in the dashboard.

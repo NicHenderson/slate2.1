@@ -33,6 +33,11 @@ jobs:
       - name: Install test tools
         run: npm ci
 
+      # Fails fast, naming the file, if a CSS/JS file changed without
+      # `npm run stamp` (see scripts/stamp.js).
+      - name: Check cache stamps
+        run: npm run stamp:check
+
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
