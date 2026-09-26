@@ -82,3 +82,37 @@ test("adding a title another tab just added says it's already there", async ({ p
   await expect(page.locator(".toast")).toHaveText("Already in your library.");
   expect(backend.db.movies.filter((m) => m.tmdb_id === 346648)).toHaveLength(1);
 });
+
+// The trailer button is there from the moment the window opens — disabled
+// while TMDB is asked — so nothing in the window jumps when it answers.
+test("the trailer button waits, disabled, where it will be; then turns on or says there's none", async ({ page }) => {
+  let answer;
+  const tmdbAnswered = new Promise((resolve) => (answer = resolve));
+  await logIn(page);
+  await page.route("**/functions/v1/tmdb", async (route) => {
+    await tmdbAnswered;
+    await route.fallback();
+  });
+
+  await page.click('.nav-btn[data-section="movies-watched"]');
+  await page.locator("#grid-movies-watched .card", { hasText: "Alien" }).click();
+  const btn = page.locator("#detail-modal .trailer-btn");
+  await expect(btn).toBeVisible();
+  await expect(btn).toBeDisabled();
+  await expect(btn).toHaveText("▶ Watch trailer");
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished))); // opening animation
+  const before = await page.locator("#detail-modal .detail-synopsis").boundingBox();
+
+  answer();
+  await expect(btn).toBeEnabled();
+  expect(await page.locator("#detail-modal .detail-synopsis").boundingBox()).toEqual(before);
+  await btn.click();
+  await expect(page.locator("#detail-modal .detail-trailer-frame iframe")).toHaveAttribute("src", /fake-alien-trailer/);
+  await page.keyboard.press("Escape");
+
+  // The Matrix has no trailer on TMDB: the button stays off and says so.
+  await page.click('.nav-btn[data-section="movies-towatch"]');
+  await page.locator("#grid-movies-towatch .card", { hasText: "The Matrix" }).click();
+  await expect(btn).toHaveText("No trailer");
+  await expect(btn).toBeDisabled();
+});

@@ -17,8 +17,9 @@
 //
 // Anything else outside the app is answered locally too: supabase-js from
 // node_modules instead of the CDN, an empty stylesheet for Google Fonts, a
-// blank image for TMDB posters. Other hosts are refused and listed in
-// `blocked`, so a test can check the app didn't reach out anywhere else.
+// blank image for TMDB posters, a blank page for the YouTube player. Other
+// hosts are refused and listed in `blocked`, so a test can check the app
+// didn't reach out anywhere else.
 
 const fs = require("fs");
 const crypto = require("crypto");
@@ -453,6 +454,7 @@ function createBackend() {
         if (url.hostname === "fonts.googleapis.com") return route.fulfill({ contentType: "text/css", body: "" });
         if (url.hostname === "image.tmdb.org") return route.fulfill({ contentType: "image/png", body: BLANK_PNG });
         if (url.hostname === "api.web3forms.com") return handleWeb3Forms(route, req, url);
+        if (url.hostname === "www.youtube-nocookie.com") return route.fulfill({ contentType: "text/html", body: "<!doctype html><title>Trailer</title>" });
         blocked.push(req.url());
         return route.abort();
       }
