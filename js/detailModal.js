@@ -135,7 +135,7 @@ function renderDetail(cfg, row) {
       ? formatDate(row.watched_date)
       : `Started ${formatDate(row.started_watching_date)} · Finished ${formatDate(row.finished_watching_date)}`;
   const review = row.review
-    ? `<p class="detail-review">${row.review}</p>`
+    ? `<p class="detail-review">${escapeHtml(row.review)}</p>`
     : `<p class="detail-review detail-review-empty">No review yet.</p>`;
 
   detailBody.innerHTML = `
