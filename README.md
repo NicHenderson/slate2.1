@@ -137,7 +137,8 @@ falta actualizarla de forma periódica.** Solo hay dos motivos para
 hacerlo:
 
 - **GitHub te avisa de una falla de seguridad.** Con las *Dependabot
-  alerts* activadas (Settings → Security → Code security), GitHub revisa
+  alerts* activadas (Settings → Advanced Security → Dependabot alerts →
+  Enable), GitHub revisa
   `package.json` y te manda un correo si la versión que usa Slate tiene
   un problema conocido. El correo dice a qué versión subir.
 - **Supabase anuncia que dejará de aceptar versiones tan antiguas.**
