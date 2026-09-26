@@ -1,3 +1,6 @@
+// Postgres's code for "that row already exists" (a unique index said no).
+const UNIQUE_VIOLATION = "23505";
+
 async function fetchExistingIds(type, ids) {
   if (!ids.length) return new Set();
   const table = type === "movie" ? "movies" : "shows";
@@ -91,6 +94,13 @@ async function addToLibrary(type, id, btn) {
       .insert(buildRecord(type, details))
       .select()
       .single();
+    // Already there after all (added from another tab since the search):
+    // the database keeps one copy per title (migration 0004).
+    if (error?.code === UNIQUE_VIOLATION) {
+      btn.textContent = "Added";
+      showToast("Already in your library.");
+      return;
+    }
     if (error) throw new Error(error.message);
 
     btn.textContent = "Added";

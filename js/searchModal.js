@@ -211,6 +211,10 @@ async function runBatchAdd() {
       const { error } = await db
         .from(table)
         .insert(buildRecord(currentType, details));
+      if (error?.code === UNIQUE_VIOLATION) {
+        skipped++; // added from elsewhere since the check above
+        continue;
+      }
       if (error) throw new Error(error.message);
       ok++;
     } catch (err) {

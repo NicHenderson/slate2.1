@@ -9,6 +9,7 @@ files, numbered in the order they apply:
 | `0001_user_settings.sql` | Per-account settings (theme, reduced motion, defaults) |
 | `0002_profiles.sql` | Profile: username, bio, favorite movie and show |
 | `0003_library.sql` | The library: movies, shows, collections and their items |
+| `0004_hardening.sql` | One title per account, indexes, deleting a user deletes their data, no unused privileges |
 
 The data itself isn't here: that's what **Settings → Your Data → Export
 data** is for (a `.slate` file per account).
@@ -35,6 +36,23 @@ browser — for anything that needs a secret:
    one's README says how).
 6. Sign up, then bring your library back with **Settings → Your Data →
    Import data**.
+
+## Before running 0004
+
+It refuses to apply (and changes nothing) if an account already holds the
+same TMDB title twice. To see any such duplicates first, run this in the SQL
+Editor — no rows means you're clear:
+
+```sql
+select 'movies' as tbl, user_id, tmdb_id, count(*) as copies, string_agg(title, ' / ') as titles
+from public.movies where tmdb_id is not null group by user_id, tmdb_id having count(*) > 1
+union all
+select 'shows', user_id, tmdb_id, count(*), string_agg(title, ' / ')
+from public.shows where tmdb_id is not null group by user_id, tmdb_id having count(*) > 1;
+```
+
+Delete the extra copies from Slate itself (keeping the one with your rating
+and review), then run `0004_hardening.sql`.
 
 ## Changing the database
 

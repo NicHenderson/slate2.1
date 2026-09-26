@@ -29,11 +29,12 @@ const BLANK_PNG = Buffer.from(
   "base64"
 );
 
-// Columns the database fills in when an insert leaves them out, and the
-// ones it refuses to leave empty (supabase/migrations/0003_library.sql).
+// Columns the database fills in when an insert leaves them out, the ones
+// it refuses to leave empty (supabase/migrations/0003_library.sql), and
+// one row per TMDB title per account (0004_hardening.sql).
 const TABLES = {
-  movies: { owner: "user_id", required: ["title"], defaults: () => ({}) },
-  shows: { owner: "user_id", required: ["title"], defaults: () => ({ is_dropped: false }) },
+  movies: { owner: "user_id", required: ["title"], uniqueTitle: true, defaults: () => ({}) },
+  shows: { owner: "user_id", required: ["title"], uniqueTitle: true, defaults: () => ({ is_dropped: false }) },
   collections: { owner: "user_id", required: ["name", "icon"], defaults: () => ({}) },
   collection_items: { owner: null, required: ["collection_id", "item_type", "item_id"], defaults: () => ({}) },
   user_settings: { owner: "user_id", key: "user_id", required: [], defaults: () => ({ settings: {} }) },
@@ -332,6 +333,10 @@ function createBackend() {
           ...spec.defaults(),
           ...input,
         };
+        // One title per account (migration 0004's unique indexes).
+        if (spec.uniqueTitle && row.tmdb_id != null && db[table].some((r) => r.user_id === row.user_id && r.tmdb_id === row.tmdb_id)) {
+          return fail(409, "23505", `duplicate key value violates unique constraint "${table}_user_tmdb_unique"`);
+        }
         const missing = spec.required.find((col) => row[col] == null);
         if (missing) return fail(400, "23502", `null value in column "${missing}" of relation "${table}" violates not-null constraint`);
         if (!canSee(table, row, userId)) return fail(403, "42501", `new row violates row-level security policy for table "${table}"`);
