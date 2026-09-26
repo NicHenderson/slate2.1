@@ -114,9 +114,9 @@ const LIBRARY_FILTERS = {
 const RATING_VALUES = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
 const RATING_MODES = {
-  atLeast: { label: "At least", test: (rated, n) => rated >= n, tag: (n) => (n === 10 ? "Rated 10" : `Rated ${n}+`) },
-  atMost: { label: "At most", test: (rated, n) => rated <= n, tag: (n) => (n === 1 ? "Rated 1" : `Rated ${n} or less`) },
-  exactly: { label: "Exactly", test: (rated, n) => rated === n, tag: (n) => `Rated exactly ${n}` },
+  atLeast: { label: "At least", symbol: "≥", test: (rated, n) => rated >= n, tag: (n) => (n === 10 ? "Rated 10" : `Rated ${n}+`) },
+  atMost: { label: "At most", symbol: "≤", test: (rated, n) => rated <= n, tag: (n) => (n === 1 ? "Rated 1" : `Rated ${n} or less`) },
+  exactly: { label: "Exactly", symbol: "=", test: (rated, n) => rated === n, tag: (n) => `Rated exactly ${n}` },
 };
 
 // Which filters each section offers.
@@ -265,8 +265,8 @@ function renderFilterPanel(sectionId) {
         key === "rating"
           ? `<div class="lf-modes" role="group" aria-label="Compare the rating">${Object.entries(RATING_MODES)
               .map(
-                ([mode, { label }]) =>
-                  `<button class="lf-mode" type="button" data-rating-mode="${mode}" aria-pressed="${mode === ratingModeOf(sectionId)}">${label}</button>`
+                ([mode, { label, symbol }]) =>
+                  `<button class="lf-mode" type="button" data-rating-mode="${mode}" aria-pressed="${mode === ratingModeOf(sectionId)}"><span class="lf-mode-symbol" aria-hidden="true">${symbol}</span>${label}</button>`
               )
               .join("")}</div>`
           : "";
