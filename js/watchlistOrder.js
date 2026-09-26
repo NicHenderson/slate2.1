@@ -27,7 +27,7 @@ async function saveCustomOrder(gridId, orderedIds) {
     showToast("Could not save the new order.", true);
     // Show what the database really holds, not the order we optimistically drew.
     forgetPendingPositions(table);
-    const { data: fresh } = await db.from(table).select("*");
+    const fresh = await fetchAllRows(table).catch(() => null);
     if (fresh) fresh.forEach((row) => STORE[table].set(row.id, row));
     rerenderGrids(Object.keys(GRID_CONFIG).filter((id) => GRID_CONFIG[id].table === table));
   }

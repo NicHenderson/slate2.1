@@ -21,6 +21,9 @@ const crypto = require("crypto");
 const { TMDB_CATALOG } = require("./tmdbCatalog");
 
 const SUPABASE_JS = fs.readFileSync(require.resolve("@supabase/supabase-js/dist/umd/supabase.js"), "utf8");
+// Supabase's default cap on the rows one request returns.
+const MAX_ROWS = 1000;
+
 const BLANK_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
   "base64"
@@ -52,7 +55,9 @@ function createBackend() {
   // or nothing to let the write through.
   // holdRealtime: queue the realtime pushes instead of sending them, until
   // the test calls releaseRealtime() — to decide exactly when echoes land.
-  const hooks = { failWhen: null, holdRealtime: false };
+  // hideCount: answer without the total row count (Content-Range), as a
+  // misconfigured or older server might.
+  const hooks = { failWhen: null, holdRealtime: false, hideCount: false };
   const heldPushes = [];
 
   function issueSession(userId) {
@@ -264,8 +269,10 @@ function createBackend() {
 
     const answer = (rows, status = 200, total) => {
       const shaped = project(rows, url.searchParams.get("select"));
-      const extra = {};
-      if (prefer.includes("count=exact")) {
+      // As the real API sends them: the page's own origin is another, so
+      // the browser only lets the app read Content-Range if it's exposed.
+      const extra = { "access-control-allow-origin": "*", "access-control-expose-headers": "Content-Range" };
+      if (prefer.includes("count=exact") && !hooks.hideCount) {
         const offset = Number(url.searchParams.get("offset") ?? 0);
         extra["content-range"] = `${offset}-${offset + Math.max(shaped.length - 1, 0)}/${total ?? shaped.length}`;
       }
@@ -291,7 +298,9 @@ function createBackend() {
     if (method === "GET" || method === "HEAD") {
       const all = sortRows(db[table].filter((row) => canSee(table, row, userId)).filter(rowFilter(url)), url.searchParams.get("order"));
       const offset = Number(url.searchParams.get("offset") ?? 0);
-      const limit = url.searchParams.has("limit") ? Number(url.searchParams.get("limit")) : Infinity;
+      // Like the real API (Settings → API → Max rows): never more than
+      // MAX_ROWS in one answer, asked for or not — and no error about it.
+      const limit = Math.min(url.searchParams.has("limit") ? Number(url.searchParams.get("limit")) : Infinity, MAX_ROWS);
       return answer(all.slice(offset, offset + limit), 200, all.length);
     }
 
