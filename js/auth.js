@@ -444,9 +444,23 @@ async function saveNewPassword(password) {
     }
     return;
   }
+  // Done: sign out everywhere (anyone else who was in the account is out
+  // too — often the reason for a reset) and log in again with the new one.
+  const { data } = await db.auth.getSession();
   setRecoveryPending(false);
-  enterApp().then(() => showToast("Password updated — you're all set."));
+  authNotice = {
+    email: data.session?.user?.email ?? "",
+    message: "Password updated. Log in with your new password.",
+  };
+  history.replaceState(null, "", ROUTE_FOR_MODE.login);
+  lastAuthRoute = "login";
+  const { error: signOutError } = await db.auth.signOut({ scope: "global" });
+  if (signOutError) console.error("Sign out after reset error:", signOutError.message);
 }
+
+// Something to say on the login card once the signed-out view is up (after
+// a password change): shown by onAuthStateChange's SIGNED_OUT branch.
+let authNotice = null;
 
 authToggleBtn.addEventListener("click", () => {
   if (authMode === "reset") {
@@ -500,16 +514,20 @@ function enterApp() {
 
 // An expired or already-used reset link: Supabase sends the visitor back
 // with an error in the URL instead of a session. Taken once, on the first
-// signed-out render: the card opens on Reset Password to ask for a new one.
-function takeLinkError() {
+// render. Signed out, the card opens on Reset Password to ask for a new
+// one; already signed in (this browser still had a session), the app opens
+// as usual and says so. Either way the error leaves the address bar.
+function takeLinkError(signedIn) {
   const failed = Boolean(window.slateAuthLink?.error);
   if (window.slateAuthLink) window.slateAuthLink.error = null;
   if (failed) {
-    history.replaceState(null, "", location.pathname + ROUTE_FOR_MODE.forgot);
-    lastAuthRoute = "forgot";
+    history.replaceState(null, "", location.pathname + (signedIn ? "" : ROUTE_FOR_MODE.forgot));
+    lastAuthRoute = signedIn ? null : "forgot";
   }
   return failed;
 }
+
+const LINK_EXPIRED = "That reset link has expired or was already used.";
 
 db.auth.onAuthStateChange((event, session) => {
   const nextUserId = session?.user?.id ?? null;
@@ -532,16 +550,24 @@ db.auth.onAuthStateChange((event, session) => {
     // A session exists: login, registration, restored session, or a switch to
     // a different account. Toggle the view synchronously.
     currentUserId = nextUserId;
-    enterApp();
+    const linkFailed = takeLinkError(true);
+    enterApp().then(() => {
+      if (linkFailed) showToast(LINK_EXPIRED, true);
+    });
   } else {
     // Session ended (logout) or none to begin with. Cleared only once the
     // app is off screen, so its exit animation shows it as it was.
     currentUserId = null;
-    const linkFailed = takeLinkError();
+    const linkFailed = takeLinkError(false);
+    const notice = authNotice;
+    authNotice = null;
     showGuestView().then(() => {
       setTimeout(teardownSession, 0);
-      if (linkFailed) {
-        showMessage("That link has expired or was already used. Enter your email to get a new one.");
+      if (linkFailed) showMessage(`${LINK_EXPIRED} Enter your email to get a new one.`);
+      if (notice) {
+        authEmail.value = notice.email;
+        showMessage(notice.message, false);
+        if (matchMedia("(pointer: fine)").matches) authPassword.focus();
       }
     });
   }
