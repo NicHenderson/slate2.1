@@ -234,9 +234,15 @@ const NO_GHOST_GRIDS = new Set(["grid-shows-watching", "grid-shows-dropped"]);
 
 // Shared by renderGrid and the detail modal's prev/next navigation, so
 // "the card next to this one" always means the same thing in both places.
-function getOrderedList(gridId) {
+// The grid's titles as it shows them: its status, the section's search
+// (js/librarySearch.js) and its sort. Also what the detail window's arrows
+// and Surprise Me go through. `searched: false` ignores the search — for
+// saving an order, which must cover the whole list.
+function getOrderedList(gridId, { searched = true } = {}) {
   const cfg = GRID_CONFIG[gridId];
-  let visible = [...STORE[cfg.table].values()].filter(cfg.match);
+  let visible = [...STORE[cfg.table].values()]
+    .filter(cfg.match)
+    .filter((row) => !searched || libraryMatches(gridId, row));
   const sortCfg = GRID_SORTS[gridId];
   if (sortCfg) {
     visible = visible.sort(sortCfg.options[activeSorts[gridId]].cmp);
@@ -257,13 +263,17 @@ function isCustomSorted(gridId) {
 
 function gridHtml(gridId, rows) {
   const cfg = GRID_CONFIG[gridId];
-  let visible = rows.filter(cfg.match);
+  let visible = rows.filter(cfg.match).filter((row) => libraryMatches(gridId, row));
   const sortCfg = GRID_SORTS[gridId];
   if (sortCfg) {
     visible = [...visible].sort(sortCfg.options[activeSorts[gridId]].cmp);
   }
   const showRating = cfg.state === "watched";
   const extra = cfg.state === "watching" ? startedAgoHtml : () => "";
+  // Searched: only what matches — no "+ Add" card among the results.
+  if (isLibraryFiltered(gridId)) {
+    return visible.length ? visible.map((row) => cardHtml(row, showRating, extra(row))).join("") : libraryEmptyHtml(gridId);
+  }
   return (
     visible.map((row) => cardHtml(row, showRating, extra(row))).join("") +
     (NO_GHOST_GRIDS.has(gridId) ? "" : ghostCardHtml(cfg.type))
@@ -282,10 +292,12 @@ function renderGrid(gridId, rows) {
   if (typeof renderHeaderStats === "function") renderHeaderStats(gridId);
   if (typeof renderDataSummary === "function") renderDataSummary();
   const grid = document.getElementById(gridId);
-  const custom = isCustomSorted(gridId);
-  grid.classList.toggle("is-sortable", custom);
+  // A searched grid can't be reordered (js/librarySearch.js says why).
+  const draggable = isCustomSorted(gridId) && !isLibraryFiltered(gridId);
+  grid.classList.toggle("is-sortable", draggable);
   const hint = CUSTOM_SORT_HINTS[gridId] && document.getElementById(CUSTOM_SORT_HINTS[gridId]);
-  if (hint) hint.hidden = !custom || rows.filter(GRID_CONFIG[gridId].match).length < 2;
+  if (hint) hint.hidden = !draggable || rows.filter(GRID_CONFIG[gridId].match).length < 2;
+  updateLibraryCount(LIBRARY_SECTION_OF_GRID[gridId]);
 
   const html = gridHtml(gridId, rows);
   if (grid._html === html) return;
@@ -382,5 +394,6 @@ function clearAppData() {
   STORE.collectionItems.clear();
   resetSettingsState();
   resetProfileState();
+  resetLibrarySearch();
   resetGrids();
 }

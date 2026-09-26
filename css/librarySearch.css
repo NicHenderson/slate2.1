@@ -1,0 +1,122 @@
+/* ---------- Searching your library (js/librarySearch.js) ----------
+
+   A paper strip between a section's header and its grid, in the same
+   sticker language as the Sort button beside it: paper, ink, a hard
+   offset shadow and a slight tilt. */
+
+.lib-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin: -10px 0 26px;
+}
+
+.lib-search {
+  position: relative;
+  flex: 0 1 380px;
+  min-width: 0;
+  transform: rotate(-0.4deg);
+}
+
+.lib-search-input {
+  width: 100%;
+  padding: 10px 38px 10px 40px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  outline: none;
+  appearance: none;
+  transition: box-shadow var(--transition);
+}
+
+.lib-search-input::placeholder {
+  color: var(--ink-muted);
+}
+
+.lib-search-input:focus {
+  box-shadow: 0 0 0 2px var(--accent), 3px 4px 0 var(--accent-deep);
+}
+
+/* The box's own ✕ stands in for the browser's. */
+.lib-search-input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.lib-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  width: 17px;
+  height: 17px;
+  transform: translateY(-50%);
+  color: var(--ink-muted);
+  pointer-events: none;
+}
+
+.lib-search-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  transform: translateY(-50%);
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  font-size: 13px;
+  transition: color var(--transition);
+}
+
+.lib-search-clear:hover,
+.lib-search-clear:focus-visible {
+  color: var(--accent-deep);
+}
+
+.lib-search-clear[hidden] {
+  display: none;
+}
+
+.lib-count {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* A search that found nothing. */
+.lib-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.lib-empty-clear {
+  padding: 9px 16px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(-1deg);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.lib-empty-clear:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 6px 0 var(--accent-deep);
+}
+
+@media (max-width: 640px) {
+  .lib-search {
+    flex-basis: 100%;
+  }
+}
