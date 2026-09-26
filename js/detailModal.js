@@ -84,6 +84,8 @@ function renderDetail(cfg, row) {
     <div class="detail-trailer">${row.tmdb_id ? TRAILER_BTN_LOADING : ""}</div>`;
 
   const addToColHtml = `<button class="edit-btn" type="button" data-action="add-to-collection">🗂 Add to collection</button>`;
+  // Not watched yet: where to watch it, below the buttons (js/whereToWatch.js).
+  const whereHtml = row.tmdb_id ? whereToWatchSlotHtml() : "";
 
   if (cfg.state === "towatch") {
     const actionBtn =
@@ -96,7 +98,8 @@ function renderDetail(cfg, row) {
         ${actionBtn}
         ${addToColHtml}
         <button class="delete-btn icon-delete-btn" type="button" data-action="delete" aria-label="Delete">🗑</button>
-      </div>`;
+      </div>
+      ${whereHtml}`;
     return;
   }
 
@@ -111,7 +114,8 @@ function renderDetail(cfg, row) {
         <button class="complete-btn" type="button" data-action="send-to-watchlist">↩ Back to "To Watch"</button>
         ${addToColHtml}
         <button class="delete-btn icon-delete-btn" type="button" data-action="delete" aria-label="Delete">🗑</button>
-      </div>`;
+      </div>
+      ${whereHtml}`;
     return;
   }
 
@@ -126,7 +130,8 @@ function renderDetail(cfg, row) {
         <button class="edit-btn" type="button" data-action="edit">✎ Edit</button>
         ${addToColHtml}
         <button class="delete-btn" type="button" data-action="drop-series">⏸ Drop series</button>
-      </div>`;
+      </div>
+      ${whereHtml}`;
     return;
   }
 
@@ -197,6 +202,7 @@ function openDetailModal(gridId, id, listProvider) {
   currentDetail = { cfg, row, gridId, listProvider: listProvider ?? null };
   renderDetail(cfg, row);
   loadDetailTrailer(cfg.table, row);
+  loadDetailWhereToWatch(cfg.table, row);
   updateDetailNav();
   detailModal.classList.remove("hidden");
 }
@@ -218,7 +224,14 @@ function navigateDetail(delta) {
   currentDetail = { ...currentDetail, row, gridId, cfg: GRID_CONFIG[gridId] };
   renderDetail(currentDetail.cfg, row);
   loadDetailTrailer(table, row);
+  loadDetailWhereToWatch(table, row);
   updateDetailNav();
+}
+
+// Fills the "Where to watch" slot renderDetail left, if it left one.
+function loadDetailWhereToWatch(table, row) {
+  const slot = detailBody.querySelector(".where-to-watch");
+  loadWhereToWatch(slot, table === "movies" ? "movie" : "tv", row.tmdb_id, () => currentDetail?.row.id === row.id);
 }
 
 function closeDetailModal() {

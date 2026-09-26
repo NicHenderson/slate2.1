@@ -35,10 +35,17 @@ function renderInfo(type, details, added) {
       </div>
     </div>
     <p class="info-synopsis">${escapeHtml(synopsis)}</p>
-    <div class="info-actions">${addButtonHtml(details.id, added)}</div>`;
+    <div class="info-actions">${addButtonHtml(details.id, added)}</div>
+    ${whereToWatchSlotHtml()}`;
+  // Where to watch it (js/whereToWatch.js), unless the window moved on.
+  loadWhereToWatch(infoBody.querySelector(".where-to-watch"), type, details.id, () => infoShowing === `${type}:${details.id}`);
 }
 
+// Which title the window shows ("movie:348"), for answers that arrive late.
+let infoShowing = null;
+
 async function openInfoModal(type, id) {
+  infoShowing = `${type}:${id}`;
   infoPoster.innerHTML = "";
   infoBody.innerHTML = `<p class="results-status">Loading…</p>`;
   infoModal.classList.remove("hidden");
@@ -57,6 +64,7 @@ async function openInfoModal(type, id) {
 
 function closeInfoModal() {
   infoModal.classList.add("hidden");
+  infoShowing = null;
 }
 
 infoClose.addEventListener("click", closeInfoModal);

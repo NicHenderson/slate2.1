@@ -74,6 +74,8 @@ Deno.test("only the requests Slate makes", async () => {
     "search/person",
     "movie/abc",
     "movie/1/credits",
+    "movie/1/watch/providers/extra",
+    "watch/providers/movie",
     "movie/1/../../account",
     "movie/1?api_key=other",
     "/movie/1",
@@ -111,6 +113,18 @@ Deno.test("details and videos, without a query", async () => {
   assertEquals(new URL(calls[0]).pathname, "/3/movie/348");
   assertEquals(new URL(calls[0]).searchParams.has("query"), false);
   assertEquals(new URL(calls[1]).pathname, "/3/tv/1399/videos");
+});
+
+Deno.test("where to watch a title, and the countries that covers", async () => {
+  const { deps, calls } = setup();
+  assertEquals((await handle(post({ path: "movie/348/watch/providers" }), deps)).status, 200);
+  assertEquals((await handle(post({ path: "tv/1399/watch/providers" }), deps)).status, 200);
+  assertEquals((await handle(post({ path: "watch/providers/regions" }), deps)).status, 200);
+  assertEquals(calls.map((c) => new URL(c).pathname), [
+    "/3/movie/348/watch/providers",
+    "/3/tv/1399/watch/providers",
+    "/3/watch/providers/regions",
+  ]);
 });
 
 Deno.test("TMDB's own errors come back as they are", async () => {

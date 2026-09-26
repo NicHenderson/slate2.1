@@ -7,7 +7,8 @@
 //   Database   /rest/v1/…      the tables of supabase/migrations/, in memory,
 //                              with the same ownership rules as the real
 //                              row-level security (each user sees only theirs)
-//   Functions  /functions/v1/tmdb   a small fake TMDB catalog (./tmdbCatalog.js)
+//   Functions  /functions/v1/tmdb   a small fake TMDB catalog (./tmdbCatalog.js),
+//                              with where to watch a few of its titles
 //   Realtime   the websocket   channels join as on the real server, and every
 //                              write is pushed to its owner's open tabs as a
 //                              postgres_changes event, like the real one
@@ -23,7 +24,7 @@
 
 const fs = require("fs");
 const crypto = require("crypto");
-const { TMDB_CATALOG } = require("./tmdbCatalog");
+const { TMDB_CATALOG, TMDB_WATCH_PROVIDERS, TMDB_WATCH_REGIONS } = require("./tmdbCatalog");
 
 const SUPABASE_JS = fs.readFileSync(require.resolve("@supabase/supabase-js/dist/umd/supabase.js"), "utf8");
 // Supabase's default cap on the rows one request returns.
@@ -413,6 +414,10 @@ function createBackend() {
       const q = String(query ?? "").toLowerCase();
       const results = TMDB_CATALOG[m[1]].filter((t) => (t.title ?? t.name).toLowerCase().includes(q));
       return reply(200, { page: 1, results, total_results: results.length });
+    }
+    if (path === "watch/providers/regions") return reply(200, { results: TMDB_WATCH_REGIONS });
+    if ((m = /^(movie|tv)\/(\d+)\/watch\/providers$/.exec(path))) {
+      return reply(200, { id: Number(m[2]), results: TMDB_WATCH_PROVIDERS[`${m[1]}/${m[2]}`] ?? {} });
     }
     if ((m = /^(movie|tv)\/(\d+)(\/videos)?$/.exec(path))) {
       const title = TMDB_CATALOG[m[1]].find((t) => t.id === Number(m[2]));

@@ -34,3 +34,16 @@ async function tmdbVideos(type, id) {
   const data = await tmdbRequest(`${type}/${id}/videos`);
   return data.results ?? [];
 }
+
+// Where to watch a title: TMDB answers for every country at once, as
+// { "CL": { link, flatrate: [...], rent: [...], ... }, ... }.
+async function tmdbWatchProviders(type, id) {
+  const data = await tmdbRequest(`${type}/${id}/watch/providers`);
+  return data.results ?? {};
+}
+
+// The countries TMDB has that for.
+async function tmdbWatchRegions() {
+  const data = await tmdbRequest("watch/providers/regions");
+  return data.results ?? [];
+}
