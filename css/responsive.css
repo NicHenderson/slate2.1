@@ -4,6 +4,11 @@
    component stylesheets. Loaded last so these rules win on override.
 
    Breakpoints:
+     Landing page   : 980 / 860 / 640 / 420px (its own tiers — a long
+                       marketing page with wide mockups; see the block below)
+     Auth screen    : max-width 860px  (its own tier — the hero pane and the
+                       440px form column need more room than the generic
+                       tablet tier gives them)
      Tablet & below : max-width 768px  (off-canvas drawer nav, tuned grids)
      Mobile         : max-width 480px  (1–2 col grids, full-width modals)
    ===================================================================== */
@@ -22,6 +27,348 @@
 .menu-toggle,
 .sidebar-backdrop {
   display: none;
+}
+
+/* =============================== LANDING PAGE =============================== */
+@media (max-width: 980px) {
+  .lp-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+    min-height: 0;
+    padding: 40px 0 70px;
+    text-align: center;
+  }
+
+  .lp-hero-lede {
+    margin: 0 auto;
+  }
+
+  .lp-hero-ctas,
+  .lp-hero-note {
+    justify-content: center;
+  }
+
+  .lp-hero-board {
+    width: min(560px, 100%);
+    margin: 0 auto;
+  }
+
+  .lp-feature {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+    padding-top: 110px;
+  }
+
+  .lp-feature--flip .lp-feature-copy {
+    order: 0;
+  }
+
+  .lp-feature-copy {
+    max-width: 640px;
+  }
+
+  .lp-things {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .lp-nav-inner {
+    grid-template-columns: 1fr auto;
+  }
+
+  .lp-nav-links {
+    display: none;
+  }
+
+  .lp-steps {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 560px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .lp-nav-inner,
+  .lp-hero,
+  .lp-section,
+  .lp-feature,
+  .lp-footer-inner {
+    width: calc(100% - 32px);
+  }
+
+  .lp-section {
+    padding-top: 96px;
+  }
+
+  .lp-feature {
+    padding-top: 96px;
+  }
+
+  .lp-feature-board {
+    padding: 30px 18px;
+    border-radius: 22px;
+  }
+
+  .lp-mock-grid {
+    gap: 14px;
+  }
+
+  .lp-mock-grid--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lp-review-note {
+    right: 10px;
+    bottom: -40px;
+  }
+
+  /* Phone hero board: three polaroids across, the stat strip under them,
+     the note tucked top-right instead of over the strip. */
+  .lp-hero-board {
+    aspect-ratio: 1 / 1.12;
+  }
+
+  .lp-hb-note {
+    top: 0;
+    right: 0;
+    bottom: auto;
+    width: 44%;
+    padding: 12px 12px 10px;
+  }
+
+  .lp-hb-note p {
+    font-size: 15px;
+  }
+
+  .lp-hb-a {
+    top: 22%;
+  }
+
+  .lp-hb-b {
+    top: 14%;
+  }
+
+  .lp-hb-c {
+    top: 24%;
+  }
+
+  .lp-hb-stub {
+    top: 4%;
+  }
+
+  .lp-hb-strip {
+    bottom: 0;
+  }
+
+  /* Status strip: three equal stubs that fit the panel. */
+  .lp-tabs {
+    width: 100%;
+  }
+
+  .lp-tabs .status-tab {
+    flex: 1 1 0;
+    justify-content: center;
+    gap: 5px;
+    padding: 10px 6px 9px;
+    font-size: 13.5px;
+  }
+
+  .lp-tabs .status-tab-icon {
+    display: none;
+  }
+
+  .lp-hb-stub strong {
+    font-size: 18px;
+  }
+
+  .lp-drop-note {
+    grid-column: span 2;
+    font-size: 18px;
+  }
+
+  .lp-feature-board--booklets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lp-feature-board--booklets .booklet-card:nth-child(2) {
+    margin-top: 0;
+  }
+
+  /* Stat strips: two segments per row, like the app's own on a phone. */
+  .landing-screen .hstats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 2px 0;
+    width: 100%;
+  }
+
+  .landing-screen .hs-item {
+    padding: 10px 14px;
+  }
+
+  .landing-screen .hs-item + .hs-item {
+    border-left: 0;
+  }
+
+  .landing-screen .hs-item:nth-child(even) {
+    border-left: 2px dashed rgba(13, 12, 21, 0.22);
+  }
+
+  .landing-screen .hs-item:nth-child(n + 3) {
+    border-top: 2px dashed rgba(13, 12, 21, 0.22);
+  }
+
+  .landing-screen .hs-item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .landing-screen .hs-label {
+    white-space: normal;
+  }
+
+  .lp-hb-strip {
+    left: 4%;
+    right: 4%;
+    width: auto;
+  }
+
+  .lp-theme-demo {
+    height: auto;
+  }
+
+  .lp-td-side {
+    flex-basis: 96px;
+    padding: 12px 8px;
+  }
+
+  .lp-td-nav {
+    font-size: 9.5px;
+    padding: 5px 6px;
+  }
+
+  .lp-td-main {
+    padding: 14px 12px 16px;
+  }
+
+  .lp-td-strip span:nth-child(3) {
+    display: none;
+  }
+
+  .lp-td-cards {
+    gap: 10px;
+  }
+
+  .lp-letter {
+    padding: 36px 24px 32px;
+    font-size: 20px;
+    line-height: 34px;
+    background:
+      repeating-linear-gradient(transparent 0 33px, rgba(13, 12, 21, 0.1) 33px 34px) 0 32px,
+      var(--paper);
+  }
+
+  .lp-final {
+    flex-direction: column;
+  }
+
+  .lp-final-stub {
+    flex-basis: auto;
+    padding: 16px 0;
+  }
+
+  .lp-final-stub span {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+
+  .lp-final-stub::after {
+    top: auto;
+    right: 0;
+    bottom: -7px;
+    left: 0;
+    width: auto;
+    height: 14px;
+    background: radial-gradient(circle at 10px 7px, var(--bg) 4px, transparent 4.5px) 0 0 / 20px 14px repeat-x;
+  }
+
+  .lp-final-body {
+    padding: 36px 26px 38px;
+  }
+}
+
+@media (max-width: 420px) {
+  .lp-brand-name {
+    display: none;
+  }
+
+  .lp-nav-actions {
+    gap: 10px;
+  }
+
+  .lp-things {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lp-hero-ctas .lp-btn {
+    width: 100%;
+  }
+}
+
+/* =============================== AUTH SCREEN (≤860px) =============================== */
+@media (max-width: 860px) {
+  .auth-screen {
+    flex-direction: column;
+  }
+
+  .auth-hero {
+    flex: none;
+    min-height: 0;
+    padding: 44px 28px 32px;
+  }
+
+  .auth-hero-title {
+    font-size: 40px;
+  }
+
+  /* The stacked hero starts with the logo top-left; keep clear of it. */
+  .auth-back {
+    top: 18px;
+    left: auto;
+    right: 20px;
+  }
+
+  .auth-hero-copy {
+    max-width: none;
+  }
+
+  /* The collage needs the hero's full height to scatter across — gone once
+     that height collapses to its content, and there's no library yet to
+     make a smaller version of it worth keeping. */
+  .auth-hero-collage {
+    display: none;
+  }
+
+  .auth-panel {
+    flex: 1;
+    min-height: 0;
+    padding: 36px 28px 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-hero {
+    padding: 36px 22px 26px;
+  }
+
+
+  .auth-hero-title {
+    font-size: 32px;
+  }
+
+  .auth-card {
+    padding: 28px 22px 24px;
+  }
 }
 
 /* =========================== TABLET & BELOW (≤768px) =========================== */
@@ -109,6 +456,18 @@
     gap: 16px;
   }
 
+  [data-density="compact"] .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  /* Collection booklets (spine, collage, progress footer) get too cramped
+     at compact widths on small screens, so they keep their normal size. */
+  [data-density="compact"] #grid-collections {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+  }
+
   /* ---------- Forms & touch targets ---------- */
 
   /* 16px prevents iOS Safari from zooming in on focus. */
@@ -132,6 +491,7 @@
   .sort-btn,
   .add-btn,
   .surprise-btn,
+  .trailer-btn,
   .modal-search-btn,
   .complete-btn,
   .cancel-btn,
@@ -160,6 +520,12 @@
     gap: 10px;
   }
 
+  /* The open-collection header now carries 4 buttons (Surprise Me, Edit,
+     Delete, + Add) — too many to stay on one row at this width. */
+  .header-actions {
+    flex-wrap: wrap;
+  }
+
   .section-header h1 {
     font-size: 22px;
   }
@@ -170,45 +536,65 @@
     gap: 12px;
   }
 
-  .ghost-card {
-    min-height: 180px;
+  [data-density="compact"] .card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
   }
 
-  /* ---------- Quick Stats: 2×2 grid instead of a squeezed row ---------- */
-  .stats-grid {
-    grid-template-columns: 1fr 1fr;
+  [data-density="compact"] #grid-collections {
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
 
-  .stat-card {
-    padding: 16px;
+  [data-density="compact"] .card {
+    gap: 5px;
+    padding: 6px 6px 9px;
   }
 
-  .stat-value {
-    font-size: 24px;
+  [data-density="compact"] .card-title {
+    font-size: 13px;
   }
 
-  /* ---------- Dashboard rows (stay horizontally scrollable) ---------- */
-  .dash-block {
-    margin-top: 26px;
+  /* Leaves room for two theme swatches per row. */
+  .settings-tile {
+    padding: 20px 18px;
   }
 
-  .dash-block-title {
-    font-size: 16px;
+  .theme-swatches {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
 
-  .dash-row .card {
-    flex: 0 0 140px;
-    width: 140px;
+  /* Label on top, control full-width underneath. */
+  .settings-row {
+    flex-wrap: wrap;
   }
 
-  .genre-chart {
-    padding: 16px;
+  .settings-select-wrap,
+  .settings-segmented {
+    flex: 1 1 100%;
   }
 
-  .genre-row {
-    grid-template-columns: 82px 1fr 28px;
-    gap: 10px;
+  .settings-segmented button {
+    flex: 1;
+  }
+
+  .profile-favorites {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .profile-username-wrap {
+    max-width: none;
+  }
+
+  .settings-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ghost-card {
+    min-height: 180px;
   }
 
   /* ---------- Modals: near full-width with small margins ---------- */
@@ -256,6 +642,13 @@
 
   .update-actions > .delete-btn {
     width: 100%;
+  }
+
+  /* Stretched full-width, the stickers' scattered tilt just reads as crooked. */
+  .update-actions .delete-btn,
+  .update-actions .cancel-btn,
+  .update-actions .modal-search-btn {
+    transform: none;
   }
 
   .confirm-actions .cancel-btn,

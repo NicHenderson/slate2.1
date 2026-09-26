@@ -12,8 +12,8 @@ function renderSortMenuFor(menuEl, gridId) {
 }
 
 // Maps a grid to the header label that shows its current sort — only
-// grids with a visible sort control need an entry here. Shows' three
-// subtabs (watched/watching/dropped) are separate grids with independent
+// grids with a visible sort control need an entry here. Shows Queue's three
+// subtabs (to watch/watching/dropped) are separate grids with independent
 // sort state, but share one label in the header, so all three point at it;
 // whichever one is the currently-visible subtab is the one that last wrote
 // to it (see the subtabs.js click handler, and the two explicit init calls
@@ -22,10 +22,10 @@ function renderSortMenuFor(menuEl, gridId) {
 const SORT_LABEL_TARGETS = {
   "grid-movies-watched": "movies-current-sort-label",
   "grid-shows-watched": "shows-current-sort-label",
-  "grid-shows-watching": "shows-current-sort-label",
-  "grid-shows-dropped": "shows-current-sort-label",
   "grid-movies-towatch": "movies-towatch-current-sort-label",
   "grid-shows-towatch": "shows-towatch-current-sort-label",
+  "grid-shows-watching": "shows-towatch-current-sort-label",
+  "grid-shows-dropped": "shows-towatch-current-sort-label",
 };
 
 function updateSortLabel(gridId) {
@@ -36,9 +36,9 @@ function updateSortLabel(gridId) {
 }
 
 function setGridSort(gridId, key) {
+  if (key === "custom") seedCustomOrder(gridId); // needs the outgoing sort still active
   activeSorts[gridId] = key;
   localStorage.setItem(GRID_SORTS[gridId].storageKey, key);
-  if (gridPageState[gridId]) gridPageState[gridId].page = 1;
   const table = GRID_CONFIG[gridId].table;
   renderGrid(gridId, [...STORE[table].values()]);
   updateSortLabel(gridId);
@@ -70,14 +70,14 @@ function initSortMenu(btnId, menuId, resolveGridId) {
 }
 
 initSortMenu("movies-sort-btn", "movies-sort-menu", () => "grid-movies-watched");
-initSortMenu("shows-sort-btn", "shows-sort-menu", () => {
-  const active = ["grid-shows-watched", "grid-shows-watching", "grid-shows-dropped"].find(
+initSortMenu("shows-sort-btn", "shows-sort-menu", () => "grid-shows-watched");
+initSortMenu("movies-towatch-sort-btn", "movies-towatch-sort-menu", () => "grid-movies-towatch");
+initSortMenu("shows-towatch-sort-btn", "shows-towatch-sort-menu", () => {
+  const active = ["grid-shows-towatch", "grid-shows-watching", "grid-shows-dropped"].find(
     (id) => !document.getElementById(id).classList.contains("subtab-hidden")
   );
-  return active ?? "grid-shows-watched";
+  return active ?? "grid-shows-towatch";
 });
-initSortMenu("movies-towatch-sort-btn", "movies-towatch-sort-menu", () => "grid-movies-towatch");
-initSortMenu("shows-towatch-sort-btn", "shows-towatch-sort-menu", () => "grid-shows-towatch");
 
 document.addEventListener("click", (e) => {
   if (e.target.closest(".sort-wrap")) return;

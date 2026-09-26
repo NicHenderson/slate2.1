@@ -2,91 +2,60 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
   gap: 20px;
-  /* Without this, the grid's default row alignment ("normal", which acts
-     like stretch here) takes any extra room from the min-height reserved
-     in renderGrid (js/data.js) and stretches the actual card ROWS to fill
-     it — harmless on a full page (no extra room to stretch into), but a
-     page with just one short row balloons that row (and every card in it)
-     to fill the whole reserved height instead of leaving the leftover
-     space empty below, like it's supposed to. */
+  /* Keeps rows at their natural height: without it the grid's default
+     row alignment ("normal", which acts like stretch) would stretch the
+     card rows to fill any extra height the grid is given. */
   align-content: start;
 }
 
-.card-grid.subtab-hidden + .pagination-slot {
+/* Settings > Card density: compact (data-density on <html>, set by
+   js/settings.js). The tablet/mobile variants live in responsive.css. */
+[data-density="compact"] .card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 14px;
+}
+
+[data-density="compact"] .card {
+  gap: 7px;
+  padding: 9px 9px 12px;
+}
+
+[data-density="compact"] .card-title {
+  font-size: 15px;
+}
+
+/* Ten stars plus "9/10" don't fit a compact card's width (they'd overlap),
+   so the rating collapses to a single star and the number. */
+[data-density="compact"] .card-rating .stars {
   display: none;
 }
 
-/* Pins pagination to the same spot at the bottom of the section regardless
-   of how many rows the current page actually has (a last page with 3 cards
-   shouldn't leave the controls floating higher up than a full page does). */
-.pagination-slot {
-  margin-top: auto;
+[data-density="compact"] .card-rating .rating-row {
+  justify-content: flex-start;
 }
 
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 24px;
-}
-
-/* Same "raised sticker" family as .add-btn / .sort-btn elsewhere (paper
-   background + hard offset shadow, popped against the dark corkboard) —
-   these were still the old flat outline-on-dark pills, which is also why
-   they read as nearly invisible against the page background. */
-.page-num,
-.page-nav {
-  min-width: 36px;
-  height: 36px;
-  padding: 0 10px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: var(--paper);
+[data-density="compact"] .card-rating .stars-value {
+  font-size: 12px;
   color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 600;
-  box-shadow: 3px 4px 0 var(--accent-deep);
-  transform: rotate(-1deg);
-  transition: transform var(--transition), box-shadow var(--transition),
-    background var(--transition), color var(--transition);
 }
 
-.page-num:nth-child(even),
-.page-nav:nth-child(even) {
-  transform: rotate(1deg);
+[data-density="compact"] .card-rating .stars-value::before {
+  content: "★ ";
+  color: var(--accent);
 }
 
-.page-num:hover,
-.page-nav:hover:not(:disabled) {
-  background: var(--paper);
-  color: var(--ink);
-  transform: rotate(0deg) translateY(-2px);
-  box-shadow: 4px 6px 0 var(--accent-deep);
+/* Shows Queue > Watching: "Started 12d ago" under the title; a show started
+   STALE_WATCHING_DAYS (data.js) ago or more reads as stalled, so its line
+   switches to the accent instead of looking like one started yesterday. */
+.card-meta {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
-.page-num:active,
-.page-nav:active:not(:disabled) {
-  transform: rotate(0deg) translateY(0);
-  box-shadow: 1px 2px 0 var(--accent-deep);
-}
-
-.page-num.active {
-  background: var(--accent-strong);
-  color: #fff;
-}
-
-.page-num.active:hover {
-  background: var(--accent-strong);
-  color: #fff;
-}
-
-.page-nav:disabled {
-  opacity: 0.35;
-  cursor: default;
-  transform: none;
-  box-shadow: none;
+.card-meta.is-stale {
+  font-weight: 700;
+  color: var(--accent);
 }
 
 /* The dragged card becomes a dashed "drop slot" — it still occupies its
@@ -100,7 +69,7 @@
    collections.js). */
 .card.dragging,
 .booklet-card.dragging {
-  background: rgba(167, 139, 250, 0.08);
+  background: color-mix(in srgb, var(--accent-glow) 8%, transparent);
   outline: 2px dashed var(--accent-strong);
   outline-offset: -2px;
   box-shadow: none !important;
@@ -120,9 +89,11 @@
 
 /* Sortable cards read as grabbable; the whole page shows "grabbing" for the
    duration of a drag so the cursor doesn't flicker as it crosses elements.
-   Drag-to-reorder is exclusive to Collections — nowhere else. */
+   Collections always; the watchlists only in "Custom order" (.is-sortable,
+   set by renderGrid in data.js). */
 #grid-collections .collection-card,
-#col-detail-grid .col-item-card {
+#col-detail-grid .col-item-card,
+.card-grid.is-sortable .card {
   cursor: grab;
   user-select: none;
 }
@@ -133,11 +104,34 @@ body.is-dragging * {
   user-select: none !important;
 }
 
+/* A small pill in the header (not a button — no shadow/tilt from the
+   .add-btn/.sort-btn sticker family) instead of a line of text sitting
+   right above the grid, which put it too far from the header it belongs
+   to and left it squeezed against the first row of cards, where the
+   hover-lift on those cards could cover it. The header's own gap (10px,
+   .section-header > div) and margin-bottom (28px, before the grid) place
+   it for free. */
 .drag-hint {
-  margin: 0 0 14px;
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  padding: 5px 11px 5px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-glow) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--accent-deep);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.drag-hint-icon {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  color: var(--accent);
 }
 
 .drag-hint[hidden] {
@@ -196,24 +190,13 @@ body.is-dragging * {
   transform: rotate(-0.7deg);
 }
 
-.dash-row .card:nth-child(3n) {
-  transform: rotate(-1.6deg);
-}
-.dash-row .card:nth-child(3n + 1) {
-  transform: rotate(1.3deg);
-}
-.dash-row .card:nth-child(3n + 2) {
-  transform: rotate(-0.7deg);
-}
-
 /* body.no-hover is set by setupDragReorder (collections.js) only while a
    drag is in progress: cards sliding under a stationary cursor would
    otherwise each fire their bouncy hover lift. */
-body:not(.no-hover) .card-grid .card:hover,
-body:not(.no-hover) .dash-row .card:hover {
+body:not(.no-hover) .card-grid .card:hover {
   transform: rotate(0deg) translateY(-6px) scale(1.035);
-  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 30px 6px rgba(167, 139, 250, 0.55),
-    0 0 60px 10px rgba(139, 92, 246, 0.25), 4px 12px 22px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 30px 6px color-mix(in srgb, var(--accent-glow) 55%, transparent),
+    0 0 60px 10px color-mix(in srgb, var(--accent-strong) 25%, transparent), 4px 12px 22px rgba(0, 0, 0, 0.5);
   z-index: 2;
 }
 
@@ -288,7 +271,7 @@ body:not(.no-hover) .dash-row .card:hover {
 
 body:not(.no-hover) .card-grid .booklet-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 26px 6px rgba(167, 139, 250, 0.5),
+  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 26px 6px color-mix(in srgb, var(--accent-glow) 50%, transparent),
     4px 10px 18px rgba(0, 0, 0, 0.4);
   z-index: 2;
 }
@@ -428,7 +411,7 @@ body:not(.no-hover) .card-grid .booklet-card:hover {
   place-items: center;
   aspect-ratio: 1;
   border: 2px dashed var(--ink-muted);
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(139, 92, 246, 0.03));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent-strong) 12%, transparent), color-mix(in srgb, var(--accent-strong) 3%, transparent));
 }
 
 .booklet-empty-icon .ico {
@@ -440,7 +423,7 @@ body:not(.no-hover) .card-grid .booklet-card:hover {
 .booklet-empty-icon {
   font-size: 56px;
   line-height: 1;
-  filter: drop-shadow(2px 3px 0 rgba(109, 40, 217, 0.25));
+  filter: drop-shadow(2px 3px 0 color-mix(in srgb, var(--accent-deep) 25%, transparent));
 }
 
 .booklet-title {
@@ -590,7 +573,7 @@ body:not(.no-hover) .card-grid .ghost-card:hover {
 
 body:not(.no-hover) .card-grid .booklet-ghost:hover {
   transform: translateY(-6px);
-  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 22px 5px rgba(167, 139, 250, 0.4),
+  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 22px 5px color-mix(in srgb, var(--accent-glow) 40%, transparent),
     4px 10px 18px rgba(0, 0, 0, 0.35);
 }
 
@@ -598,7 +581,12 @@ body:not(.no-hover) .card-grid .booklet-ghost:hover {
 .booklet-ghost-spine {
   width: 16px;
   flex-shrink: 0;
-  background: linear-gradient(90deg, #d4cee3 0%, #e6e1f1 50%, #d4cee3 100%);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent-deep) 12%, var(--paper)) 0%,
+    color-mix(in srgb, var(--accent-deep) 5%, var(--paper)) 50%,
+    color-mix(in srgb, var(--accent-deep) 12%, var(--paper)) 100%
+  );
   border-right: 1px solid rgba(13, 12, 21, 0.2);
   box-shadow: inset -3px 0 4px rgba(13, 12, 21, 0.14);
 }
@@ -671,6 +659,6 @@ body > .drag-ghost {
 .drag-ghost.lifted {
   scale: 1.06;
   rotate: -2.5deg;
-  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 30px 8px rgba(167, 139, 250, 0.55),
+  box-shadow: 0 0 0 2px var(--accent-strong), 0 0 30px 8px color-mix(in srgb, var(--accent-glow) 55%, transparent),
     10px 22px 34px rgba(0, 0, 0, 0.55);
 }

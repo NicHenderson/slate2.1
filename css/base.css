@@ -8,6 +8,10 @@
   --accent-strong: #8b5cf6;
   --accent-deep: #6d28d9;
   --accent-soft: rgba(167, 139, 246, 0.12);
+  /* The page-level accent, for glows drawn by paper surfaces: those remap
+     --accent to --accent-deep (see the :where() block below), but this is
+     resolved here on the root, so children inherit the theme's own accent. */
+  --accent-glow: var(--accent);
   --pop: #2979ff;
   --text: #ece8f5;
   --text-muted: #9d94b3;
@@ -18,6 +22,9 @@
   --radius: 10px;
   --radius-sm: 6px;
   --transition: 0.2s ease;
+  --scrollbar-thumb: #4c3d6e;
+  --scrollbar-track: var(--bg-elevated);
+  --scrollbar-thumb-edge: var(--bg);
   --font-body: "Libre Franklin", "Inter", -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
   --font-display: "Oswald", sans-serif;
@@ -32,17 +39,225 @@
     .sort-menu,
     .toast,
     .card,
-    .stat-card,
-    .genre-chart,
     .collection-card,
     .col-item-card,
     .col-stats,
+    .hstats,
     .auth-card,
     .ghost-card
   ) {
   --text: var(--ink);
   --text-muted: var(--ink-muted);
   --accent: var(--accent-deep);
+  /* These same paper surfaces (modals included) scroll on a light ground —
+     the default scrollbar below is tuned for the dark app background, so a
+     solid var(--bg-elevated) track painted a dark, edge-to-edge bar right
+     over the paper instead of blending into it. */
+  --scrollbar-thumb: var(--accent-deep);
+  --scrollbar-track: transparent;
+  --scrollbar-thumb-edge: var(--paper);
+}
+
+/* ---------- Themes ----------
+
+   :root's own values above are the "midnight" theme, unconditional — a
+   browser that hasn't run js/settings.js yet (or a user who never set a
+   preference) gets today's exact look with zero data-theme attribute
+   required. Each theme below only overrides the raw color tokens; every
+   component built on them follows automatically. --accent-strong and --pop
+   always carry white text (active nav tickets, primary buttons, sidebar
+   group tags), so each theme keeps them dark enough for that to read.
+
+   Dark themes leave --paper/--paper-dim/--ink alone: those derive from
+   --text/--bg (var(--text) / var(--bg)), which gives light "paper" cards on
+   a dark page. Light themes flip --bg and --text, which would flip those
+   derived values too (dark cards), so they set all three explicitly. */
+
+/* ----- dark ----- */
+
+:root[data-theme="midnight"] {
+  --bg: #0d0c15;
+  --bg-elevated: #17131f;
+  --sidebar-bg: #120e1b;
+  --surface: #1c1727;
+  --border: #2a2338;
+  --accent: #a78bfa;
+  --accent-strong: #8b5cf6;
+  --accent-deep: #6d28d9;
+  --accent-soft: rgba(167, 139, 246, 0.12);
+  --pop: #2979ff;
+  --text: #ece8f5;
+  --text-muted: #9d94b3;
+  --ink-muted: #5c5470;
+}
+
+:root[data-theme="ocean"] {
+  --bg: #07131c;
+  --bg-elevated: #0d1d29;
+  --sidebar-bg: #0a1822;
+  --surface: #112534;
+  --border: #1e3a4d;
+  --accent: #4fd1e0;
+  --accent-strong: #0b8a9c;
+  --accent-deep: #07606e;
+  --accent-soft: rgba(79, 209, 224, 0.14);
+  --pop: #e05a47;
+  --text: #e4f3f7;
+  --text-muted: #8aa9b5;
+  --ink-muted: #4f6b77;
+}
+
+:root[data-theme="forest"] {
+  --bg: #0c1712;
+  --bg-elevated: #132119;
+  --sidebar-bg: #0f1a14;
+  --surface: #17261d;
+  --border: #25392c;
+  --accent: #6fcf9b;
+  --accent-strong: #2f9e68;
+  --accent-deep: #1f7a4e;
+  --accent-soft: rgba(111, 207, 155, 0.14);
+  --pop: #2f7fbf;
+  --text: #e9f3ec;
+  --text-muted: #93ab9d;
+  --ink-muted: #5c7268;
+}
+
+:root[data-theme="sunset"] {
+  --bg: #1c1015;
+  --bg-elevated: #26141b;
+  --sidebar-bg: #1f1218;
+  --surface: #2c1720;
+  --border: #3d2029;
+  --accent: #f0916a;
+  --accent-strong: #d9623a;
+  --accent-deep: #b0441f;
+  --accent-soft: rgba(240, 145, 106, 0.14);
+  --pop: #7b4dd6;
+  --text: #f7e9e2;
+  --text-muted: #ba9a91;
+  --ink-muted: #8a6a5c;
+}
+
+:root[data-theme="arcade"] {
+  --bg: #110a24;
+  --bg-elevated: #1a1033;
+  --sidebar-bg: #150c2b;
+  --surface: #211440;
+  --border: #35205e;
+  --accent: #ff5fb0;
+  --accent-strong: #e0368e;
+  --accent-deep: #b01f6c;
+  --accent-soft: rgba(255, 95, 176, 0.15);
+  --pop: #2d6cff;
+  --text: #f4ecff;
+  --text-muted: #a996c9;
+  --ink-muted: #5e4b80;
+}
+
+/* ----- light ----- */
+
+:root[data-theme="paper"] {
+  --bg: #f6f1e7;
+  --bg-elevated: #efe7d8;
+  --sidebar-bg: #efe6d4;
+  --surface: #fbf7ee;
+  --border: #ddd0b4;
+  --accent: #c2703d;
+  --accent-strong: #b35f2c;
+  --accent-deep: #8f4620;
+  --accent-soft: rgba(194, 112, 61, 0.14);
+  --pop: #3f7d6e;
+  --text: #2b2318;
+  --text-muted: #8a7c62;
+  --paper: #fffdf8;
+  --paper-dim: #f3ead8;
+  --ink: #2b2318;
+  --ink-muted: #8a7c62;
+}
+
+:root[data-theme="blossom"] {
+  --bg: #fbf0f2;
+  --bg-elevated: #f6e3e7;
+  --sidebar-bg: #f5dfe4;
+  --surface: #fff6f8;
+  --border: #ecc9d1;
+  --accent: #d6457a;
+  --accent-strong: #c2356a;
+  --accent-deep: #93224d;
+  --accent-soft: rgba(214, 69, 122, 0.12);
+  --pop: #4f8a66;
+  --text: #3a1f29;
+  --text-muted: #946673;
+  --paper: #fffafb;
+  --paper-dim: #f7e8ec;
+  --ink: #3a1f29;
+  --ink-muted: #946673;
+}
+
+:root[data-theme="glacier"] {
+  --bg: #eef3f8;
+  --bg-elevated: #e2eaf2;
+  --sidebar-bg: #e3ebf3;
+  --surface: #f7fafc;
+  --border: #c9d6e3;
+  --accent: #2f6fd6;
+  --accent-strong: #2459b8;
+  --accent-deep: #1a3f85;
+  --accent-soft: rgba(47, 111, 214, 0.12);
+  --pop: #c9542f;
+  --text: #16233a;
+  --text-muted: #607089;
+  --paper: #ffffff;
+  --paper-dim: #edf2f7;
+  --ink: #16233a;
+  --ink-muted: #607089;
+}
+
+/* ---------- Brand theme (landing page + login) ----------
+
+   Slate's own look, whatever theme is active: the landing page and the
+   login screen are the front door, so they never pick up a theme the
+   account — or just this device's cache, applied by the <head> snippet
+   before there's a session to check — last had on. Same raw tokens as
+   :root (= midnight) above, and the derived ones too: a custom property's
+   var() is resolved where it's declared, so --paper / --ink / the
+   scrollbar trio computed on :root would still carry a cached light
+   theme's values in here unless they're re-declared on this element. */
+.brand-theme {
+  --bg: #0d0c15;
+  --bg-elevated: #17131f;
+  --sidebar-bg: #120e1b;
+  --surface: #1c1727;
+  --border: #2a2338;
+  --accent: #a78bfa;
+  --accent-strong: #8b5cf6;
+  --accent-deep: #6d28d9;
+  --accent-soft: rgba(167, 139, 246, 0.12);
+  --accent-glow: var(--accent);
+  --pop: #2979ff;
+  --text: #ece8f5;
+  --text-muted: #9d94b3;
+  --paper: var(--text);
+  --paper-dim: color-mix(in srgb, var(--bg) 7%, var(--text));
+  --ink: var(--bg);
+  --ink-muted: #5c5470;
+  --scrollbar-thumb: #4c3d6e;
+  --scrollbar-track: var(--bg-elevated);
+  --scrollbar-thumb-edge: var(--bg);
+  /* Its own color too: body's `color: var(--text)` was resolved on body,
+     outside this scope, and would otherwise be what text in here inherits. */
+  color: var(--text);
+}
+
+/* Settings > Reduce animations. Same near-zero-duration override the OS-level
+   prefers-reduced-motion rule below already uses — this just lets the app's
+   own toggle apply it too, independent of the OS setting. */
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
 }
 
 * {
@@ -50,7 +265,7 @@
   padding: 0;
   box-sizing: border-box;
   scrollbar-width: thin;
-  scrollbar-color: #4c3d6e var(--bg-elevated);
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar {
@@ -63,9 +278,9 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #4c3d6e;
+  background: var(--scrollbar-thumb);
   border-radius: 8px;
-  border: 2px solid var(--bg);
+  border: 2px solid var(--scrollbar-thumb-edge);
 }
 
 ::-webkit-scrollbar-thumb:hover {

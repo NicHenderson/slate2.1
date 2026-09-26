@@ -1,0 +1,245 @@
+/* ---------- Screen transitions (js/viewTransitions.js) ----------
+
+   The browser snapshots the screen before and after a change of screen;
+   elements with a view-transition-name get their own snapshot, so each can
+   move on its own path while the rest of the page ("root") cross-fades
+   underneath. <html data-vt="…"> names the change for the length of it:
+
+     open-auth    landing → login card    the card drops onto the board
+     close-auth   login card → landing    the card lifts off again
+     auth-swap    Log In ⇄ Create Account the same card resizes in place
+     enter-app    login card → the app    the card flies toward you, the
+                                          sidebar slides in, the content rises
+     logout       the app → landing       the app sinks away, the page rises
+
+   None of this runs for reduced motion or without browser support: the
+   change then just happens (js/viewTransitions.js decides). */
+
+.auth-hero {
+  view-transition-name: auth-hero;
+}
+
+.auth-card {
+  view-transition-name: auth-card;
+}
+
+.sidebar {
+  view-transition-name: app-sidebar;
+}
+
+.content {
+  view-transition-name: app-content;
+}
+
+/* The card's own pop-in is for browsers without view transitions; with
+   them it would play inside the snapshot, on top of the drop below. */
+@supports (view-transition-name: none) {
+  .auth-card {
+    animation: none;
+  }
+}
+
+/* The landing page scrolls the whole window, and the open card locks that
+   scroll (html.auth-open): keep the scrollbar's space reserved so the page
+   underneath doesn't shift sideways by its width as the card opens. */
+html:has(> body > .landing-screen:not(.hidden)) {
+  scrollbar-gutter: stable;
+}
+
+/* ---------- motion vocabulary ---------- */
+
+::view-transition-group(*) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* Pinned onto the board: in from above, tilted, settling with a bounce. */
+@keyframes vt-card-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-56px) rotate(-8deg) scale(0.94);
+  }
+  55% {
+    opacity: 1;
+  }
+}
+
+@keyframes vt-card-lift {
+  to {
+    opacity: 0;
+    transform: translateY(-40px) rotate(6deg) scale(0.95);
+  }
+}
+
+/* Through the door: the card grows toward the viewer and dissolves. */
+@keyframes vt-card-through {
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(1.14);
+    filter: blur(6px);
+  }
+}
+
+@keyframes vt-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-44px);
+  }
+}
+
+@keyframes vt-slide-out-left {
+  to {
+    opacity: 0;
+    transform: translateX(-44px);
+  }
+}
+
+/* The login hero is as tall as the screen with a hard right edge over the
+   page underneath: it drifts in and out by less, so that edge never reads
+   as a panel sliding across. */
+@keyframes vt-drift-in {
+  from {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+}
+
+@keyframes vt-drift-out {
+  to {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+}
+
+@keyframes vt-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.985);
+  }
+}
+
+@keyframes vt-sink-out {
+  to {
+    opacity: 0;
+    transform: scale(0.965);
+    filter: blur(4px);
+  }
+}
+
+/* ---------- open-auth ---------- */
+
+html[data-vt="open-auth"]::view-transition-old(root) {
+  animation: vt-fade-out 0.3s ease both;
+}
+
+html[data-vt="open-auth"]::view-transition-new(root) {
+  animation: vt-fade-in 0.35s ease both;
+}
+
+html[data-vt="open-auth"]::view-transition-new(auth-hero) {
+  animation: vt-drift-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html[data-vt="open-auth"]::view-transition-new(auth-card) {
+  animation: vt-card-drop 0.7s cubic-bezier(0.34, 1.4, 0.64, 1) 0.08s both;
+}
+
+/* ---------- close-auth ---------- */
+
+html[data-vt="close-auth"]::view-transition-old(auth-card) {
+  animation: vt-card-lift 0.38s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+html[data-vt="close-auth"]::view-transition-old(auth-hero) {
+  animation: vt-drift-out 0.4s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+html[data-vt="close-auth"]::view-transition-old(root) {
+  animation: vt-fade-out 0.3s ease 0.08s both;
+}
+
+html[data-vt="close-auth"]::view-transition-new(root) {
+  animation: vt-fade-in 0.4s ease 0.08s both;
+}
+
+/* ---------- auth-swap ---------- */
+
+/* The group morphs the card's size (Confirm password appears / goes); the
+   contents cross-fade a touch faster than it grows. */
+html[data-vt="auth-swap"]::view-transition-group(auth-card) {
+  animation-duration: 0.45s;
+}
+
+html[data-vt="auth-swap"]::view-transition-old(auth-card) {
+  animation: vt-fade-out 0.2s ease both;
+}
+
+html[data-vt="auth-swap"]::view-transition-new(auth-card) {
+  animation: vt-fade-in 0.3s ease 0.1s both;
+}
+
+/* Both snapshots are cropped to the growing / shrinking card from the top
+   (never stretched, which would squash the text): the taller form is
+   uncovered as the paper grows instead of showing at full length at once. */
+html[data-vt="auth-swap"]::view-transition-old(auth-card),
+html[data-vt="auth-swap"]::view-transition-new(auth-card) {
+  height: 100%;
+  object-fit: none;
+  object-position: top;
+}
+
+/* ---------- enter-app ---------- */
+
+html[data-vt="enter-app"]::view-transition-old(auth-card) {
+  animation: vt-card-through 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+html[data-vt="enter-app"]::view-transition-old(auth-hero) {
+  animation: vt-drift-out 0.4s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+html[data-vt="enter-app"]::view-transition-old(root) {
+  animation: vt-fade-out 0.35s ease both;
+}
+
+html[data-vt="enter-app"]::view-transition-new(root) {
+  animation: vt-fade-in 0.4s ease 0.12s both;
+}
+
+html[data-vt="enter-app"]::view-transition-new(app-sidebar) {
+  animation: vt-slide-in-left 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+html[data-vt="enter-app"]::view-transition-new(app-content) {
+  animation: vt-rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+}
+
+/* ---------- logout ---------- */
+
+html[data-vt="logout"]::view-transition-old(app-content) {
+  animation: vt-sink-out 0.4s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+html[data-vt="logout"]::view-transition-old(app-sidebar) {
+  animation: vt-slide-out-left 0.4s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+html[data-vt="logout"]::view-transition-old(root) {
+  animation: vt-fade-out 0.3s ease both;
+}
+
+html[data-vt="logout"]::view-transition-new(root) {
+  animation: vt-rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}

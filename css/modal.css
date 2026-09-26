@@ -449,7 +449,7 @@
   color: #fff;
   font-size: 28px;
   line-height: 1;
-  box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.5), 0 8px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-strong) 50%, transparent), 0 8px 20px rgba(0, 0, 0, 0.5);
   transform: translateY(-50%) scale(1);
   transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
     box-shadow 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -459,8 +459,8 @@
 .detail-nav-btn:hover:not(:disabled) {
   background: var(--accent);
   transform: translateY(-50%) scale(1.14);
-  box-shadow: 0 0 0 10px rgba(139, 92, 246, 0.18),
-    0 0 26px rgba(167, 139, 250, 0.65), 0 10px 24px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent-strong) 18%, transparent),
+    0 0 26px color-mix(in srgb, var(--accent-glow) 65%, transparent), 0 10px 24px rgba(0, 0, 0, 0.5);
 }
 
 .detail-nav-btn:active:not(:disabled) {
@@ -549,6 +549,10 @@
   overflow-x: hidden;
   min-height: 0;
   padding-bottom: 10px;
+  /* Opening the trailer is the most common way this box now flips between
+     scrolling and not — reserving the scrollbar's lane keeps that from
+     shoving the whole panel's content sideways by a few px each time. */
+  scrollbar-gutter: stable;
 }
 
 .detail-panel::before,
@@ -624,6 +628,60 @@
   line-height: 1.65;
 }
 
+/* Stays empty (and takes no room) until TMDB turns up a trailer. */
+.detail-trailer {
+  margin-top: 18px;
+}
+
+.detail-trailer:empty {
+  display: none;
+}
+
+/* Same paper sticker as the detail action row's secondary button
+   (.detail-actions .edit-btn). The small left margin keeps its tilted
+   corner clear of .detail-body's overflow-x clip. */
+.trailer-btn {
+  margin-left: 3px;
+  padding: 9px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(-1deg);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.trailer-btn:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 6px 0 var(--accent-deep);
+}
+
+.trailer-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 var(--accent-deep);
+}
+
+.detail-trailer-frame {
+  margin-top: 16px;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border: 1px solid var(--border);
+  box-shadow: 2px 6px 14px rgba(0, 0, 0, 0.3);
+}
+
+.detail-trailer-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 .detail-meta-strip {
   display: flex;
   gap: 32px;
@@ -687,7 +745,7 @@
   color: #fff;
   padding: 11px 22px;
   border-radius: 7px;
-  box-shadow: 0 3px 10px rgba(139, 92, 246, 0.35);
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--accent-strong) 35%, transparent);
 }
 
 .detail-actions-review [data-action="add-to-collection"]:hover {
@@ -810,13 +868,11 @@
   width: min(480px, calc(100vw - 32px));
 }
 
-/* "Mark as watched" — Polaroid poster (like #detail-modal) on the left, a
+/* "Mark as watched" (#update-modal) and its series twin "Start watching"
+   (#start-modal) — Polaroid poster (like #detail-modal) on the left, a
    panel on the right whose own header is a die-cut violet ticket instead of
-   a plain heading, naming the actual movie instead of a generic "Mark as
-   watched" (that text becomes the eyebrow above the title). #start-modal
-   ("Start watching") deliberately still uses the plain .modal/.update-modal
-   shell — not asked to change, and it has no single title/poster to anchor
-   this treatment against yet. */
+   a plain heading, naming the actual title instead of a generic "Mark as
+   watched" (that text becomes the eyebrow above the title). */
 .update-layout {
   position: relative;
   display: flex;
@@ -1013,6 +1069,89 @@
 .delete-btn-solid:hover {
   background: #ef4444;
   border-color: #ef4444;
+}
+
+/* Mark as watched / Start watching action row: the same "raised sticker"
+   family as the detail modal's actions and the delete confirmation (hard
+   offset shadow, a slight scattered tilt, square corners, Oswald
+   uppercase) instead of flat rounded pills. Save is the solid primary,
+   Cancel the paper secondary, Delete the red-inked paper sticker the open
+   collection's own Delete uses (.sort-btn-danger) — it only opens the
+   confirmation, so it isn't the solid red of the final "Yes, delete". */
+.update-actions .delete-btn,
+.update-actions .cancel-btn,
+.update-actions .modal-search-btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 0;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  transition: transform var(--transition), box-shadow var(--transition),
+    background var(--transition);
+}
+
+.update-actions .modal-search-btn {
+  background: var(--accent-strong);
+  color: #fff;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(1deg);
+}
+
+.update-actions .cancel-btn {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(-1deg);
+}
+
+.update-actions .delete-btn {
+  background: var(--paper);
+  color: #b42318;
+  box-shadow: 3px 4px 0 #b42318;
+  transform: rotate(-1deg);
+}
+
+.update-actions .modal-search-btn:hover,
+.update-actions .cancel-btn:hover,
+.update-actions .delete-btn:hover {
+  filter: none;
+  transform: rotate(0deg) translateY(-2px);
+}
+
+.update-actions .modal-search-btn:hover,
+.update-actions .cancel-btn:hover {
+  box-shadow: 4px 6px 0 var(--accent-deep);
+}
+
+.update-actions .cancel-btn:hover {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.update-actions .delete-btn:hover {
+  background: var(--paper);
+  box-shadow: 4px 6px 0 #b42318;
+}
+
+.update-actions .modal-search-btn:active,
+.update-actions .cancel-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 var(--accent-deep);
+}
+
+.update-actions .delete-btn:active {
+  transform: rotate(0deg) translateY(0);
+  box-shadow: 1px 2px 0 #b42318;
+}
+
+.update-actions .modal-search-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
 }
 
 .confirm-backdrop {
@@ -1795,27 +1934,27 @@ body:not(.no-hover) .col-item-card:hover .col-item-remove {
   width: 100%;
   padding: 11px 12px;
   margin-bottom: 22px;
-  background: rgba(139, 92, 246, 0.07);
-  border: 1.5px dashed rgba(109, 40, 217, 0.35);
+  background: color-mix(in srgb, var(--accent-strong) 7%, transparent);
+  border: 1.5px dashed color-mix(in srgb, var(--accent-deep) 35%, transparent);
   cursor: pointer;
   font-family: var(--font-hand);
   font-size: 16px;
   color: var(--ink-muted);
-  box-shadow: 2px 3px 0 rgba(109, 40, 217, 0.3);
+  box-shadow: 2px 3px 0 color-mix(in srgb, var(--accent-deep) 30%, transparent);
   transform: rotate(-0.4deg);
   transition: background var(--transition), border-color var(--transition),
     box-shadow var(--transition), transform var(--transition);
 }
 
 .add-hint:hover {
-  background: rgba(139, 92, 246, 0.14);
+  background: color-mix(in srgb, var(--accent-strong) 14%, transparent);
   border-color: var(--accent-deep);
-  box-shadow: 3px 5px 0 rgba(109, 40, 217, 0.42);
+  box-shadow: 3px 5px 0 color-mix(in srgb, var(--accent-deep) 42%, transparent);
   transform: rotate(0deg) translateY(-2px);
 }
 
 .add-hint:active {
-  box-shadow: 1px 2px 0 rgba(109, 40, 217, 0.42);
+  box-shadow: 1px 2px 0 color-mix(in srgb, var(--accent-deep) 42%, transparent);
   transform: rotate(0deg) translateY(0);
 }
 
@@ -1915,7 +2054,7 @@ body:not(.no-hover) .col-item-card:hover .col-item-remove {
 .add-card.selected .add-card-inner {
   outline: 3px solid var(--accent-strong);
   outline-offset: 1px;
-  box-shadow: 0 0 0 5px rgba(139, 92, 246, 0.22), 3px 8px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent-strong) 22%, transparent), 3px 8px 16px rgba(0, 0, 0, 0.4);
 }
 
 .add-check {
@@ -2177,9 +2316,9 @@ body:not(.no-hover) .col-item-card:hover .col-item-remove {
     width: 100%;
   }
 
-  /* The stacked layout leaves less room for the star row than the old plain
-     .update-modal shell did (that mobile padding tweak lives on .update-modal
-     for #start-modal, which still uses it — this is the new panel's own). */
+  /* The stacked layout leaves less room for the star row than a plain
+     .update-modal shell does (that mobile padding tweak lives on
+     .update-modal, now only the New Collection modal) — this is the panel's own. */
   .update-form-body {
     padding-left: 10px;
     padding-right: 10px;

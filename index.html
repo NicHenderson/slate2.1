@@ -3,56 +3,709 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Slate</title>
+  <title>Slate — every movie, every show, pinned to one board</title>
+  <meta name="description" content="Slate is a cozy corkboard for everything you've watched, everything you're watching and everything you can't wait to start. Rate, review and collect movies and TV shows." />
+  <meta property="og:title" content="Slate — every movie, every show, pinned to one board" />
+  <meta property="og:description" content="Rate, review and collect movies and TV shows on your own cozy corkboard." />
+  <meta property="og:image" content="img/Slate-logo.png" />
   <link rel="icon" type="image/png" href="img/Slate-logo.png" />
+  <script>
+    // Applied before any CSS paints, from whatever theme was cached on the
+    // last login — otherwise the page would flash the "midnight" default
+    // for a frame before js/settings.js loads the real one from Supabase.
+    (function () {
+      try {
+        var cached = JSON.parse(localStorage.getItem("slate_settings_cache") || "null");
+        if (cached && cached.theme) {
+          document.documentElement.setAttribute("data-theme", cached.theme);
+        }
+        if (cached && cached.reduceMotion) {
+          document.documentElement.setAttribute("data-reduce-motion", "true");
+        }
+        if (cached && cached.density === "compact") {
+          document.documentElement.setAttribute("data-density", "compact");
+        }
+      } catch (e) {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Patrick+Hand&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/base.css?v=3" />
-  <link rel="stylesheet" href="css/sidebar.css?v=1" />
-  <link rel="stylesheet" href="css/content.css?v=12" />
-  <link rel="stylesheet" href="css/cards.css?v=19" />
-  <link rel="stylesheet" href="css/modal.css?v=36" />
-  <link rel="stylesheet" href="css/dashboard.css?v=1" />
-  <link rel="stylesheet" href="css/auth.css?v=1" />
-  <link rel="stylesheet" href="css/responsive.css?v=14" />
+  <link rel="stylesheet" href="css/base.css?v=27ef0068" />
+  <link rel="stylesheet" href="css/sidebar.css?v=b0c4cd07" />
+  <link rel="stylesheet" href="css/content.css?v=8428c386" />
+  <link rel="stylesheet" href="css/cards.css?v=8bb24eb5" />
+  <link rel="stylesheet" href="css/modal.css?v=d647f751" />
+  <link rel="stylesheet" href="css/auth.css?v=0468e5c7" />
+  <link rel="stylesheet" href="css/landing.css?v=2e15fdb2" />
+  <link rel="stylesheet" href="css/transitions.css?v=bf37ef65" />
+  <link rel="stylesheet" href="css/settings.css?v=378ba9d8" />
+  <link rel="stylesheet" href="css/yourData.css?v=c9f8e5f2" />
+  <link rel="stylesheet" href="css/responsive.css?v=1d55d7b9" />
 </head>
 <body>
-  <div class="auth-screen hidden" id="auth-screen">
-    <div class="auth-card">
-      <div class="auth-brand">
-        <span class="brand-tag">Slate</span>
+  <!-- ============================================================
+       Landing page — what a signed-out visitor sees (js/auth.js).
+       Mockups reuse the app's own components (cards, booklets, stat
+       strips, status tabs) with CSS-drawn posters (css/landing.css).
+       ============================================================ -->
+  <div class="landing-screen brand-theme hidden" id="landing-screen">
+    <header class="lp-nav" id="lp-nav">
+      <div class="lp-nav-inner">
+        <a class="lp-brand" href="#lp-top" data-lp-scroll>
+          <img class="lp-brand-logo" src="img/Slate-logo.png" alt="" />
+          <span class="lp-brand-name">Slate</span>
+        </a>
+        <nav class="lp-nav-links" aria-label="Page sections">
+          <a href="#lp-features" data-lp-scroll>Features</a>
+          <a href="#lp-collections" data-lp-scroll>Collections</a>
+          <a href="#lp-yours" data-lp-scroll>Make it yours</a>
+          <a href="#lp-faq" data-lp-scroll>FAQ</a>
+        </nav>
+        <div class="lp-nav-actions">
+          <a class="lp-btn lp-btn--paper lp-btn--sm" href="#login">Log in</a>
+          <a class="lp-btn lp-btn--solid lp-btn--sm" href="#signup">Get started</a>
+        </div>
       </div>
-      <p class="auth-subtitle" id="auth-subtitle">Log in to your library</p>
+    </header>
 
-      <form id="auth-form" novalidate>
-        <div class="auth-field">
-          <label class="field-label" for="auth-email">Email</label>
-          <input type="email" id="auth-email" class="field-input" autocomplete="email" placeholder="you@example.com" />
-          <p class="auth-field-error hidden" id="auth-email-error"></p>
+    <main>
+      <!-- ---------- hero ---------- -->
+      <section class="lp-hero" id="lp-top">
+        <div class="lp-hero-copy">
+          <p class="lp-sticker">Hi, movie lover ♥</p>
+          <h1 class="lp-hero-title">Every movie.<br />Every show.<br /><span class="lp-hl">Pinned to one board.</span></h1>
+          <p class="lp-hero-lede">Slate is a cozy corkboard for everything you've watched, everything you're halfway through, and everything you can't wait to start. Rate it, review it, collect it — and never again lose that title a friend swore you'd love.</p>
+          <div class="lp-hero-ctas">
+            <a class="lp-btn lp-btn--solid lp-btn--lg" href="#signup">Start your board →</a>
+            <a class="lp-btn lp-btn--paper lp-btn--lg" href="#login">I already have one</a>
+          </div>
+          <p class="lp-hero-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 0 1-14.3 4.9M4 12A8 8 0 0 1 18.3 7.1"/><polyline points="18.5 3 18.5 7.3 14.2 7.3"/><polyline points="5.5 21 5.5 16.7 9.8 16.7"/></svg>
+            On your phone, tablet and laptop — always in sync.
+          </p>
         </div>
 
-        <div class="auth-field">
-          <label class="field-label" for="auth-password">Password</label>
-          <input type="password" id="auth-password" class="field-input" autocomplete="current-password" placeholder="At least 8 characters" />
-          <p class="auth-field-error hidden" id="auth-password-error"></p>
+        <div class="lp-hero-board" aria-hidden="true">
+          <article class="card lp-hb-a lp-float">
+            <div class="card-poster lp-art lp-art--moons"><span class="lp-art-title">Paper Moons</span></div>
+            <p class="card-title">Paper Moons</p>
+            <div class="card-rating"><div class="rating-row"><div class="stars"><span class="stars-base">★★★★★★★★★★</span><span class="stars-fill" style="width: 90%">★★★★★★★★★★</span></div><span class="stars-value">9/10</span></div></div>
+          </article>
+          <article class="card lp-hb-b lp-float">
+            <div class="card-poster lp-art lp-art--drive"><span class="lp-art-title">Midnight Drive</span></div>
+            <p class="card-title">Midnight Drive</p>
+            <div class="card-rating"><div class="rating-row"><div class="stars"><span class="stars-base">★★★★★★★★★★</span><span class="stars-fill" style="width: 100%">★★★★★★★★★★</span></div><span class="stars-value">10/10</span></div></div>
+          </article>
+          <article class="card lp-hb-c lp-float">
+            <div class="card-poster lp-art lp-art--north"><span class="lp-art-title">Northbound</span></div>
+            <p class="card-title">Northbound</p>
+            <p class="card-meta">Added yesterday</p>
+          </article>
+          <div class="hstats lp-hb-strip lp-float">
+            <div class="hs-item"><span class="hs-value">312h</span><span class="hs-label">Time watched</span></div>
+            <div class="hs-item"><span class="hs-value">8.1<small>/10</small></span><span class="hs-label">Avg rating</span></div>
+            <div class="hs-item hs-text"><span class="hs-value">Drama</span><span class="hs-label">Top genre · 41%</span></div>
+          </div>
+          <div class="lp-note lp-hb-note lp-float"><p>Tonight: something scary? 🎃</p></div>
+          <div class="lp-stub lp-hb-stub lp-float"><span>Admit</span><strong>One</strong></div>
         </div>
+      </section>
 
-        <div class="auth-field hidden" id="auth-confirm-field">
-          <label class="field-label" for="auth-confirm">Confirm password</label>
-          <input type="password" id="auth-confirm" class="field-input" autocomplete="new-password" placeholder="Repeat your password" />
-          <p class="auth-field-error hidden" id="auth-confirm-error"></p>
+      <!-- ---------- film strip ---------- -->
+      <div class="lp-filmstrip" aria-hidden="true">
+        <div class="lp-filmstrip-track">
+          <div class="lp-fs-set">
+            <span>Watch</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Rate</span><img src="img/Slate-logo.png" alt="" /><span>Review</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Collect</span><img src="img/Slate-logo.png" alt="" /><span>Surprise me</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Repeat</span><img src="img/Slate-logo.png" alt="" />
+          </div>
+          <div class="lp-fs-set">
+            <span>Watch</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Rate</span><img src="img/Slate-logo.png" alt="" /><span>Review</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Collect</span><img src="img/Slate-logo.png" alt="" /><span>Surprise me</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Repeat</span><img src="img/Slate-logo.png" alt="" />
+          </div>
         </div>
+      </div>
 
-        <p class="auth-message hidden" id="auth-message"></p>
+      <!-- ---------- how it works ---------- -->
+      <section class="lp-section" id="lp-how">
+        <header class="lp-section-head reveal">
+          <p class="lp-sticker lp-sticker--pop">Three steps. That's it.</p>
+          <h2 class="lp-h2">How Slate works</h2>
+        </header>
+        <ol class="lp-steps">
+          <li class="lp-step lp-paper reveal">
+            <span class="lp-step-num">01</span>
+            <div class="lp-step-body">
+              <h3>Find it</h3>
+              <p>Search for any movie or show by its name or its TMDB code.</p>
+            </div>
+          </li>
+          <li class="lp-step lp-paper reveal">
+            <span class="lp-step-num">02</span>
+            <div class="lp-step-body">
+              <h3>Pin it</h3>
+              <p>Drop it on your watchlist, start it, finish it, or let it go. Every title moves to the right list on its own.</p>
+            </div>
+          </li>
+          <li class="lp-step lp-paper reveal">
+            <span class="lp-step-num">03</span>
+            <div class="lp-step-body">
+              <h3>Love it (or don't)</h3>
+              <p>Rate it out of ten, write what you thought and note the day you watched it.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
 
-        <button type="submit" class="auth-submit" id="auth-submit">Log In</button>
-      </form>
+      <!-- ---------- feature: watched ---------- -->
+      <section class="lp-feature" id="lp-features">
+        <div class="lp-feature-copy reveal">
+          <p class="lp-kicker">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="8.2" y1="4" x2="8.2" y2="20"/><line x1="15.8" y1="4" x2="15.8" y2="20"/><line x1="3" y1="9" x2="8.2" y2="9"/><line x1="3" y1="15" x2="8.2" y2="15"/><line x1="15.8" y1="9" x2="21" y2="9"/><line x1="15.8" y1="15" x2="21" y2="15"/></svg>
+            Watched
+          </p>
+          <h2 class="lp-h2">A diary for everything you've seen</h2>
+          <p class="lp-body">Every movie gets its own polaroid: the day you watched it, a rating out of ten and a review in your own words. Scroll back months later and remember exactly how that ending made you feel.</p>
+          <ul class="lp-points">
+            <li>Ratings from one to ten stars, and reviews as long as you like.</li>
+            <li>Watch dates, so your year in movies tells a story.</li>
+            <li>The trailer is one click away, right inside the title.</li>
+          </ul>
+        </div>
+        <div class="lp-feature-board reveal" aria-hidden="true">
+          <div class="lp-mock-grid">
+            <article class="card">
+              <div class="card-poster lp-art lp-art--lighthouse"><span class="lp-art-title">The Last Lighthouse</span></div>
+              <p class="card-title">The Last Lighthouse</p>
+              <div class="card-rating"><div class="rating-row"><div class="stars"><span class="stars-base">★★★★★★★★★★</span><span class="stars-fill" style="width: 80%">★★★★★★★★★★</span></div><span class="stars-value">8/10</span></div></div>
+            </article>
+            <article class="card">
+              <div class="card-poster lp-art lp-art--hours"><span class="lp-art-title">Small Hours</span></div>
+              <p class="card-title">Small Hours</p>
+              <div class="card-rating"><div class="rating-row"><div class="stars"><span class="stars-base">★★★★★★★★★★</span><span class="stars-fill" style="width: 100%">★★★★★★★★★★</span></div><span class="stars-value">10/10</span></div></div>
+            </article>
+            <article class="card">
+              <div class="card-poster lp-art lp-art--tigers"><span class="lp-art-title">Neon Tigers</span></div>
+              <p class="card-title">Neon Tigers</p>
+              <div class="card-rating"><div class="rating-row"><div class="stars"><span class="stars-base">★★★★★★★★★★</span><span class="stars-fill" style="width: 70%">★★★★★★★★★★</span></div><span class="stars-value">7/10</span></div></div>
+            </article>
+          </div>
+          <div class="lp-note lp-review-note">
+            <p>“Cried twice. Would cry again.”</p>
+            <span>Your review of Small Hours · watched Mar 14</span>
+          </div>
+        </div>
+      </section>
 
-      <p class="auth-toggle">
-        <span id="auth-toggle-text">Don't have an account?</span>
-        <button type="button" class="auth-toggle-btn" id="auth-toggle-btn">Register</button>
-      </p>
+      <!-- ---------- feature: watchlist ---------- -->
+      <section class="lp-feature lp-feature--flip">
+        <div class="lp-feature-copy reveal">
+          <p class="lp-kicker">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5 H17.5 V20.5 L12 16.5 L6.5 20.5 Z"/></svg>
+            Watchlist
+          </p>
+          <h2 class="lp-h2">A watchlist that helps you pick</h2>
+          <p class="lp-body">Sort your queue by when you added it, by title or by release year — or switch to Custom order and drag titles into the exact order you want to watch them. Can't decide? Let the dice roll.</p>
+          <ul class="lp-points">
+            <li>Custom order: drag and drop, on your laptop or your phone.</li>
+            <li>Surprise Me picks something for tonight — go on, try it.</li>
+            <li>See how many hours are waiting, and what's been waiting longest.</li>
+          </ul>
+        </div>
+        <div class="lp-feature-board reveal">
+          <div class="lp-board-bar">
+            <p class="drag-hint"><svg class="drag-hint-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>Drag to reorder</p>
+            <button class="surprise-btn" id="lp-surprise" type="button">🎲 Surprise Me</button>
+          </div>
+          <div class="lp-mock-grid lp-mock-grid--4" id="lp-surprise-grid">
+            <article class="card">
+              <div class="card-poster lp-art lp-art--orbit"><span class="lp-art-title">Orbit</span></div>
+              <p class="card-title">Orbit</p>
+            </article>
+            <article class="card is-lifted">
+              <div class="card-poster lp-art lp-art--honey"><span class="lp-art-title">Salt &amp; Honey</span></div>
+              <p class="card-title">Salt &amp; Honey</p>
+              <svg class="lp-cursor" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 8-6.2 1.6L10 19z" fill="#fff" stroke="#0d0c15" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </article>
+            <article class="card">
+              <div class="card-poster lp-art lp-art--static"><span class="lp-art-title">Static Hearts</span></div>
+              <p class="card-title">Static Hearts</p>
+            </article>
+            <article class="card">
+              <div class="card-poster lp-art lp-art--north"><span class="lp-art-title">Northbound</span></div>
+              <p class="card-title">Northbound</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- feature: shows queue ---------- -->
+      <section class="lp-feature">
+        <div class="lp-feature-copy reveal">
+          <p class="lp-kicker">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="13" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="18" x2="12" y2="21"/></svg>
+            Shows Queue
+          </p>
+          <h2 class="lp-h2">Shows have a life of their own</h2>
+          <p class="lp-body">A show isn't over in one night, so shows get their own queue: To Watch, Watching and Dropped. Every show you're in the middle of remembers when you started it — and gently points out the ones you haven't touched in a month.</p>
+          <ul class="lp-points">
+            <li>Start, finish or drop a show in a tap — it moves itself.</li>
+            <li>Seasons and episodes filled in for every show.</li>
+            <li>“How long do I take to finish a show?” Slate knows.</li>
+          </ul>
+        </div>
+        <div class="lp-feature-board reveal">
+          <div class="subtabs status-strip lp-tabs" role="tablist" aria-label="Show status (demo)">
+            <button class="status-tab" type="button" role="tab" aria-selected="false" data-lp-tab="towatch">
+              <svg class="status-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5 H17.5 V20.5 L12 16.5 L6.5 20.5 Z"/></svg>
+              <span class="status-tab-label">To Watch</span>
+              <span class="status-tab-count">3</span>
+            </button>
+            <button class="status-tab active" type="button" role="tab" aria-selected="true" data-lp-tab="watching">
+              <svg class="status-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 4.5 L19 12 L6.5 19.5 Z"/></svg>
+              <span class="status-tab-label">Watching</span>
+              <span class="status-tab-count">3</span>
+            </button>
+            <button class="status-tab" type="button" role="tab" aria-selected="false" data-lp-tab="dropped">
+              <svg class="status-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6 L18 18 M18 6 L6 18"/></svg>
+              <span class="status-tab-label">Dropped</span>
+              <span class="status-tab-count">1</span>
+            </button>
+          </div>
+          <div class="lp-mock-grid" data-lp-panel="towatch" role="tabpanel" hidden>
+            <article class="card" aria-hidden="true">
+              <div class="card-poster lp-art lp-art--kitchen"><span class="lp-art-title">Kitchen Chaos</span></div>
+              <p class="card-title">Kitchen Chaos</p>
+              <p class="card-meta">4 seasons · 40 episodes</p>
+            </article>
+            <article class="card" aria-hidden="true">
+              <div class="card-poster lp-art lp-art--lighthouse"><span class="lp-art-title">The Last Lighthouse</span></div>
+              <p class="card-title">The Last Lighthouse</p>
+              <p class="card-meta">1 season · 8 episodes</p>
+            </article>
+            <article class="card" aria-hidden="true">
+              <div class="card-poster lp-art lp-art--tigers"><span class="lp-art-title">Neon Tigers</span></div>
+              <p class="card-title">Neon Tigers</p>
+              <p class="card-meta">2 seasons · 16 episodes</p>
+            </article>
+          </div>
+          <div class="lp-mock-grid" data-lp-panel="watching" role="tabpanel">
+            <article class="card" aria-hidden="true">
+              <div class="card-poster lp-art lp-art--creek"><span class="lp-art-title">Hollow Creek</span></div>
+              <p class="card-title">Hollow Creek</p>
+              <p class="card-meta">Started 3d ago</p>
+            </article>
+            <article class="card" aria-hidden="true">
+              <div class="card-poster lp-art lp-art--shift"><span class="lp-art-title">The Night Shift</span></div>
+              <p class="card-title">The Night Shift</p>
+              <p class="card-meta">Started 12d ago</p>
+            </article>
+            <article class="card" aria-hidden="true">
+              <div class="card-poster lp-art lp-art--hours"><span class="lp-art-title">Small Hours</span></div>
+              <p class="card-title">Small Hours</p>
+              <p class="card-meta is-stale">Started 45d ago</p>
+            </article>
+          </div>
+          <div class="lp-mock-grid" data-lp-panel="dropped" role="tabpanel" hidden>
+            <article class="card" aria-hidden="true">
+              <div class="card-poster lp-art lp-art--static"><span class="lp-art-title">Static Hearts</span></div>
+              <p class="card-title">Static Hearts</p>
+              <p class="card-meta">Dropped after season 1</p>
+            </article>
+            <p class="lp-drop-note">It happens. No guilt here — you can always send it back to To Watch.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- feature: collections ---------- -->
+      <section class="lp-feature lp-feature--flip" id="lp-collections">
+        <div class="lp-feature-copy reveal">
+          <p class="lp-kicker">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.8 a1.6 1.6 0 0 1 1.6 -1.6 h4.6 l1.9 2.3 h9.3 a1.6 1.6 0 0 1 1.6 1.6 v9.1 a1.6 1.6 0 0 1 -1.6 1.6 h-15.8 a1.6 1.6 0 0 1 -1.6 -1.6 z"/></svg>
+            Collections
+          </p>
+          <h2 class="lp-h2">A collection for every mood</h2>
+          <p class="lp-body">Halloween marathon. Comfort shows for rainy Sundays. Every film by the director you can't stop talking about. Group titles into collections with their own icon, watch the progress bar fill up, and let Surprise Me pick the next one from inside it.</p>
+          <ul class="lp-points">
+            <li>Hundreds of emoji and icons to give each collection its face.</li>
+            <li>Movies and shows side by side, in the order you drag them.</li>
+            <li>Progress, average rating, best and worst — per collection.</li>
+          </ul>
+        </div>
+        <div class="lp-feature-board lp-feature-board--booklets reveal" aria-hidden="true">
+          <article class="collection-card booklet-card">
+            <div class="booklet-spine"></div>
+            <div class="booklet-body">
+              <div class="booklet-ribbon"></div>
+              <div class="booklet-cover">
+                <div class="booklet-stamp stamp-n4"><span class="lp-art lp-art--hours"></span><span class="lp-art lp-art--static"></span><span class="lp-art lp-art--shift"></span><span class="lp-art lp-art--creek"></span></div>
+                <span class="booklet-icon"><img class="ico ico-emoji" src="img/emoji/1F383.svg" alt="" draggable="false" /></span>
+              </div>
+              <p class="booklet-title">Halloween Marathon</p>
+              <div class="booklet-footer">
+                <div class="booklet-progress">
+                  <div class="booklet-bar"><span style="width: 83%"></span></div>
+                  <p class="booklet-progress-text"><span>5/6 watched</span></p>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="collection-card booklet-card">
+            <div class="booklet-spine"></div>
+            <div class="booklet-body">
+              <div class="booklet-ribbon"></div>
+              <div class="booklet-cover">
+                <div class="booklet-stamp stamp-n3"><span class="lp-art lp-art--kitchen"></span><span class="lp-art lp-art--moons"></span><span class="lp-art lp-art--honey"></span></div>
+                <span class="booklet-icon"><img class="ico ico-emoji" src="img/emoji/1F37F.svg" alt="" draggable="false" /></span>
+              </div>
+              <p class="booklet-title">Comfort Shows</p>
+              <div class="booklet-footer">
+                <div class="booklet-progress">
+                  <div class="booklet-bar"><span style="width: 38%"></span></div>
+                  <p class="booklet-progress-text"><span>3/8 watched</span></p>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="collection-card booklet-card">
+            <div class="booklet-spine"></div>
+            <div class="booklet-body">
+              <div class="booklet-ribbon"></div>
+              <div class="booklet-cover">
+                <div class="booklet-stamp stamp-n4"><span class="lp-art lp-art--orbit"></span><span class="lp-art lp-art--drive"></span><span class="lp-art lp-art--north"></span><span class="lp-art lp-art--lighthouse"></span></div>
+                <span class="booklet-icon"><img class="ico ico-emoji" src="img/emoji/1F319.svg" alt="" draggable="false" /></span>
+              </div>
+              <p class="booklet-title">Night Sky</p>
+              <div class="booklet-footer">
+                <div class="booklet-progress is-complete">
+                  <div class="booklet-bar"><span style="width: 100%"></span></div>
+                  <p class="booklet-progress-text"><span>4/4 watched</span><span class="booklet-done">✓</span></p>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ---------- feature: stats ---------- -->
+      <section class="lp-feature">
+        <div class="lp-feature-copy reveal">
+          <p class="lp-kicker">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="19" y1="20" x2="19" y2="9"/></svg>
+            Stats
+          </p>
+          <h2 class="lp-h2">Your taste, in numbers</h2>
+          <p class="lp-body">Every list keeps its own little scoreboard, right next to its title: hours watched, your average rating, your top genre, your best and your worst, how long you take to finish a show. It's the fun kind of math.</p>
+          <ul class="lp-points">
+            <li>Updates the second you rate or finish something.</li>
+            <li>Tap your best or worst title to jump straight to it.</li>
+          </ul>
+        </div>
+        <div class="lp-feature-board lp-feature-board--stats reveal" aria-hidden="true">
+          <p class="lp-board-label">Movies</p>
+          <div class="hstats lp-stats-strip">
+            <div class="hs-item"><span class="hs-value" data-lp-count="184">184</span><span class="hs-label">Movies watched</span></div>
+            <div class="hs-item"><span class="hs-value"><span data-lp-count="312">312</span>h</span><span class="hs-label">Time watched</span></div>
+            <div class="hs-item"><span class="hs-value"><span data-lp-count="7.8" data-lp-decimals="1">7.8</span><small>/10</small></span><span class="hs-label">Avg rating</span></div>
+            <div class="hs-item hs-extremes">
+              <span class="extreme-row"><span class="extreme-arrow">▲</span><span class="extreme-title">Small Hours</span><span class="extreme-rating">10/10</span><span class="extreme-ties">+2</span></span>
+              <span class="extreme-row"><span class="extreme-arrow">▼</span><span class="extreme-title">Static Hearts</span><span class="extreme-rating">4/10</span></span>
+            </div>
+          </div>
+          <p class="lp-board-label">Shows</p>
+          <div class="hstats lp-stats-strip lp-stats-strip--alt">
+            <div class="hs-item"><span class="hs-value" data-lp-count="27">27</span><span class="hs-label">Shows finished</span></div>
+            <div class="hs-item hs-text"><span class="hs-value">Comedy</span><span class="hs-label">Top genre · 38%</span></div>
+            <div class="hs-item"><span class="hs-value"><span data-lp-count="23">23</span><small> days</small></span><span class="hs-label">Avg time to finish</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- feature: make it yours ---------- -->
+      <section class="lp-feature lp-feature--flip" id="lp-yours">
+        <div class="lp-feature-copy reveal">
+          <p class="lp-kicker">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1 0 1.6-.8 1.6-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.8-1.7 1.7-1.7h2A4.7 4.7 0 0 0 21 10.5C21 6.4 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7.2" r="1.2"/><circle cx="15" cy="7.2" r="1.2"/></svg>
+            Make it yours
+          </p>
+          <h2 class="lp-h2">Your board, your colors</h2>
+          <p class="lp-body">Eight themes, from moody Midnight to crisp Glacier. Comfortable or compact cards. Pick the page Slate opens to, write a bio, and pin your favorite movie and show to your profile. It's your corner of the internet — decorate it.</p>
+          <ul class="lp-points">
+            <li>Five dark themes and three light ones.</li>
+            <li>Calmer animations, if you'd rather things sit still.</li>
+            <li>Your profile: username, bio and two all-time favorites.</li>
+          </ul>
+        </div>
+        <div class="lp-feature-board lp-feature-board--themes reveal">
+          <div class="lp-theme-demo" id="lp-theme-demo" aria-hidden="true">
+            <div class="lp-td-side">
+              <img class="lp-td-logo" src="img/Slate-logo.png" alt="" />
+              <span class="lp-td-label">Watched</span>
+              <span class="lp-td-nav is-active">Movies</span>
+              <span class="lp-td-nav">Shows</span>
+              <span class="lp-td-label">To Watch</span>
+              <span class="lp-td-nav">Movies To Watch</span>
+              <span class="lp-td-nav">Shows Queue</span>
+            </div>
+            <div class="lp-td-main">
+              <span class="lp-td-sub">Everything you've watched</span>
+              <span class="lp-td-title">Movies</span>
+              <div class="lp-td-strip"><span><b>184</b> watched</span><span><b>7.8</b> avg</span><span><b>Drama</b> top</span></div>
+              <div class="lp-td-cards">
+                <span class="lp-td-card"><span class="lp-art lp-art--drive"></span><i></i></span>
+                <span class="lp-td-card"><span class="lp-art lp-art--moons"></span><i></i></span>
+                <span class="lp-td-card"><span class="lp-art lp-art--north"></span><i></i></span>
+                <span class="lp-td-card"><span class="lp-art lp-art--orbit"></span><i></i></span>
+              </div>
+            </div>
+          </div>
+          <div class="lp-theme-chips" id="lp-theme-chips" role="radiogroup" aria-label="Preview a theme"></div>
+        </div>
+      </section>
+
+      <!-- ---------- little things ---------- -->
+      <section class="lp-section" id="lp-little">
+        <header class="lp-section-head reveal">
+          <p class="lp-sticker">The little things</p>
+          <h2 class="lp-h2">Small touches, big hugs</h2>
+          <p class="lp-lede">The details you'll never notice until you use something without them.</p>
+        </header>
+        <div class="lp-things">
+          <article class="lp-thing lp-paper reveal">
+            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 0 1-14.3 4.9M4 12A8 8 0 0 1 18.3 7.1"/><polyline points="18.5 3 18.5 7.3 14.2 7.3"/><polyline points="5.5 21 5.5 16.7 9.8 16.7"/></svg></span>
+            <h3>Always in sync</h3>
+            <p>Rate something on your phone and it's already there on your laptop. No refresh.</p>
+          </article>
+          <article class="lp-thing lp-paper reveal">
+            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><line x1="11" y1="18.3" x2="13" y2="18.3"/></svg></span>
+            <h3>Made for your thumb</h3>
+            <p>Every page and every card works just as well on a phone. Press and hold to drag.</p>
+          </article>
+          <article class="lp-thing lp-paper reveal">
+            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M10 9.2v5.6l4.8-2.8z"/></svg></span>
+            <h3>Trailers built in</h3>
+            <p>Not sure about a title? Watch its trailer without leaving the page.</p>
+          </article>
+          <article class="lp-thing lp-paper reveal">
+            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 3 12 9 18"/><polyline points="15 6 21 12 15 18"/></svg></span>
+            <h3>Flip, don't hunt</h3>
+            <p>Browse a list title by title with next and previous, right inside the details.</p>
+          </article>
+          <article class="lp-thing lp-paper reveal">
+            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+            <h3>Yours alone</h3>
+            <p>Your lists are locked to your account. Nobody else can see what's on your board.</p>
+          </article>
+          <article class="lp-thing lp-paper reveal">
+            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l1 13h9l1-13"/></svg></span>
+            <h3>Oops-proof</h3>
+            <p>Deleting asks first. Deleting something you rated? You'll type its name to be sure.</p>
+          </article>
+          <article class="lp-thing lp-paper reveal">
+            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span>
+            <h3>Easy on the eyes</h3>
+            <p>Dark or light themes, compact cards, and calmer animations when you want them.</p>
+          </article>
+          <article class="lp-thing lp-paper reveal">
+            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><line x1="16" y1="16" x2="21" y2="21"/></svg></span>
+            <h3>Every title, found</h3>
+            <p>Millions of movies and shows to search, with posters and details ready to go.</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ---------- love note ---------- -->
+      <section class="lp-section lp-section--note">
+        <div class="lp-letter lp-paper reveal">
+          <span class="lp-letter-tape lp-letter-tape--l" aria-hidden="true"></span>
+          <span class="lp-letter-tape lp-letter-tape--r" aria-hidden="true"></span>
+          <p>Hi, dear movie lover. First things first — how are you? Everything okay?</p>
+          <p>Slate was made so that no record would ever be lost again.</p>
+          <p>Before it existed, I wrote down every movie and show I watched in a notebook. Over the years it grew into a huge record — and one day I lost that notebook. I lost it all. That's how Slate was born: so that would never happen again.</p>
+          <p>Today it's much more than a digital notebook: it's a place where every movie and show I watch stays saved forever, like fixed stars in a sky that can no longer be lost.</p>
+          <p class="lp-letter-sign">With love, Nicholas Henderson,<br />the creator of Slate ♥</p>
+        </div>
+      </section>
+
+      <!-- ---------- FAQ ---------- -->
+      <section class="lp-section" id="lp-faq">
+        <header class="lp-section-head reveal">
+          <p class="lp-sticker lp-sticker--pop">Good questions</p>
+          <h2 class="lp-h2">Frequently asked</h2>
+        </header>
+        <div class="lp-faq">
+          <details class="lp-faq-item lp-paper reveal">
+            <summary>What exactly is Slate?</summary>
+            <p>A personal tracker for movies and TV shows. Keep what you've watched (with ratings, reviews and dates), what you're watching, what you want to watch next, and group it all into collections.</p>
+          </details>
+          <details class="lp-faq-item lp-paper reveal">
+            <summary>Where do the posters and details come from?</summary>
+            <p>From TMDB, The Movie Database — a huge, community-built catalog of movies and shows. Search for a title and Slate brings in its poster, synopsis, genres, runtime, seasons and trailer.</p>
+          </details>
+          <details class="lp-faq-item lp-paper reveal">
+            <summary>Can other people see my lists?</summary>
+            <p>No. Everything on your board is tied to your account, and only you can see or change it.</p>
+          </details>
+          <details class="lp-faq-item lp-paper reveal">
+            <summary>Does it work on my phone?</summary>
+            <p>Yes. Slate is built to feel right on phones, tablets and computers, and whatever you change on one shows up on the others right away.</p>
+          </details>
+          <details class="lp-faq-item lp-paper reveal">
+            <summary>Do I track shows episode by episode?</summary>
+            <p>Slate tracks shows by where you are with them — to watch, watching, finished or dropped — plus the day you started and the day you finished. No episode checklists to keep up with.</p>
+          </details>
+          <details class="lp-faq-item lp-paper reveal">
+            <summary>How do I get started?</summary>
+            <p>Create an account with your email, confirm it from the message we send you, and start pinning titles. It takes about a minute.</p>
+          </details>
+        </div>
+      </section>
+
+      <!-- ---------- final call ---------- -->
+      <section class="lp-final reveal">
+        <div class="lp-final-stub" aria-hidden="true"><span>Admit one</span></div>
+        <div class="lp-final-body lp-paper">
+          <p class="lp-final-eyebrow">Now showing</p>
+          <h2 class="lp-final-title">Your board is waiting.</h2>
+          <p class="lp-final-copy">Every movie. Every show. One cozy corkboard that remembers it all for you.</p>
+          <div class="lp-hero-ctas">
+            <a class="lp-btn lp-btn--solid lp-btn--lg" href="#signup">Create your account</a>
+            <a class="lp-btn lp-btn--paper lp-btn--lg" href="#login">Log in</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="lp-footer">
+      <div class="lp-footer-inner">
+        <a class="lp-brand" href="#lp-top" data-lp-scroll>
+          <img class="lp-brand-logo" src="img/Slate-logo.png" alt="" />
+          <span class="lp-brand-name">Slate</span>
+        </a>
+        <nav class="lp-footer-links" aria-label="Footer">
+          <a href="#lp-features" data-lp-scroll>Features</a>
+          <a href="#lp-faq" data-lp-scroll>FAQ</a>
+          <a href="#login">Log in</a>
+          <a href="#signup">Create account</a>
+        </nav>
+      </div>
+      <div class="lp-footer-inner lp-footer-fine">
+        <small>Movie and show data from <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.</small>
+        <small>© <span id="lp-year">2026</span> Slate · Made with ♥ for movie nights.</small>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // First paint for a signed-out visitor: the landing page right away,
+    // instead of a blank screen while Supabase restores the session. With a
+    // stored session nothing is shown yet — js/auth.js reveals the app (or,
+    // if that session turns out to be dead, this page) once it knows.
+    (function () {
+      try {
+        var stored = Object.keys(localStorage).some(function (k) {
+          return /^sb-.+-auth-token$/.test(k);
+        });
+        if (!stored) document.getElementById("landing-screen").classList.remove("hidden");
+      } catch (e) {}
+    })();
+
+    // Coming back from a password-reset email: Supabase signs the visitor in
+    // from the link and only says it was a *reset* link a moment later, so
+    // js/auth.js would open the app first. Read the link now, before
+    // Supabase clears it from the address bar: a reset link opens the "new
+    // password" card instead (remembered for the tab, so a reload keeps it);
+    // an expired or used one is reported on the "reset password" card.
+    (function () {
+      var params = location.hash.slice(1) + "&" + location.search.slice(1);
+      var get = function (name) {
+        var m = params.match(new RegExp("(?:^|&)" + name + "=([^&]*)"));
+        return m ? decodeURIComponent(m[1].replace(/\+/g, " ")) : null;
+      };
+      window.slateAuthLink = { recovery: get("type") === "recovery", error: get("error_code") || get("error") };
+      try {
+        if (window.slateAuthLink.recovery) sessionStorage.setItem("slate-recovery", "1");
+      } catch (e) {}
+    })();
+  </script>
+
+  <div class="auth-screen brand-theme hidden" id="auth-screen">
+    <div class="auth-hero">
+      <a class="auth-back" id="auth-back" href="#lp-top">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="14 6 8 12 14 18"/></svg>
+        Back to Slate
+      </a>
+      <div class="auth-hero-collage" aria-hidden="true">
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+        <span class="auth-hero-poster"></span>
+      </div>
+      <div class="auth-hero-content">
+        <img class="auth-hero-logo" src="img/Slate-logo.png" alt="Slate" />
+        <p class="auth-hero-eyebrow">Every movie. Every show.</p>
+        <h1 class="auth-hero-title">Slate</h1>
+        <p class="auth-hero-copy">Your corkboard for everything you've watched, dropped, and can't wait to start.</p>
+      </div>
+    </div>
+
+    <div class="auth-panel">
+      <div class="auth-card">
+        <span class="auth-card-tape" aria-hidden="true"></span>
+        <p class="auth-eyebrow" id="auth-subtitle">Welcome back</p>
+        <h2 class="auth-title" id="auth-title">Log In</h2>
+        <p class="auth-hint hidden" id="auth-hint"></p>
+
+        <form id="auth-form" novalidate>
+          <div class="auth-field" id="auth-email-field">
+            <label class="field-label" for="auth-email">Email</label>
+            <input type="email" id="auth-email" class="field-input" autocomplete="email" placeholder="you@example.com" />
+            <p class="auth-field-error hidden" id="auth-email-error"></p>
+          </div>
+
+          <div class="auth-field" id="auth-password-field">
+            <label class="field-label" for="auth-password" id="auth-password-label">Password</label>
+            <div class="auth-password-wrap">
+              <input type="password" id="auth-password" class="field-input" autocomplete="current-password" placeholder="At least 8 characters" />
+              <button type="button" class="auth-password-toggle" id="auth-password-toggle" aria-label="Show password" aria-pressed="false">
+              <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.7 10.7 0 0 1 12 5c7 0 10.5 7 10.5 7a13.3 13.3 0 0 1-3.15 3.9M6.5 6.6C3.6 8.5 1.5 12 1.5 12s3.5 7 10.5 7a10.6 10.6 0 0 0 4.2-.85"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+            </button>
+            </div>
+            <p class="auth-field-error hidden" id="auth-password-error"></p>
+            <button type="button" class="auth-forgot-btn" id="auth-forgot-btn">Forgot password?</button>
+          </div>
+
+          <div class="auth-field hidden" id="auth-confirm-field">
+            <label class="field-label" for="auth-confirm" id="auth-confirm-label">Confirm password</label>
+            <div class="auth-password-wrap">
+              <input type="password" id="auth-confirm" class="field-input" autocomplete="new-password" placeholder="Repeat your password" />
+              <button type="button" class="auth-password-toggle" id="auth-confirm-toggle" aria-label="Show password" aria-pressed="false">
+              <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.7 10.7 0 0 1 12 5c7 0 10.5 7 10.5 7a13.3 13.3 0 0 1-3.15 3.9M6.5 6.6C3.6 8.5 1.5 12 1.5 12s3.5 7 10.5 7a10.6 10.6 0 0 0 4.2-.85"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+            </button>
+            </div>
+            <p class="auth-field-error hidden" id="auth-confirm-error"></p>
+          </div>
+
+          <p class="auth-message hidden" id="auth-message"></p>
+
+          <button type="submit" class="auth-submit" id="auth-submit">Log In</button>
+        </form>
+
+        <p class="auth-toggle">
+          <span id="auth-toggle-text">Don't have an account?</span>
+          <button type="button" class="auth-toggle-btn" id="auth-toggle-btn">Register</button>
+        </p>
+      </div>
     </div>
   </div>
 
@@ -75,17 +728,8 @@
       </div>
 
       <nav class="sidebar-nav">
-        <button class="nav-btn active" data-section="dashboard">
-          <span class="ticket">
-            <span class="nav-stub">
-              <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.4"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.4"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.4"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.4"/></svg>
-            </span>
-            <span class="nav-label-text">Dashboard</span>
-          </span>
-        </button>
-
         <p class="nav-label">Watched</p>
-        <button class="nav-btn" data-section="movies-watched">
+        <button class="nav-btn active" data-section="movies-watched">
           <span class="ticket">
             <span class="nav-stub">
               <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="8.2" y1="4" x2="8.2" y2="20"/><line x1="15.8" y1="4" x2="15.8" y2="20"/><line x1="3" y1="9" x2="8.2" y2="9"/><line x1="3" y1="15" x2="8.2" y2="15"/><line x1="15.8" y1="9" x2="21" y2="9"/><line x1="15.8" y1="15" x2="21" y2="15"/></svg>
@@ -116,7 +760,7 @@
             <span class="nav-stub">
               <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="13" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="18" x2="12" y2="21"/></svg>
             </span>
-            <span class="nav-label-text">Shows To Watch</span>
+            <span class="nav-label-text">Shows Queue</span>
           </span>
         </button>
 
@@ -129,6 +773,16 @@
             <span class="nav-label-text">Collections</span>
           </span>
         </button>
+
+        <p class="nav-label">You</p>
+        <button class="nav-btn" data-section="settings">
+          <span class="ticket">
+            <span class="nav-stub">
+              <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V19.4a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H4.6a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V4.6a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H19.4a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </span>
+            <span class="nav-label-text">Settings</span>
+          </span>
+        </button>
       </nav>
 
       <footer class="sidebar-footer">
@@ -137,73 +791,8 @@
     </aside>
 
     <main class="content">
-
-      <section class="section active" id="dashboard">
-        <header class="section-header">
-          <div>
-            <h1>Dashboard</h1>
-            <p class="section-sub">Your watching at a glance</p>
-          </div>
-          <button class="surprise-btn" id="surprise-btn" type="button" hidden>🎲 Surprise Me</button>
-        </header>
-
-        <div class="placeholder-panel under-construction">
-          <span class="under-construction-icon">🚧</span>
-          <p class="under-construction-text">This page is under construction</p>
-        </div>
-
-        <div class="dashboard-content" hidden>
-          <div class="stats-grid">
-            <div class="stat-card">
-              <span class="stat-value" id="stat-movies">0</span>
-              <span class="stat-label">Movies Watched</span>
-            </div>
-            <div class="stat-card">
-              <span class="stat-value" id="stat-shows">0</span>
-              <span class="stat-label">Shows Watched &amp; Watching</span>
-            </div>
-            <div class="stat-card">
-              <span class="stat-value" id="stat-time">0m</span>
-              <span class="stat-label">Total Watch Time</span>
-            </div>
-            <div class="stat-card">
-              <span class="stat-value" id="stat-rating">–</span>
-              <span class="stat-label">Average Rating</span>
-            </div>
-          </div>
-
-          <div class="dash-block">
-            <h2 class="dash-block-title">Continue Watching</h2>
-            <div class="dash-row" id="dash-continue"></div>
-          </div>
-
-          <div class="dash-block">
-            <h2 class="dash-block-title">Recently Added</h2>
-            <div class="dash-row" id="dash-recent"></div>
-          </div>
-
-          <div class="dash-block">
-            <h2 class="dash-block-title">Top Rated</h2>
-            <div class="dash-row" id="dash-toprated"></div>
-          </div>
-
-          <div class="dash-block">
-            <h2 class="dash-block-title">Genre Distribution</h2>
-            <div class="genre-chart" id="dash-genres"></div>
-          </div>
-
-          <div class="dash-block">
-            <div class="dash-block-head">
-              <h2 class="dash-block-title">Collections</h2>
-              <span class="dash-block-count" id="dash-col-count"></span>
-            </div>
-            <div class="dash-row" id="dash-collections"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="movies-watched">
-        <header class="section-header">
+      <section class="section active" id="movies-watched">
+        <header class="section-header has-stats">
           <div>
             <p class="current-sort">Sorted by <span id="movies-current-sort-label"></span></p>
             <h1>Movies</h1>
@@ -219,6 +808,7 @@
             </div>
             <button class="add-btn" data-type="movie">+ Add</button>
           </div>
+          <div class="hstats" id="hstats-movies-watched" hidden></div>
         </header>
         <div class="card-grid" id="grid-movies-watched">
           <p class="loading">Loading…</p>
@@ -226,7 +816,7 @@
       </section>
 
       <section class="section" id="shows-watched">
-        <header class="section-header">
+        <header class="section-header has-stats">
           <div>
             <p class="current-sort">Sorted by <span id="shows-current-sort-label"></span></p>
             <h1>Shows Watched</h1>
@@ -242,22 +832,77 @@
             </div>
             <button class="add-btn" data-type="tv">+ Add</button>
           </div>
+          <div class="hstats" id="hstats-shows-watched" hidden></div>
         </header>
-        <div class="subtabs status-strip">
-          <button class="status-tab active" data-subtab="grid-shows-watched">
-            <svg class="status-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"/></svg>
-            <span class="status-tab-label">Watched</span>
+        <div class="card-grid" id="grid-shows-watched">
+          <p class="loading">Loading…</p>
+        </div>
+      </section>
+
+      <section class="section" id="movies-towatch">
+        <header class="section-header has-stats">
+          <div>
+            <p class="drag-hint" id="movies-towatch-drag-hint" hidden><svg class="drag-hint-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg><span class="hint-pointer">Drag to reorder</span><span class="hint-touch">Press &amp; hold to reorder</span></p>
+            <p class="current-sort">Sorted by <span id="movies-towatch-current-sort-label"></span></p>
+            <h1>Movies To Watch</h1>
+            <p class="section-sub">Your movie watchlist</p>
+          </div>
+          <div class="header-actions">
+            <button class="surprise-btn" id="movies-surprise-btn" type="button">🎲 Surprise Me</button>
+            <div class="sort-wrap">
+              <button class="sort-btn" id="movies-towatch-sort-btn" type="button">
+                <svg class="sort-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5 L8 19 M8 5 L4.5 8.5 M8 5 L11.5 8.5"/><path d="M16 19 L16 5 M16 19 L12.5 15.5 M16 19 L19.5 15.5"/></svg>
+                Sort
+              </button>
+              <div class="sort-menu hidden" id="movies-towatch-sort-menu"></div>
+            </div>
+            <button class="add-btn" data-type="movie">+ Add</button>
+          </div>
+          <div class="hstats" id="hstats-movies-towatch" hidden></div>
+        </header>
+        <div class="card-grid" id="grid-movies-towatch">
+          <p class="loading">Loading…</p>
+        </div>
+      </section>
+
+      <section class="section" id="shows-towatch">
+        <header class="section-header has-stats">
+          <div>
+            <p class="drag-hint" id="shows-towatch-drag-hint" data-subtab-panel="grid-shows-towatch" hidden><svg class="drag-hint-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg><span class="hint-pointer">Drag to reorder</span><span class="hint-touch">Press &amp; hold to reorder</span></p>
+            <p class="current-sort">Sorted by <span id="shows-towatch-current-sort-label"></span></p>
+            <h1>Shows To Watch</h1>
+            <p class="section-sub">Your show queue</p>
+          </div>
+          <div class="header-actions">
+            <button class="surprise-btn" id="shows-surprise-btn" type="button" data-subtab-panel="grid-shows-towatch">🎲 Surprise Me</button>
+            <div class="sort-wrap">
+              <button class="sort-btn" id="shows-towatch-sort-btn" type="button">
+                <svg class="sort-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5 L8 19 M8 5 L4.5 8.5 M8 5 L11.5 8.5"/><path d="M16 19 L16 5 M16 19 L12.5 15.5 M16 19 L19.5 15.5"/></svg>
+                Sort
+              </button>
+              <div class="sort-menu hidden" id="shows-towatch-sort-menu"></div>
+            </div>
+            <button class="add-btn" data-type="tv">+ Add</button>
+          </div>
+          <div class="hstats" id="hstats-shows-towatch" data-subtab-panel="grid-shows-towatch" hidden></div>
+          <div class="hstats subtab-hidden" id="hstats-shows-watching" data-subtab-panel="grid-shows-watching" hidden></div>
+          <div class="hstats subtab-hidden" id="hstats-shows-dropped" data-subtab-panel="grid-shows-dropped" hidden></div>
+        </header>
+        <div class="subtabs status-strip" role="tablist" aria-label="Show status">
+          <button class="status-tab active" type="button" data-subtab="grid-shows-towatch" role="tab">
+            <svg class="status-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5 H17.5 V20.5 L12 16.5 L6.5 20.5 Z"/></svg>
+            <span class="status-tab-label">To Watch</span>
           </button>
-          <button class="status-tab" data-subtab="grid-shows-watching">
+          <button class="status-tab" type="button" data-subtab="grid-shows-watching" role="tab">
             <svg class="status-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 4.5 L19 12 L6.5 19.5 Z"/></svg>
             <span class="status-tab-label">Watching</span>
           </button>
-          <button class="status-tab" data-subtab="grid-shows-dropped">
+          <button class="status-tab" type="button" data-subtab="grid-shows-dropped" role="tab">
             <svg class="status-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6 L18 18 M18 6 L6 18"/></svg>
             <span class="status-tab-label">Dropped</span>
           </button>
         </div>
-        <div class="card-grid" id="grid-shows-watched">
+        <div class="card-grid" id="grid-shows-towatch">
           <p class="loading">Loading…</p>
         </div>
         <div class="card-grid subtab-hidden" id="grid-shows-watching">
@@ -268,60 +913,15 @@
         </div>
       </section>
 
-      <section class="section" id="movies-towatch">
-        <header class="section-header">
-          <div>
-            <p class="current-sort">Sorted by <span id="movies-towatch-current-sort-label"></span></p>
-            <h1>Movies To Watch</h1>
-            <p class="section-sub">Your movie watchlist</p>
-          </div>
-          <div class="header-actions">
-            <div class="sort-wrap">
-              <button class="sort-btn" id="movies-towatch-sort-btn" type="button">
-                <svg class="sort-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5 L8 19 M8 5 L4.5 8.5 M8 5 L11.5 8.5"/><path d="M16 19 L16 5 M16 19 L12.5 15.5 M16 19 L19.5 15.5"/></svg>
-                Sort
-              </button>
-              <div class="sort-menu hidden" id="movies-towatch-sort-menu"></div>
-            </div>
-            <button class="add-btn" data-type="movie">+ Add</button>
-          </div>
-        </header>
-        <div class="card-grid" id="grid-movies-towatch">
-          <p class="loading">Loading…</p>
-        </div>
-      </section>
-
-      <section class="section" id="shows-towatch">
-        <header class="section-header">
-          <div>
-            <p class="current-sort">Sorted by <span id="shows-towatch-current-sort-label"></span></p>
-            <h1>Shows To Watch</h1>
-            <p class="section-sub">Your show watchlist</p>
-          </div>
-          <div class="header-actions">
-            <div class="sort-wrap">
-              <button class="sort-btn" id="shows-towatch-sort-btn" type="button">
-                <svg class="sort-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5 L8 19 M8 5 L4.5 8.5 M8 5 L11.5 8.5"/><path d="M16 19 L16 5 M16 19 L12.5 15.5 M16 19 L19.5 15.5"/></svg>
-                Sort
-              </button>
-              <div class="sort-menu hidden" id="shows-towatch-sort-menu"></div>
-            </div>
-            <button class="add-btn" data-type="tv">+ Add</button>
-          </div>
-        </header>
-        <div class="card-grid" id="grid-shows-towatch">
-          <p class="loading">Loading…</p>
-        </div>
-      </section>
-
       <section class="section" id="collections">
-        <header class="section-header">
+        <header class="section-header has-stats">
           <div>
+            <p class="drag-hint" id="collections-drag-hint" hidden><svg class="drag-hint-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg><span class="hint-pointer">Drag to reorder</span><span class="hint-touch">Press &amp; hold to reorder</span></p>
             <h1>Collections</h1>
             <p class="section-sub">Curated groups of titles</p>
           </div>
+          <div class="hstats" id="hstats-collections" hidden></div>
         </header>
-        <p class="drag-hint" id="collections-drag-hint" hidden><span class="hint-pointer">Drag collections to reorder them.</span><span class="hint-touch">Press and hold a collection, then drag to reorder.</span></p>
         <div class="card-grid" id="grid-collections">
           <p class="loading">Loading…</p>
         </div>
@@ -330,6 +930,7 @@
       <section class="section" id="collection-view">
         <header class="section-header">
           <div>
+            <p class="drag-hint" id="col-detail-drag-hint" hidden><svg class="drag-hint-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg><span class="hint-pointer">Drag to reorder</span><span class="hint-touch">Press &amp; hold to reorder</span></p>
             <h1 class="crumb">
               <button class="crumb-link" id="col-crumb-back" type="button">Collections</button>
               <span class="crumb-sep" aria-hidden="true">›</span>
@@ -338,6 +939,7 @@
             <p class="section-sub" id="col-detail-count"></p>
           </div>
           <div class="header-actions">
+            <button class="surprise-btn" id="col-surprise-btn" type="button">🎲 Surprise Me</button>
             <button class="sort-btn" id="col-edit-btn" type="button">✎ Edit</button>
             <button class="sort-btn sort-btn-danger" id="col-delete-btn" type="button">🗑 Delete</button>
             <button class="add-btn" data-type="collection-titles" type="button">+ Add</button>
@@ -356,8 +958,163 @@
             <span class="status-tab-count">0</span>
           </button>
         </div>
-        <p class="drag-hint" id="col-detail-drag-hint" hidden><span class="hint-pointer">Drag titles to reorder them.</span><span class="hint-touch">Press and hold a title, then drag to reorder.</span></p>
         <div class="card-grid" id="col-detail-grid"></div>
+      </section>
+
+      <section class="section" id="settings">
+        <header class="section-header">
+          <div>
+            <h1>Settings</h1>
+            <p class="section-sub">Make it yours</p>
+          </div>
+        </header>
+
+        <div class="settings-bento">
+          <div class="settings-grid">
+            <div class="settings-tile tile-profile">
+              <h2 class="settings-tile-title">Profile</h2>
+
+              <form class="profile-form" id="profile-form" novalidate>
+                <div class="profile-field">
+                  <label class="settings-row-title" for="profile-username">Username</label>
+                  <div class="profile-username-wrap">
+                    <span class="profile-at" aria-hidden="true">@</span>
+                    <input class="profile-input profile-username" id="profile-username" type="text" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="yourname" aria-describedby="profile-username-hint profile-username-error" />
+                  </div>
+                  <p class="settings-row-hint" id="profile-username-hint">3–20 letters, numbers, _ and . — leave it empty to use the name from your email.</p>
+                  <p class="profile-error hidden" id="profile-username-error" role="alert"></p>
+                </div>
+
+                <div class="profile-field">
+                  <div class="profile-label-row">
+                    <label class="settings-row-title" for="profile-bio">Bio</label>
+                    <span class="profile-counter" id="profile-bio-count" aria-live="polite">0/160</span>
+                  </div>
+                  <textarea class="profile-input profile-bio" id="profile-bio" rows="3" maxlength="160" placeholder="A line or two about what you love to watch."></textarea>
+                </div>
+
+                <p class="settings-group-label profile-favorites-label">Favorites</p>
+                <div class="profile-favorites" id="profile-favorites">
+                  <div class="favorite-slot" data-fav-slot="movie">
+                    <p class="favorite-kind">Movie</p>
+                    <div class="favorite-body"></div>
+                  </div>
+                  <div class="favorite-slot" data-fav-slot="tv">
+                    <p class="favorite-kind">Show</p>
+                    <div class="favorite-body"></div>
+                  </div>
+                  <div class="favorite-slot profile-preview-slot">
+                    <p class="favorite-kind">Preview</p>
+                    <div class="profile-preview" id="profile-preview"></div>
+                  </div>
+                </div>
+
+                <div class="profile-actions">
+                  <p class="profile-dirty hidden" id="profile-dirty">Unsaved changes</p>
+                  <button class="profile-save-btn" id="profile-save" type="submit" disabled>Save profile</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="settings-tile tile-theme">
+              <h2 class="settings-tile-title">Theme</h2>
+              <div class="theme-swatches" id="theme-swatches"></div>
+            </div>
+
+            <div class="settings-tile tile-motion">
+              <h2 class="settings-tile-title">Animations</h2>
+              <div class="settings-row">
+                <div>
+                  <p class="settings-row-title">Reduce animations</p>
+                  <p class="settings-row-hint">Turns off hover lifts, drag animation and confetti.</p>
+                </div>
+                <button class="settings-toggle" id="reduce-motion-toggle" type="button" aria-label="Reduce animations">
+                  <span class="settings-toggle-track"></span>
+                  <span class="settings-toggle-thumb"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="settings-tile tile-density">
+              <h2 class="settings-tile-title">Card density</h2>
+              <p class="settings-row-hint">Compact fits more titles on each page.</p>
+              <div class="settings-segmented" id="density-control" role="group" aria-label="Card density">
+                <button type="button" data-density-value="comfortable">Comfortable</button>
+                <button type="button" data-density-value="compact">Compact</button>
+              </div>
+            </div>
+
+            <div class="settings-tile tile-defaults">
+              <h2 class="settings-tile-title">Defaults</h2>
+              <div class="settings-fields">
+                <div class="settings-field">
+                  <label class="settings-row-title" for="setting-open-to">Open to</label>
+                  <p class="settings-row-hint">The page you land on when you log in.</p>
+                  <div class="settings-select-wrap">
+                    <select class="settings-select" id="setting-open-to">
+                      <option value="last">Last page you viewed</option>
+                      <option value="movies-watched">Movies</option>
+                      <option value="shows-watched">Shows</option>
+                      <option value="movies-towatch">Movies To Watch</option>
+                      <option value="shows-towatch">Shows Queue</option>
+                      <option value="collections">Collections</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="settings-field">
+                  <label class="settings-row-title" for="setting-default-sort">Default sort</label>
+                  <p class="settings-row-hint">For lists you haven't sorted yourself.</p>
+                  <div class="settings-select-wrap">
+                    <select class="settings-select" id="setting-default-sort">
+                      <option value="recent">Most recent first</option>
+                      <option value="oldest">Oldest first</option>
+                      <option value="alpha-asc">A to Z</option>
+                      <option value="alpha-desc">Z to A</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="settings-field">
+                  <p class="settings-row-title" id="confirm-deletes-label">Confirm before deleting</p>
+                  <p class="settings-row-hint">When off, deleting happens right away — watched titles included.</p>
+                  <button class="settings-toggle settings-field-toggle" id="confirm-deletes-toggle" type="button" aria-labelledby="confirm-deletes-label">
+                    <span class="settings-toggle-track"></span>
+                    <span class="settings-toggle-thumb"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-tile tile-data">
+              <h2 class="settings-tile-title">Your Data</h2>
+              <p class="settings-row-hint">Everything you've logged, in one file you keep. Titles and collections only — your profile and settings stay out of it.</p>
+              <div class="data-actions">
+                <div class="data-action">
+                  <span class="data-action-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
+                  </span>
+                  <div class="data-action-text">
+                    <p class="settings-row-title">Export data</p>
+                    <p class="settings-row-hint">Downloads a <span class="data-ext">.slate</span> file with <span id="data-export-summary">your whole library</span> — ratings, reviews, dates and custom order included.</p>
+                  </div>
+                  <button class="data-btn" id="data-export-btn" type="button">Export data</button>
+                </div>
+                <div class="data-action">
+                  <span class="data-action-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="M7 9l5-5 5 5"/><path d="M5 20h14"/></svg>
+                  </span>
+                  <div class="data-action-text">
+                    <p class="settings-row-title">Import data</p>
+                    <p class="settings-row-hint">Bring back a <span class="data-ext">.slate</span> file. You'll see what's inside before anything in your account changes.</p>
+                  </div>
+                  <button class="data-btn" id="data-import-btn" type="button">Import data</button>
+                  <input class="hidden" id="data-import-input" type="file" tabindex="-1" aria-hidden="true" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
     </main>
@@ -386,6 +1143,25 @@
         <span class="batch-count" id="batch-count">0 selected</span>
         <button class="tmdb-go-btn" id="batch-add-btn" type="button" disabled>Add Selected (0)</button>
       </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="favorite-modal">
+    <div class="modal modal-add" role="dialog" aria-modal="true" aria-labelledby="favorite-modal-title">
+      <div class="modal-head">
+        <div class="modal-head-left">
+          <h2 id="favorite-modal-title">Favorite movie</h2>
+        </div>
+        <button class="modal-close" id="favorite-close" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="tmdb-search-row">
+        <input id="favorite-input" type="text" placeholder="Search movies" autocomplete="off" aria-label="Search TMDB" />
+        <button class="tmdb-go-btn" id="favorite-search-btn" type="button">Search</button>
+      </div>
+      <p class="modal-error hidden" id="favorite-error"></p>
+      <div class="tmdb-list" id="favorite-results"></div>
     </div>
   </div>
 
@@ -524,40 +1300,57 @@
   </div>
 
   <div class="modal-backdrop update-backdrop hidden" id="start-modal">
-    <div class="modal update-modal">
-      <div class="modal-head">
-        <h2 id="start-title">Start watching</h2>
-        <button class="modal-close" id="start-close" aria-label="Close">✕</button>
-      </div>
-      <form id="start-form">
-        <label class="field-label" for="start-date">Started on</label>
-        <input type="date" id="start-date" class="field-input" />
+    <div class="update-layout">
+      <div class="update-poster-box" id="start-poster"></div>
+      <div class="update-panel">
+        <button class="modal-close update-close-btn" id="start-close" aria-label="Close">✕</button>
+        <div class="update-ticket">
+          <p class="update-eyebrow" id="start-title">Start watching</p>
+          <p class="update-movie-title" id="start-show-title"></p>
+          <p class="update-movie-meta" id="start-show-meta"></p>
+        </div>
+        <form id="start-form" class="update-form-body">
+          <label class="field-label" for="start-date">Started on</label>
+          <input type="date" id="start-date" class="field-input" />
 
-        <label class="field-label" for="start-finish-date">Finished on (optional)</label>
-        <input type="date" id="start-finish-date" class="field-input" />
+          <label class="field-label" for="start-finish-date">Finished on (optional)</label>
+          <input type="date" id="start-finish-date" class="field-input" />
 
-        <div id="start-extra" class="hidden">
-          <p class="field-label">Rating</p>
-          <div class="rating-row">
-            <div class="stars stars-input" id="start-stars">
-              <span class="stars-base">★★★★★★★★★★</span>
-              <span class="stars-fill" id="start-stars-fill" style="width: 0%">★★★★★★★★★★</span>
+          <div id="start-extra" class="hidden">
+            <p class="field-label">Rating</p>
+            <div class="rating-row">
+              <div class="stars stars-input" id="start-stars">
+                <span class="stars-base">★★★★★★★★★★</span>
+                <span class="stars-fill" id="start-stars-fill" style="width: 0%">★★★★★★★★★★</span>
+              </div>
+              <span class="stars-value" id="start-rating-value">0/10</span>
             </div>
-            <span class="stars-value" id="start-rating-value">0/10</span>
+
+            <label class="field-label" for="start-review">Review</label>
+            <textarea id="start-review" class="field-input" rows="4" placeholder="Your thoughts…"></textarea>
           </div>
 
-          <label class="field-label" for="start-review">Review</label>
-          <textarea id="start-review" class="field-input" rows="4" placeholder="Your thoughts…"></textarea>
-        </div>
-
-        <div class="update-actions">
-          <button type="button" class="delete-btn" id="start-delete">🗑 Delete</button>
-          <div class="update-actions-right">
-            <button type="button" class="cancel-btn" id="start-cancel">Cancel</button>
-            <button type="submit" class="modal-search-btn" id="start-save">Save Changes</button>
+          <div class="update-actions">
+            <button type="button" class="delete-btn" id="start-delete">🗑 Delete</button>
+            <div class="update-actions-right">
+              <button type="button" class="cancel-btn" id="start-cancel">Cancel</button>
+              <button type="submit" class="modal-search-btn" id="start-save">Save Changes</button>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop import-backdrop hidden" id="import-modal" data-view="reading">
+    <div class="import-panel" role="dialog" aria-modal="true" aria-labelledby="import-title">
+      <button class="modal-close update-close-btn" id="import-close" type="button" aria-label="Close">✕</button>
+      <div class="update-ticket">
+        <p class="update-eyebrow" id="import-eyebrow">Import data</p>
+        <p class="update-movie-title" id="import-title"></p>
+        <p class="update-movie-meta" id="import-meta"></p>
+      </div>
+      <div class="import-body" id="import-body"></div>
     </div>
   </div>
 
@@ -584,30 +1377,37 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="js/escapeHtml.js?v=1"></script>
-  <script src="js/supabaseClient.js?v=1"></script>
-  <script src="js/navigation.js?v=1"></script>
-  <script src="js/subtabs.js?v=5"></script>
-  <script src="js/imageGuard.js?v=1"></script>
-  <script src="js/realtime.js?v=2"></script>
-  <script src="js/tmdb.js?v=1"></script>
-  <script src="js/addItem.js?v=3"></script>
-  <script src="js/searchModal.js?v=5"></script>
-  <script src="js/libraryModal.js?v=6"></script>
-  <script src="js/emojiData.js?v=1"></script>
-  <script src="js/iconData.js?v=1"></script>
-  <script src="js/icons.js?v=1"></script>
-  <script src="js/iconPicker.js?v=1"></script>
-  <script src="js/collections.js?v=34"></script>
-  <script src="js/infoModal.js?v=4"></script>
-  <script src="js/detailModal.js?v=7"></script>
-  <script src="js/starsInput.js?v=3"></script>
-  <script src="js/updateModal.js?v=2"></script>
-  <script src="js/startModal.js?v=1"></script>
-  <script src="js/confirmModal.js?v=6"></script>
-  <script src="js/data.js?v=21"></script>
-  <script src="js/sortMenu.js?v=3"></script>
-  <script src="js/dashboard.js?v=2"></script>
-  <script src="js/auth.js?v=1"></script>
+  <script src="js/escapeHtml.js?v=28c1feb8"></script>
+  <script src="js/viewTransitions.js?v=d587d807"></script>
+  <script src="js/config.js?v=de181327"></script>
+  <script src="js/supabaseClient.js?v=6a29daf6"></script>
+  <script src="js/navigation.js?v=39fe0a72"></script>
+  <script src="js/subtabs.js?v=758a03f4"></script>
+  <script src="js/imageGuard.js?v=3e57b5e2"></script>
+  <script src="js/realtime.js?v=1808fe8e"></script>
+  <script src="js/tmdb.js?v=7b00499f"></script>
+  <script src="js/addItem.js?v=14d963bc"></script>
+  <script src="js/searchModal.js?v=dd18907a"></script>
+  <script src="js/libraryModal.js?v=5ecb9e3e"></script>
+  <script src="js/emojiData.js?v=00b8c396"></script>
+  <script src="js/iconData.js?v=051d09a4"></script>
+  <script src="js/icons.js?v=2c2534f3"></script>
+  <script src="js/iconPicker.js?v=107ebbfb"></script>
+  <script src="js/collections.js?v=35259f9a"></script>
+  <script src="js/infoModal.js?v=e4ccf9f2"></script>
+  <script src="js/detailModal.js?v=a8ae83bb"></script>
+  <script src="js/starsInput.js?v=4457c4a6"></script>
+  <script src="js/updateModal.js?v=c72f8162"></script>
+  <script src="js/startModal.js?v=b49680ba"></script>
+  <script src="js/confirmModal.js?v=e3035a86"></script>
+  <script src="js/settings.js?v=4a727577"></script>
+  <script src="js/profile.js?v=47b4a649"></script>
+  <script src="js/data.js?v=8c51cb23"></script>
+  <script src="js/sortMenu.js?v=9f28d5be"></script>
+  <script src="js/watchlistOrder.js?v=667e99d7"></script>
+  <script src="js/sectionHeaders.js?v=71188709"></script>
+  <script src="js/yourData.js?v=e6a22523"></script>
+  <script src="js/landing.js?v=fbf6e0e4"></script>
+  <script src="js/auth.js?v=1e727218"></script>
 </body>
 </html>

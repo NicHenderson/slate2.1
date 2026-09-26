@@ -1,0 +1,4 @@
+# Test tooling (package.json)
+node_modules/
+test-results/
+playwright-report/
