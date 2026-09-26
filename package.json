@@ -1,16 +1,19 @@
 {
   "name": "slate",
   "private": true,
-  "description": "Slate's tooling: the automated tests and the cache-stamp script. The app itself has no build step and no dependencies.",
+  "description": "Slate's tooling: the automated tests and the cache-stamp script. The app has no build step; its one library, supabase-js, is loaded from a CDN at the exact version listed here (see scripts/supabase-js.js).",
   "scripts": {
     "test": "playwright test",
     "test:functions": "cd supabase/functions/tmdb && TMDB_PROXY_TEST=1 deno test --allow-env",
     "stamp": "node scripts/stamp.js",
     "stamp:check": "node scripts/stamp.js --check",
-    "prepare": "node scripts/install-hooks.js"
+    "prepare": "node scripts/install-hooks.js",
+    "update-supabase": "node scripts/supabase-js.js"
   },
   "devDependencies": {
-    "@playwright/test": "1.56.1",
+    "@playwright/test": "1.56.1"
+  },
+  "dependencies": {
     "@supabase/supabase-js": "2.117.2"
   }
 }

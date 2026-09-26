@@ -33,7 +33,7 @@ then open <http://127.0.0.1:8080>. After pulling changes, hard-refresh
 | `img/` | The logo and the OpenMoji emoji used for collection icons |
 | `supabase/` | The database structure (`migrations/`) and server-side code (`functions/`) — see [`supabase/README.md`](supabase/README.md) |
 | `tests/` | The automated tests (below) |
-| `scripts/` | `stamp.js` keeps the cache stamps (`?v=…`) in `index.html` in step with the files; `install-hooks.js` switches on the git hook in `.githooks/` that runs it on each commit |
+| `scripts/` | `stamp.js` keeps the cache stamps (`?v=…`) in `index.html` in step with the files; `install-hooks.js` switches on the git hook in `.githooks/` that runs it on each commit; `supabase-js.js` updates the pinned Supabase library (below) |
 | `.github/workflows/tests.yml` | Runs every test on GitHub on each push |
 
 ## Tests
@@ -122,6 +122,48 @@ reach any site outside the app.
   the `tmdb` Edge Function.
 - **Anything shown on the page goes through `escapeHtml`** — titles,
   reviews, names — including what comes from an imported file.
+- **The Supabase library is pinned.** `index.html` loads one exact version
+  of `supabase-js` from the CDN, the same one `package.json` lists and the
+  tests use, with an integrity hash: the browser refuses any other file.
+  It only changes when someone updates it (next section).
+
+## Actualizar la librería de Supabase (supabase-js)
+
+*Escrito en español a propósito, para el dueño de Slate.*
+
+Slate usa siempre la misma versión de la librería de Supabase, así que
+nunca cambia sola ni se rompe por una actualización ajena. **No hace
+falta actualizarla de forma periódica.** Solo hay dos motivos para
+hacerlo:
+
+- **GitHub te avisa de una falla de seguridad.** Con las *Dependabot
+  alerts* activadas (Settings → Advanced Security → Dependabot alerts →
+  Enable), GitHub revisa
+  `package.json` y te manda un correo si la versión que usa Slate tiene
+  un problema conocido. El correo dice a qué versión subir.
+- **Supabase anuncia que dejará de aceptar versiones tan antiguas.**
+
+Para actualizar, en la carpeta de Slate (con Node.js instalado):
+
+1. Instala esa versión y apunta Slate a ella; en vez de `2.118.0`, pon la
+   versión que corresponda:
+   ```sh
+   npm run update-supabase -- 2.118.0
+   ```
+2. Comprueba que todo sigue funcionando:
+   ```sh
+   npm test
+   ```
+3. Si todo pasa, guarda y sube el cambio:
+   ```sh
+   git add -A
+   git commit -m "Update supabase-js to 2.118.0"
+   git push
+   ```
+
+Si alguna prueba falla, no subas nada: la versión nueva cambió algo que
+Slate usa. Deshaz los cambios con `git checkout -- .` y quédate con la
+versión actual, que sigue funcionando igual que siempre.
 
 ## Credits
 

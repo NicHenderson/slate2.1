@@ -67,6 +67,12 @@ directly.
   binary or with `newline=""`.
 - **Comments explain why**, in the same style as the code around them.
 - **Anything user-provided goes through `escapeHtml`.**
+- **supabase-js is pinned** in `index.html` (exact version + SRI hash) to
+  the version in `package.json`. Update it only with
+  `npm run update-supabase -- <version>` (`scripts/supabase-js.js`);
+  `tests/stamps.spec.js` checks the two agree. The README's section on
+  updating it is in Spanish on purpose: it's for the owner, in case
+  there's no Claude around.
 - **Secrets never go in the repo.** `js/config.js` holds only public values:
   the Supabase URL, the publishable key and the Web3Forms access key. The
   TMDB key is a secret of the `tmdb` Edge Function.
@@ -122,6 +128,13 @@ directly.
      the Site URL and the Redirect URLs, so password-reset links work.
   3. Update the address in Web3Forms' form settings.
   4. Put the address in the welcome-email tool (it remembers it).
+  5. Add a `_headers` file with the simple security headers only:
+     `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`
+     and `X-Content-Type-Options: nosniff`. The owner and Claude decided
+     against a full Content-Security-Policy for now: the risk of breaking
+     part of Slate outweighs the benefit for a small private app.
+- After that, the owner wants the app translated into Spanish, German and
+  Italian (besides English), in a new session.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - a privacy policy page;
