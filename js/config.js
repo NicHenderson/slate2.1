@@ -11,3 +11,8 @@
 
 const SUPABASE_URL = "https://vzmxvogjycyybvmkvadh.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_WKjEnesVJrGnSzq-LXQ4Ug_ZSZwBWHQ";
+
+// Where "Request access" sends its form (js/auth.js): Web3Forms emails each
+// request to Slate's inbox. Public by design too — it can only send a
+// message to that inbox, not read anything.
+const WEB3FORMS_ACCESS_KEY = "d161742f-b969-4d89-9179-d19db170fb36";

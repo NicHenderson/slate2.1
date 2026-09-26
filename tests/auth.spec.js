@@ -1,30 +1,61 @@
-// Accounts: registering, logging in, and getting back in with a reset link.
+// Accounts: asking for one, logging in, and getting back in with a reset link.
 const { test, expect, logIn, USER } = require("./support/fixtures");
 
-test.describe("registering", () => {
-  test("creates the account and asks to confirm the email before logging in", async ({ page, backend }) => {
-    await page.goto("/#signup");
-    await expect(page.locator("#auth-title")).toHaveText("Create Account");
-    await page.fill("#auth-email", "new@slate.test");
-    await page.fill("#auth-password", "a-fine-password");
-    await page.fill("#auth-confirm", "a-fine-password");
+test.describe("requesting access", () => {
+  // Slate is invite-only: there's no way to make an account from the app.
+  // The card asks for access instead, emailed to Slate's inbox (Web3Forms).
+  test("the landing's button opens Request Access, which sends name, email and message — and makes no account", async ({ page, backend }) => {
+    await page.goto("/");
+    await page.locator('#lp-nav a[href="#request-access"]').click();
+    await expect(page).toHaveURL(/#request-access$/);
+    await expect(page.locator("#auth-title")).toHaveText("Request Access");
+    await expect(page.locator("#auth-password-field")).toBeHidden();
+    await expect(page.locator("#auth-confirm-field")).toBeHidden();
+
+    await page.fill("#auth-name", "Ana");
+    await page.fill("#auth-email", "ana@slate.test");
+    await page.fill("#auth-note", "Friend of Nico's.");
+    await expect(page.locator("#auth-note-count")).toHaveText("17/500");
     await page.click("#auth-submit");
 
-    await expect(page.locator("#auth-title")).toHaveText("Log In");
-    await expect(page.locator("#auth-message")).toHaveText("Check your email to confirm your account before logging in.");
-    expect([...backend.users.values()].some((u) => u.email === "new@slate.test")).toBe(true);
+    await expect(page.locator("#auth-message")).toHaveText("Request sent! We'll write to ana@slate.test once your account is ready.");
+    await expect(page.locator("#auth-submit")).toHaveText(/^Send again in \d+s$/);
+    await expect(page.locator("#auth-name")).toHaveValue("");
+    expect(backend.accessRequests).toEqual([
+      expect.objectContaining({ subject: "Slate access request: Ana", name: "Ana", email: "ana@slate.test", message: "Friend of Nico's." }),
+    ]);
+    expect(backend.accessRequests[0].access_key).toMatch(/^[0-9a-f-]{36}$/);
+    expect(backend.users.size).toBe(1); // only the seeded one
   });
 
-  test("checks the fields before sending anything", async ({ page, backend }) => {
-    await page.goto("/#signup");
+  test("checks the fields first, and a bot filling the hidden field sends nothing", async ({ page, backend }) => {
+    await page.goto("/#signup"); // Create Account's old address asks for access now
+    await expect(page.locator("#auth-title")).toHaveText("Request Access");
     await page.fill("#auth-email", "not-an-email");
-    await page.fill("#auth-password", "short");
-    await page.fill("#auth-confirm", "different");
     await page.click("#auth-submit");
+    await expect(page.locator("#auth-name-error")).toHaveText("Tell us your name.");
     await expect(page.locator("#auth-email-error")).toHaveText("Enter a valid email address.");
-    await expect(page.locator("#auth-password-error")).toHaveText("Password must be at least 8 characters.");
-    await expect(page.locator("#auth-confirm-error")).toHaveText("Passwords do not match.");
-    expect(backend.users.size).toBe(1);
+    expect(backend.accessRequests).toEqual([]);
+
+    await page.fill("#auth-name", "Bot");
+    await page.fill("#auth-email", "bot@spam.test");
+    await page.locator("#auth-website").evaluate((el) => (el.value = "http://spam.test"));
+    await page.click("#auth-submit");
+    await expect(page.locator("#auth-message")).toContainText("Request sent!");
+    expect(backend.accessRequests).toEqual([]);
+  });
+
+  test("if the request can't be sent, it says so and keeps what was typed", async ({ page, backend }) => {
+    backend.hooks.failWhen = (method, target) => (target === "web3forms" ? { status: 500 } : null);
+    await page.goto("/#login");
+    await expect(page.locator("#auth-toggle-btn")).toHaveText("Request access");
+    await page.click("#auth-toggle-btn");
+    await page.fill("#auth-name", "Ana");
+    await page.fill("#auth-email", "ana@slate.test");
+    await page.click("#auth-submit");
+    await expect(page.locator("#auth-message")).toHaveText("Couldn't send your request. Please try again in a moment.");
+    await expect(page.locator("#auth-name")).toHaveValue("Ana");
+    await expect(page.locator("#auth-submit")).toBeEnabled();
   });
 });
 

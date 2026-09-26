@@ -11,6 +11,9 @@
 //                              write is pushed to its owner's open tabs as a
 //                              postgres_changes event, like the real one
 //
+//   Web3Forms  api.web3forms.com/submit   access requests, recorded in
+//                              `accessRequests` instead of emailed
+//
 // Anything else outside the app is answered locally too: supabase-js from
 // node_modules instead of the CDN, an empty stylesheet for Google Fonts, a
 // blank image for TMDB posters. Other hosts are refused and listed in
@@ -51,6 +54,7 @@ function createBackend() {
   const log = []; // every write, as "INSERT movies 1", for assertions
   const emails = []; // reset emails "sent": { email, redirectTo }
   const blocked = []; // outside requests the app shouldn't have made
+  const accessRequests = []; // "Request access" forms sent: what Web3Forms got
   const channels = []; // joined realtime channels: { ws, topic, joinRef, userId, bindings }
   // Set by a test to make writes fail: (method, table) → an error message,
   // or nothing to let the write through.
@@ -418,6 +422,21 @@ function createBackend() {
     return reply(400, { error: "Not a TMDB request Slate makes." });
   }
 
+  /* ---------- Web3Forms (Request access) ---------- */
+
+  function handleWeb3Forms(route, req, url) {
+    const headers = { "access-control-allow-origin": "*", "access-control-allow-headers": "content-type, accept" };
+    if (req.method() === "OPTIONS") return route.fulfill({ status: 204, headers, body: "" });
+    const reply = (status, json) => route.fulfill({ status, headers, contentType: "application/json", body: JSON.stringify(json) });
+    if (req.method() !== "POST" || url.pathname !== "/submit") return reply(404, { success: false, message: "Not found" });
+    const injected = hooks.failWhen?.("POST", "web3forms");
+    if (injected) return reply(injected.status ?? 500, { success: false, message: injected.message ?? "Injected failure" });
+    const body = req.postDataJSON() ?? {};
+    if (!body.access_key) return reply(400, { success: false, message: "Access key missing" });
+    accessRequests.push(body);
+    return reply(200, { success: true, message: "Email sent successfully!" });
+  }
+
   /* ---------- installing it into a page ---------- */
 
   async function install(page) {
@@ -434,6 +453,7 @@ function createBackend() {
         }
         if (url.hostname === "fonts.googleapis.com") return route.fulfill({ contentType: "text/css", body: "" });
         if (url.hostname === "image.tmdb.org") return route.fulfill({ contentType: "image/png", body: BLANK_PNG });
+        if (url.hostname === "api.web3forms.com") return handleWeb3Forms(route, req, url);
         blocked.push(req.url());
         return route.abort();
       }
@@ -507,7 +527,7 @@ function createBackend() {
     return JSON.parse(JSON.stringify(db));
   }
 
-  return { install, addUser, seed, recoveryLink, snapshot, hooks, releaseRealtime, heldPushes, db, users, log, emails, blocked };
+  return { install, addUser, seed, recoveryLink, snapshot, hooks, releaseRealtime, heldPushes, db, users, log, emails, blocked, accessRequests };
 }
 
 module.exports = { createBackend };

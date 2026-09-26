@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="css/content.css?v=8428c386" />
   <link rel="stylesheet" href="css/cards.css?v=8bb24eb5" />
   <link rel="stylesheet" href="css/modal.css?v=e17d831e" />
-  <link rel="stylesheet" href="css/auth.css?v=0468e5c7" />
+  <link rel="stylesheet" href="css/auth.css?v=d17be66f" />
   <link rel="stylesheet" href="css/landing.css?v=2e15fdb2" />
   <link rel="stylesheet" href="css/transitions.css?v=bf37ef65" />
   <link rel="stylesheet" href="css/settings.css?v=76a3748b" />
@@ -64,7 +64,7 @@
         </nav>
         <div class="lp-nav-actions">
           <a class="lp-btn lp-btn--paper lp-btn--sm" href="#login">Log in</a>
-          <a class="lp-btn lp-btn--solid lp-btn--sm" href="#signup">Get started</a>
+          <a class="lp-btn lp-btn--solid lp-btn--sm" href="#request-access">Request access</a>
         </div>
       </div>
     </header>
@@ -77,7 +77,7 @@
           <h1 class="lp-hero-title">Every movie.<br />Every show.<br /><span class="lp-hl">Pinned to one board.</span></h1>
           <p class="lp-hero-lede">Slate is a cozy corkboard for everything you've watched, everything you're halfway through, and everything you can't wait to start. Rate it, review it, collect it — and never again lose that title a friend swore you'd love.</p>
           <div class="lp-hero-ctas">
-            <a class="lp-btn lp-btn--solid lp-btn--lg" href="#signup">Start your board →</a>
+            <a class="lp-btn lp-btn--solid lp-btn--lg" href="#request-access">Request access →</a>
             <a class="lp-btn lp-btn--paper lp-btn--lg" href="#login">I already have one</a>
           </div>
           <p class="lp-hero-note">
@@ -554,7 +554,7 @@
           </details>
           <details class="lp-faq-item lp-paper reveal">
             <summary>How do I get started?</summary>
-            <p>Create an account with your email, confirm it from the message we send you, and start pinning titles. It takes about a minute.</p>
+            <p>Slate is invite-only for now. Request access with your name and email; once your account is ready, you'll get an email with a temporary password to log in with and change.</p>
           </details>
         </div>
       </section>
@@ -565,9 +565,9 @@
         <div class="lp-final-body lp-paper">
           <p class="lp-final-eyebrow">Now showing</p>
           <h2 class="lp-final-title">Your board is waiting.</h2>
-          <p class="lp-final-copy">Every movie. Every show. One cozy corkboard that remembers it all for you.</p>
+          <p class="lp-final-copy">Every movie. Every show. One cozy corkboard that remembers it all for you. Slate is invite-only for now — ask for your spot.</p>
           <div class="lp-hero-ctas">
-            <a class="lp-btn lp-btn--solid lp-btn--lg" href="#signup">Create your account</a>
+            <a class="lp-btn lp-btn--solid lp-btn--lg" href="#request-access">Request access</a>
             <a class="lp-btn lp-btn--paper lp-btn--lg" href="#login">Log in</a>
           </div>
         </div>
@@ -584,7 +584,7 @@
           <a href="#lp-features" data-lp-scroll>Features</a>
           <a href="#lp-faq" data-lp-scroll>FAQ</a>
           <a href="#login">Log in</a>
-          <a href="#signup">Create account</a>
+          <a href="#request-access">Request access</a>
         </nav>
       </div>
       <div class="lp-footer-inner lp-footer-fine">
@@ -665,6 +665,12 @@
         <p class="auth-hint hidden" id="auth-hint"></p>
 
         <form id="auth-form" novalidate>
+          <div class="auth-field hidden" id="auth-name-field">
+            <label class="field-label" for="auth-name">Name</label>
+            <input type="text" id="auth-name" class="field-input" autocomplete="name" maxlength="80" placeholder="What should we call you?" />
+            <p class="auth-field-error hidden" id="auth-name-error"></p>
+          </div>
+
           <div class="auth-field" id="auth-email-field">
             <label class="field-label" for="auth-email">Email</label>
             <input type="email" id="auth-email" class="field-input" autocomplete="email" placeholder="you@example.com" />
@@ -696,6 +702,20 @@
             <p class="auth-field-error hidden" id="auth-confirm-error"></p>
           </div>
 
+          <div class="auth-field hidden" id="auth-note-field">
+            <div class="auth-label-row">
+              <label class="field-label" for="auth-note">Message <span class="auth-optional">(optional)</span></label>
+              <span class="auth-counter" id="auth-note-count" aria-live="polite">0/500</span>
+            </div>
+            <textarea id="auth-note" class="field-input auth-note" rows="3" maxlength="500" placeholder="Who are you? How did you hear about Slate?"></textarea>
+          </div>
+
+          <!-- Left empty by people; bots fill in every field they find. -->
+          <div class="auth-trap" aria-hidden="true">
+            <label for="auth-website">Website</label>
+            <input type="text" id="auth-website" tabindex="-1" autocomplete="off" />
+          </div>
+
           <p class="auth-message hidden" id="auth-message"></p>
 
           <button type="submit" class="auth-submit" id="auth-submit">Log In</button>
@@ -703,7 +723,7 @@
 
         <p class="auth-toggle">
           <span id="auth-toggle-text">Don't have an account?</span>
-          <button type="button" class="auth-toggle-btn" id="auth-toggle-btn">Register</button>
+          <button type="button" class="auth-toggle-btn" id="auth-toggle-btn">Request access</button>
         </p>
       </div>
     </div>
@@ -1393,7 +1413,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/escapeHtml.js?v=28c1feb8"></script>
   <script src="js/viewTransitions.js?v=d587d807"></script>
-  <script src="js/config.js?v=de181327"></script>
+  <script src="js/config.js?v=7bbe3fe4"></script>
   <script src="js/supabaseClient.js?v=da013ab8"></script>
   <script src="js/navigation.js?v=39fe0a72"></script>
   <script src="js/subtabs.js?v=758a03f4"></script>
@@ -1422,7 +1442,7 @@
   <script src="js/sectionHeaders.js?v=71188709"></script>
   <script src="js/yourData.js?v=8485eb3a"></script>
   <script src="js/deleteAccount.js?v=78a6ba0b"></script>
-  <script src="js/landing.js?v=fbf6e0e4"></script>
-  <script src="js/auth.js?v=1e727218"></script>
+  <script src="js/landing.js?v=d4d172b3"></script>
+  <script src="js/auth.js?v=d32d1d27"></script>
 </body>
 </html>
