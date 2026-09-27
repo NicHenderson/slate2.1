@@ -256,9 +256,14 @@ directly.
      calls the legacy workflow). Production branch `main`, no build
      command, the repo root as output: every merge into `main` publishes.
      `tools/welcome-email.html` is still used from the local server.
-  2. Add the new address to Supabase → Authentication → URL Configuration:
-     the Site URL and the Redirect URLs, so password-reset links work.
-  3. Update the address in Web3Forms' form settings.
+  2. Done: Supabase → Authentication → URL Configuration has Site URL
+     `https://myslate.pages.dev`, and Redirect URLs
+     `https://myslate.pages.dev/**` plus `http://localhost:8080/**` and
+     `http://127.0.0.1:8080/**` for local testing.
+  3. Nothing to change in Web3Forms: on the free plan it has no domain
+     setting (restricting domains is a Pro feature). Some sources said the
+     free plan blocks free subdomains like `.pages.dev`; the owner's own
+     test says otherwise: a request sent from myslate.pages.dev arrived.
   4. Put the address in the welcome-email tool (it remembers it).
   5. Done (`_headers` at the repo root): the simple security headers only:
      `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`
