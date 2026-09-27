@@ -235,6 +235,14 @@ directly.
      library can mix English and Spanish titles). A synopsis TMDB hasn't
      translated comes from its English details. The owner redeployed the
      live `tmdb` function with `language` (en-US or es-MX).
+- **The landing page** was cut down before the launch (the owner's
+  decision): it sells the one problem Slate solves, not every feature.
+  Hero ("Every movie. Every show. All saved in one place."), "Sound
+  familiar?" (three notes: did I see it, the lost recommendation, the
+  lost notebook), "Slate keeps it for you" (what you watched, what you
+  want to watch, for good), the owner's letter word for word, and the
+  invite-only call. Features are left for people to find in the app;
+  don't add feature tours, FAQs or detail cards back without asking.
 - **Publishing on Cloudflare Pages** (free, chosen over Netlify and
   Vercel). The steps:
   1. Connect the GitHub repo. There's no build command, and the output
