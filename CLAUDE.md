@@ -54,6 +54,19 @@ directly.
 - When a bug turns up while working on something else, tell them before
   fixing it.
 
+## Since the launch: how changes reach people
+
+- `main` **is** what people use: every merge publishes myslate.pages.dev
+  in about a minute. Work stays on a branch, tested locally, until the
+  owner says "súbelo a main", as before. An open tab keeps the old code
+  until it's reloaded.
+- The local copy talks to the **live** Supabase project: testing locally
+  with a real account changes real data. Test with the owner's own
+  account, never a friend's.
+- Migrations and `tmdb` function redeploys reach everyone at once, before
+  the app's new code does. Write them so the published app keeps working
+  with them (as `0007_viewings.sql` was).
+
 ## Code conventions
 
 - **No build step, no framework.** The `js/` files are classic scripts
