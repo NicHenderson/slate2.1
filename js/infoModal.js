@@ -17,7 +17,7 @@ function renderInfo(type, details, added) {
   const date = details.release_date ?? details.first_air_date ?? "";
   const year = date ? date.slice(0, 4) : "—";
   const synopsis = details.overview || t("No synopsis available.");
-  const genreLine = (details.genres ?? []).map((g) => g.name).join(" · ");
+  const genreLine = (details.genres ?? []).map((g) => genreName(g.name)).join(" · ");
 
   infoPoster.innerHTML = details.poster_path
     ? `<img class="info-poster-img" src="${TMDB_IMG_LG}${details.poster_path}" alt="" />`

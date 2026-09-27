@@ -17,6 +17,40 @@ function parseGenres(value) {
     .filter(Boolean);
 }
 
+// TMDB's genres, as each title saves them (in English), shown in the
+// page's language. One missing here (TMDB adds one now and then) shows as
+// saved.
+const GENRE_NAMES = {
+  Action: t("Action"),
+  Adventure: t("Adventure"),
+  Animation: t("Animation"),
+  Comedy: t("Comedy"),
+  Crime: t("Crime"),
+  Documentary: t("Documentary"),
+  Drama: t("Drama"),
+  Family: t("Family"),
+  Fantasy: t("Fantasy"),
+  History: t("History"),
+  Horror: t("Horror"),
+  Music: t("Music"),
+  Mystery: t("Mystery"),
+  Romance: t("Romance"),
+  "Science Fiction": t("Science Fiction"),
+  "TV Movie": t("TV Movie"),
+  Thriller: t("Thriller"),
+  War: t("War"),
+  Western: t("Western"),
+  "Action & Adventure": t("Action & Adventure"),
+  Kids: t("Kids"),
+  News: t("News"),
+  Reality: t("Reality"),
+  "Sci-Fi & Fantasy": t("Sci-Fi & Fantasy"),
+  Soap: t("Soap"),
+  Talk: t("Talk"),
+  "War & Politics": t("War & Politics"),
+};
+const genreName = (genre) => GENRE_NAMES[genre] ?? genre;
+
 function formatDate(value) {
   if (!value) return "—";
   return new Date(value).toLocaleDateString(LOCALE, {
@@ -67,7 +101,7 @@ function renderDetail(cfg, row) {
     ? `<img class="detail-poster-img" src="${escapeHtml(row.poster)}" alt="" />`
     : `<div class="detail-poster-img detail-poster-empty"></div>`;
 
-  const genreLine = parseGenres(row.genres).join(" · ");
+  const genreLine = parseGenres(row.genres).map(genreName).join(" · ");
 
   const head = `
     <div class="detail-head">

@@ -208,7 +208,9 @@ directly.
      owner: the watched date for IMDb (it only has the date rated), films
      Letterboxd has as watched but not in the diary, titles already in
      Slate, and where shows go.
-- Next: translate the app (Spanish, German and Italian), then publish.
+- Next: translate the app, then publish. **Slate launches in English and
+  Spanish only** (the owner's decision); German and Italian are out for
+  now, and adding a language later only takes its dictionary.
   The owner authorized the stages one at a time:
   1. **The base** — done, not merged: `js/i18n.js`, every string through
      `t()`/`tn()`, the tests. English looks exactly as before.
@@ -220,10 +222,12 @@ directly.
      card; the choice is per device (not saved to the account). Decimals
      follow the language (`formatDecimal`: "7,8"). The header stats strip
      now puts what doesn't fit on a second row instead of overlapping.
-  3. German and Italian, in the same terms once Spanish is approved.
-  4. TMDB's data in the language (genres, synopses, search results): the
-     owner said yes, to do when it's time. Needs the `tmdb` function to
-     pass a language (a redeploy); genres saved in English need a table.
+  3. ~~German and Italian~~ — dropped for the launch.
+  4. **TMDB's data in the language**, before the launch (the owner's
+     choice). Part 1 done: genres, saved in English, show through a table
+     (`GENRE_NAMES` in `js/detailModal.js`). Part 2 (synopses, search
+     results, maybe titles) needs the `tmdb` function to take a language,
+     so a redeploy.
 - **Publishing on Cloudflare Pages** (free, chosen over Netlify and
   Vercel). The steps:
   1. Connect the GitHub repo. There's no build command, and the output

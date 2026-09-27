@@ -38,7 +38,7 @@ test("every language has every string, with the same {placeholders} and markup",
 // without t() would show up here.
 test("nothing on the main screens escapes translation", async ({ page }) => {
   const data = ["Alien", "The Matrix", "Dark", "Sci-fi night", "Still terrifying.", "tester", "@tester", "T",
-    "Horror", "Science Fiction", "Horror · Science Fiction", "Action", "Action · Science Fiction", "Crime", "Aug 1, 2026", "Max"];
+    "Aug 1, 2026", "Max"];
   const screens = {};
   const look = async (name) => (screens[name] = await untranslated(page, data));
   await usePseudoLanguage(page);

@@ -54,7 +54,7 @@ function topGenreItem(rows) {
   );
   if (!counts.size) return "";
   const [name, count] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
-  return hsItem(escapeHtml(name), t("Top genre · {pct}%", { pct: Math.round((count / rows.length) * 100) }), {
+  return hsItem(escapeHtml(genreName(name)), t("Top genre · {pct}%", { pct: Math.round((count / rows.length) * 100) }), {
     text: true,
   });
 }

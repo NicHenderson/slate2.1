@@ -57,7 +57,8 @@ const LIBRARY_FILTERS = {
         .split(",")
         .map((g) => g.trim())
         .filter(Boolean),
-    order: (a, b) => b.count - a.count || a.value.localeCompare(b.value),
+    name: (value) => genreName(value),
+    order: (a, b) => b.count - a.count || genreName(a.value).localeCompare(genreName(b.value), LOCALE),
   },
   decades: {
     label: t("Decade"),
