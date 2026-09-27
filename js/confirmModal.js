@@ -74,7 +74,7 @@ function openViewingDeleteConfirm(movie, viewing, run) {
   confirmWarningIcon.classList.remove("hidden");
   confirmTypedCheck.classList.remove("hidden");
   confirmHeading.textContent = "Delete this viewing";
-  confirmText.innerHTML = `This deletes the time you watched <strong>"${escapeHtml(title)}"</strong> on <strong>${formatDate(viewing.watched_on)}</strong>${viewing.note ? `, and its note` : ""}. It can't be undone. If you're sure, type <strong>"${escapeHtml(title)}"</strong> below and press Delete.`;
+  confirmText.innerHTML = `This deletes the time you watched <strong>"${escapeHtml(title)}"</strong> on <strong>${formatDate(viewing.watched_on)}</strong>. It can't be undone. If you're sure, type <strong>"${escapeHtml(title)}"</strong> below and press Delete.`;
   confirmTypedInput.value = "";
   confirmTypedInput.placeholder = title;
   confirmYes.disabled = true;

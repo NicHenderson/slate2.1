@@ -1,20 +1,21 @@
 /* ---------- Viewings: every time a movie was watched ----------
 
    (supabase/migrations/0007_viewings.sql.) A watched movie has one or more
-   viewings — a date and an optional short note — while its rating and
-   review stay one per movie. The database keeps movies.watched_date the
+   viewings, each just a date, while its rating and review stay one per
+   movie (the review is where anything about it gets written). The database keeps movies.watched_date the
    latest viewing, never lets a movie lose its last one, and turns a
    watched_date written straight onto a movie (marking it watched) into its
    viewing.
 
    In the detail window of a watched movie: the latest date; with more
    than one viewing, an "N viewings" list, and picking one swaps the
-   window's content to that viewing, to change its date or note or delete
-   it. "Watched it again" opens the same view, empty. With a single viewing
-   there's no list: its date and note are edited from Edit
-   (js/updateModal.js). Shows don't have viewings (yet). */
-
-const VIEWING_NOTE_MAX = 200;
+   window's content to that viewing, to change its date or delete it. The
+   earliest one says it was the first time; that's worked out here, not
+   stored, so it moves along if an earlier viewing is added. (The table's
+   note column is unused: notes per viewing were dropped.) "Watched it
+   again" opens the same view, empty. With a single viewing there's no
+   list: its date is edited from Edit (js/updateModal.js). Shows don't
+   have viewings (yet). */
 
 // Movie id → its viewings, latest first. Rebuilt on the next read after
 // any change to STORE.viewings.
@@ -81,16 +82,13 @@ function rewatchBadgeHtml(row) {
   return n > 1 ? `<span class="card-rewatch" title="Watched ${n} times">×${n}</span>` : "";
 }
 
-// The date part of a watched movie's summary: the latest date, then its
-// note (one viewing) or the list of every viewing (several).
+// The date part of a watched movie's summary: the latest date, and with
+// several viewings, the button that shows the list of them.
 function watchedDateBlockHtml(row) {
   const viewings = viewingsOf(row.id);
   const latest = viewings[0];
   const date = formatDate(latest?.watched_on ?? row.watched_date);
-  if (viewings.length <= 1) {
-    const note = latest?.note ? `<p class="viewing-note-line">${escapeHtml(latest.note)}</p>` : "";
-    return `<p class="detail-label">Watched on</p><p class="detail-date-value">${date}</p>${note}`;
-  }
+  if (viewings.length <= 1) return `<p class="detail-label">Watched on</p><p class="detail-date-value">${date}</p>`;
   const open = Boolean(currentDetail?.viewingsOpen);
   return `
     <p class="detail-label">Last watched</p>
@@ -103,13 +101,14 @@ function watchedDateBlockHtml(row) {
 function viewingsListHtml(row) {
   const viewings = viewingsOf(row.id);
   if (viewings.length <= 1) return "";
+  // Latest first, so the first time is the last in the list.
   const items = viewings
     .map(
-      (v) => `
+      (v, i) => `
       <li>
         <button class="viewing-item" type="button" data-action="open-viewing" data-viewing-id="${v.id}">
           <span class="viewing-item-date">${formatDate(v.watched_on)}</span>
-          ${v.note ? `<span class="viewing-item-note">${escapeHtml(v.note)}</span>` : ""}
+          ${i === viewings.length - 1 ? `<span class="viewing-item-note">The first time you saw this movie</span>` : ""}
           <span class="viewing-item-go" aria-hidden="true">›</span>
         </button>
       </li>`
@@ -125,7 +124,6 @@ function openViewingView(movie, viewing) {
   currentDetail.viewing = { id: viewing?.id ?? null };
   const count = viewingsOf(movie.id).length;
   const deletable = viewing && count > 1;
-  const note = viewing?.note ?? "";
   detailBody.innerHTML = `
     <button class="viewing-back" type="button" data-action="back-to-summary">← Back to ${escapeHtml(movie.title ?? "Untitled")}</button>
     <p class="viewing-eyebrow">${viewing ? "Viewing" : "Watched it again"}</p>
@@ -134,11 +132,6 @@ function openViewingView(movie, viewing) {
       <label class="field-label" for="viewing-date">Watched on</label>
       <input type="date" id="viewing-date" class="field-input" required value="${viewing?.watched_on ?? localToday()}" />
       <p class="field-error hidden" id="viewing-date-error" role="alert">Pick the day you watched it.</p>
-      <div class="field-label-row">
-        <label class="field-label" for="viewing-note">Note <span class="field-optional">(optional)</span></label>
-        <span class="field-counter" id="viewing-note-count">${note.length}/${VIEWING_NOTE_MAX}</span>
-      </div>
-      <input type="text" id="viewing-note" class="field-input" maxlength="${VIEWING_NOTE_MAX}" value="${escapeHtml(note)}" placeholder="At the cinema, with friends, the director's cut…" />
       <p class="viewing-error hidden" id="viewing-error" role="alert"></p>
       <div class="detail-actions viewing-actions">
         ${deletable ? `<button class="delete-btn" type="button" data-action="delete-viewing">🗑 Delete viewing</button>` : ""}
@@ -171,14 +164,13 @@ async function saveViewing() {
     dateInput.focus();
     return;
   }
-  const note = document.getElementById("viewing-note").value.trim() || null;
   const btn = document.getElementById("viewing-save");
   btn.disabled = true;
   viewingError("");
 
   const request = id
-    ? db.from("viewings").update({ watched_on: date, note }).eq("id", id)
-    : db.from("viewings").insert({ movie_id: movie.id, watched_on: date, note });
+    ? db.from("viewings").update({ watched_on: date }).eq("id", id)
+    : db.from("viewings").insert({ movie_id: movie.id, watched_on: date });
   const { data, error } = await request.select().single();
   btn.disabled = false;
   if (error) {
@@ -233,9 +225,6 @@ detailBody.addEventListener("submit", (e) => {
 });
 
 detailBody.addEventListener("input", (e) => {
-  if (e.target.id === "viewing-note") {
-    document.getElementById("viewing-note-count").textContent = `${e.target.value.length}/${VIEWING_NOTE_MAX}`;
-  }
   if (e.target.id === "viewing-date" && e.target.value) {
     document.getElementById("viewing-date-error").classList.add("hidden");
   }

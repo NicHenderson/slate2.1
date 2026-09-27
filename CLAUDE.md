@@ -148,15 +148,18 @@ directly.
      write (the current app, a v1 `.slate`) into the matching viewing — so
      it's safe to apply before the app's new code. The owner's decisions:
      - one rating and one review per movie (their current opinion); each
-       viewing has a date and an optional note of up to 200 characters;
+       viewing is just a date. No notes per viewing (the owner tried them
+       and didn't want them; the review covers that): the earliest viewing
+       shows a fixed, app-set "The first time you saw this movie" instead.
+       The `viewings.note` column stays in the database, unused;
      - a watched movie can never lose its date: Edit changes it but can't
        empty it, and the only way back is deleting the movie;
      - viewings can be deleted with a strong confirmation (type the title),
        except the last one;
      - the detail window shows the latest date; with more than one
        viewing, a "N viewings" button lists them, and picking one swaps the
-       window's content to that viewing (date, note, save, delete, back);
-       with a single viewing, Edit holds its date and note;
+       window's content to that viewing (date, save, delete, back);
+       with a single viewing, Edit holds its date;
      - "↻ Watched it again" beside Edit adds one; cards show ×N;
      - Time watched counts every viewing, plus a Rewatches stat; the
        "Watched in" filter matches any viewing's year;

@@ -20,13 +20,6 @@
 
 /* ---------- the detail window's summary ---------- */
 
-.viewing-note-line {
-  margin-top: 4px;
-  font-family: var(--font-hand);
-  font-size: 15px;
-  color: var(--text-muted);
-}
-
 .viewings-toggle {
   display: inline-flex;
   align-items: center;
@@ -92,15 +85,14 @@
   font-weight: 600;
 }
 
-/* Takes only the room left (width 0, then grows), so a long note is cut
-   with "…" instead of widening the whole window on a phone. */
+/* "The first time you saw this movie", on the earliest viewing. Takes
+   only the room left (width 0, then grows), so on a narrow phone it wraps
+   onto a second line instead of widening the whole window. */
 .viewing-item-note {
   flex: 1 1 0;
   width: 0;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.25;
   font-family: var(--font-hand);
   font-size: 15px;
   color: var(--text-muted);
@@ -168,25 +160,6 @@
 }
 
 /* ---------- small field helpers (this form and Edit's) ---------- */
-
-.field-label-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.field-optional {
-  font-weight: 500;
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-.field-counter {
-  font-size: 11.5px;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
 
 .field-error {
   margin-top: 6px;

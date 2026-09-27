@@ -6,8 +6,6 @@ const updateSave = document.getElementById("update-save");
 const updateCancel = document.getElementById("update-cancel");
 const updateClose = document.getElementById("update-close");
 const updateViewingFields = document.getElementById("update-viewing-fields");
-const updateViewingNote = document.getElementById("update-viewing-note");
-const updateViewingNoteCount = document.getElementById("update-viewing-note-count");
 const updateDateError = document.getElementById("update-date-error");
 const updateViewingsHint = document.getElementById("update-viewings-hint");
 
@@ -18,17 +16,13 @@ const updateStarsInput = createStarsInput(
 );
 
 let updateRow = null;
-// The viewing the date and note fields stand for: the movie's only one
+// The viewing the date field stands for: the movie's only one
 // (Edit), or none yet (Mark as watched). Null with several viewings: then
 // the fields are hidden, and each viewing is changed from the detail
 // window's list instead (js/viewings.js).
 let updateViewing = null;
 let updateManyViewings = false;
 
-const syncViewingNoteCount = () => {
-  updateViewingNoteCount.textContent = `${updateViewingNote.value.length}/${VIEWING_NOTE_MAX}`;
-};
-updateViewingNote.addEventListener("input", syncViewingNoteCount);
 updateDate.addEventListener("input", () => {
   if (updateDate.value) updateDateError.classList.add("hidden");
 });
@@ -42,14 +36,12 @@ function openMarkAsWatchedModal(row, isNewInsert = false) {
 
   updateStarsInput.set(row.rating ?? 0);
   updateDate.value = updateViewing?.watched_on || row.watched_date || localToday();
-  updateViewingNote.value = updateViewing?.note ?? "";
-  syncViewingNoteCount();
   updateDateError.classList.add("hidden");
   updateReview.value = row.review || "";
   updateViewingFields.classList.toggle("hidden", updateManyViewings);
   updateViewingsHint.classList.toggle("hidden", !updateManyViewings);
   updateViewingsHint.textContent = updateManyViewings
-    ? `Watched ${viewings.length} times — each date and note is under “${viewings.length} viewings” in the movie's window.`
+    ? `Watched ${viewings.length} times — each date is under “${viewings.length} viewings” in the movie's window.`
     : "";
   document.getElementById("update-title").textContent = watched
     ? "Edit"
@@ -74,7 +66,7 @@ function closeUpdateModal() {
 
 // A watched movie always keeps a date (migration 0007): it can be changed,
 // never emptied. Marking one watched writes watched_date, which the
-// database turns into its first viewing; its note is then added to it.
+// database turns into its first viewing.
 updateForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!updateRow) return;
@@ -91,16 +83,14 @@ updateForm.addEventListener("submit", async (e) => {
   updateSave.textContent = "Saving…";
   const rating = updateStarsInput.get();
   const opinion = { rating: rating > 0 ? rating : null, review: updateReview.value.trim() || null };
-  const note = updateViewingNote.value.trim() || null;
 
   let error = null;
   if (updateManyViewings) {
     ({ error } = await db.from("movies").update(opinion).eq("id", movieId));
   } else if (updateViewing) {
-    // Edit, one viewing: its date and note, then the rating and review.
-    const changed = updateViewing.watched_on !== date || (updateViewing.note ?? null) !== note;
-    if (changed) {
-      const res = await db.from("viewings").update({ watched_on: date, note }).eq("id", updateViewing.id).select().single();
+    // Edit, one viewing: its date, then the rating and review.
+    if (updateViewing.watched_on !== date) {
+      const res = await db.from("viewings").update({ watched_on: date }).eq("id", updateViewing.id).select().single();
       error = res.error;
       if (!error) storeViewing(res.data);
     }
@@ -108,11 +98,6 @@ updateForm.addEventListener("submit", async (e) => {
   } else {
     // Mark as watched (or a watched movie whose viewings couldn't load).
     ({ error } = await db.from("movies").update({ ...opinion, watched_date: date }).eq("id", movieId));
-    if (!error && note) {
-      const res = await db.from("viewings").update({ note }).eq("movie_id", movieId).select();
-      if (res.error) console.error("Viewing note error:", res.error.message);
-      else res.data.forEach(storeViewing);
-    }
   }
 
   updateSave.disabled = false;

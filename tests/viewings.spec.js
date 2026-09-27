@@ -1,6 +1,7 @@
 // Rewatches (js/viewings.js, migration 0007): a watched movie's viewings —
-// each a date and an optional note — listed in its detail window, with the
-// movie's date always its latest viewing and never lost. The seed's Alien
+// each just a date, the earliest marked as the first time — listed in its
+// detail window, with the movie's date always its latest viewing and never
+// lost. The seed's Alien
 // (watched 2026-08-01) starts with one viewing, as 0007 left every movie.
 const { test, expect, logIn } = require("./support/fixtures");
 
@@ -25,8 +26,8 @@ test("“Watched it again” adds a viewing: the latest date, the list, the card
   await detail.locator('[data-action="watched-again"]').click();
   await expect(detail.locator(".viewing-eyebrow")).toHaveText("Watched it again");
   await expect(page.locator("#detail-nav-next")).toBeHidden(); // no stepping to another title meanwhile
+  await expect(detail.locator("#viewing-form input")).toHaveCount(1); // a date, no note
   await detail.locator("#viewing-date").fill("2026-09-20");
-  await detail.locator("#viewing-note").fill("At the cinema, 4K restoration");
   await detail.locator("#viewing-save").click();
 
   // Back on the summary: the latest date, and the two viewings listed.
@@ -35,7 +36,9 @@ test("“Watched it again” adds a viewing: the latest date, the list, the card
   await expect(detail.locator(".detail-field .detail-date-value").first()).toHaveText("Sep 20, 2026");
   await expect(detail.locator(".viewings-toggle")).toHaveText(/2 viewings/);
   await expect(detail.locator(".viewing-item-date")).toHaveText(["Sep 20, 2026", "Aug 1, 2026"]);
-  await expect(detail.locator(".viewing-item-note")).toHaveText(["At the cinema, 4K restoration"]);
+  // Only the earliest says it was the first time.
+  await expect(detail.locator(".viewing-item").last().locator(".viewing-item-note")).toHaveText("The first time you saw this movie");
+  await expect(detail.locator(".viewing-item-note")).toHaveCount(1);
   await expect(page.locator("#detail-nav-next")).toBeVisible();
 
   await page.keyboard.press("Escape");
@@ -44,7 +47,7 @@ test("“Watched it again” adds a viewing: the latest date, the list, the card
   await expect.poll(() => alienOf(backend).watched_date).toBe("2026-09-20");
 });
 
-test("a viewing opened from the list changes its date and note, and is deleted only once the title is typed — never the last one", async ({ page, backend }) => {
+test("a viewing opened from the list changes its date — the “first time” label follows the earliest — and is deleted only once the title is typed — never the last one", async ({ page, backend }) => {
   const alien = alienOf(backend);
   backend.seed("viewings", [{ movie_id: alien.id, watched_on: "2024-10-31", note: "Halloween" }], backend.user.id);
   await logIn(page);
@@ -54,17 +57,30 @@ test("a viewing opened from the list changes its date and note, and is deleted o
   await detail.locator(".viewings-toggle").click();
   await detail.locator(".viewing-item", { hasText: "Oct 31, 2024" }).click();
   await expect(detail.locator(".viewing-eyebrow")).toHaveText("Viewing");
-  await expect(detail.locator("#viewing-note")).toHaveValue("Halloween");
+  await expect(detail.locator("#viewing-date")).toHaveValue("2024-10-31");
 
   // A date can be changed, never emptied.
   await detail.locator("#viewing-date").fill("");
   await detail.locator("#viewing-save").click();
   await expect(detail.locator("#viewing-date-error")).toHaveText("Pick the day you watched it.");
   await detail.locator("#viewing-date").fill("2024-11-01");
-  await detail.locator("#viewing-note").fill("The day after Halloween");
   await detail.locator("#viewing-save").click();
   await expect(detail.locator(".viewing-item-date")).toHaveText(["Aug 1, 2026", "Nov 1, 2024"]);
-  expect(backend.db.viewings.find((v) => v.watched_on === "2024-11-01")?.note).toBe("The day after Halloween");
+  expect(viewingsOf(backend, alien)).toEqual(["2024-11-01", "2026-08-01"]);
+  // A note stored before notes were dropped isn't shown anywhere.
+  await expect(detail).not.toContainText("Halloween");
+  await expect(detail.locator(".viewing-item", { hasText: "Nov 1, 2024" })).toContainText("The first time you saw this movie");
+
+  // Moved after the other, it's no longer the first time: the label moves.
+  await detail.locator(".viewing-item", { hasText: "Nov 1, 2024" }).click();
+  await detail.locator("#viewing-date").fill("2026-09-05");
+  await detail.locator("#viewing-save").click();
+  await expect(detail.locator(".viewing-item-date")).toHaveText(["Sep 5, 2026", "Aug 1, 2026"]);
+  await expect(detail.locator(".viewing-item", { hasText: "Aug 1, 2026" })).toContainText("The first time you saw this movie");
+  await expect(detail.locator(".viewing-item-note")).toHaveCount(1);
+  await detail.locator(".viewing-item", { hasText: "Sep 5, 2026" }).click();
+  await detail.locator("#viewing-date").fill("2024-11-01");
+  await detail.locator("#viewing-save").click();
 
   // Escape from a viewing goes back to the summary, not out of the window.
   await detail.locator(".viewing-item", { hasText: "Nov 1, 2024" }).click();
@@ -85,7 +101,7 @@ test("a viewing opened from the list changes its date and note, and is deleted o
   expect(viewingsOf(backend, alien)).toEqual(["2026-08-01"]);
 
   // The last one can't be deleted: there's no way to it but Edit, which
-  // changes its date and note, and refuses an empty date.
+  // changes its date, and refuses an empty date.
   await detail.locator('[data-action="edit"]').click();
   await expect(page.locator("#update-title")).toHaveText("Edit");
   await expect(page.locator("#update-date")).toHaveValue("2026-08-01");
@@ -94,28 +110,27 @@ test("a viewing opened from the list changes its date and note, and is deleted o
   await expect(page.locator("#update-date-error")).toBeVisible();
   expect(alien.watched_date).toBe("2026-08-01");
   await page.fill("#update-date", "2026-07-15");
-  await page.fill("#update-viewing-note", "Double bill with Aliens");
   await page.click("#update-save");
   await expect(page.locator(".toast").last()).toHaveText("Changes saved.");
   await expect.poll(() => alien.watched_date).toBe("2026-07-15");
   expect(backend.db.viewings.filter((v) => v.movie_id === alien.id)).toEqual([
-    expect.objectContaining({ watched_on: "2026-07-15", note: "Double bill with Aliens" }),
+    expect.objectContaining({ watched_on: "2026-07-15" }),
   ]);
 });
 
-test("marking a movie watched makes its first viewing, with its note; with several, Edit keeps to the rating and review", async ({ page, backend }) => {
+test("marking a movie watched makes its first viewing, with only a date to pick; with several, Edit keeps to the rating and review", async ({ page, backend }) => {
   await logIn(page);
   await page.click('.nav-btn[data-section="movies-towatch"]');
   await page.locator("#grid-movies-towatch .card", { hasText: "The Matrix" }).click();
   await page.locator('#detail-modal [data-action="mark-watched"]').click();
+  await expect(page.locator("#update-viewing-fields input")).toHaveCount(1); // the date, no note
   await page.fill("#update-date", "2026-09-01");
-  await page.fill("#update-viewing-note", "First time!");
   await page.click("#update-save");
   await expect(page.locator(".toast").last()).toHaveText("Marked as watched.");
   const matrix = backend.db.movies.find((m) => m.tmdb_id === 603);
   await expect
     .poll(() => backend.db.viewings.filter((v) => v.movie_id === matrix.id))
-    .toEqual([expect.objectContaining({ watched_on: "2026-09-01", note: "First time!" })]);
+    .toEqual([expect.objectContaining({ watched_on: "2026-09-01" })]);
 
   // A second viewing: Edit no longer shows a date, and says where they are.
   backend.seed("viewings", [{ movie_id: matrix.id, watched_on: "2026-09-10" }], backend.user.id);
