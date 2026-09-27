@@ -1,0 +1,8 @@
+# Security headers for every page Cloudflare Pages serves (see CLAUDE.md,
+# "Publishing"). Only the simple ones: a full Content-Security-Policy was
+# left out on purpose, as the risk of breaking part of Slate outweighs the
+# benefit for a small private app.
+/*
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Content-Type-Options: nosniff
