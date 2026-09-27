@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Slate — every movie, every show, pinned to one board</title>
-  <meta name="description" content="Slate is a cozy corkboard for everything you've watched, everything you're watching and everything you can't wait to start. Rate, review and collect movies and TV shows." />
-  <meta property="og:title" content="Slate — every movie, every show, pinned to one board" />
-  <meta property="og:description" content="Rate, review and collect movies and TV shows on your own cozy corkboard." />
+  <title>Slate — every movie, every show, all saved in one place</title>
+  <meta name="description" content="What you watched, what you thought of it, and what you want to watch next. Your record of movies and shows, safe for good." />
+  <meta property="og:title" content="Slate — every movie, every show, all saved in one place" />
+  <meta property="og:description" content="What you watched, what you thought of it, and what you want to watch next. Your record of movies and shows, safe for good." />
   <meta property="og:image" content="img/Slate-logo.png" />
   <link rel="icon" type="image/png" href="img/Slate-logo.png" />
   <script>
@@ -37,20 +37,22 @@
   <link rel="stylesheet" href="css/cards.css?v=8bb24eb5" />
   <link rel="stylesheet" href="css/modal.css?v=0adc06fd" />
   <link rel="stylesheet" href="css/auth.css?v=17c2cd2c" />
-  <link rel="stylesheet" href="css/landing.css?v=2e15fdb2" />
+  <link rel="stylesheet" href="css/landing.css?v=8ed108b2" />
   <link rel="stylesheet" href="css/transitions.css?v=bf37ef65" />
   <link rel="stylesheet" href="css/settings.css?v=76a3748b" />
   <link rel="stylesheet" href="css/yourData.css?v=f979fb6e" />
   <link rel="stylesheet" href="css/viewings.css?v=a12c11bd" />
   <link rel="stylesheet" href="css/whereToWatch.css?v=7528c42f" />
   <link rel="stylesheet" href="css/librarySearch.css?v=cce1cb12" />
-  <link rel="stylesheet" href="css/responsive.css?v=1ad90db7" />
+  <link rel="stylesheet" href="css/responsive.css?v=70bd1363" />
 </head>
 <body>
   <!-- ============================================================
-       Landing page — what a signed-out visitor sees (js/auth.js).
-       Mockups reuse the app's own components (cards, booklets, stat
-       strips, status tabs) with CSS-drawn posters (css/landing.css).
+       Landing page — what a signed-out visitor sees (js/auth.js). It
+       sells one thing, the problem Slate solves (a record of what you
+       watch that can't get lost), not a tour of every feature: those are
+       found inside the app. The hero board reuses the app's own cards and
+       stat strip, with CSS-drawn posters (css/landing.css).
        ============================================================ -->
   <div class="landing-screen brand-theme hidden" id="landing-screen">
     <header class="lp-nav" id="lp-nav">
@@ -59,12 +61,6 @@
           <img class="lp-brand-logo" src="img/Slate-logo.png" alt="" />
           <span class="lp-brand-name" translate="no">Slate</span>
         </a>
-        <nav class="lp-nav-links" aria-label="Page sections">
-          <a href="#lp-features" data-lp-scroll>Features</a>
-          <a href="#lp-collections" data-lp-scroll>Collections</a>
-          <a href="#lp-yours" data-lp-scroll>Make it yours</a>
-          <a href="#lp-faq" data-lp-scroll>FAQ</a>
-        </nav>
         <div class="lp-nav-actions">
           <a class="lp-btn lp-btn--paper lp-btn--sm" href="#login">Log in</a>
           <a class="lp-btn lp-btn--solid lp-btn--sm" href="#request-access">Request access</a>
@@ -77,16 +73,12 @@
       <section class="lp-hero" id="lp-top">
         <div class="lp-hero-copy">
           <p class="lp-sticker">Hi, movie lover ♥</p>
-          <h1 class="lp-hero-title" data-i18n>Every movie.<br />Every show.<br /><span class="lp-hl">Pinned to one board.</span></h1>
-          <p class="lp-hero-lede">Slate is a cozy corkboard for everything you've watched, everything you're halfway through, and everything you can't wait to start. Rate it, review it, collect it — and never again lose that title a friend swore you'd love.</p>
+          <h1 class="lp-hero-title" data-i18n>Every movie.<br />Every show.<br /><span class="lp-hl">All saved in one place.</span></h1>
+          <p class="lp-hero-lede">What you watched, what you thought of it, and what you want to watch next. Your record of movies and shows, safe for good.</p>
           <div class="lp-hero-ctas">
             <a class="lp-btn lp-btn--solid lp-btn--lg" href="#request-access">Request access →</a>
             <a class="lp-btn lp-btn--paper lp-btn--lg" href="#login">I already have one</a>
           </div>
-          <p class="lp-hero-note">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 0 1-14.3 4.9M4 12A8 8 0 0 1 18.3 7.1"/><polyline points="18.5 3 18.5 7.3 14.2 7.3"/><polyline points="5.5 21 5.5 16.7 9.8 16.7"/></svg>
-            On your phone, tablet and laptop — always in sync.
-          </p>
         </div>
 
         <div class="lp-hero-board" aria-hidden="true">
@@ -119,398 +111,55 @@
       <div class="lp-filmstrip" aria-hidden="true">
         <div class="lp-filmstrip-track">
           <div class="lp-fs-set">
-            <span>Watch</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Rate</span><img src="img/Slate-logo.png" alt="" /><span>Review</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Collect</span><img src="img/Slate-logo.png" alt="" /><span>Surprise me</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Repeat</span><img src="img/Slate-logo.png" alt="" />
+            <span>Watch</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Rate</span><img src="img/Slate-logo.png" alt="" /><span>Review</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Keep</span><img src="img/Slate-logo.png" alt="" /><span>Repeat</span><img src="img/Slate-logo.png" alt="" />
           </div>
           <div class="lp-fs-set">
-            <span>Watch</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Rate</span><img src="img/Slate-logo.png" alt="" /><span>Review</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Collect</span><img src="img/Slate-logo.png" alt="" /><span>Surprise me</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Repeat</span><img src="img/Slate-logo.png" alt="" />
+            <span>Watch</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Rate</span><img src="img/Slate-logo.png" alt="" /><span>Review</span><img src="img/Slate-logo.png" alt="" /><span class="is-outline">Keep</span><img src="img/Slate-logo.png" alt="" /><span>Repeat</span><img src="img/Slate-logo.png" alt="" />
           </div>
         </div>
       </div>
 
-      <!-- ---------- how it works ---------- -->
-      <section class="lp-section" id="lp-how">
+      <!-- ---------- the problem ---------- -->
+      <section class="lp-section" id="lp-problem">
         <header class="lp-section-head reveal">
-          <p class="lp-sticker lp-sticker--pop">Three steps. That's it.</p>
-          <h2 class="lp-h2">How Slate works</h2>
+          <h2 class="lp-h2">Sound familiar?</h2>
         </header>
-        <ol class="lp-steps">
-          <li class="lp-step lp-paper reveal">
-            <span class="lp-step-num">01</span>
-            <div class="lp-step-body">
-              <h3>Find it</h3>
-              <p>Search for any movie or show by its name or its TMDB code.</p>
-            </div>
-          </li>
-          <li class="lp-step lp-paper reveal">
-            <span class="lp-step-num">02</span>
-            <div class="lp-step-body">
-              <h3>Pin it</h3>
-              <p>Drop it on your watchlist, start it, finish it, or let it go. Every title moves to the right list on its own.</p>
-            </div>
-          </li>
-          <li class="lp-step lp-paper reveal">
-            <span class="lp-step-num">03</span>
-            <div class="lp-step-body">
-              <h3>Love it (or don't)</h3>
-              <p>Rate it out of ten, write what you thought and note the day you watched it.</p>
-            </div>
-          </li>
-        </ol>
-      </section>
-
-      <!-- ---------- feature: watched ---------- -->
-      <section class="lp-feature" id="lp-features">
-        <div class="lp-feature-copy reveal">
-          <p class="lp-kicker">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="8.2" y1="4" x2="8.2" y2="20"/><line x1="15.8" y1="4" x2="15.8" y2="20"/><line x1="3" y1="9" x2="8.2" y2="9"/><line x1="3" y1="15" x2="8.2" y2="15"/><line x1="15.8" y1="9" x2="21" y2="9"/><line x1="15.8" y1="15" x2="21" y2="15"/></svg>
-            Watched
-          </p>
-          <h2 class="lp-h2">A diary for everything you've seen</h2>
-          <p class="lp-body">Every movie gets its own polaroid: the day you watched it, a rating out of ten and a review in your own words. Scroll back months later and remember exactly how that ending made you feel.</p>
-          <ul class="lp-points">
-            <li>Ratings from one to ten stars, and reviews as long as you like.</li>
-            <li>Watch dates, so your year in movies tells a story.</li>
-            <li>The trailer is one click away, right inside the title.</li>
-          </ul>
-        </div>
-        <div class="lp-feature-board reveal" aria-hidden="true">
-          <div class="lp-mock-grid">
-            <article class="card">
-              <div class="card-poster lp-art lp-art--lighthouse"><span class="lp-art-title" translate="no">The Last Lighthouse</span></div>
-              <p class="card-title" translate="no">The Last Lighthouse</p>
-              <div class="card-rating"><div class="rating-row"><div class="stars"><span class="stars-base">★★★★★★★★★★</span><span class="stars-fill" style="width: 80%">★★★★★★★★★★</span></div><span class="stars-value">8/10</span></div></div>
-            </article>
-            <article class="card">
-              <div class="card-poster lp-art lp-art--hours"><span class="lp-art-title" translate="no">Small Hours</span></div>
-              <p class="card-title" translate="no">Small Hours</p>
-              <div class="card-rating"><div class="rating-row"><div class="stars"><span class="stars-base">★★★★★★★★★★</span><span class="stars-fill" style="width: 100%">★★★★★★★★★★</span></div><span class="stars-value">10/10</span></div></div>
-            </article>
-            <article class="card">
-              <div class="card-poster lp-art lp-art--tigers"><span class="lp-art-title" translate="no">Neon Tigers</span></div>
-              <p class="card-title" translate="no">Neon Tigers</p>
-              <div class="card-rating"><div class="rating-row"><div class="stars"><span class="stars-base">★★★★★★★★★★</span><span class="stars-fill" style="width: 70%">★★★★★★★★★★</span></div><span class="stars-value">7/10</span></div></div>
-            </article>
-          </div>
-          <div class="lp-note lp-review-note">
-            <p>“Cried twice. Would cry again.”</p>
-            <span>Your review of Small Hours · watched Mar 14</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- ---------- feature: watchlist ---------- -->
-      <section class="lp-feature lp-feature--flip">
-        <div class="lp-feature-copy reveal">
-          <p class="lp-kicker">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5 H17.5 V20.5 L12 16.5 L6.5 20.5 Z"/></svg>
-            Watchlist
-          </p>
-          <h2 class="lp-h2">A watchlist that helps you pick</h2>
-          <p class="lp-body">Sort your queue by when you added it, by title or by release year — or switch to Custom order and drag titles into the exact order you want to watch them. Can't decide? Let the dice roll.</p>
-          <ul class="lp-points">
-            <li>Custom order: drag and drop, on your laptop or your phone.</li>
-            <li>Surprise Me picks something for tonight — go on, try it.</li>
-            <li>See how many hours are waiting, and what's been waiting longest.</li>
-          </ul>
-        </div>
-        <div class="lp-feature-board reveal">
-          <div class="lp-board-bar">
-            <p class="drag-hint"><svg class="drag-hint-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>Drag to reorder</p>
-            <button class="surprise-btn" id="lp-surprise" type="button">🎲 Surprise Me</button>
-          </div>
-          <div class="lp-mock-grid lp-mock-grid--4" id="lp-surprise-grid">
-            <article class="card">
-              <div class="card-poster lp-art lp-art--orbit"><span class="lp-art-title" translate="no">Orbit</span></div>
-              <p class="card-title" translate="no">Orbit</p>
-            </article>
-            <article class="card is-lifted">
-              <div class="card-poster lp-art lp-art--honey"><span class="lp-art-title" translate="no">Salt &amp; Honey</span></div>
-              <p class="card-title" translate="no">Salt &amp; Honey</p>
-              <svg class="lp-cursor" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 8-6.2 1.6L10 19z" fill="#fff" stroke="#0d0c15" stroke-width="1.5" stroke-linejoin="round"/></svg>
-            </article>
-            <article class="card">
-              <div class="card-poster lp-art lp-art--static"><span class="lp-art-title" translate="no">Static Hearts</span></div>
-              <p class="card-title" translate="no">Static Hearts</p>
-            </article>
-            <article class="card">
-              <div class="card-poster lp-art lp-art--north"><span class="lp-art-title" translate="no">Northbound</span></div>
-              <p class="card-title" translate="no">Northbound</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <!-- ---------- feature: shows queue ---------- -->
-      <section class="lp-feature">
-        <div class="lp-feature-copy reveal">
-          <p class="lp-kicker">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="13" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="18" x2="12" y2="21"/></svg>
-            Shows Queue
-          </p>
-          <h2 class="lp-h2">Shows have a life of their own</h2>
-          <p class="lp-body">A show isn't over in one night, so shows get their own queue: To Watch, Watching and Dropped. Every show you're in the middle of remembers when you started it — and gently points out the ones you haven't touched in a month.</p>
-          <ul class="lp-points">
-            <li>Start, finish or drop a show in a tap — it moves itself.</li>
-            <li>Seasons and episodes filled in for every show.</li>
-            <li>“How long do I take to finish a show?” Slate knows.</li>
-          </ul>
-        </div>
-        <div class="lp-feature-board reveal">
-          <div class="subtabs status-strip lp-tabs" role="tablist" aria-label="Show status (demo)">
-            <button class="status-tab" type="button" role="tab" aria-selected="false" data-lp-tab="towatch">
-              <svg class="status-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5 H17.5 V20.5 L12 16.5 L6.5 20.5 Z"/></svg>
-              <span class="status-tab-label">To Watch</span>
-              <span class="status-tab-count">3</span>
-            </button>
-            <button class="status-tab active" type="button" role="tab" aria-selected="true" data-lp-tab="watching">
-              <svg class="status-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 4.5 L19 12 L6.5 19.5 Z"/></svg>
-              <span class="status-tab-label">Watching</span>
-              <span class="status-tab-count">3</span>
-            </button>
-            <button class="status-tab" type="button" role="tab" aria-selected="false" data-lp-tab="dropped">
-              <svg class="status-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6 L18 18 M18 6 L6 18"/></svg>
-              <span class="status-tab-label">Dropped</span>
-              <span class="status-tab-count">1</span>
-            </button>
-          </div>
-          <div class="lp-mock-grid" data-lp-panel="towatch" role="tabpanel" hidden>
-            <article class="card" aria-hidden="true">
-              <div class="card-poster lp-art lp-art--kitchen"><span class="lp-art-title" translate="no">Kitchen Chaos</span></div>
-              <p class="card-title" translate="no">Kitchen Chaos</p>
-              <p class="card-meta">4 seasons · 40 episodes</p>
-            </article>
-            <article class="card" aria-hidden="true">
-              <div class="card-poster lp-art lp-art--lighthouse"><span class="lp-art-title" translate="no">The Last Lighthouse</span></div>
-              <p class="card-title" translate="no">The Last Lighthouse</p>
-              <p class="card-meta">1 season · 8 episodes</p>
-            </article>
-            <article class="card" aria-hidden="true">
-              <div class="card-poster lp-art lp-art--tigers"><span class="lp-art-title" translate="no">Neon Tigers</span></div>
-              <p class="card-title" translate="no">Neon Tigers</p>
-              <p class="card-meta">2 seasons · 16 episodes</p>
-            </article>
-          </div>
-          <div class="lp-mock-grid" data-lp-panel="watching" role="tabpanel">
-            <article class="card" aria-hidden="true">
-              <div class="card-poster lp-art lp-art--creek"><span class="lp-art-title" translate="no">Hollow Creek</span></div>
-              <p class="card-title" translate="no">Hollow Creek</p>
-              <p class="card-meta">Started 3d ago</p>
-            </article>
-            <article class="card" aria-hidden="true">
-              <div class="card-poster lp-art lp-art--shift"><span class="lp-art-title" translate="no">The Night Shift</span></div>
-              <p class="card-title" translate="no">The Night Shift</p>
-              <p class="card-meta">Started 12d ago</p>
-            </article>
-            <article class="card" aria-hidden="true">
-              <div class="card-poster lp-art lp-art--hours"><span class="lp-art-title" translate="no">Small Hours</span></div>
-              <p class="card-title" translate="no">Small Hours</p>
-              <p class="card-meta is-stale">Started 45d ago</p>
-            </article>
-          </div>
-          <div class="lp-mock-grid" data-lp-panel="dropped" role="tabpanel" hidden>
-            <article class="card" aria-hidden="true">
-              <div class="card-poster lp-art lp-art--static"><span class="lp-art-title" translate="no">Static Hearts</span></div>
-              <p class="card-title" translate="no">Static Hearts</p>
-              <p class="card-meta">Dropped after season 1</p>
-            </article>
-            <p class="lp-drop-note">It happens. No guilt here — you can always send it back to To Watch.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ---------- feature: collections ---------- -->
-      <section class="lp-feature lp-feature--flip" id="lp-collections">
-        <div class="lp-feature-copy reveal">
-          <p class="lp-kicker">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.8 a1.6 1.6 0 0 1 1.6 -1.6 h4.6 l1.9 2.3 h9.3 a1.6 1.6 0 0 1 1.6 1.6 v9.1 a1.6 1.6 0 0 1 -1.6 1.6 h-15.8 a1.6 1.6 0 0 1 -1.6 -1.6 z"/></svg>
-            Collections
-          </p>
-          <h2 class="lp-h2">A collection for every mood</h2>
-          <p class="lp-body">Halloween marathon. Comfort shows for rainy Sundays. Every film by the director you can't stop talking about. Group titles into collections with their own icon, watch the progress bar fill up, and let Surprise Me pick the next one from inside it.</p>
-          <ul class="lp-points">
-            <li>Hundreds of emoji and icons to give each collection its face.</li>
-            <li>Movies and shows side by side, in the order you drag them.</li>
-            <li>Progress, average rating, best and worst — per collection.</li>
-          </ul>
-        </div>
-        <div class="lp-feature-board lp-feature-board--booklets reveal" aria-hidden="true">
-          <article class="collection-card booklet-card">
-            <div class="booklet-spine"></div>
-            <div class="booklet-body">
-              <div class="booklet-ribbon"></div>
-              <div class="booklet-cover">
-                <div class="booklet-stamp stamp-n4"><span class="lp-art lp-art--hours"></span><span class="lp-art lp-art--static"></span><span class="lp-art lp-art--shift"></span><span class="lp-art lp-art--creek"></span></div>
-                <span class="booklet-icon"><img class="ico ico-emoji" src="img/emoji/1F383.svg" alt="" draggable="false" /></span>
-              </div>
-              <p class="booklet-title">Halloween Marathon</p>
-              <div class="booklet-footer">
-                <div class="booklet-progress">
-                  <div class="booklet-bar"><span style="width: 83%"></span></div>
-                  <p class="booklet-progress-text"><span>5/6 watched</span></p>
-                </div>
-              </div>
-            </div>
+        <div class="lp-problems">
+          <article class="lp-note lp-problem reveal">
+            <p>“Did I see this one?”</p>
+            <span>It looks familiar, but you can't remember if you watched it, or what you thought.</span>
           </article>
-          <article class="collection-card booklet-card">
-            <div class="booklet-spine"></div>
-            <div class="booklet-body">
-              <div class="booklet-ribbon"></div>
-              <div class="booklet-cover">
-                <div class="booklet-stamp stamp-n3"><span class="lp-art lp-art--kitchen"></span><span class="lp-art lp-art--moons"></span><span class="lp-art lp-art--honey"></span></div>
-                <span class="booklet-icon"><img class="ico ico-emoji" src="img/emoji/1F37F.svg" alt="" draggable="false" /></span>
-              </div>
-              <p class="booklet-title">Comfort Shows</p>
-              <div class="booklet-footer">
-                <div class="booklet-progress">
-                  <div class="booklet-bar"><span style="width: 38%"></span></div>
-                  <p class="booklet-progress-text"><span>3/8 watched</span></p>
-                </div>
-              </div>
-            </div>
+          <article class="lp-note lp-problem reveal">
+            <p>“What was that recommendation?”</p>
+            <span>The show a friend swore you'd love is lost somewhere in a chat.</span>
           </article>
-          <article class="collection-card booklet-card">
-            <div class="booklet-spine"></div>
-            <div class="booklet-body">
-              <div class="booklet-ribbon"></div>
-              <div class="booklet-cover">
-                <div class="booklet-stamp stamp-n4"><span class="lp-art lp-art--orbit"></span><span class="lp-art lp-art--drive"></span><span class="lp-art lp-art--north"></span><span class="lp-art lp-art--lighthouse"></span></div>
-                <span class="booklet-icon"><img class="ico ico-emoji" src="img/emoji/1F319.svg" alt="" draggable="false" /></span>
-              </div>
-              <p class="booklet-title">Night Sky</p>
-              <div class="booklet-footer">
-                <div class="booklet-progress is-complete">
-                  <div class="booklet-bar"><span style="width: 100%"></span></div>
-                  <p class="booklet-progress-text"><span>4/4 watched</span><span class="booklet-done">✓</span></p>
-                </div>
-              </div>
-            </div>
+          <article class="lp-note lp-problem reveal">
+            <p>“I had it written down.”</p>
+            <span>In a note, a notebook, an app that's gone. And one day, it wasn't there.</span>
           </article>
         </div>
       </section>
 
-      <!-- ---------- feature: stats ---------- -->
-      <section class="lp-feature">
-        <div class="lp-feature-copy reveal">
-          <p class="lp-kicker">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="19" y1="20" x2="19" y2="9"/></svg>
-            Stats
-          </p>
-          <h2 class="lp-h2">Your taste, in numbers</h2>
-          <p class="lp-body">Every list keeps its own little scoreboard, right next to its title: hours watched, your average rating, your top genre, your best and your worst, how long you take to finish a show. It's the fun kind of math.</p>
-          <ul class="lp-points">
-            <li>Updates the second you rate or finish something.</li>
-            <li>Tap your best or worst title to jump straight to it.</li>
-          </ul>
-        </div>
-        <div class="lp-feature-board lp-feature-board--stats reveal" aria-hidden="true">
-          <p class="lp-board-label">Movies</p>
-          <div class="hstats lp-stats-strip">
-            <div class="hs-item"><span class="hs-value" data-lp-count="184">184</span><span class="hs-label">Movies watched</span></div>
-            <div class="hs-item"><span class="hs-value"><span data-lp-count="312">312</span>h</span><span class="hs-label">Time watched</span></div>
-            <div class="hs-item"><span class="hs-value"><span data-lp-count="7.8" data-lp-decimals="1" data-lp-decimal>7.8</span><small>/10</small></span><span class="hs-label">Avg rating</span></div>
-            <div class="hs-item hs-extremes">
-              <span class="extreme-row"><span class="extreme-arrow">▲</span><span class="extreme-title" translate="no">Small Hours</span><span class="extreme-rating">10/10</span><span class="extreme-ties">+2</span></span>
-              <span class="extreme-row"><span class="extreme-arrow">▼</span><span class="extreme-title" translate="no">Static Hearts</span><span class="extreme-rating">4/10</span></span>
-            </div>
-          </div>
-          <p class="lp-board-label">Shows</p>
-          <div class="hstats lp-stats-strip lp-stats-strip--alt">
-            <div class="hs-item"><span class="hs-value" data-lp-count="27">27</span><span class="hs-label">Shows finished</span></div>
-            <div class="hs-item hs-text"><span class="hs-value">Comedy</span><span class="hs-label">Top genre · 38%</span></div>
-            <div class="hs-item"><span class="hs-value"><span data-lp-count="23">23</span><small> days</small></span><span class="hs-label">Avg time to finish</span></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ---------- feature: make it yours ---------- -->
-      <section class="lp-feature lp-feature--flip" id="lp-yours">
-        <div class="lp-feature-copy reveal">
-          <p class="lp-kicker">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1 0 1.6-.8 1.6-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.8-1.7 1.7-1.7h2A4.7 4.7 0 0 0 21 10.5C21 6.4 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7.2" r="1.2"/><circle cx="15" cy="7.2" r="1.2"/></svg>
-            Make it yours
-          </p>
-          <h2 class="lp-h2">Your board, your colors</h2>
-          <p class="lp-body">Eight themes, from moody Midnight to crisp Glacier. Comfortable or compact cards. Pick the page Slate opens to, write a bio, and pin your favorite movie and show to your profile. It's your corner of the internet — decorate it.</p>
-          <ul class="lp-points">
-            <li>Five dark themes and three light ones.</li>
-            <li>Calmer animations, if you'd rather things sit still.</li>
-            <li>Your profile: username, bio and two all-time favorites.</li>
-          </ul>
-        </div>
-        <div class="lp-feature-board lp-feature-board--themes reveal">
-          <div class="lp-theme-demo" id="lp-theme-demo" aria-hidden="true">
-            <div class="lp-td-side">
-              <img class="lp-td-logo" src="img/Slate-logo.png" alt="" />
-              <span class="lp-td-label">Watched</span>
-              <span class="lp-td-nav is-active">Movies</span>
-              <span class="lp-td-nav">Shows</span>
-              <span class="lp-td-label">To Watch</span>
-              <span class="lp-td-nav">Movies To Watch</span>
-              <span class="lp-td-nav">Shows Queue</span>
-            </div>
-            <div class="lp-td-main">
-              <span class="lp-td-sub">Everything you've watched</span>
-              <span class="lp-td-title">Movies</span>
-              <div class="lp-td-strip"><span data-i18n><b>184</b> watched</span><span data-i18n><b>7.8</b> avg</span><span data-i18n><b>Drama</b> top</span></div>
-              <div class="lp-td-cards">
-                <span class="lp-td-card"><span class="lp-art lp-art--drive"></span><i></i></span>
-                <span class="lp-td-card"><span class="lp-art lp-art--moons"></span><i></i></span>
-                <span class="lp-td-card"><span class="lp-art lp-art--north"></span><i></i></span>
-                <span class="lp-td-card"><span class="lp-art lp-art--orbit"></span><i></i></span>
-              </div>
-            </div>
-          </div>
-          <div class="lp-theme-chips" id="lp-theme-chips" role="radiogroup" aria-label="Preview a theme"></div>
-        </div>
-      </section>
-
-      <!-- ---------- little things ---------- -->
-      <section class="lp-section" id="lp-little">
+      <!-- ---------- the answer ---------- -->
+      <section class="lp-section" id="lp-answer">
         <header class="lp-section-head reveal">
-          <p class="lp-sticker">The little things</p>
-          <h2 class="lp-h2">Small touches, big hugs</h2>
-          <p class="lp-lede">The details you'll never notice until you use something without them.</p>
+          <h2 class="lp-h2">Slate keeps it for you</h2>
         </header>
         <div class="lp-things">
           <article class="lp-thing lp-paper reveal">
-            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 0 1-14.3 4.9M4 12A8 8 0 0 1 18.3 7.1"/><polyline points="18.5 3 18.5 7.3 14.2 7.3"/><polyline points="5.5 21 5.5 16.7 9.8 16.7"/></svg></span>
-            <h3>Always in sync</h3>
-            <p>Rate something on your phone and it's already there on your laptop. No refresh.</p>
+            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.25 4.1 1 5.8L12 16.9l-5.25 2.7 1-5.8L3.5 9.7l5.9-.9z"/></svg></span>
+            <h3>What you watched</h3>
+            <p>Every movie and show, with your rating, your review and the day you watched it.</p>
           </article>
           <article class="lp-thing lp-paper reveal">
-            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><line x1="11" y1="18.3" x2="13" y2="18.3"/></svg></span>
-            <h3>Made for your thumb</h3>
-            <p>Every page and every card works just as well on a phone. Press and hold to drag.</p>
+            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11v17l-5.5-4-5.5 4z"/></svg></span>
+            <h3>What you want to watch</h3>
+            <p>That recommendation goes straight to your list, and stays there until you watch it.</p>
           </article>
           <article class="lp-thing lp-paper reveal">
-            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M10 9.2v5.6l4.8-2.8z"/></svg></span>
-            <h3>Trailers built in</h3>
-            <p>Not sure about a title? Watch its trailer without leaving the page.</p>
-          </article>
-          <article class="lp-thing lp-paper reveal">
-            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 3 12 9 18"/><polyline points="15 6 21 12 15 18"/></svg></span>
-            <h3>Flip, don't hunt</h3>
-            <p>Browse a list title by title with next and previous, right inside the details.</p>
-          </article>
-          <article class="lp-thing lp-paper reveal">
-            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
-            <h3>Yours alone</h3>
-            <p>Your lists are locked to your account. Nobody else can see what's on your board.</p>
-          </article>
-          <article class="lp-thing lp-paper reveal">
-            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l1 13h9l1-13"/></svg></span>
-            <h3>Oops-proof</h3>
-            <p>Deleting asks first. Deleting something you rated? You'll type its name to be sure.</p>
-          </article>
-          <article class="lp-thing lp-paper reveal">
-            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span>
-            <h3>Easy on the eyes</h3>
-            <p>Dark or light themes, compact cards, and calmer animations when you want them.</p>
-          </article>
-          <article class="lp-thing lp-paper reveal">
-            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><line x1="16" y1="16" x2="21" y2="21"/></svg></span>
-            <h3>Every title, found</h3>
-            <p>Millions of movies and shows to search, with posters and details ready to go.</p>
+            <span class="lp-thing-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7.5 3v5.5c0 4.4-3.1 8.2-7.5 9.5-4.4-1.3-7.5-5.1-7.5-9.5V6z"/><polyline points="8.5 12 11 14.5 15.5 10"/></svg></span>
+            <h3>For good</h3>
+            <p>It lives in your account, on all your devices, and you can download your own copy any time.</p>
           </article>
         </div>
       </section>
@@ -528,47 +177,13 @@
         </div>
       </section>
 
-      <!-- ---------- FAQ ---------- -->
-      <section class="lp-section" id="lp-faq">
-        <header class="lp-section-head reveal">
-          <p class="lp-sticker lp-sticker--pop">Good questions</p>
-          <h2 class="lp-h2">Frequently asked</h2>
-        </header>
-        <div class="lp-faq">
-          <details class="lp-faq-item lp-paper reveal">
-            <summary>What exactly is Slate?</summary>
-            <p>A personal tracker for movies and TV shows. Keep what you've watched (with ratings, reviews and dates), what you're watching, what you want to watch next, and group it all into collections.</p>
-          </details>
-          <details class="lp-faq-item lp-paper reveal">
-            <summary>Where do the posters and details come from?</summary>
-            <p>From TMDB, The Movie Database — a huge, community-built catalog of movies and shows. Search for a title and Slate brings in its poster, synopsis, genres, runtime, seasons and trailer.</p>
-          </details>
-          <details class="lp-faq-item lp-paper reveal">
-            <summary>Can other people see my lists?</summary>
-            <p>No. Everything on your board is tied to your account, and only you can see or change it.</p>
-          </details>
-          <details class="lp-faq-item lp-paper reveal">
-            <summary>Does it work on my phone?</summary>
-            <p>Yes. Slate is built to feel right on phones, tablets and computers, and whatever you change on one shows up on the others right away.</p>
-          </details>
-          <details class="lp-faq-item lp-paper reveal">
-            <summary>Do I track shows episode by episode?</summary>
-            <p>Slate tracks shows by where you are with them — to watch, watching, finished or dropped — plus the day you started and the day you finished. No episode checklists to keep up with.</p>
-          </details>
-          <details class="lp-faq-item lp-paper reveal">
-            <summary>How do I get started?</summary>
-            <p>Slate is invite-only for now. Request access with your name and email; once your account is ready, you'll get an email with a temporary password to log in with and change.</p>
-          </details>
-        </div>
-      </section>
-
       <!-- ---------- final call ---------- -->
       <section class="lp-final reveal">
         <div class="lp-final-stub" aria-hidden="true"><span>Admit one</span></div>
         <div class="lp-final-body lp-paper">
           <p class="lp-final-eyebrow">Now showing</p>
           <h2 class="lp-final-title">Your board is waiting.</h2>
-          <p class="lp-final-copy">Every movie. Every show. One cozy corkboard that remembers it all for you. Slate is invite-only for now — ask for your spot.</p>
+          <p class="lp-final-copy">Slate is invite-only for now: ask for your spot and you'll get an email once your account is ready.</p>
           <div class="lp-hero-ctas">
             <a class="lp-btn lp-btn--solid lp-btn--lg" href="#request-access">Request access</a>
             <a class="lp-btn lp-btn--paper lp-btn--lg" href="#login">Log in</a>
@@ -588,8 +203,6 @@
           <select data-language-picker translate="no"></select>
         </label>
         <nav class="lp-footer-links" aria-label="Footer">
-          <a href="#lp-features" data-lp-scroll>Features</a>
-          <a href="#lp-faq" data-lp-scroll>FAQ</a>
           <a href="#login">Log in</a>
           <a href="#request-access">Request access</a>
         </nav>
@@ -1513,7 +1126,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-  <script src="js/lang/es.js?v=ebc9274d"></script>
+  <script src="js/lang/es.js?v=1a7f5e9d"></script>
   <script src="js/i18n.js?v=028fb3d5"></script>
   <script src="js/escapeHtml.js?v=28c1feb8"></script>
   <script src="js/viewTransitions.js?v=d587d807"></script>
@@ -1549,7 +1162,7 @@
   <script src="js/sectionHeaders.js?v=1ff2ab07"></script>
   <script src="js/yourData.js?v=30b17cab"></script>
   <script src="js/deleteAccount.js?v=8000d345"></script>
-  <script src="js/landing.js?v=24efe549"></script>
+  <script src="js/landing.js?v=69197ae5"></script>
   <script src="js/auth.js?v=43a43f19"></script>
 </body>
 </html>
