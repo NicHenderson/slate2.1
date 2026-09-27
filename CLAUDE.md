@@ -223,8 +223,8 @@ directly.
      owner: the watched date for IMDb (it only has the date rated), films
      Letterboxd has as watched but not in the diary, titles already in
      Slate, and where shows go.
-- Translation is done; **next: publish.** **Slate launches in English and
-  Spanish only** (the owner's decision); German and Italian are out for
+- Translation is done, and Slate is published (below). **Slate launches in
+  English and Spanish only** (the owner's decision); German and Italian are out for
   now, and adding a language later only takes its dictionary.
   The owner authorized the stages one at a time:
   1. **The base** — done: `js/i18n.js`, every string through
@@ -277,11 +277,13 @@ directly.
      domains is a Pro feature); the form's "Website URL" (Settings → Form
      Details) is only a label, set to the new address. The subject and
      sender name its settings show are overridden by what `js/auth.js`
-     sends, and its Redirect URL isn't used (Slate posts with fetch). Some sources said the
-     free plan blocks free subdomains like `.pages.dev`; the owner's own
-     test says otherwise: a request sent from myslate.pages.dev arrived.
-  4. Put the address in the welcome-email tool (it remembers it).
-  Password reset from myslate.pages.dev was tested by the owner and works.
+     sends, and its Redirect URL isn't used (Slate posts with fetch). Some
+     sources said the free plan blocks free subdomains like `.pages.dev`;
+     the owner's own test says otherwise: a request sent from
+     myslate.pages.dev arrived.
+  4. The owner puts the address in the welcome-email tool (it remembers
+     it). Password reset from myslate.pages.dev was tested by the owner
+     and works.
   5. Done (`_headers` at the repo root): the simple security headers only:
      `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`
      and `X-Content-Type-Options: nosniff`. The owner and Claude decided
