@@ -260,11 +260,15 @@ directly.
      `https://myslate.pages.dev`, and Redirect URLs
      `https://myslate.pages.dev/**` plus `http://localhost:8080/**` and
      `http://127.0.0.1:8080/**` for local testing.
-  3. Nothing to change in Web3Forms: on the free plan it has no domain
-     setting (restricting domains is a Pro feature). Some sources said the
+  3. Web3Forms: on the free plan it has no domain setting (restricting
+     domains is a Pro feature); the form's "Website URL" (Settings → Form
+     Details) is only a label, set to the new address. The subject and
+     sender name its settings show are overridden by what `js/auth.js`
+     sends, and its Redirect URL isn't used (Slate posts with fetch). Some sources said the
      free plan blocks free subdomains like `.pages.dev`; the owner's own
      test says otherwise: a request sent from myslate.pages.dev arrived.
   4. Put the address in the welcome-email tool (it remembers it).
+  Password reset from myslate.pages.dev was tested by the owner and works.
   5. Done (`_headers` at the repo root): the simple security headers only:
      `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`
      and `X-Content-Type-Options: nosniff`. The owner and Claude decided
