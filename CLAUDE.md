@@ -251,8 +251,11 @@ directly.
   The whole repo root is served, docs and tests included: the repo is
   public anyway and holds no secrets. Free plan (Sept. 2026): 500 builds a
   month, 20,000 files and 25 MiB per file. The steps:
-  1. Connect the GitHub repo, production branch `main`. There's no build
-     command, and the output directory is the repo root.
+  1. Done: **Slate is live at https://myslate.pages.dev** (Pages project
+     `myslate`, created through "Continue to Pages", which Cloudflare now
+     calls the legacy workflow). Production branch `main`, no build
+     command, the repo root as output: every merge into `main` publishes.
+     `tools/welcome-email.html` is still used from the local server.
   2. Add the new address to Supabase → Authentication → URL Configuration:
      the Site URL and the Redirect URLs, so password-reset links work.
   3. Update the address in Web3Forms' form settings.
