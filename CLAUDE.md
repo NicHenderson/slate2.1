@@ -174,12 +174,17 @@ directly.
      (a movie watched in the account but not in the file can't lose its
      date): such a movie is now deleted and recreated on the same id.
      Nothing of this stage needs a migration or a redeploy.
-  3. **Import from other apps:** IMDb (CSV with IMDb ids → TMDB `find`),
-     Letterboxd (ZIP of CSVs, title + year matching, diary rewatches),
-     Trakt (JSON with TMDB ids); TV Time only after seeing a real export.
-     Reuse the `.slate` import flow, with a review of what didn't match.
-     Needs real export files from the owner.
-- Then: translate the app, then publish.
+  3. **Import from other apps: moved to a later update (maybe v3.1.0)**,
+     the owner's decision. The plan so far: IMDb (CSV with IMDb ids → TMDB
+     `find`), Letterboxd (ZIP of CSVs, title + year matching, diary
+     rewatches), Trakt (JSON with TMDB ids). TV Time shut down on July 15,
+     2026, and JustWatch has no official export, so both are out. Reuse
+     the `.slate` import flow in Add mode, with a review of what didn't
+     match. Needs real export files from the owner. Open questions for the
+     owner: the watched date for IMDb (it only has the date rated), films
+     Letterboxd has as watched but not in the diary, titles already in
+     Slate, and where shows go.
+- Next: translate the app, then publish.
 - **Publishing on Cloudflare Pages** (free, chosen over Netlify and
   Vercel). The steps:
   1. Connect the GitHub repo. There's no build command, and the output
