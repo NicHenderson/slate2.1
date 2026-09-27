@@ -289,6 +289,19 @@ directly.
      and `X-Content-Type-Options: nosniff`. The owner and Claude decided
      against a full Content-Security-Policy for now: the risk of breaking
      part of Slate outweighs the benefit for a small private app.
+- **Next: Slate that feels like a phone app** (the owner's request),
+  on its own branch, `claude/mobile-app`, which goes straight to `main`
+  when done; `claude/funny-pascal-bk99gr` stays for small fixes meanwhile.
+  Phone-only changes; the computer layout stays as it is. Claude reviewed
+  every screen at phone size and proposed stages (installable app, bottom
+  tab bar and compact headers, windows as bottom sheets, full-screen
+  search and touch polish); none is built until the owner says so.
+- **The test scenario** the owner follows to hunt bugs (PC first, then
+  the phone): https://claude.ai/artifact/WV8WgTtnTG5LsviRT4amDm. It runs
+  with a throwaway account (`+slate1` / `+slate2` Gmail aliases), never a
+  real one. Each step is marked ok / bug / odd with a note, saved in the
+  page's database: read them with ArtifactData, collection `results`,
+  documents `<pc|phone>__<step id>`.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - a privacy policy page;
