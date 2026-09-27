@@ -80,11 +80,16 @@ function oldestWaitingItem(rows, table) {
 function moviesWatchedStats() {
   const rows = listRows("grid-movies-watched");
   if (!rows.length) return "";
-  const minutes = rows.reduce((sum, r) => sum + (r.duration || 0), 0);
+  // Every viewing counts: a movie watched three times, three times its
+  // runtime. At least once each, should the viewings not have loaded.
+  const times = (r) => Math.max(1, viewingsOf(r.id).length);
+  const minutes = rows.reduce((sum, r) => sum + (r.duration || 0) * times(r), 0);
+  const rewatches = rows.reduce((n, r) => n + times(r) - 1, 0);
   const rated = rows.filter((r) => r.rating != null).map((row) => ({ table: "movies", row }));
   return (
     hsItem(rows.length, "Movies watched") +
     hsItem(formatWatchTime(minutes), "Time watched") +
+    (rewatches ? hsItem(rewatches, rewatches === 1 ? "Rewatch" : "Rewatches") : "") +
     ratingItem(rows, { showCount: false }) +
     topGenreItem(rows) +
     `<div class="hs-item hs-extremes">${collectionExtremesHtml(rated)}</div>`

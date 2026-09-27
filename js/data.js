@@ -46,6 +46,7 @@ const STORE = {
   shows: new Map(),
   collections: new Map(),
   collectionItems: new Map(),
+  viewings: new Map(), // every time a movie was watched (js/viewings.js)
 };
 
 function makeSorts(dateField) {
@@ -279,7 +280,8 @@ function gridHtml(gridId, rows) {
     visible = [...visible].sort(sortCfg.options[effectiveSort(gridId)].cmp);
   }
   const showRating = cfg.state === "watched";
-  const extra = cfg.state === "watching" ? startedAgoHtml : () => "";
+  const extra =
+    cfg.state === "watching" ? startedAgoHtml : gridId === "grid-movies-watched" ? rewatchBadgeHtml : () => "";
   // Searched: only what matches — no "+ Add" card among the results.
   if (isLibraryFiltered(gridId)) {
     return visible.length ? visible.map((row) => cardHtml(row, showRating, extra(row))).join("") : libraryEmptyHtml(gridId);
@@ -330,14 +332,22 @@ async function loadData() {
 
   // Whole tables, however long (fetchAllRows, supabaseClient.js); each
   // settles as { data, error } so one failing table doesn't sink the rest.
-  const [moviesRes, showsRes, colsRes, colItemsRes] = await Promise.all(
-    ["movies", "shows", "collections", "collection_items"].map((table) =>
+  const [moviesRes, showsRes, colsRes, colItemsRes, viewingsRes] = await Promise.all(
+    ["movies", "shows", "collections", "collection_items", "viewings"].map((table) =>
       fetchAllRows(table).then(
         (data) => ({ data, error: null }),
         (error) => ({ data: null, error })
       )
     )
   );
+
+  // Before the movie grids, whose cards count them. Without them, a movie
+  // still shows its latest date (watched_date); it just can't list others.
+  if (viewingsRes.error) {
+    console.error("Viewings error:", viewingsRes.error.message);
+  } else {
+    viewingsRes.data.forEach(storeViewing);
+  }
 
   if (moviesRes.error) {
     renderError(MOVIE_GRIDS, "Could not load movies.");
@@ -402,6 +412,7 @@ function clearAppData() {
   STORE.shows.clear();
   STORE.collections.clear();
   STORE.collectionItems.clear();
+  resetViewings();
   resetSettingsState();
   resetProfileState();
   resetLibrarySearch();

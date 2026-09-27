@@ -12,6 +12,7 @@ files, numbered in the order they apply:
 | `0004_hardening.sql` | One title per account, indexes, deleting a user deletes their data, no unused privileges |
 | `0005_delete_account.sql` | `delete_my_account()`: lets a signed-in user delete their own account (Settings → Delete account) |
 | `0006_invite_only.sql` | Marks every existing account as having its own password (see [Letting someone in](#letting-someone-in)) |
+| `0007_viewings.sql` | Rewatches: a `viewings` table (each time a movie was watched), one viewing per movie already watched, and the rules keeping `movies.watched_date` the latest viewing |
 
 The data itself isn't here: that's what **Settings → Your Data → Export
 data** is for (a `.slate` file per account).

@@ -96,7 +96,7 @@ directly.
 
 ## The live Supabase project
 
-- Migrations `0001`–`0006` in `supabase/migrations/` have all been applied
+- Migrations `0001`–`0007` in `supabase/migrations/` have all been applied
   to the live project. **Never re-run `0006_invite_only.sql`**: it would mark
   accounts made by hand as already having their own password.
 - Test a new migration on a throwaway local Postgres before the owner runs
@@ -119,7 +119,8 @@ directly.
 
 - Everything so far is in `main`: invite-only access, the welcome-email
   tool, the review note redesign, the trailer button that waits, disabled,
-  search + filters, and where to watch.
+  search + filters, where to watch, and rewatches of movies (all three
+  stages).
 - Search and filters (`js/librarySearch.js`) cover Movies, Shows, Movies To
   Watch and the Shows Queue; the owner chose to leave collections for later.
   Their decisions:
@@ -139,10 +140,40 @@ directly.
      `watch/providers/regions`; the owner redeployed the live function with
      them. Any later change to `supabase/functions/tmdb/index.ts` needs the
      same redeploy (its README says how).
-  2. **Rewatches** (movies first; shows later, designed apart): a new
-     viewings table (date + optional note), backfilled with one viewing per
-     watched movie; `watched_date` stays the latest viewing so sorts, stats
-     and filters keep working; the `.slate` backup must carry viewings.
+  2. **Rewatches** (movies only for now; shows get planned apart once
+     movies work well). Stages 1 (`0007_viewings.sql`, applied live: one
+     viewing per watched movie, counts checked) and 2 (the app,
+     `js/viewings.js`) are done. The database keeps
+     `movies.watched_date` = the latest viewing, refuses to drop a movie's
+     last viewing or clear its date, and turns a direct `watched_date`
+     write (the current app, a v1 `.slate`) into the matching viewing — so
+     it's safe to apply before the app's new code. The owner's decisions:
+     - one rating and one review per movie (their current opinion); each
+       viewing is just a date. No notes per viewing (the owner tried them
+       and didn't want them; the review covers that): the earliest viewing
+       shows a fixed, app-set "The first time you saw this movie" instead.
+       The `viewings.note` column stays in the database, unused;
+     - a watched movie can never lose its date: Edit changes it but can't
+       empty it, and the only way back is deleting the movie;
+     - viewings can be deleted with a strong confirmation (type the title),
+       except the last one;
+     - the detail window shows the latest date; with more than one
+       viewing, a "N viewings" button lists them, and picking one swaps the
+       window's content to that viewing (date, save, delete, back);
+       with a single viewing, Edit holds its date;
+     - "↻ Watched it again" beside Edit adds one; cards show ×N;
+     - Time watched counts every viewing, plus a Rewatches stat; the
+       "Watched in" filter matches any viewing's year;
+     - `.slate` goes to version 2 carrying viewings; version 1 files still
+       import (one viewing per watched movie).
+     Stage 3 is done too: `.slate` version 2 lists each movie's viewings
+     (version 1 files still import, one viewing per watched movie), Replace
+     brings them in and its undo puts them back, Time watched counts every
+     viewing, a Rewatches stat shows once there's one, and "Watched in"
+     matches any viewing's year. Replace had broken when 0007 went live
+     (a movie watched in the account but not in the file can't lose its
+     date): such a movie is now deleted and recreated on the same id.
+     Nothing of this stage needs a migration or a redeploy.
   3. **Import from other apps:** IMDb (CSV with IMDb ids → TMDB `find`),
      Letterboxd (ZIP of CSVs, title + year matching, diary rewatches),
      Trakt (JSON with TMDB ids); TV Time only after seeing a real export.

@@ -62,6 +62,27 @@ function openDeleteConfirm(table, row) {
   if (watched) confirmTypedInput.focus();
 }
 
+// Deleting one of a movie's viewings (js/viewings.js): always asked, and
+// only once the movie's title is typed, whatever "Confirm before deleting"
+// says — a viewing can't be brought back. `run` does the delete and
+// resolves to the error, or null.
+function openViewingDeleteConfirm(movie, viewing, run) {
+  const title = movie.title ?? "Untitled";
+  pendingDelete = { run };
+  requiredTypedTitle = title;
+  confirmModalPanel.classList.add("confirm-danger");
+  confirmWarningIcon.classList.remove("hidden");
+  confirmTypedCheck.classList.remove("hidden");
+  confirmHeading.textContent = "Delete this viewing";
+  confirmText.innerHTML = `This deletes the time you watched <strong>"${escapeHtml(title)}"</strong> on <strong>${formatDate(viewing.watched_on)}</strong>. It can't be undone. If you're sure, type <strong>"${escapeHtml(title)}"</strong> below and press Delete.`;
+  confirmTypedInput.value = "";
+  confirmTypedInput.placeholder = title;
+  confirmYes.disabled = true;
+  confirmError.classList.add("hidden");
+  confirmModal.classList.remove("hidden");
+  confirmTypedInput.focus();
+}
+
 function closeConfirmModal() {
   confirmModal.classList.add("hidden");
 }
@@ -82,7 +103,12 @@ confirmYes.addEventListener("click", async () => {
   confirmYes.disabled = true;
   confirmYes.textContent = "Deleting…";
 
-  const error = await deleteRecord(pendingDelete.table, pendingDelete.row);
+  const error = pendingDelete.run
+    ? await pendingDelete.run().then((err) => {
+        if (!err) closeConfirmModal();
+        return err;
+      })
+    : await deleteRecord(pendingDelete.table, pendingDelete.row);
 
   confirmYes.disabled = false;
   confirmYes.textContent = "Yes, delete";

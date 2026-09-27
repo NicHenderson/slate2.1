@@ -60,6 +60,11 @@ function subscribeRealtime() {
       { event: "*", schema: "public", table: "collection_items" },
       (payload) => handleCollectionChange("collectionItems", payload)
     )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "viewings" },
+      handleViewingChange
+    )
     .subscribe((status, err) => {
       if (status === "SUBSCRIBED") console.log("Realtime connected");
       if (err) console.error("Realtime error:", err.message);
