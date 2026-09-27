@@ -23,7 +23,8 @@
    drawn needs drawing again. */
 
 const SLATE_LANGUAGES = {
-  en: { name: "English", locale: "en-US", strings: {} },
+  // tmdb: the language TMDB answers searches and details in.
+  en: { name: "English", locale: "en-US", tmdb: "en-US", strings: {} },
   ...(window.SLATE_LANGUAGES ?? {}),
 };
 
@@ -46,6 +47,7 @@ const LANGUAGE = pickLanguage();
 const LOCALE = SLATE_LANGUAGES[LANGUAGE].locale;
 const STRINGS = SLATE_LANGUAGES[LANGUAGE].strings;
 const PLURALS = new Intl.PluralRules(LOCALE);
+const TMDB_LANGUAGE = SLATE_LANGUAGES[LANGUAGE].tmdb ?? "en-US";
 document.documentElement.lang = LANGUAGE;
 
 function setLanguage(code) {

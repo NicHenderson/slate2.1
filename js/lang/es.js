@@ -9,6 +9,7 @@ window.SLATE_LANGUAGES = {
   es: {
     name: "Español",
     locale: "es",
+    tmdb: "es-MX", // Latin American titles and synopses: the owner's choice
     strings: {
       "Adding…": "Agregando…",
       "Added": "Agregada",

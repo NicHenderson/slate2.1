@@ -106,6 +106,16 @@ Deno.test("search: asks TMDB with the key, in English, query encoded", async () 
   assertEquals(url.searchParams.get("query"), "Twin Peaks & co");
 });
 
+Deno.test("in Latin American Spanish when asked; any other language is English", async () => {
+  const { deps, calls } = setup();
+  await handle(post({ path: "search/movie", query: "alien", language: "es-MX" }), deps);
+  await handle(post({ path: "movie/348", language: "es-MX" }), deps);
+  await handle(post({ path: "movie/348", language: "fr-FR" }), deps);
+  await handle(post({ path: "movie/348", language: "es-MX&api_key=other" }), deps);
+  assertEquals(calls.map((c) => new URL(c).searchParams.get("language")), ["es-MX", "es-MX", "en-US", "en-US"]);
+  assertEquals(calls.every((c) => new URL(c).searchParams.getAll("api_key").join() === KEY), true);
+});
+
 Deno.test("details and videos, without a query", async () => {
   const { deps, calls } = setup();
   assertEquals((await handle(post({ path: "movie/348", query: "ignored" }), deps)).status, 200);

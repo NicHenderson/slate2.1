@@ -84,4 +84,30 @@ test.describe("in a Spanish browser", () => {
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
   });
+
+  // What's saved stays as it was added: a title added in Spanish keeps
+  // TMDB's Spanish name (and, TMDB having no Spanish synopsis, its English
+  // one); genres are saved in English, one filter option per genre, and
+  // shown in the page's language. Titles added before stay as they were.
+  test("a title added in Spanish is saved as TMDB names it in Spanish; genres saved in English, shown in Spanish", async ({ page, backend }) => {
+    await logIn(page);
+    await page.click('.nav-btn[data-section="movies-towatch"]');
+    await page.locator("#movies-towatch .add-btn").click();
+    await page.fill("#modal-input", "origen");
+    await page.click("#modal-search-btn");
+    await expect(page.locator("#modal-results .tmdb-row-title")).toHaveText(["El origen"]);
+    await page.locator("#modal-results .row-check").check();
+    await page.click("#batch-add-btn");
+    await expect.poll(() => backend.db.movies.find((m) => m.tmdb_id === 27205)).toMatchObject({
+      title: "El origen",
+      synopsis: "A thief who steals corporate secrets through dreams.",
+      genres: "Action, Science Fiction, Adventure",
+    });
+
+    await page.locator("#grid-movies-towatch .card", { hasText: "El origen" }).click();
+    await expect(page.locator("#detail-modal .detail-genre-line")).toHaveText("Acción · Ciencia ficción · Aventura");
+    await page.keyboard.press("Escape");
+    await page.click('.nav-btn[data-section="movies-watched"]');
+    await expect(page.locator("#grid-movies-watched .card-title")).toHaveText(["Alien"]);
+  });
 });

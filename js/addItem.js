@@ -53,13 +53,14 @@ function buildRecord(type, details) {
 
   const base = {
     tmdb_id: details.id,
+    // In the language the page was in: saved as it was added.
     title: details.title ?? details.name ?? "Untitled",
     poster: details.poster_path
       ? `https://image.tmdb.org/t/p/w500${details.poster_path}`
       : null,
     synopsis: details.overview || null,
     release_year: date ? Number(date.slice(0, 4)) : null,
-    genres: (details.genres ?? []).map((g) => g.name).join(", ") || null,
+    genres: (details.genres ?? []).map(englishGenre).join(", ") || null,
     rating: null,
     review: null,
   };

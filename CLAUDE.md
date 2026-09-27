@@ -224,10 +224,16 @@ directly.
      now puts what doesn't fit on a second row instead of overlapping.
   3. ~~German and Italian~~ — dropped for the launch.
   4. **TMDB's data in the language**, before the launch (the owner's
-     choice). Part 1 done: genres, saved in English, show through a table
-     (`GENRE_NAMES` in `js/detailModal.js`). Part 2 (synopses, search
-     results, maybe titles) needs the `tmdb` function to take a language,
-     so a redeploy.
+     choice) — done, not merged. Genres are saved in English (by TMDB id,
+     `TMDB_GENRES`) and shown translated (`GENRE_NAMES`), so one genre is
+     one filter option. Searches and details come in the page's language:
+     Spanish is TMDB's Latin American (`es-MX`, the owner's choice). The
+     owner decided that **titles and synopses are saved in the language
+     Slate is in when they're added, and always shown as saved** (a
+     library can mix English and Spanish titles). A synopsis TMDB hasn't
+     translated comes from its English details. **Pending: the owner
+     redeploys the `tmdb` function** (it now takes `language`); until
+     then TMDB keeps answering in English, and nothing breaks.
 - **Publishing on Cloudflare Pages** (free, chosen over Netlify and
   Vercel). The steps:
   1. Connect the GitHub repo. There's no build command, and the output
