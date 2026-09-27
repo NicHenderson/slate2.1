@@ -59,7 +59,7 @@ function pendingRows() {
 
 function libraryRowHtml(row) {
   const poster = row.poster
-    ? `<img class="add-poster" src="${row.poster}" alt="" loading="lazy" />`
+    ? `<img class="add-poster" src="${escapeHtml(row.poster)}" alt="" loading="lazy" />`
     : `<div class="add-poster add-poster-empty"></div>`;
   const selected = collectionAddMode && librarySelection.has(row.id);
   return `

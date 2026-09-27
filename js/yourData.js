@@ -183,10 +183,11 @@ const optText = (v, max = 20000) => (typeof v === "string" && v.trim() ? v.slice
 const optDate = (v) => (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null);
 const optTimestamp = (v) => (typeof v === "string" && !Number.isNaN(Date.parse(v)) ? v : null);
 const optRating = (v) => (typeof v === "number" && v >= 0 && v <= 10 ? v : null);
-// Only TMDB's own image host: anything else would be the file making the
-// page load whatever it likes.
+// Only an image on TMDB's own host, as Slate saves them: anything else
+// would be the file making the page load whatever it likes (or, with a
+// quote in it, slipping markup in).
 const optPoster = (v) =>
-  typeof v === "string" && v.startsWith("https://image.tmdb.org/") ? v : null;
+  typeof v === "string" && /^https:\/\/image\.tmdb\.org\/[\w/.-]+$/.test(v) ? v : null;
 
 const byOldestViewing = (a, b) =>
   a.watched_on.localeCompare(b.watched_on) || (a.created_at ?? "").localeCompare(b.created_at ?? "");

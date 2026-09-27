@@ -51,16 +51,25 @@ test("deleting a watched title asks for its name first; a watchlist one just ask
   await expect.poll(() => backend.db.movies.length).toBe(0);
 });
 
-// Regression: reviews were put into the page as HTML, so one carrying
-// markup (say, from an imported .slate) ran in the detail window.
-test("a review is shown as text, never run as HTML", async ({ page, backend }) => {
+// Regression: reviews, genres and posters were put into the page as HTML,
+// so markup in one (say, from an imported .slate) ran in the page.
+test("a review, genres and a poster are shown as text, never run as HTML", async ({ page, backend }) => {
   const alien = backend.db.movies.find((m) => m.tmdb_id === 348);
   alien.review = '<img src="x" onerror="window.__pwned = true">Loved it';
+  alien.genres = "Horror<img src=x onerror=window.__pwned=1>";
+  alien.poster = 'https://image.tmdb.org/t/p/w500/a.png" onload="window.__pwned = 2';
   await logIn(page);
   await page.click('.nav-btn[data-section="movies-watched"]');
   await page.locator("#grid-movies-watched .card", { hasText: "Alien" }).click();
   await expect(page.locator("#detail-modal .detail-review")).toHaveText('<img src="x" onerror="window.__pwned = true">Loved it');
   await expect(page.locator("#detail-modal .detail-review img")).toHaveCount(0);
+  await expect(page.locator("#detail-modal .detail-genre-line")).toHaveText("Horror<img src=x onerror=window.__pwned=1>");
+  await page.locator('#detail-modal [data-action="edit"]').click(); // its poster again
+  await page.click("#update-cancel");
+  await page.keyboard.press("Escape");
+  await page.click('.nav-btn[data-section="collections"]'); // and on its collection's cover
+  await expect(page.locator("#grid-collections .booklet-stamp img").first()).toBeVisible();
+  await page.waitForTimeout(300);
   expect(await page.evaluate(() => window.__pwned)).toBeUndefined();
 });
 

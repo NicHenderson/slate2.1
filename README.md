@@ -64,7 +64,7 @@ your data and don't break when your password does.
 | --- | --- |
 | `smoke.spec.js` | Landing page, logging in and out, adding a title from TMDB |
 | `auth.spec.js` | Requesting access, forgot password, the reset link, expired links |
-| `library.spec.js` | Marking titles watched, deleting safely, reviews shown as text |
+| `library.spec.js` | Marking titles watched, deleting safely, reviews, genres and posters shown as text |
 | `customOrder.spec.js` | Drag and drop in Custom order, and the drag bugs it once had |
 | `viewings.spec.js` | Rewatches: adding, changing and deleting a movie's viewings, a watched movie never losing its date, and every viewing counting in the stats and the "Watched in" filter |
 | `whereToWatch.spec.js` | Where to watch titles not watched yet, by country |

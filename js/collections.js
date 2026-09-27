@@ -84,7 +84,7 @@ function collectionCoverHtml(col, posters) {
   const slots = posters
     .map((p) =>
       p
-        ? `<img src="${p}" alt="" loading="lazy" />`
+        ? `<img src="${escapeHtml(p)}" alt="" loading="lazy" />`
         : `<div class="stamp-slot-empty"></div>`
     )
     .join("");
@@ -219,7 +219,7 @@ function colItemCardHtml(item) {
   if (!resolved) return "";
   const { row, table } = resolved;
   const poster = row.poster
-    ? `<img class="card-poster" src="${row.poster}" alt="" loading="lazy" />`
+    ? `<img class="card-poster" src="${escapeHtml(row.poster)}" alt="" loading="lazy" />`
     : `<div class="card-poster card-poster-empty"></div>`;
   const status = itemStatus(table, row);
   const badge = STATUS_BADGES[status];

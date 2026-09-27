@@ -64,7 +64,7 @@ function detailDurationLine(table, row) {
 
 function renderDetail(cfg, row) {
   detailPoster.innerHTML = row.poster
-    ? `<img class="detail-poster-img" src="${row.poster}" alt="" />`
+    ? `<img class="detail-poster-img" src="${escapeHtml(row.poster)}" alt="" />`
     : `<div class="detail-poster-img detail-poster-empty"></div>`;
 
   const genreLine = parseGenres(row.genres).join(" · ");
@@ -73,7 +73,7 @@ function renderDetail(cfg, row) {
     <div class="detail-head">
       <div class="detail-head-left">
         <h2 class="detail-title">${escapeHtml(row.title ?? t("Untitled"))}</h2>
-        ${genreLine ? `<p class="detail-genre-line">${genreLine}</p>` : ""}
+        ${genreLine ? `<p class="detail-genre-line">${escapeHtml(genreLine)}</p>` : ""}
       </div>
       <div class="detail-meta">
         <p class="detail-meta-year">${row.release_year ?? "—"}</p>

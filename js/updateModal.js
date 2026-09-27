@@ -52,7 +52,7 @@ function openMarkAsWatchedModal(row, isNewInsert = false) {
   document.getElementById("update-movie-meta").textContent =
     `${row.release_year ?? "—"} · ${formatRuntime(row.duration)}`;
   document.getElementById("update-poster").innerHTML = row.poster
-    ? `<img class="update-poster-img" src="${row.poster}" alt="" />`
+    ? `<img class="update-poster-img" src="${escapeHtml(row.poster)}" alt="" />`
     : `<div class="update-poster-img update-poster-empty"></div>`;
   document
     .getElementById("update-delete")

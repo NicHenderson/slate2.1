@@ -219,7 +219,7 @@ function startedAgoHtml(row) {
 // extra: markup for under the title (the rating, a "Started 12d ago" line).
 function cardHtml(item, showRating = false, extra = "") {
   const poster = item.poster
-    ? `<img class="card-poster" src="${item.poster}" alt="" loading="lazy" />`
+    ? `<img class="card-poster" src="${escapeHtml(item.poster)}" alt="" loading="lazy" />`
     : `<div class="card-poster card-poster-empty"></div>`;
   const rating = showRating
     ? `<div class="card-rating">${starsHtml(item.rating)}</div>`
