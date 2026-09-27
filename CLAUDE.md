@@ -54,6 +54,19 @@ directly.
 - When a bug turns up while working on something else, tell them before
   fixing it.
 
+## Since the launch: how changes reach people
+
+- `main` **is** what people use: every merge publishes myslate.pages.dev
+  in about a minute. Work stays on a branch, tested locally, until the
+  owner says "súbelo a main", as before. An open tab keeps the old code
+  until it's reloaded.
+- The local copy talks to the **live** Supabase project: testing locally
+  with a real account changes real data. Test with the owner's own
+  account, never a friend's.
+- Migrations and `tmdb` function redeploys reach everyone at once, before
+  the app's new code does. Write them so the published app keeps working
+  with them (as `0007_viewings.sql` was).
+
 ## Code conventions
 
 - **No build step, no framework.** The `js/` files are classic scripts
@@ -210,8 +223,8 @@ directly.
      owner: the watched date for IMDb (it only has the date rated), films
      Letterboxd has as watched but not in the diary, titles already in
      Slate, and where shows go.
-- Translation is done; **next: publish.** **Slate launches in English and
-  Spanish only** (the owner's decision); German and Italian are out for
+- Translation is done, and Slate is published (below). **Slate launches in
+  English and Spanish only** (the owner's decision); German and Italian are out for
   now, and adding a language later only takes its dictionary.
   The owner authorized the stages one at a time:
   1. **The base** — done: `js/i18n.js`, every string through
@@ -251,12 +264,26 @@ directly.
   The whole repo root is served, docs and tests included: the repo is
   public anyway and holds no secrets. Free plan (Sept. 2026): 500 builds a
   month, 20,000 files and 25 MiB per file. The steps:
-  1. Connect the GitHub repo, production branch `main`. There's no build
-     command, and the output directory is the repo root.
-  2. Add the new address to Supabase → Authentication → URL Configuration:
-     the Site URL and the Redirect URLs, so password-reset links work.
-  3. Update the address in Web3Forms' form settings.
-  4. Put the address in the welcome-email tool (it remembers it).
+  1. Done: **Slate is live at https://myslate.pages.dev** (Pages project
+     `myslate`, created through "Continue to Pages", which Cloudflare now
+     calls the legacy workflow). Production branch `main`, no build
+     command, the repo root as output: every merge into `main` publishes.
+     `tools/welcome-email.html` is still used from the local server.
+  2. Done: Supabase → Authentication → URL Configuration has Site URL
+     `https://myslate.pages.dev`, and Redirect URLs
+     `https://myslate.pages.dev/**` plus `http://localhost:8080/**` and
+     `http://127.0.0.1:8080/**` for local testing.
+  3. Web3Forms: on the free plan it has no domain setting (restricting
+     domains is a Pro feature); the form's "Website URL" (Settings → Form
+     Details) is only a label, set to the new address. The subject and
+     sender name its settings show are overridden by what `js/auth.js`
+     sends, and its Redirect URL isn't used (Slate posts with fetch). Some
+     sources said the free plan blocks free subdomains like `.pages.dev`;
+     the owner's own test says otherwise: a request sent from
+     myslate.pages.dev arrived.
+  4. The owner puts the address in the welcome-email tool (it remembers
+     it). Password reset from myslate.pages.dev was tested by the owner
+     and works.
   5. Done (`_headers` at the repo root): the simple security headers only:
      `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`
      and `X-Content-Type-Options: nosniff`. The owner and Claude decided
