@@ -212,10 +212,15 @@ directly.
   The owner authorized the stages one at a time:
   1. **The base** — done, not merged: `js/i18n.js`, every string through
      `t()`/`tn()`, the tests. English looks exactly as before.
-  2. Spanish, which the owner reviews themselves; the language picker
-     (Settings, landing and login) comes with it. Numbers with decimals
-     ("7.8") still need the locale's format.
-  3. German and Italian.
+  2. **Spanish** — done, not merged, waiting for the owner's review:
+     `js/lang/es.js` (neutral Spanish, "tú"; película / serie / colección,
+     Por ver / Viendo / Visto / Abandonadas, calificación, reseña,
+     visionado, "revisionados" for rewatches, Ajustes). Language pickers in
+     Settings → Defaults, the landing page's footer and under the login
+     card; the choice is per device (not saved to the account). Decimals
+     follow the language (`formatDecimal`: "7,8"). The header stats strip
+     now puts what doesn't fit on a second row instead of overlapping.
+  3. German and Italian, in the same terms once Spanish is approved.
   4. TMDB's data in the language (genres, synopses, search results): the
      owner said yes, to do when it's time. Needs the `tmdb` function to
      pass a language (a redeploy); genres saved in English need a table.

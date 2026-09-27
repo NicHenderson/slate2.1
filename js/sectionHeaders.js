@@ -40,7 +40,7 @@ function ratingItem(rows, { showCount = true } = {}) {
   if (!rated.length) return hsItem("–", t("No ratings yet"));
   const avg = rated.reduce((sum, r) => sum + r.rating, 0) / rated.length;
   return hsItem(
-    `${avg.toFixed(1)}<small>/10</small>`,
+    `${formatDecimal(avg)}<small>/10</small>`,
     showCount ? t("Avg rating · {n} rated", { n: rated.length }) : t("Avg rating")
   );
 }

@@ -67,3 +67,21 @@ test("nothing on the main screens escapes translation", async ({ page }) => {
 
   expect(Object.fromEntries(Object.entries(screens).filter(([, found]) => found.length))).toEqual({});
 });
+
+test.describe("in a Spanish browser", () => {
+  test.use({ locale: "es-CL" });
+
+  test("Slate starts in Spanish; English picked in Settings sticks on this device", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("lang", "es");
+    await expect(page.locator(".lp-nav-actions")).toContainText("Iniciar sesión");
+    await logIn(page);
+    await page.click('.nav-btn[data-section="settings"]');
+    await expect(page.locator("#setting-language")).toHaveValue("es");
+    await Promise.all([page.waitForEvent("load"), page.selectOption("#setting-language", "en")]);
+    await expect(page.locator("#app")).toBeVisible();
+    await expect(page.locator('.nav-btn[data-section="settings"]')).toHaveText("Settings");
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  });
+});

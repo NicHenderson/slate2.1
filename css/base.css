@@ -342,3 +342,52 @@ img {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ---------- the language picker (js/i18n.js) ----------
+   On the landing page and under the login card; Settings has its own, as
+   one of its fields. */
+
+.lang-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.lang-picker:hover,
+.lang-picker:focus-within {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.lang-picker svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.lang-picker select {
+  appearance: none;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lang-picker select:focus-visible {
+  outline: none;
+}
+
+.lang-picker option {
+  color: var(--text);
+  background: var(--bg-elevated, var(--bg));
+}

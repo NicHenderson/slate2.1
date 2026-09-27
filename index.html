@@ -31,12 +31,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Patrick+Hand&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/base.css?v=27ef0068" />
+  <link rel="stylesheet" href="css/base.css?v=34e685e8" />
   <link rel="stylesheet" href="css/sidebar.css?v=b0c4cd07" />
-  <link rel="stylesheet" href="css/content.css?v=8428c386" />
+  <link rel="stylesheet" href="css/content.css?v=42b1b03a" />
   <link rel="stylesheet" href="css/cards.css?v=8bb24eb5" />
   <link rel="stylesheet" href="css/modal.css?v=48351daa" />
-  <link rel="stylesheet" href="css/auth.css?v=5310d2de" />
+  <link rel="stylesheet" href="css/auth.css?v=17c2cd2c" />
   <link rel="stylesheet" href="css/landing.css?v=2e15fdb2" />
   <link rel="stylesheet" href="css/transitions.css?v=bf37ef65" />
   <link rel="stylesheet" href="css/settings.css?v=76a3748b" />
@@ -107,7 +107,7 @@
           </article>
           <div class="hstats lp-hb-strip lp-float">
             <div class="hs-item"><span class="hs-value">312h</span><span class="hs-label">Time watched</span></div>
-            <div class="hs-item"><span class="hs-value">8.1<small>/10</small></span><span class="hs-label">Avg rating</span></div>
+            <div class="hs-item"><span class="hs-value"><span data-lp-decimal>8.1</span><small>/10</small></span><span class="hs-label">Avg rating</span></div>
             <div class="hs-item hs-text"><span class="hs-value">Drama</span><span class="hs-label">Top genre · 41%</span></div>
           </div>
           <div class="lp-note lp-hb-note lp-float"><p>Tonight: something scary? 🎃</p></div>
@@ -407,7 +407,7 @@
           <div class="hstats lp-stats-strip">
             <div class="hs-item"><span class="hs-value" data-lp-count="184">184</span><span class="hs-label">Movies watched</span></div>
             <div class="hs-item"><span class="hs-value"><span data-lp-count="312">312</span>h</span><span class="hs-label">Time watched</span></div>
-            <div class="hs-item"><span class="hs-value"><span data-lp-count="7.8" data-lp-decimals="1">7.8</span><small>/10</small></span><span class="hs-label">Avg rating</span></div>
+            <div class="hs-item"><span class="hs-value"><span data-lp-count="7.8" data-lp-decimals="1" data-lp-decimal>7.8</span><small>/10</small></span><span class="hs-label">Avg rating</span></div>
             <div class="hs-item hs-extremes">
               <span class="extreme-row"><span class="extreme-arrow">▲</span><span class="extreme-title" translate="no">Small Hours</span><span class="extreme-rating">10/10</span><span class="extreme-ties">+2</span></span>
               <span class="extreme-row"><span class="extreme-arrow">▼</span><span class="extreme-title" translate="no">Static Hearts</span><span class="extreme-rating">4/10</span></span>
@@ -583,6 +583,10 @@
           <img class="lp-brand-logo" src="img/Slate-logo.png" alt="" />
           <span class="lp-brand-name" translate="no">Slate</span>
         </a>
+        <label class="lang-picker">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/></svg>
+          <select data-language-picker translate="no"></select>
+        </label>
         <nav class="lp-footer-links" aria-label="Footer">
           <a href="#lp-features" data-lp-scroll>Features</a>
           <a href="#lp-faq" data-lp-scroll>FAQ</a>
@@ -729,6 +733,10 @@
           <button type="button" class="auth-toggle-btn" id="auth-toggle-btn">Request access</button>
         </p>
       </div>
+      <label class="lang-picker auth-lang">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/></svg>
+        <select data-language-picker translate="no"></select>
+      </label>
     </div>
   </div>
 
@@ -1135,6 +1143,14 @@
               <h2 class="settings-tile-title">Defaults</h2>
               <div class="settings-fields">
                 <div class="settings-field">
+                  <label class="settings-row-title" for="setting-language">Language</label>
+                  <p class="settings-row-hint">The language Slate is in on this device.</p>
+                  <div class="settings-select-wrap">
+                    <select class="settings-select" id="setting-language" data-language-picker translate="no"></select>
+                  </div>
+                </div>
+
+                <div class="settings-field">
                   <label class="settings-row-title" for="setting-open-to">Open to</label>
                   <p class="settings-row-hint">The page you land on when you log in.</p>
                   <div class="settings-select-wrap">
@@ -1494,7 +1510,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-  <script src="js/i18n.js?v=8851dd89"></script>
+  <script src="js/lang/es.js?v=105de636"></script>
+  <script src="js/i18n.js?v=051107ad"></script>
   <script src="js/escapeHtml.js?v=28c1feb8"></script>
   <script src="js/viewTransitions.js?v=d587d807"></script>
   <script src="js/config.js?v=7bbe3fe4"></script>
@@ -1511,7 +1528,7 @@
   <script src="js/iconData.js?v=051d09a4"></script>
   <script src="js/icons.js?v=3a450da2"></script>
   <script src="js/iconPicker.js?v=60949f19"></script>
-  <script src="js/collections.js?v=4e3c42b6"></script>
+  <script src="js/collections.js?v=6314b5ec"></script>
   <script src="js/infoModal.js?v=46ca4a09"></script>
   <script src="js/detailModal.js?v=b53404ca"></script>
   <script src="js/starsInput.js?v=4457c4a6"></script>
@@ -1526,10 +1543,10 @@
   <script src="js/data.js?v=e952d8ac"></script>
   <script src="js/sortMenu.js?v=477f7128"></script>
   <script src="js/watchlistOrder.js?v=dfb1f50a"></script>
-  <script src="js/sectionHeaders.js?v=5a62b2e0"></script>
+  <script src="js/sectionHeaders.js?v=201b105a"></script>
   <script src="js/yourData.js?v=30b17cab"></script>
   <script src="js/deleteAccount.js?v=8000d345"></script>
-  <script src="js/landing.js?v=617e1404"></script>
+  <script src="js/landing.js?v=24efe549"></script>
   <script src="js/auth.js?v=43a43f19"></script>
 </body>
 </html>

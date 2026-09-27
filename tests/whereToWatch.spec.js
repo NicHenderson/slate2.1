@@ -3,7 +3,7 @@
 // for the browser's country or the one picked in Settings.
 const { test, expect, logIn } = require("./support/fixtures");
 
-test.use({ locale: "es-CL" }); // a browser in Chile
+test.use({ locale: "en-CL" }); // a browser in Chile (in English: Slate would be in Spanish otherwise)
 
 test("a title to watch shows where to watch it in the browser's country, below its buttons; a watched one doesn't", async ({ page }) => {
   await logIn(page);

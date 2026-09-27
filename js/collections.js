@@ -330,7 +330,7 @@ function collectionStatsHtml(colId) {
       </div>
     </div>
     <div class="cs-item">
-      <span class="cs-value">${avg == null ? "–" : `${avg.toFixed(1)}<small>/10</small>`}</span>
+      <span class="cs-value">${avg == null ? "–" : `${formatDecimal(avg)}<small>/10</small>`}</span>
       <span class="cs-label">${avg == null ? t("No ratings") : t("Avg rating · {n} rated", { n: rated.length })}</span>
     </div>
     <div class="cs-item cs-extremes">${collectionExtremesHtml(rated)}</div>`;

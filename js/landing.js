@@ -42,6 +42,11 @@ syncNavBackdrop();
 
 /* ---------- count-up numbers (the stats mockup) ---------- */
 
+// The page's own decimals, as the language writes them ("8,1").
+landingEl.querySelectorAll("[data-lp-decimal]").forEach((el) => {
+  el.textContent = formatDecimal(parseFloat(el.textContent));
+});
+
 function countUp(root) {
   if (lpReduceMotion()) return; // the markup already holds the final values
   root.querySelectorAll("[data-lp-count]").forEach((el) => {
@@ -52,7 +57,7 @@ function countUp(root) {
     const tick = (now) => {
       const progress = Math.min(1, (now - start) / duration);
       const eased = 1 - (1 - progress) ** 3;
-      el.textContent = (end * eased).toFixed(decimals);
+      el.textContent = formatDecimal(end * eased, decimals);
       if (progress < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);

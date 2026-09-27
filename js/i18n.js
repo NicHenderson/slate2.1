@@ -56,6 +56,12 @@ function setLanguage(code) {
   location.reload();
 }
 
+// A number with a set count of decimals, as the language writes it: "7.8"
+// in English, "7,8" in Spanish.
+function formatDecimal(value, digits = 1) {
+  return Number(value).toLocaleString(LOCALE, { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
 function fillIn(text, vars) {
   return vars ? text.replace(/\{(\w+)\}/g, (match, name) => (name in vars ? String(vars[name]) : match)) : text;
 }
@@ -121,3 +127,21 @@ function translateStatic() {
 }
 
 translateStatic();
+
+/* ---------- the pickers ----------
+
+   One on the landing page, one under the login card and one in Settings:
+   every language, each by its own name. The choice is this device's. */
+
+function initLanguagePickers() {
+  document.querySelectorAll("[data-language-picker]").forEach((select) => {
+    select.innerHTML = Object.entries(SLATE_LANGUAGES)
+      .map(([code, lang]) => `<option value="${code}" lang="${code}">${lang.name}</option>`)
+      .join("");
+    select.value = LANGUAGE;
+    if (!select.labels?.length) select.setAttribute("aria-label", t("Language"));
+    select.addEventListener("change", () => setLanguage(select.value));
+  });
+}
+
+initLanguagePickers();
