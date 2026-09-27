@@ -47,48 +47,48 @@ let authBusy = false;
 
 const AUTH_MODES = {
   login: {
-    eyebrow: "Welcome back",
-    title: "Log In",
-    submit: "Log In",
-    busy: "Logging in…",
-    toggleText: "Don't have an account?",
-    toggleBtn: "Request access",
+    eyebrow: t("Welcome back"),
+    title: t("Log In"),
+    submit: t("Log In"),
+    busy: t("Logging in…"),
+    toggleText: t("Don't have an account?"),
+    toggleBtn: t("Request access"),
   },
   request: {
-    eyebrow: "Invite-only for now",
-    title: "Request Access",
-    hint: "Slate is private for now. Tell us who you are, and once your account is ready we'll email you a temporary password to log in with.",
-    submit: "Send request",
-    busy: "Sending…",
-    toggleText: "Already have an account?",
-    toggleBtn: "Log In",
+    eyebrow: t("Invite-only for now"),
+    title: t("Request Access"),
+    hint: t("Slate is private for now. Tell us who you are, and once your account is ready we'll email you a temporary password to log in with."),
+    submit: t("Send request"),
+    busy: t("Sending…"),
+    toggleText: t("Already have an account?"),
+    toggleBtn: t("Log In"),
   },
   forgot: {
-    eyebrow: "Happens to everyone",
-    title: "Reset Password",
-    hint: "Enter the email you signed up with and we'll send you a link to choose a new password.",
-    submit: "Send reset link",
-    busy: "Sending…",
-    toggleText: "Remembered it?",
-    toggleBtn: "Log In",
+    eyebrow: t("Happens to everyone"),
+    title: t("Reset Password"),
+    hint: t("Enter the email you signed up with and we'll send you a link to choose a new password."),
+    submit: t("Send reset link"),
+    busy: t("Sending…"),
+    toggleText: t("Remembered it?"),
+    toggleBtn: t("Log In"),
   },
   reset: {
-    eyebrow: "Almost there",
-    title: "New Password",
-    hint: "Choose a new password for your Slate account.",
-    submit: "Save password",
-    busy: "Saving…",
-    toggleText: "Not you?",
-    toggleBtn: "Log out",
+    eyebrow: t("Almost there"),
+    title: t("New Password"),
+    hint: t("Choose a new password for your Slate account."),
+    submit: t("Save password"),
+    busy: t("Saving…"),
+    toggleText: t("Not you?"),
+    toggleBtn: t("Log out"),
   },
   choose: {
-    eyebrow: "Welcome to Slate",
-    title: "Choose Your Password",
-    hint: "You logged in with a temporary password. Choose your own to finish setting up your account — it's the one you'll use from now on.",
-    submit: "Save password",
-    busy: "Saving…",
-    toggleText: "Not you?",
-    toggleBtn: "Log out",
+    eyebrow: t("Welcome to Slate"),
+    title: t("Choose Your Password"),
+    hint: t("You logged in with a temporary password. Choose your own to finish setting up your account — it's the one you'll use from now on."),
+    submit: t("Save password"),
+    busy: t("Saving…"),
+    toggleText: t("Not you?"),
+    toggleBtn: t("Log out"),
   },
 };
 
@@ -147,7 +147,7 @@ function initPasswordToggle(inputId) {
     input.type = show ? "text" : "password";
     btn.classList.toggle("is-visible", show);
     btn.setAttribute("aria-pressed", String(show));
-    btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+    btn.setAttribute("aria-label", show ? t("Hide password") : t("Show password"));
   });
 }
 
@@ -164,7 +164,7 @@ function hidePasswordFields() {
     const btn = document.getElementById(`${input.id}-toggle`);
     btn.classList.remove("is-visible");
     btn.setAttribute("aria-pressed", "false");
-    btn.setAttribute("aria-label", "Show password");
+    btn.setAttribute("aria-label", t("Show password"));
   });
 }
 
@@ -337,8 +337,8 @@ function setAuthMode(mode) {
   authConfirmField.classList.toggle("hidden", !settingPassword(mode));
   authNoteField.classList.toggle("hidden", mode !== "request");
   authForgotBtn.classList.toggle("hidden", mode !== "login");
-  authPasswordLabel.textContent = settingPassword(mode) ? "New password" : "Password";
-  authConfirmLabel.textContent = settingPassword(mode) ? "Confirm new password" : "Confirm password";
+  authPasswordLabel.textContent = settingPassword(mode) ? t("New password") : t("Password");
+  authConfirmLabel.textContent = settingPassword(mode) ? t("Confirm new password") : t("Confirm password");
   authPassword.autocomplete = mode === "login" ? "current-password" : "new-password";
   authSubtitle.textContent = text.eyebrow;
   authTitle.textContent = text.title;
@@ -371,14 +371,14 @@ function syncSubmit() {
   const readyAt = resendReadyAt[authMode] ?? 0;
   const wait = Math.max(0, Math.ceil((readyAt - Date.now()) / 1000));
   authSubmit.disabled = authBusy || wait > 0;
-  authSubmit.textContent = authBusy ? text.busy : wait > 0 ? `Send again in ${wait}s` : text.submit;
+  authSubmit.textContent = authBusy ? text.busy : wait > 0 ? t("Send again in {n}s", { n: wait }) : text.submit;
 }
 
 function startResendCooldown(mode) {
   resendReadyAt[mode] = Date.now() + RESEND_COOLDOWN_S * 1000;
   clearInterval(resendTimer);
   resendTimer = setInterval(() => {
-    if (Object.values(resendReadyAt).every((t) => Date.now() >= t)) clearInterval(resendTimer);
+    if (Object.values(resendReadyAt).every((at) => Date.now() >= at)) clearInterval(resendTimer);
     syncSubmit();
   }, 1000);
   syncSubmit();
@@ -393,23 +393,23 @@ function validate() {
   const password = authPassword.value;
 
   if (authMode === "request" && !authName.value.trim()) {
-    setFieldError("auth-name-error", "Tell us your name.");
+    setFieldError("auth-name-error", t("Tell us your name."));
     ok = false;
   }
   if (!settingPassword(authMode) && !EMAIL_RE.test(email)) {
-    setFieldError("auth-email-error", "Enter a valid email address.");
+    setFieldError("auth-email-error", t("Enter a valid email address."));
     ok = false;
   }
   if (authMode === "forgot" || authMode === "request") return ok;
   if (password.length < 8) {
     setFieldError(
       "auth-password-error",
-      "Password must be at least 8 characters."
+      t("Password must be at least 8 characters.")
     );
     ok = false;
   }
   if (settingPassword(authMode) && authConfirm.value !== password) {
-    setFieldError("auth-confirm-error", "Passwords do not match.");
+    setFieldError("auth-confirm-error", t("Passwords do not match."));
     ok = false;
   }
   return ok;
@@ -440,14 +440,14 @@ authForm.addEventListener("submit", async (e) => {
       const { error } = await db.auth.signInWithPassword({ email, password });
       if (error) {
         // Never disclose which field was wrong.
-        showMessage("Incorrect email or password");
+        showMessage(t("Incorrect email or password"));
         return;
       }
       // onAuthStateChange handles the transition into the app.
     }
   } catch (err) {
     console.error("Auth error:", err.message);
-    showMessage("Something went wrong. Please try again.");
+    showMessage(t("Something went wrong. Please try again."));
   } finally {
     setBusy(false);
   }
@@ -464,15 +464,15 @@ async function sendResetLink(email) {
     const limited = error.status === 429 || /rate limit/i.test(error.message);
     showMessage(
       limited
-        ? "Too many emails were sent in a short while. Wait a few minutes and try again."
-        : "Couldn't send the email. Please try again."
+        ? t("Too many emails were sent in a short while. Wait a few minutes and try again.")
+        : t("Couldn't send the email. Please try again.")
     );
     if (!limited) console.error("Reset email error:", error.message);
     return;
   }
   startResendCooldown("forgot");
   showMessage(
-    "If there's a Slate account for that email, a link to choose a new password is on its way. Check your inbox — and the spam folder.",
+    t("If there's a Slate account for that email, a link to choose a new password is on its way. Check your inbox — and the spam folder."),
     false
   );
 }
@@ -480,7 +480,8 @@ async function sendResetLink(email) {
 const ACCESS_REQUEST_URL = "https://api.web3forms.com/submit";
 
 // Emailed to Slate's inbox, where accounts are handed out by hand. Nothing
-// is stored in Slate's database until then.
+// is stored in Slate's database until then. The email is for the owner, so
+// it stays in English whatever language the page is in.
 async function sendAccessRequest(email) {
   const name = authName.value.trim();
   const note = authNote.value.trim();
@@ -512,7 +513,7 @@ async function sendAccessRequest(email) {
     const result = await res.json().catch(() => ({}));
     if (!res.ok || !result.success) {
       console.error("Access request error:", res.status, result.message);
-      showMessage("Couldn't send your request. Please try again in a moment.");
+      showMessage(t("Couldn't send your request. Please try again in a moment."));
       return;
     }
   }
@@ -520,7 +521,10 @@ async function sendAccessRequest(email) {
   syncNoteCount();
   startResendCooldown("request");
   showMessage(
-    `Request sent! Every request is read by a person, so the answer isn't instant — it usually takes anywhere from a few hours to a day. We'll write to ${email} once your account is ready. Don't forget to check your spam folder if you can't find it.`,
+    t(
+      "Request sent! Every request is read by a person, so the answer isn't instant — it usually takes anywhere from a few hours to a day. We'll write to {email} once your account is ready. Don't forget to check your spam folder if you can't find it.",
+      { email }
+    ),
     false
   );
 }
@@ -531,14 +535,14 @@ async function updatePassword(password, sessionGoneMessage) {
   const { error } = await db.auth.updateUser({ password, data: { password_chosen: true } });
   if (!error) return true;
   if (error.code === "same_password") {
-    setFieldError("auth-password-error", "That's already your password — choose a different one.");
+    setFieldError("auth-password-error", t("That's already your password — choose a different one."));
   } else if (error.code === "weak_password") {
     setFieldError("auth-password-error", error.message);
   } else if (error.status === 401 || error.code === "session_not_found" || error.code === "session_expired") {
     showMessage(sessionGoneMessage);
   } else {
     console.error("Password update error:", error.message);
-    showMessage("Couldn't save your new password. Please try again.");
+    showMessage(t("Couldn't save your new password. Please try again."));
   }
   return false;
 }
@@ -546,14 +550,14 @@ async function updatePassword(password, sessionGoneMessage) {
 // First login: their own password replaces the temporary one, and the app
 // opens straight away — no need to log in again.
 async function saveChosenPassword(password) {
-  const saved = await updatePassword(password, "You've been signed out. Log out and log in again with your temporary password.");
+  const saved = await updatePassword(password, t("You've been signed out. Log out and log in again with your temporary password."));
   if (!saved) return;
   authForm.reset();
-  enterApp().then(() => showToast("Password saved. Welcome to Slate!"));
+  enterApp().then(() => showToast(t("Password saved. Welcome to Slate!")));
 }
 
 async function saveNewPassword(password) {
-  const saved = await updatePassword(password, "This reset link has run out. Log out and ask for a new one.");
+  const saved = await updatePassword(password, t("This reset link has run out. Log out and ask for a new one."));
   if (!saved) return;
   // Done: sign out everywhere (anyone else who was in the account is out
   // too — often the reason for a reset) and log in again with the new one.
@@ -561,7 +565,7 @@ async function saveNewPassword(password) {
   setRecoveryPending(false);
   authNotice = {
     email: data.session?.user?.email ?? "",
-    message: "Password updated. Log in with your new password.",
+    message: t("Password updated. Log in with your new password."),
   };
   history.replaceState(null, "", ROUTE_FOR_MODE.login);
   lastAuthRoute = "login";
@@ -638,7 +642,7 @@ function takeLinkError(signedIn) {
   return failed;
 }
 
-const LINK_EXPIRED = "That reset link has expired or was already used.";
+const LINK_EXPIRED = t("That reset link has expired or was already used.");
 
 db.auth.onAuthStateChange((event, session) => {
   const nextUserId = session?.user?.id ?? null;
@@ -689,7 +693,7 @@ db.auth.onAuthStateChange((event, session) => {
     authNotice = null;
     showGuestView().then(() => {
       setTimeout(teardownSession, 0);
-      if (linkFailed) showMessage(`${LINK_EXPIRED} Enter your email to get a new one.`);
+      if (linkFailed) showMessage(t("That reset link has expired or was already used. Enter your email to get a new one."));
       if (notice) {
         authEmail.value = notice.email;
         showMessage(notice.message, false);

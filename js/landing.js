@@ -50,10 +50,10 @@ function countUp(root) {
     const start = performance.now();
     const duration = 1300;
     const tick = (now) => {
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - (1 - t) ** 3;
+      const progress = Math.min(1, (now - start) / duration);
+      const eased = 1 - (1 - progress) ** 3;
       el.textContent = (end * eased).toFixed(decimals);
-      if (t < 1) requestAnimationFrame(tick);
+      if (progress < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
   });
@@ -102,7 +102,7 @@ lpSurpriseBtn.addEventListener("click", () => {
     lpSurpriseGrid.querySelectorAll(".lp-pick-tag").forEach((tag) => tag.remove());
     cards.forEach((c) => c.classList.remove("is-picked", "is-lifted"));
     card.classList.add("is-picked");
-    card.insertAdjacentHTML("afterbegin", `<span class="lp-pick-tag">Tonight's pick!</span>`);
+    card.insertAdjacentHTML("afterbegin", `<span class="lp-pick-tag">${t("Tonight's pick!")}</span>`);
   });
 });
 
@@ -111,11 +111,11 @@ lpSurpriseBtn.addEventListener("click", () => {
 const lpTabs = [...landingEl.querySelectorAll("[data-lp-tab]")];
 
 function selectLpTab(tab) {
-  lpTabs.forEach((t) => {
-    const on = t === tab;
-    t.classList.toggle("active", on);
-    t.setAttribute("aria-selected", String(on));
-    t.tabIndex = on ? 0 : -1;
+  lpTabs.forEach((other) => {
+    const on = other === tab;
+    other.classList.toggle("active", on);
+    other.setAttribute("aria-selected", String(on));
+    other.tabIndex = on ? 0 : -1;
   });
   landingEl.querySelectorAll("[data-lp-panel]").forEach((panel) => {
     panel.hidden = panel.dataset.lpPanel !== tab.dataset.lpTab;

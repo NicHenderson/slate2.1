@@ -12,7 +12,13 @@ const confirmCancel = document.getElementById("confirm-cancel");
 let pendingDelete = null;
 let requiredTypedTitle = null;
 
-const DELETE_NOUNS = { movies: "movie", shows: "show", collections: "collection" };
+// A whole sentence for each kind: in other languages "this" changes with
+// the noun.
+const DELETE_QUESTIONS = {
+  movies: (title) => t('Are you sure you want to delete this movie: "{title}"?', { title }),
+  shows: (title) => t('Are you sure you want to delete this show: "{title}"?', { title }),
+  collections: (title) => t('Are you sure you want to delete this collection: "{title}"?', { title }),
+};
 
 // A movie counts as watched once it has a watched_date; a show counts as
 // watched once it has actually been finished (not just started/watching).
@@ -29,13 +35,12 @@ function openDeleteConfirm(table, row) {
     deleteRecord(table, row).then((error) => {
       if (!error) return;
       console.error("Delete error:", error.message);
-      showToast("Could not delete — please try again.", true);
+      showToast(t("Could not delete — please try again."), true);
     });
     return;
   }
 
   pendingDelete = { table, row };
-  const noun = DELETE_NOUNS[table] ?? "item";
   const title = row.title ?? row.name;
   const watched = isAlreadyWatched(table, row);
 
@@ -45,15 +50,18 @@ function openDeleteConfirm(table, row) {
 
   if (watched) {
     requiredTypedTitle = title;
-    confirmHeading.textContent = "You've already watched this";
-    confirmText.innerHTML = `You've already watched <strong>"${escapeHtml(title)}"</strong> — deleting it now means losing your rating and review for good. If you're sure, type <strong>"${escapeHtml(title)}"</strong> below and press Delete.`;
+    confirmHeading.textContent = t("You've already watched this");
+    confirmText.innerHTML = t(
+      'You\'ve already watched <strong>"{title}"</strong> — deleting it now means losing your rating and review for good. If you\'re sure, type <strong>"{title}"</strong> below and press Delete.',
+      { title: escapeHtml(title) }
+    );
     confirmTypedInput.value = "";
     confirmTypedInput.placeholder = title;
     confirmYes.disabled = true;
   } else {
     requiredTypedTitle = null;
-    confirmHeading.textContent = "Delete";
-    confirmText.textContent = `Are you sure you want to delete this ${noun}: "${title}"?`;
+    confirmHeading.textContent = t("Delete");
+    confirmText.textContent = DELETE_QUESTIONS[table](title);
     confirmYes.disabled = false;
   }
 
@@ -67,14 +75,17 @@ function openDeleteConfirm(table, row) {
 // says — a viewing can't be brought back. `run` does the delete and
 // resolves to the error, or null.
 function openViewingDeleteConfirm(movie, viewing, run) {
-  const title = movie.title ?? "Untitled";
+  const title = movie.title ?? t("Untitled");
   pendingDelete = { run };
   requiredTypedTitle = title;
   confirmModalPanel.classList.add("confirm-danger");
   confirmWarningIcon.classList.remove("hidden");
   confirmTypedCheck.classList.remove("hidden");
-  confirmHeading.textContent = "Delete this viewing";
-  confirmText.innerHTML = `This deletes the time you watched <strong>"${escapeHtml(title)}"</strong> on <strong>${formatDate(viewing.watched_on)}</strong>. It can't be undone. If you're sure, type <strong>"${escapeHtml(title)}"</strong> below and press Delete.`;
+  confirmHeading.textContent = t("Delete this viewing");
+  confirmText.innerHTML = t(
+    'This deletes the time you watched <strong>"{title}"</strong> on <strong>{date}</strong>. It can\'t be undone. If you\'re sure, type <strong>"{title}"</strong> below and press Delete.',
+    { title: escapeHtml(title), date: formatDate(viewing.watched_on) }
+  );
   confirmTypedInput.value = "";
   confirmTypedInput.placeholder = title;
   confirmYes.disabled = true;
@@ -101,7 +112,7 @@ confirmYes.addEventListener("click", async () => {
   }
 
   confirmYes.disabled = true;
-  confirmYes.textContent = "Deleting…";
+  confirmYes.textContent = t("Deleting…");
 
   const error = pendingDelete.run
     ? await pendingDelete.run().then((err) => {
@@ -111,11 +122,11 @@ confirmYes.addEventListener("click", async () => {
     : await deleteRecord(pendingDelete.table, pendingDelete.row);
 
   confirmYes.disabled = false;
-  confirmYes.textContent = "Yes, delete";
+  confirmYes.textContent = t("Yes, delete");
 
   if (error) {
     console.error("Delete error:", error.message);
-    confirmError.textContent = "Could not delete — please try again.";
+    confirmError.textContent = t("Could not delete — please try again.");
     confirmError.classList.remove("hidden");
   }
 });
@@ -148,7 +159,7 @@ async function deleteRecord(table, row) {
       console.error("Collection cleanup error:", cleanupError.message);
     }
   }
-  showToast("Deleted from your library.");
+  showToast(t("Deleted from your library."));
   return null;
 }
 

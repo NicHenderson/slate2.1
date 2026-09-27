@@ -72,6 +72,7 @@ your data and don't break when your password does.
 | `shows.spec.js` | A show from the queue to watching to finished |
 | `collections.spec.js` | Creating collections and filling them |
 | `yourData.spec.js` | Export, and import in both Add and Replace modes, viewings included (and version 1 files) |
+| `i18n.spec.js` | Every language has every string, and nothing on screen escapes translation |
 | `settings.spec.js` | Settings kept by the account, and saving the profile |
 | `account.spec.js` | Deleting an account: the locks, a wrong password, a server failure, and the account gone |
 | `mobile.spec.js` | Slate on a phone: nothing scrolls sideways, and the menu and adding a title work by tapping |

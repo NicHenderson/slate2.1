@@ -24,7 +24,7 @@ async function saveCustomOrder(gridId, orderedIds) {
       "Custom order not saved:",
       error?.message ?? "the upsert wrote fewer rows than expected"
     );
-    showToast("Could not save the new order.", true);
+    showToast(t("Could not save the new order."), true);
     // Show what the database really holds, not the order we optimistically drew.
     forgetPendingPositions(table);
     const fresh = await fetchAllRows(table).catch(() => null);

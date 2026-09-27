@@ -52,38 +52,38 @@ const STORE = {
 function makeSorts(dateField) {
   return {
     recent: {
-      label: "Most recent first",
-      group: "By date",
+      label: t("Most recent first"),
+      group: t("By date"),
       stub: "↓",
       cmp: (a, b) => (b[dateField] ?? "").localeCompare(a[dateField] ?? ""),
     },
     oldest: {
-      label: "Oldest first",
-      group: "By date",
+      label: t("Oldest first"),
+      group: t("By date"),
       stub: "↑",
       cmp: (a, b) => (a[dateField] ?? "").localeCompare(b[dateField] ?? ""),
     },
     "rating-desc": {
-      label: "Highest rated first",
-      group: "By rating",
+      label: t("Highest rated first"),
+      group: t("By rating"),
       stub: "★",
       cmp: (a, b) => (b.rating ?? -1) - (a.rating ?? -1),
     },
     "rating-asc": {
-      label: "Lowest rated first",
-      group: "By rating",
+      label: t("Lowest rated first"),
+      group: t("By rating"),
       stub: "☆",
       cmp: (a, b) => (a.rating ?? 11) - (b.rating ?? 11),
     },
     "alpha-asc": {
-      label: "A to Z",
-      group: "A–Z",
+      label: t("A to Z"),
+      group: t("A–Z"),
       stub: "A",
       cmp: (a, b) => (a.title ?? "").localeCompare(b.title ?? ""),
     },
     "alpha-desc": {
-      label: "Z to A",
-      group: "A–Z",
+      label: t("Z to A"),
+      group: t("A–Z"),
       stub: "Z",
       cmp: (a, b) => (b.title ?? "").localeCompare(a.title ?? ""),
     },
@@ -98,46 +98,46 @@ function makeSorts(dateField) {
 // by the exact same fields, nothing table-specific about any of it.
 const WATCHLIST_SORTS = {
   recent: {
-    label: "Recently added",
-    group: "By date added",
+    label: t("Recently added"),
+    group: t("By date added"),
     stub: "↓",
     cmp: (a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""),
   },
   oldest: {
-    label: "Oldest added",
-    group: "By date added",
+    label: t("Oldest added"),
+    group: t("By date added"),
     stub: "↑",
     cmp: (a, b) => (a.created_at ?? "").localeCompare(b.created_at ?? ""),
   },
   "alpha-asc": {
-    label: "A to Z",
-    group: "A–Z",
+    label: t("A to Z"),
+    group: t("A–Z"),
     stub: "A",
     cmp: (a, b) => (a.title ?? "").localeCompare(b.title ?? ""),
   },
   "alpha-desc": {
-    label: "Z to A",
-    group: "A–Z",
+    label: t("Z to A"),
+    group: t("A–Z"),
     stub: "Z",
     cmp: (a, b) => (b.title ?? "").localeCompare(a.title ?? ""),
   },
   "release-desc": {
-    label: "Newest release first",
-    group: "By release year",
+    label: t("Newest release first"),
+    group: t("By release year"),
     stub: "↓",
     cmp: (a, b) => (b.release_year ?? -Infinity) - (a.release_year ?? -Infinity),
   },
   "release-asc": {
-    label: "Oldest release first",
-    group: "By release year",
+    label: t("Oldest release first"),
+    group: t("By release year"),
     stub: "↑",
     cmp: (a, b) => (a.release_year ?? Infinity) - (b.release_year ?? Infinity),
   },
   // Drag-to-reorder (js/watchlistOrder.js). Titles with no position yet
   // (anything added after the order was set) go last, in the order added.
   custom: {
-    label: "Custom order",
-    group: "Custom",
+    label: t("Custom order"),
+    group: t("Custom"),
     stub: "≡",
     cmp: (a, b) =>
       (a.position ?? Infinity) - (b.position ?? Infinity) ||
@@ -211,7 +211,7 @@ const STALE_WATCHING_DAYS = 30;
 function startedAgoHtml(row) {
   const days = daysSince(row.started_watching_date);
   if (days == null) return "";
-  const text = days === 0 ? "Started today" : days === 1 ? "Started yesterday" : `Started ${days}d ago`;
+  const text = days === 0 ? t("Started today") : days === 1 ? t("Started yesterday") : t("Started {n}d ago", { n: days });
   const stale = days >= STALE_WATCHING_DAYS ? " is-stale" : "";
   return `<p class="card-meta${stale}">${text}</p>`;
 }
@@ -227,17 +227,17 @@ function cardHtml(item, showRating = false, extra = "") {
   return `
     <article class="card" data-id="${item.id}">
       ${poster}
-      <p class="card-title">${escapeHtml(item.title ?? "Untitled")}</p>
+      <p class="card-title">${escapeHtml(item.title ?? t("Untitled"))}</p>
       ${rating}${extra}
     </article>`;
 }
 
 function ghostCardHtml(type) {
-  const label = type === "movie" ? "Add Movie" : "Add TV Show";
+  const label = type === "movie" ? t("+ Add Movie") : t("+ Add TV Show");
   return `
     <button class="ghost-card" type="button" data-type="${type}">
       <span class="ghost-slot"><span class="ghost-plus">+</span></span>
-      <span class="ghost-label">+ ${label}</span>
+      <span class="ghost-label">${label}</span>
     </button>`;
 }
 
@@ -350,7 +350,7 @@ async function loadData() {
   }
 
   if (moviesRes.error) {
-    renderError(MOVIE_GRIDS, "Could not load movies.");
+    renderError(MOVIE_GRIDS, t("Could not load movies."));
     console.error("Movies error:", moviesRes.error.message);
   } else {
     moviesRes.data.forEach((row) => STORE.movies.set(row.id, row));
@@ -358,7 +358,7 @@ async function loadData() {
   }
 
   if (showsRes.error) {
-    renderError(SHOW_GRIDS, "Could not load shows.");
+    renderError(SHOW_GRIDS, t("Could not load shows."));
     console.error("Shows error:", showsRes.error.message);
   } else {
     showsRes.data.forEach((row) => STORE.shows.set(row.id, row));
@@ -388,13 +388,13 @@ function resetGrids() {
   Object.keys(GRID_CONFIG).forEach((gridId) => {
     const grid = document.getElementById(gridId);
     if (grid) {
-      grid.innerHTML = `<p class="loading">Loading…</p>`;
+      grid.innerHTML = `<p class="loading">${t("Loading…")}</p>`;
       grid._html = null;
     }
   });
   const colGrid = document.getElementById("grid-collections");
   if (colGrid) {
-    colGrid.innerHTML = `<p class="loading">Loading…</p>`;
+    colGrid.innerHTML = `<p class="loading">${t("Loading…")}</p>`;
     colGrid._html = null; // see paintGrid in collections.js
   }
   // Header stats describe the signed-in library; none until the next load.

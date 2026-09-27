@@ -4,9 +4,9 @@ const NO_ADD_SUBTABS = new Set(["grid-shows-watching", "grid-shows-dropped"]);
 // live here instead of a separate generic map — one h1 per grid, swapped
 // on tab switch same as the sort label.
 const SUBTAB_SECTION_TITLE = {
-  "grid-shows-towatch": "Shows To Watch",
-  "grid-shows-watching": "Shows You're Watching",
-  "grid-shows-dropped": "Shows You've Dropped",
+  "grid-shows-towatch": t("Shows To Watch"),
+  "grid-shows-watching": t("Shows You're Watching"),
+  "grid-shows-dropped": t("Shows You've Dropped"),
 };
 
 document.querySelectorAll(".subtabs [data-subtab]").forEach((btn) => {

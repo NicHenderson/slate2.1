@@ -19,7 +19,7 @@ function parseGenres(value) {
 
 function formatDate(value) {
   if (!value) return "—";
-  return new Date(value).toLocaleDateString("en-US", {
+  return new Date(value).toLocaleDateString(LOCALE, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -33,15 +33,15 @@ function localToday() {
 }
 
 function formatRuntime(minutes) {
-  if (!minutes) return "Runtime unknown";
+  if (!minutes) return t("Runtime unknown");
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return h ? `${h}h ${m}m` : `${m}m`;
+  return h ? t("{h}h {m}m", { h, m }) : t("{m}m", { m });
 }
 
 function starsHtml(rating) {
   if (rating === null || rating === undefined) {
-    return `<p class="detail-unrated">Unrated</p>`;
+    return `<p class="detail-unrated">${t("Unrated")}</p>`;
   }
   const pct = Math.max(0, Math.min(10, rating)) * 10;
   const stars = "★".repeat(10);
@@ -59,7 +59,7 @@ function detailDurationLine(table, row) {
   if (table === "movies") return formatRuntime(row.duration);
   const seasons = row.total_seasons ?? 0;
   const episodes = row.total_episodes ?? 0;
-  return `${seasons} season${seasons === 1 ? "" : "s"} · ${episodes} episode${episodes === 1 ? "" : "s"}`;
+  return `${tn(seasons, "{n} season", "{n} seasons")} · ${tn(episodes, "{n} episode", "{n} episodes")}`;
 }
 
 function renderDetail(cfg, row) {
@@ -72,7 +72,7 @@ function renderDetail(cfg, row) {
   const head = `
     <div class="detail-head">
       <div class="detail-head-left">
-        <h2 class="detail-title">${escapeHtml(row.title ?? "Untitled")}</h2>
+        <h2 class="detail-title">${escapeHtml(row.title ?? t("Untitled"))}</h2>
         ${genreLine ? `<p class="detail-genre-line">${genreLine}</p>` : ""}
       </div>
       <div class="detail-meta">
@@ -80,24 +80,24 @@ function renderDetail(cfg, row) {
         <p class="detail-meta-runtime">${detailDurationLine(cfg.table, row)}</p>
       </div>
     </div>
-    <p class="detail-synopsis">${escapeHtml(row.synopsis || "No synopsis available.")}</p>
+    <p class="detail-synopsis">${escapeHtml(row.synopsis || t("No synopsis available."))}</p>
     <div class="detail-trailer">${row.tmdb_id ? TRAILER_BTN_LOADING : ""}</div>`;
 
-  const addToColHtml = `<button class="edit-btn" type="button" data-action="add-to-collection">🗂 Add to collection</button>`;
+  const addToColHtml = `<button class="edit-btn" type="button" data-action="add-to-collection">${t("🗂 Add to collection")}</button>`;
   // Not watched yet: where to watch it, below the buttons (js/whereToWatch.js).
   const whereHtml = row.tmdb_id ? whereToWatchSlotHtml() : "";
 
   if (cfg.state === "towatch") {
     const actionBtn =
       cfg.table === "movies"
-        ? `<button class="complete-btn" type="button" data-action="mark-watched">✓ Mark as watched</button>`
-        : `<button class="complete-btn" type="button" data-action="start-watching">▶ Start watching</button>`;
+        ? `<button class="complete-btn" type="button" data-action="mark-watched">${t("✓ Mark as watched")}</button>`
+        : `<button class="complete-btn" type="button" data-action="start-watching">${t("▶ Start watching")}</button>`;
     detailBody.innerHTML = `
       ${head}
       <div class="detail-actions">
         ${actionBtn}
         ${addToColHtml}
-        <button class="delete-btn icon-delete-btn" type="button" data-action="delete" aria-label="Delete">🗑</button>
+        <button class="delete-btn icon-delete-btn" type="button" data-action="delete" aria-label="${t("Delete")}">🗑</button>
       </div>
       ${whereHtml}`;
     return;
@@ -107,13 +107,13 @@ function renderDetail(cfg, row) {
     detailBody.innerHTML = `
       ${head}
       <div class="detail-section">
-        <p class="detail-label">Started on</p>
+        <p class="detail-label">${t("Started on")}</p>
         <p class="detail-date-value">${formatDate(row.started_watching_date)}</p>
       </div>
       <div class="detail-actions detail-actions-start">
-        <button class="complete-btn" type="button" data-action="send-to-watchlist">↩ Back to "To Watch"</button>
+        <button class="complete-btn" type="button" data-action="send-to-watchlist">${t('↩ Back to "To Watch"')}</button>
         ${addToColHtml}
-        <button class="delete-btn icon-delete-btn" type="button" data-action="delete" aria-label="Delete">🗑</button>
+        <button class="delete-btn icon-delete-btn" type="button" data-action="delete" aria-label="${t("Delete")}">🗑</button>
       </div>
       ${whereHtml}`;
     return;
@@ -123,13 +123,13 @@ function renderDetail(cfg, row) {
     detailBody.innerHTML = `
       ${head}
       <div class="detail-section">
-        <p class="detail-label">Started on</p>
+        <p class="detail-label">${t("Started on")}</p>
         <p class="detail-date-value">${formatDate(row.started_watching_date)}</p>
       </div>
       <div class="detail-actions detail-actions-start">
-        <button class="edit-btn" type="button" data-action="edit">✎ Edit</button>
+        <button class="edit-btn" type="button" data-action="edit">${t("✎ Edit")}</button>
         ${addToColHtml}
-        <button class="delete-btn" type="button" data-action="drop-series">⏸ Drop series</button>
+        <button class="delete-btn" type="button" data-action="drop-series">${t("⏸ Drop series")}</button>
       </div>
       ${whereHtml}`;
     return;
@@ -139,10 +139,10 @@ function renderDetail(cfg, row) {
   const dateHtml =
     cfg.table === "movies"
       ? watchedDateBlockHtml(row)
-      : `<p class="detail-label">Watched on</p><p class="detail-date-value">Started ${formatDate(row.started_watching_date)} · Finished ${formatDate(row.finished_watching_date)}</p>`;
+      : `<p class="detail-label">${t("Watched on")}</p><p class="detail-date-value">${t("Started {start} · Finished {end}", { start: formatDate(row.started_watching_date), end: formatDate(row.finished_watching_date) })}</p>`;
   const review = row.review
     ? `<p class="detail-review">${escapeHtml(row.review)}</p>`
-    : `<p class="detail-review detail-review-empty">No review yet.</p>`;
+    : `<p class="detail-review detail-review-empty">${t("No review yet.")}</p>`;
 
   detailBody.innerHTML = `
     ${head}
@@ -151,18 +151,18 @@ function renderDetail(cfg, row) {
         ${dateHtml}
       </div>
       <div class="detail-field">
-        <p class="detail-label">Rating</p>
+        <p class="detail-label">${t("Rating")}</p>
         ${starsHtml(row.rating)}
       </div>
     </div>
     ${cfg.table === "movies" ? viewingsListHtml(row) : ""}
     <div class="detail-section">
-      <p class="detail-label">Personal review</p>
+      <p class="detail-label">${t("Personal review")}</p>
       ${review}
     </div>
     <div class="detail-actions detail-actions-review">
-      <button class="edit-btn" type="button" data-action="edit">✎ Edit</button>
-      ${cfg.table === "movies" ? `<button class="edit-btn" type="button" data-action="watched-again">↻ Watched it again</button>` : ""}
+      <button class="edit-btn" type="button" data-action="edit">${t("✎ Edit")}</button>
+      ${cfg.table === "movies" ? `<button class="edit-btn" type="button" data-action="watched-again">${t("↻ Watched it again")}</button>` : ""}
       ${addToColHtml}
     </div>`;
 }
@@ -259,7 +259,7 @@ function closeDetailModal() {
    is found, or says there isn't one. The YouTube player itself isn't
    loaded until that button is clicked. */
 
-const TRAILER_BTN_LOADING = `<button class="trailer-btn" type="button" data-action="toggle-trailer" aria-expanded="false" disabled aria-busy="true">▶ Watch trailer</button>`;
+const TRAILER_BTN_LOADING = `<button class="trailer-btn" type="button" data-action="toggle-trailer" aria-expanded="false" disabled aria-busy="true">${t("▶ Watch trailer")}</button>`;
 
 // Keyed by type + TMDB id, since a movie and a show can share a TMDB id.
 // Holds the promise, so a title reopened mid-lookup doesn't fetch twice.
@@ -311,7 +311,7 @@ async function loadDetailTrailer(table, row) {
   if (!btn || !btn.disabled) return;
   btn.removeAttribute("aria-busy");
   if (!key) {
-    btn.textContent = failed ? "Trailer unavailable" : "No trailer";
+    btn.textContent = failed ? t("Trailer unavailable") : t("No trailer");
     return;
   }
   slot.dataset.key = key;
@@ -323,7 +323,7 @@ function toggleTrailer(btn) {
   const frame = slot.querySelector(".detail-trailer-frame");
   if (frame) {
     frame.remove();
-    btn.textContent = "▶ Watch trailer";
+    btn.textContent = t("▶ Watch trailer");
     btn.setAttribute("aria-expanded", "false");
     return;
   }
@@ -332,13 +332,13 @@ function toggleTrailer(btn) {
   const iframe = document.createElement("iframe");
   // autoplay only ever follows this explicit click — nothing plays on open.
   iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(slot.dataset.key)}?autoplay=1&rel=0`;
-  iframe.title = "Trailer";
+  iframe.title = t("Trailer");
   iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
   iframe.allowFullscreen = true;
   iframe.referrerPolicy = "strict-origin-when-cross-origin";
   wrap.appendChild(iframe);
   slot.appendChild(wrap);
-  btn.textContent = "✕ Hide trailer";
+  btn.textContent = t("✕ Hide trailer");
   btn.setAttribute("aria-expanded", "true");
   wrap.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
@@ -389,8 +389,8 @@ function detailColMenuHtml(row) {
   );
   if (!cols.length) {
     return `
-      <p class="col-menu-empty">No collections yet.</p>
-      <button class="sort-option" type="button" data-action="new-collection"><span class="sort-stub">+</span><span class="sort-option-label">Create collection</span></button>`;
+      <p class="col-menu-empty">${t("No collections yet.")}</p>
+      <button class="sort-option" type="button" data-action="new-collection"><span class="sort-stub">+</span><span class="sort-option-label">${t("Create collection")}</span></button>`;
   }
   return cols
     .map((c) => {
@@ -410,11 +410,11 @@ async function dropSeries(row, btn) {
 
   if (error) {
     console.error("Drop series error:", error.message);
-    showToast("Could not drop the series — please try again.", true);
+    showToast(t("Could not drop the series — please try again."), true);
     return;
   }
   closeDetailModal();
-  showToast("Series dropped.");
+  showToast(t("Series dropped."));
 }
 
 async function sendToWatchlist(row, btn) {
@@ -433,11 +433,11 @@ async function sendToWatchlist(row, btn) {
 
   if (error) {
     console.error("Send to watchlist error:", error.message);
-    showToast("Could not move the series — please try again.", true);
+    showToast(t("Could not move the series — please try again."), true);
     return;
   }
   closeDetailModal();
-  showToast('Moved back to "To Watch".');
+  showToast(t('Moved back to "To Watch".'));
 }
 
 async function addItemToCollection(colId, table, row, btn) {
@@ -461,7 +461,7 @@ async function addItemToCollection(colId, table, row, btn) {
   if (error) {
     console.error("Add to collection error:", error.message);
     btn.disabled = false;
-    showToast("Could not add — please try again.", true);
+    showToast(t("Could not add — please try again."), true);
     return;
   }
 
@@ -470,7 +470,7 @@ async function addItemToCollection(colId, table, row, btn) {
   if (typeof refreshOpenCollection === "function") refreshOpenCollection();
   const menu = document.getElementById("detail-col-menu");
   if (menu) menu.innerHTML = detailColMenuHtml(row);
-  showToast("Added to collection.");
+  showToast(t("Added to collection."));
 }
 
 detailBody.addEventListener("click", (e) => {

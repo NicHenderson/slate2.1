@@ -25,8 +25,10 @@ directly.
 
 ## Working with the owner
 
-- **Talk to them in Spanish. Everything in the app stays in English**:
-  UI copy, emails, code, comments, commit messages and docs.
+- **Talk to them in Spanish. Everything in the repo is written in
+  English**: the app's text, emails, code, comments, commit messages and
+  docs. Other languages are translations of the English text (see
+  Languages below).
 - They aren't a professional developer. Explain in plain terms, with
   reasons, and skip jargon unless you explain it.
 - **When they ask you to explain before doing anything, only explain, then
@@ -67,6 +69,28 @@ directly.
   binary or with `newline=""`.
 - **Comments explain why**, in the same style as the code around them.
 - **Anything user-provided goes through `escapeHtml`.**
+- **Languages** (`js/i18n.js`). Every string the app shows goes through
+  translation, so none can be written as bare English:
+  - in scripts, `t("English text", { name })` and
+    `tn(count, "{n} movie", "{n} movies")`, always with the string written
+    out (the tests collect them from the source). A whole sentence per
+    string, never one glued from pieces: word order and genders change.
+    Values go in as given, so user text still needs `escapeHtml` when the
+    result lands in HTML;
+  - in `index.html`, text and placeholder/aria-label/title/alt are
+    translated automatically at load; `data-i18n` translates an element
+    whole (a sentence with markup inside), `translate="no"` skips one;
+  - dictionaries (`js/lang/<code>.js`, loaded before `i18n.js`) map each
+    English string to its translation; the language is the one picked on
+    the device, else the browser's, else English, and changing it reloads.
+    Dates use `LOCALE`.
+  - `tests/i18n.spec.js` fails if a language lacks a string or has one
+    nothing uses, if placeholders or markup differ, or if the main screens
+    show text that doesn't go through translation.
+  - Stays in English on purpose: the owner's emails (Web3Forms request,
+    the welcome-email tool), Supabase's own emails and error texts (like
+    weak passwords), emoji and icon names in the icon picker, and the
+    "Untitled" saved as a title when TMDB has none.
 - **supabase-js is pinned** in `index.html` (exact version + SRI hash) to
   the version in `package.json`. Update it only with
   `npm run update-supabase -- <version>` (`scripts/supabase-js.js`);
@@ -184,7 +208,17 @@ directly.
      owner: the watched date for IMDb (it only has the date rated), films
      Letterboxd has as watched but not in the diary, titles already in
      Slate, and where shows go.
-- Next: translate the app, then publish.
+- Next: translate the app (Spanish, German and Italian), then publish.
+  The owner authorized the stages one at a time:
+  1. **The base** — done, not merged: `js/i18n.js`, every string through
+     `t()`/`tn()`, the tests. English looks exactly as before.
+  2. Spanish, which the owner reviews themselves; the language picker
+     (Settings, landing and login) comes with it. Numbers with decimals
+     ("7.8") still need the locale's format.
+  3. German and Italian.
+  4. TMDB's data in the language (genres, synopses, search results): the
+     owner said yes, to do when it's time. Needs the `tmdb` function to
+     pass a language (a redeploy); genres saved in English need a table.
 - **Publishing on Cloudflare Pages** (free, chosen over Netlify and
   Vercel). The steps:
   1. Connect the GitHub repo. There's no build command, and the output
@@ -198,7 +232,6 @@ directly.
      and `X-Content-Type-Options: nosniff`. The owner and Claude decided
      against a full Content-Security-Policy for now: the risk of breaking
      part of Slate outweighs the benefit for a small private app.
-- Translation: Spanish, German and Italian, besides English.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - a privacy policy page;

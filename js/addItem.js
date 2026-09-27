@@ -85,7 +85,7 @@ async function addToLibrary(type, id, btn) {
   const table = type === "movie" ? "movies" : "shows";
   const originalText = btn.textContent;
   btn.disabled = true;
-  btn.textContent = "Adding…";
+  btn.textContent = t("Adding…");
 
   try {
     const details = await tmdbDetails(type, id);
@@ -97,20 +97,20 @@ async function addToLibrary(type, id, btn) {
     // Already there after all (added from another tab since the search):
     // the database keeps one copy per title (migration 0004).
     if (error?.code === UNIQUE_VIOLATION) {
-      btn.textContent = "Added";
-      showToast("Already in your library.");
+      btn.textContent = t("Added");
+      showToast(t("Already in your library."));
       return;
     }
     if (error) throw new Error(error.message);
 
-    btn.textContent = "Added";
+    btn.textContent = t("Added");
     if (collectionAddMode) {
       STORE[table].set(inserted.id, inserted);
       await bindToOpenCollection(table, inserted);
       refreshCollectionAfterAdd(type);
-      showToast("Added to your library and this collection.");
+      showToast(t("Added to your library and this collection."));
     } else {
-      showToast("Added to your library.");
+      showToast(t("Added to your library."));
     }
 
     const activeSection = document.querySelector(".section.active")?.id;
@@ -125,6 +125,6 @@ async function addToLibrary(type, id, btn) {
     console.error("Add error:", err.message);
     btn.textContent = originalText;
     btn.disabled = false;
-    showToast("Could not add — please try again.", true);
+    showToast(t("Could not add — please try again."), true);
   }
 }

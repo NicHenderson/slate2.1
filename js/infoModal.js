@@ -5,18 +5,18 @@ const infoClose = document.getElementById("info-close");
 
 function runtimeLine(type, details) {
   if (type === "movie") {
-    return details.runtime ? `${details.runtime} min` : "Runtime unknown";
+    return details.runtime ? t("{n} min", { n: details.runtime }) : t("Runtime unknown");
   }
   const seasons = details.number_of_seasons ?? 0;
   const episodes = details.number_of_episodes ?? 0;
-  return `${seasons} season${seasons === 1 ? "" : "s"} · ${episodes} episode${episodes === 1 ? "" : "s"}`;
+  return `${tn(seasons, "{n} season", "{n} seasons")} · ${tn(episodes, "{n} episode", "{n} episodes")}`;
 }
 
 function renderInfo(type, details, added) {
-  const title = details.title ?? details.name ?? "No title";
+  const title = details.title ?? details.name ?? t("No title");
   const date = details.release_date ?? details.first_air_date ?? "";
   const year = date ? date.slice(0, 4) : "—";
-  const synopsis = details.overview || "No synopsis available.";
+  const synopsis = details.overview || t("No synopsis available.");
   const genreLine = (details.genres ?? []).map((g) => g.name).join(" · ");
 
   infoPoster.innerHTML = details.poster_path
@@ -47,7 +47,7 @@ let infoShowing = null;
 async function openInfoModal(type, id) {
   infoShowing = `${type}:${id}`;
   infoPoster.innerHTML = "";
-  infoBody.innerHTML = `<p class="results-status">Loading…</p>`;
+  infoBody.innerHTML = `<p class="results-status">${t("Loading…")}</p>`;
   infoModal.classList.remove("hidden");
 
   try {
@@ -57,7 +57,7 @@ async function openInfoModal(type, id) {
     ]);
     renderInfo(type, details, existing.has(details.id));
   } catch (err) {
-    infoBody.innerHTML = `<p class="results-status">Failed to load details.</p>`;
+    infoBody.innerHTML = `<p class="results-status">${t("Failed to load details.")}</p>`;
     console.error("TMDB error:", err.message);
   }
 }

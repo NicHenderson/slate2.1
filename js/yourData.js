@@ -30,17 +30,20 @@ const SLATE_FILE_VERSION = 2;
 const dataExportBtn = document.getElementById("data-export-btn");
 const dataExportSummary = document.getElementById("data-export-summary");
 
-function plural(n, word) {
-  return `${n} ${word}${n === 1 ? "" : "s"}`;
+// "2 movies, 1 show and 3 collections": the whole library in one phrase.
+function libraryCounts(movies, shows, collections) {
+  return t("{movies}, {shows} and {collections}", {
+    movies: tn(movies, "{n} movie", "{n} movies"),
+    shows: tn(shows, "{n} show", "{n} shows"),
+    collections: tn(collections, "{n} collection", "{n} collections"),
+  });
 }
 
 // What the file would hold right now, from what's on screen. Called by the
 // grid renders (data.js, collections.js) so it follows every change.
 function renderDataSummary() {
   if (!dataExportSummary) return;
-  dataExportSummary.textContent =
-    `${plural(STORE.movies.size, "movie")}, ${plural(STORE.shows.size, "show")} and ` +
-    plural(STORE.collections.size, "collection");
+  dataExportSummary.textContent = libraryCounts(STORE.movies.size, STORE.shows.size, STORE.collections.size);
 }
 
 function withoutKeys(row, keys) {
@@ -132,21 +135,21 @@ let dataExportReset = null;
 async function exportData() {
   clearTimeout(dataExportReset);
   dataExportBtn.disabled = true;
-  dataExportBtn.textContent = "Exporting…";
+  dataExportBtn.textContent = t("Exporting…");
   const reset = () => {
     dataExportBtn.disabled = false;
-    dataExportBtn.textContent = "Export data";
+    dataExportBtn.textContent = t("Export data");
   };
   try {
     const file = await buildSlateBackup();
     downloadFile(file.name, file.text);
-    dataExportBtn.textContent = "Downloaded ✓";
-    showToast(`Saved ${file.name}`);
+    dataExportBtn.textContent = t("Downloaded ✓");
+    showToast(t("Saved {file}", { file: file.name }));
     dataExportReset = setTimeout(reset, 2000);
   } catch (err) {
     console.error("Export failed:", err);
     reset();
-    showToast("Could not export your data. Nothing was downloaded.", true);
+    showToast(t("Could not export your data. Nothing was downloaded."), true);
   }
 }
 
@@ -288,27 +291,27 @@ function readTitleRows(rows, type) {
 
 async function readSlateFile(file) {
   if (file.size > IMPORT_MAX_BYTES) {
-    throw new ImportError("This file is far too big to be a Slate backup.");
+    throw new ImportError(t("This file is far too big to be a Slate backup."));
   }
   let data;
   try {
     data = JSON.parse(await file.text());
   } catch {
-    throw new ImportError("This isn't a Slate backup — it couldn't be read as one.");
+    throw new ImportError(t("This isn't a Slate backup — it couldn't be read as one."));
   }
   if (!data || typeof data !== "object" || data.slate !== "backup") {
-    throw new ImportError("This isn't a Slate backup — it couldn't be read as one.");
+    throw new ImportError(t("This isn't a Slate backup — it couldn't be read as one."));
   }
   if (!isInt(data.version) || data.version < 1) {
-    throw new ImportError("This Slate file is damaged: it doesn't say which version it is.");
+    throw new ImportError(t("This Slate file is damaged: it doesn't say which version it is."));
   }
   if (data.version > SLATE_FILE_VERSION) {
     throw new ImportError(
-      "This file was made by a newer version of Slate. Refresh the page and try again."
+      t("This file was made by a newer version of Slate. Refresh the page and try again.")
     );
   }
   if (![data.movies, data.shows, data.collections].every(Array.isArray)) {
-    throw new ImportError("This Slate file is damaged: part of it is missing.");
+    throw new ImportError(t("This Slate file is damaged: part of it is missing."));
   }
 
   const movies = readTitleRows(data.movies, "movie");
@@ -317,7 +320,7 @@ async function readSlateFile(file) {
   const skipped = movies.skipped + shows.skipped + (data.collections.length - collections.length);
 
   if (!movies.kept.length && !shows.kept.length && !collections.length) {
-    throw new ImportError("This backup is empty — there's nothing in it to import.");
+    throw new ImportError(t("This backup is empty — there's nothing in it to import."));
   }
   return {
     exportedAt: optTimestamp(data.exported_at),
@@ -358,7 +361,7 @@ function closeImportModal() {
 }
 
 function showImportReading(fileName) {
-  setImportHeader("Import data", "Reading your file", fileName);
+  setImportHeader(t("Import data"), t("Reading your file"), fileName);
   setImportView(
     "reading",
     `<div class="import-reading" role="status">
@@ -369,15 +372,15 @@ function showImportReading(fileName) {
         <span class="import-env-card"></span>
         <span class="import-env-front"></span>
       </div>
-      <p class="import-reading-title">Reading file…</p>
-      <p class="import-reading-hint">Checking every title before showing you anything.</p>
+      <p class="import-reading-title">${t("Reading file…")}</p>
+      <p class="import-reading-hint">${t("Checking every title before showing you anything.")}</p>
       <div class="import-progress" aria-hidden="true"><span></span></div>
     </div>`
   );
 }
 
 function showImportError(fileName, message) {
-  setImportHeader("Import data", "That file won't open", fileName);
+  setImportHeader(t("Import data"), t("That file won't open"), fileName);
   setImportView(
     "error",
     `<div class="import-error">
@@ -385,24 +388,25 @@ function showImportError(fileName, message) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 L21.5 20 L2.5 20 Z"/><line x1="12" y1="9.7" x2="12" y2="14.2"/><circle cx="12" cy="17.2" r="0.75" fill="currentColor" stroke="none"/></svg>
       </span>
       <p class="import-error-text" role="alert">${escapeHtml(message)}</p>
-      <p class="import-note">Nothing in your account was touched.</p>
+      <p class="import-note">${t("Nothing in your account was touched.")}</p>
     </div>
     <div class="update-actions import-actions">
       <span></span>
       <div class="update-actions-right">
-        <button type="button" class="cancel-btn" data-import-action="close">Close</button>
-        <button type="button" class="modal-search-btn" data-import-action="pick">Choose another file</button>
+        <button type="button" class="cancel-btn" data-import-action="close">${t("Close")}</button>
+        <button type="button" class="modal-search-btn" data-import-action="pick">${t("Choose another file")}</button>
       </div>
     </div>`
   );
   importBody.querySelector('[data-import-action="pick"]').focus();
 }
 
-// "41 watched · 24 to watch", leaving out the parts that are zero.
+// "41 watched · 24 to watch", leaving out the parts that are zero. Each
+// part is [count, its text with the count in it].
 function breakdown(parts) {
   return parts
     .filter(([n]) => n > 0)
-    .map(([n, label]) => `${n} ${label}`)
+    .map(([, text]) => text)
     .join(" · ");
 }
 
@@ -412,6 +416,8 @@ function showImportSummary(fileName, parsed) {
   const { movies, shows, collections, skipped } = parsed;
   const count = (rows, gridId) => rows.filter(GRID_CONFIG[gridId].match).length;
   const rewatches = movies.reduce((n, row) => n + Math.max(0, row.viewings.length - 1), 0);
+  const [watchedMovies, towatchMovies] = [count(movies, "grid-movies-watched"), count(movies, "grid-movies-towatch")];
+  const [finishedShows, watchingShows, towatchShows, droppedShows] = ["grid-shows-watched", "grid-shows-watching", "grid-shows-towatch", "grid-shows-dropped"].map((gridId) => count(shows, gridId));
   const itemCount = collections.reduce((n, col) => n + col.items.length, 0);
 
   // A fan of the most recently added posters: proof at a glance that this
@@ -440,26 +446,35 @@ function showImportSummary(fileName, parsed) {
   const moreCols = collections.length - shownCols.length;
 
   const exported = parsed.exportedAt
-    ? `Exported ${new Date(parsed.exportedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}`
-    : "Export date unknown";
-  setImportHeader("Import data · What's inside", fileName.replace(/\.slate$/i, ""), exported);
+    ? t("Exported {date}", { date: new Date(parsed.exportedAt).toLocaleString(LOCALE, { dateStyle: "medium", timeStyle: "short" }) })
+    : t("Export date unknown");
+  setImportHeader(t("Import data · What's inside"), fileName.replace(/\.slate$/i, ""), exported);
 
   setImportView(
     "summary",
     `${posters.length ? `<div class="import-fan" aria-hidden="true">${posters.map((row) => `<span class="import-fan-card"><img src="${escapeHtml(row.poster)}" alt="" /></span>`).join("")}</div>` : ""}
     <div class="import-stats">
-      ${stat(movies.length, movies.length === 1 ? "Movie" : "Movies", breakdown([[count(movies, "grid-movies-watched"), "watched"], [count(movies, "grid-movies-towatch"), "to watch"], [rewatches, rewatches === 1 ? "rewatch" : "rewatches"]]))}
-      ${stat(shows.length, shows.length === 1 ? "Show" : "Shows", breakdown([[count(shows, "grid-shows-watched"), "finished"], [count(shows, "grid-shows-watching"), "watching"], [count(shows, "grid-shows-towatch"), "to watch"], [count(shows, "grid-shows-dropped"), "dropped"]]))}
-      ${stat(collections.length, collections.length === 1 ? "Collection" : "Collections", itemCount ? `${plural(itemCount, "title")} inside` : "")}
+      ${stat(movies.length, tn(movies.length, "Movie", "Movies"), breakdown([
+        [watchedMovies, tn(watchedMovies, "{n} watched", "{n} watched")],
+        [towatchMovies, tn(towatchMovies, "{n} to watch", "{n} to watch")],
+        [rewatches, tn(rewatches, "{n} rewatch", "{n} rewatches")],
+      ]))}
+      ${stat(shows.length, tn(shows.length, "Show", "Shows"), breakdown([
+        [finishedShows, tn(finishedShows, "{n} finished", "{n} finished")],
+        [watchingShows, tn(watchingShows, "{n} watching", "{n} watching")],
+        [towatchShows, tn(towatchShows, "{n} to watch", "{n} to watch")],
+        [droppedShows, tn(droppedShows, "{n} dropped", "{n} dropped")],
+      ]))}
+      ${stat(collections.length, tn(collections.length, "Collection", "Collections"), itemCount ? tn(itemCount, "{n} title inside", "{n} titles inside") : "")}
     </div>
-    ${chips ? `<ul class="import-chips">${chips}${moreCols > 0 ? `<li class="import-chip import-chip-more">+${moreCols} more</li>` : ""}</ul>` : ""}
-    ${skipped ? `<p class="import-warn">${skipped} ${skipped === 1 ? "entry" : "entries"} in this file couldn't be read and will be left out.</p>` : ""}
-    <p class="import-note">Nothing changes in your account until you choose how to import it.</p>
+    ${chips ? `<ul class="import-chips">${chips}${moreCols > 0 ? `<li class="import-chip import-chip-more">${t("+{n} more", { n: moreCols })}</li>` : ""}</ul>` : ""}
+    ${skipped ? `<p class="import-warn">${tn(skipped, "{n} entry in this file couldn't be read and will be left out.", "{n} entries in this file couldn't be read and will be left out.")}</p>` : ""}
+    <p class="import-note">${t("Nothing changes in your account until you choose how to import it.")}</p>
     <div class="update-actions import-actions">
       <span></span>
       <div class="update-actions-right">
-        <button type="button" class="cancel-btn" data-import-action="close">Cancel</button>
-        <button type="button" class="modal-search-btn" data-import-action="continue">Continue</button>
+        <button type="button" class="cancel-btn" data-import-action="close">${t("Cancel")}</button>
+        <button type="button" class="modal-search-btn" data-import-action="continue">${t("Continue")}</button>
       </div>
     </div>`
   );
@@ -479,7 +494,7 @@ async function startImport(file) {
   } catch (err) {
     if (!(err instanceof ImportError)) console.error("Import read failed:", err);
     message =
-      err instanceof ImportError ? err.message : "This file couldn't be read. Try exporting it again.";
+      err instanceof ImportError ? err.message : t("This file couldn't be read. Try exporting it again.");
   }
   // Always shown for the same time, reduced motion included (the envelope
   // just holds still then): a file "read" in a blink reads as nothing done.
@@ -540,17 +555,17 @@ let importMode = null;
 
 function showImportModes() {
   importMode = null;
-  setImportHeader("Import data · How to import", importFileName.replace(/\.slate$/i, ""), "Choose one");
+  setImportHeader(t("Import data · How to import"), importFileName.replace(/\.slate$/i, ""), t("Choose one"));
   setImportView(
     "modes",
-    `<div class="import-modes" role="radiogroup" aria-label="How to import">
+    `<div class="import-modes" role="radiogroup" aria-label="${t("How to import")}">
       <button type="button" class="import-mode" role="radio" aria-checked="false" data-import-action="mode" data-import-mode="add">
         <span class="import-mode-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         </span>
         <span class="import-mode-text">
-          <span class="import-mode-title">Add to my library</span>
-          <span class="import-mode-desc">Everything you have stays. New titles and collections are added; anything already in your library is left exactly as it is.</span>
+          <span class="import-mode-title">${t("Add to my library")}</span>
+          <span class="import-mode-desc">${t("Everything you have stays. New titles and collections are added; anything already in your library is left exactly as it is.")}</span>
         </span>
       </button>
       <button type="button" class="import-mode import-mode-danger" role="radio" aria-checked="false" data-import-action="mode" data-import-mode="replace">
@@ -558,15 +573,15 @@ function showImportModes() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
         </span>
         <span class="import-mode-text">
-          <span class="import-mode-title">Replace everything</span>
-          <span class="import-mode-desc">Deletes everything in your account and brings in only this file.</span>
+          <span class="import-mode-title">${t("Replace everything")}</span>
+          <span class="import-mode-desc">${t("Deletes everything in your account and brings in only this file.")}</span>
         </span>
       </button>
     </div>
     <div class="update-actions import-actions">
-      <button type="button" class="cancel-btn" data-import-action="back">Back</button>
+      <button type="button" class="cancel-btn" data-import-action="back">${t("Back")}</button>
       <div class="update-actions-right">
-        <button type="button" class="modal-search-btn" data-import-action="run" disabled>Import</button>
+        <button type="button" class="modal-search-btn" data-import-action="run" disabled>${t("Import")}</button>
       </div>
     </div>`
   );
@@ -675,7 +690,7 @@ const collectionKey = (name) => name.trim().toLowerCase();
 // deleted again.
 async function importAdd(parsed, onProgress) {
   const created = { movies: [], shows: [], collections: [], collection_items: [], viewings: [] };
-  onProgress("Checking your library…", 0);
+  onProgress(t("Checking your library…"), 0);
   const [accMovies, accShows, accCols, accItems] = await Promise.all(
     ["movies", "shows", "collections", "collection_items"].map(fetchAllRows)
   );
@@ -722,20 +737,20 @@ async function importAdd(parsed, onProgress) {
 
   const written = { movies: [], shows: [], collections: [], collectionItems: [] };
   try {
-    onProgress("Adding movies…", 0);
-    written.movies = await insertRows("movies", titleRowsToInsert(newMovies, accMovies), created, tick("Adding movies…"));
+    onProgress(t("Adding movies…"), 0);
+    written.movies = await insertRows("movies", titleRowsToInsert(newMovies, accMovies), created, tick(t("Adding movies…")));
     // Each movie's earlier viewings (its latest came with its date). They
     // go with their movie if the import is undone.
     const movieIdByTmdb = new Map(written.movies.map((row) => [row.tmdb_id, row.id]));
     const earlier = newMovies.flatMap((row) => earlierViewingRows(movieIdByTmdb.get(row.tmdb_id), row.viewings));
-    await insertRows("viewings", earlier, created, tick("Adding movies…"));
-    onProgress("Adding shows…", done / total);
-    written.shows = await insertRows("shows", titleRowsToInsert(newShows, accShows), created, tick("Adding shows…"));
+    await insertRows("viewings", earlier, created, tick(t("Adding movies…")));
+    onProgress(t("Adding shows…"), done / total);
+    written.shows = await insertRows("shows", titleRowsToInsert(newShows, accShows), created, tick(t("Adding shows…")));
     written.movies.forEach((row) => idByTmdb.movie.set(row.tmdb_id, row.id));
     written.shows.forEach((row) => idByTmdb.show.set(row.tmdb_id, row.id));
 
-    onProgress("Filling collections…", done / total);
-    written.collections = await insertRows("collections", colsToCreate, created, tick("Filling collections…"));
+    onProgress(t("Filling collections…"), done / total);
+    written.collections = await insertRows("collections", colsToCreate, created, tick(t("Filling collections…")));
     written.collections.forEach((col) => {
       byName.set(collectionKey(col.name), { id: col.id, has: new Set(), next: 1, existed: false });
     });
@@ -764,9 +779,9 @@ async function importAdd(parsed, onProgress) {
         });
     });
     done = total - itemRows.length; // items skipped as already there count as done
-    written.collectionItems = await insertRows("collection_items", itemRows, created, tick("Filling collections…"));
+    written.collectionItems = await insertRows("collection_items", itemRows, created, tick(t("Filling collections…")));
   } catch (err) {
-    onProgress("Something went wrong — undoing…", done / total);
+    onProgress(t("Something went wrong — undoing…"), done / total);
     err.undone = await deleteCreated(created);
     throw err;
   }
@@ -775,7 +790,7 @@ async function importAdd(parsed, onProgress) {
   // reply. If this read fails, the realtime echoes bring them anyway.
   written.viewings = newMovies.length ? await fetchAllRows("viewings").catch(() => null) : null;
 
-  onProgress("Done", 1);
+  onProgress(t("Done"), 1);
   return {
     written,
     report: {
@@ -807,7 +822,7 @@ function applyImported(written) {
 }
 
 function showImportWorking() {
-  setImportHeader("Import data · Importing", importFileName.replace(/\.slate$/i, ""), "Keep this page open");
+  setImportHeader(t("Import data · Importing"), importFileName.replace(/\.slate$/i, ""), t("Keep this page open"));
   setImportView(
     "working",
     `<div class="import-reading" role="status">
@@ -818,7 +833,7 @@ function showImportWorking() {
         <span class="import-env-card"></span>
         <span class="import-env-front"></span>
       </div>
-      <p class="import-reading-title" id="import-step">Checking your library…</p>
+      <p class="import-reading-title" id="import-step">${t("Checking your library…")}</p>
       <p class="import-reading-hint" id="import-percent">0%</p>
       <div class="import-progress is-determinate" aria-hidden="true"><span id="import-bar"></span></div>
     </div>`
@@ -838,28 +853,31 @@ function showImportDone(report) {
   const titles = report.movies + report.shows;
   const lines = [];
   if (titles) {
+    const movies = tn(report.movies, "{n} movie", "{n} movies");
+    const shows = tn(report.shows, "{n} show", "{n} shows");
     lines.push(
-      `<strong>${breakdown([[report.movies, report.movies === 1 ? "movie" : "movies"], [report.shows, report.shows === 1 ? "show" : "shows"]]).replace(" · ", " and ")}</strong> added to your library.`
+      report.movies && report.shows
+        ? t("<strong>{movies} and {shows}</strong> added to your library.", { movies, shows })
+        : t("<strong>{titles}</strong> added to your library.", { titles: report.movies ? movies : shows })
     );
   }
   if (report.alreadyHad) {
-    lines.push(`${report.alreadyHad} ${report.alreadyHad === 1 ? "title was" : "titles were"} already there and stayed exactly as ${report.alreadyHad === 1 ? "it was" : "they were"}.`);
-  }
-  const colParts = [];
-  if (report.newCollections) colParts.push(`${plural(report.newCollections, "new collection")}`);
-  if (report.mergedCollections) {
-    colParts.push(`${report.mergedCollections} merged into ${report.mergedCollections === 1 ? "one" : "ones"} you had`);
-  }
-  if (colParts.length || report.placed) {
     lines.push(
-      `${colParts.join(", ")}${colParts.length && report.placed ? " — " : ""}${report.placed ? `${plural(report.placed, "title")} placed in collections` : ""}.`.replace(/^./, (c) => c.toUpperCase())
+      tn(report.alreadyHad, "{n} title was already there and stayed exactly as it was.", "{n} titles were already there and stayed exactly as they were.")
     );
   }
+  const colParts = [];
+  if (report.newCollections) colParts.push(tn(report.newCollections, "{n} new collection", "{n} new collections"));
+  if (report.mergedCollections) {
+    colParts.push(tn(report.mergedCollections, "{n} merged into one you had", "{n} merged into ones you had"));
+  }
+  const placed = report.placed ? tn(report.placed, "{n} title placed in collections", "{n} titles placed in collections") : "";
+  if (colParts.length || placed) lines.push(`${[colParts.join(", "), placed].filter(Boolean).join(" — ")}.`);
   const nothing = !titles && !report.newCollections && !report.placed;
 
   setImportHeader(
-    "Import data · Done",
-    nothing ? "Nothing new to add" : "Import complete",
+    t("Import data · Done"),
+    nothing ? t("Nothing new to add") : t("Import complete"),
     importFileName.replace(/\.slate$/i, "")
   );
   setImportView(
@@ -868,12 +886,12 @@ function showImportDone(report) {
       <span class="import-done-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
       </span>
-      ${nothing ? `<p class="import-done-line">Everything in this file was already in your library. Nothing was changed.</p>` : lines.map((line) => `<p class="import-done-line">${line}</p>`).join("")}
+      ${nothing ? `<p class="import-done-line">${t("Everything in this file was already in your library. Nothing was changed.")}</p>` : lines.map((line) => `<p class="import-done-line">${line}</p>`).join("")}
     </div>
     <div class="update-actions import-actions">
       <span></span>
       <div class="update-actions-right">
-        <button type="button" class="modal-search-btn" data-import-action="close">Done</button>
+        <button type="button" class="modal-search-btn" data-import-action="close">${t("Done")}</button>
       </div>
     </div>`
   );
@@ -881,7 +899,7 @@ function showImportDone(report) {
 }
 
 function showImportFailed(undone, message) {
-  setImportHeader("Import data", "The import didn't finish", importFileName.replace(/\.slate$/i, ""));
+  setImportHeader(t("Import data"), t("The import didn't finish"), importFileName.replace(/\.slate$/i, ""));
   setImportView(
     "error",
     `<div class="import-error">
@@ -891,16 +909,16 @@ function showImportFailed(undone, message) {
       <p class="import-error-text" role="alert">${
         message ??
         (undone
-          ? "Something went wrong while importing, so it was undone: your library is exactly as it was."
-          : "Something went wrong while importing, and not everything could be undone. Some titles from the file may be in your library now — nothing you already had was changed.")
+          ? t("Something went wrong while importing, so it was undone: your library is exactly as it was.")
+          : t("Something went wrong while importing, and not everything could be undone. Some titles from the file may be in your library now — nothing you already had was changed."))
       }</p>
-      <p class="import-note">Check your connection and try again.</p>
+      <p class="import-note">${t("Check your connection and try again.")}</p>
     </div>
     <div class="update-actions import-actions">
       <span></span>
       <div class="update-actions-right">
-        <button type="button" class="cancel-btn" data-import-action="close">Close</button>
-        <button type="button" class="modal-search-btn" data-import-action="back">Try again</button>
+        <button type="button" class="cancel-btn" data-import-action="close">${t("Close")}</button>
+        <button type="button" class="modal-search-btn" data-import-action="back">${t("Try again")}</button>
       </div>
     </div>`
   );
@@ -948,12 +966,13 @@ async function runImport(confirmed = false) {
     applyImported(outcome.written);
     showImportDone(outcome.report);
   } else if (outcome.stage === "backup") {
-    showImportFailed(true, "Your backup couldn't be downloaded, so nothing was deleted or imported.");
+    showImportFailed(true, t("Your backup couldn't be downloaded, so nothing was deleted or imported."));
   } else if (!outcome.undone && replace) {
     showImportFailed(
       false,
-      "Something went wrong while replacing, and not everything could be put back. Your library may be a mix of what you had and this file" +
-        (backupFirst ? " — the backup you just downloaded has everything you had." : ".")
+      backupFirst
+        ? t("Something went wrong while replacing, and not everything could be put back. Your library may be a mix of what you had and this file — the backup you just downloaded has everything you had.")
+        : t("Something went wrong while replacing, and not everything could be put back. Your library may be a mix of what you had and this file.")
     );
   } else {
     showImportFailed(outcome.undone);
@@ -968,7 +987,8 @@ async function runImport(confirmed = false) {
    unticked — a backup of the current library downloaded before anything is
    touched. */
 
-const REPLACE_CONFIRM_WORD = "Delete Data";
+// Typed as it reads, in whichever language that is.
+const REPLACE_CONFIRM_WORD = t("Delete Data");
 const REPLACE_WAIT_SECONDS = 3;
 let replaceCountdown = null;
 
@@ -992,35 +1012,36 @@ function showReplaceDanger() {
     collections: STORE.collections.size,
   };
   const incoming = importParsed;
-  setImportHeader("Import data · Replace everything", "This deletes your library", importFileName.replace(/\.slate$/i, ""));
+  setImportHeader(t("Import data · Replace everything"), t("This deletes your library"), importFileName.replace(/\.slate$/i, ""));
   setImportView(
     "danger",
     `<div class="import-danger">
       <p class="import-danger-text">
-        Everything in your account — <strong>${plural(have.movies, "movie")}, ${plural(have.shows, "show")} and ${plural(have.collections, "collection")}</strong>, with every rating and review — will be deleted and replaced by this file's
-        ${plural(incoming.movies.length, "movie")}, ${plural(incoming.shows.length, "show")} and ${plural(incoming.collections.length, "collection")}.
-        <strong>This can't be undone.</strong>
+        ${t("Everything in your account — <strong>{have}</strong>, with every rating and review — will be deleted and replaced by this file's {incoming}. <strong>This can't be undone.</strong>", {
+          have: libraryCounts(have.movies, have.shows, have.collections),
+          incoming: libraryCounts(incoming.movies.length, incoming.shows.length, incoming.collections.length),
+        })}
       </p>
 
       <label class="import-check">
         <input type="checkbox" id="import-backup-first" checked />
         <span class="import-check-box" aria-hidden="true"></span>
         <span class="import-check-text">
-          <span class="import-check-title">Download a backup of my library first</span>
-          <span class="import-check-hint">Saved as a .slate file before anything is deleted, so you can always bring it back.</span>
+          <span class="import-check-title">${t("Download a backup of my library first")}</span>
+          <span class="import-check-hint">${t("Saved as a .slate file before anything is deleted, so you can always bring it back.")}</span>
         </span>
       </label>
 
-      <label class="import-confirm-label" for="import-confirm-input">To confirm, type <strong>${REPLACE_CONFIRM_WORD}</strong></label>
+      <label class="import-confirm-label" for="import-confirm-input">${t("To confirm, type <strong>{phrase}</strong>", { phrase: REPLACE_CONFIRM_WORD })}</label>
       <div class="import-confirm-wrap">
-        <input type="text" class="field-input import-confirm-input" id="import-confirm-input" autocomplete="off" autocapitalize="off" spellcheck="false" disabled placeholder="Wait ${REPLACE_WAIT_SECONDS}…" />
+        <input type="text" class="field-input import-confirm-input" id="import-confirm-input" autocomplete="off" autocapitalize="off" spellcheck="false" disabled placeholder="${t("Wait {n}…", { n: REPLACE_WAIT_SECONDS })}" />
         <span class="import-confirm-timer" id="import-confirm-timer" aria-hidden="true"></span>
       </div>
     </div>
     <div class="update-actions import-actions">
-      <button type="button" class="cancel-btn" data-import-action="continue">Back</button>
+      <button type="button" class="cancel-btn" data-import-action="continue">${t("Back")}</button>
       <div class="update-actions-right">
-        <button type="button" class="delete-btn import-replace-btn" data-import-action="confirm-replace" disabled>Delete &amp; import</button>
+        <button type="button" class="delete-btn import-replace-btn" data-import-action="confirm-replace" disabled>${t("Delete &amp; import")}</button>
       </div>
     </div>`
   );
@@ -1037,7 +1058,7 @@ function showReplaceDanger() {
       return;
     }
     if (left > 0) {
-      input.placeholder = `Wait ${left}…`;
+      input.placeholder = t("Wait {n}…", { n: left });
       return;
     }
     clearInterval(replaceCountdown);
@@ -1114,7 +1135,7 @@ async function deleteIds(table, ids, onRows) {
 // says so.
 async function importReplace(parsed, backupFirst, onProgress) {
   if (backupFirst) {
-    onProgress("Saving a backup of your library…", 0);
+    onProgress(t("Saving a backup of your library…"), 0);
     try {
       const file = await buildSlateBackup();
       downloadFile(file.name.replace("slate-backup-", "slate-backup-before-import-"), file.text);
@@ -1125,7 +1146,7 @@ async function importReplace(parsed, backupFirst, onProgress) {
     }
   }
 
-  onProgress("Checking your library…", 0);
+  onProgress(t("Checking your library…"), 0);
   const snap = await snapshotAccount();
   const created = { movies: [], shows: [], collections: [], collection_items: [], viewings: [] };
   // Originals, for undoing: put back in place, or (a movie whose watched
@@ -1151,7 +1172,7 @@ async function importReplace(parsed, backupFirst, onProgress) {
   const keepIds = new Set(); // account titles the file overwrites (not deleted)
 
   try {
-    for (const [type, table, label] of [["movie", "movies", "Bringing in movies…"], ["show", "shows", "Bringing in shows…"]]) {
+    for (const [type, table, label] of [["movie", "movies", t("Bringing in movies…")], ["show", "shows", t("Bringing in shows…")]]) {
       onProgress(label, done / total);
       const fileRows = type === "movie" ? parsed.movies : parsed.shows;
       const accByTmdb = new Map();
@@ -1211,7 +1232,7 @@ async function importReplace(parsed, backupFirst, onProgress) {
       }
     }
 
-    onProgress("Rebuilding your collections…", done / total);
+    onProgress(t("Rebuilding your collections…"), done / total);
     const tmdbByRef = {
       movie: new Map(parsed.movies.map((row) => [row.ref, row.tmdb_id])),
       show: new Map(parsed.shows.map((row) => [row.ref, row.tmdb_id])),
@@ -1224,7 +1245,7 @@ async function importReplace(parsed, backupFirst, onProgress) {
         "collections",
         [withoutNulls({ name: col.name, icon: col.icon, position: col.position, created_at: col.created_at }, ["position", "created_at"])],
         created,
-        tick("Rebuilding your collections…")
+        tick(t("Rebuilding your collections…"))
       );
       const seen = new Set();
       col.items.forEach((item) => {
@@ -1239,9 +1260,9 @@ async function importReplace(parsed, backupFirst, onProgress) {
         );
       });
     }
-    await insertRows("collection_items", itemRows, created, tick("Rebuilding your collections…"));
+    await insertRows("collection_items", itemRows, created, tick(t("Rebuilding your collections…")));
   } catch (err) {
-    onProgress("Something went wrong — putting everything back…", done / total);
+    onProgress(t("Something went wrong — putting everything back…"), done / total);
     let undone = true;
     try {
       // The movies whose watched state changed, as they were, with their
@@ -1282,9 +1303,9 @@ async function importReplace(parsed, backupFirst, onProgress) {
   ];
   let leftovers = 0;
   for (const [table, ids] of removals) {
-    onProgress("Clearing out your old library…", done / total);
+    onProgress(t("Clearing out your old library…"), done / total);
     try {
-      await deleteIds(table, ids, tick("Clearing out your old library…"));
+      await deleteIds(table, ids, tick(t("Clearing out your old library…")));
     } catch (err) {
       console.warn("Replace: retrying the removal of old rows —", err.message);
       try {
@@ -1298,7 +1319,7 @@ async function importReplace(parsed, backupFirst, onProgress) {
 
   // (The old viewings of the movies deleted went with them, uncounted.)
   done = total;
-  onProgress("Done", 1);
+  onProgress(t("Done"), 1);
   return {
     report: {
       movies: parsed.movies.length,
@@ -1332,22 +1353,28 @@ async function reloadLibrary() {
     if (typeof renderProfilePreview === "function") renderProfilePreview();
   } catch (err) {
     console.error("Reload after import failed:", err);
-    showToast("Imported — refresh the page to see everything.", true);
+    showToast(t("Imported — refresh the page to see everything."), true);
   }
 }
 
 function showReplaceDone(report) {
   const lines = [
-    `Your library is now this file: <strong>${plural(report.movies, "movie")}, ${plural(report.shows, "show")} and ${plural(report.collections, "collection")}</strong>.`,
+    t("Your library is now this file: <strong>{library}</strong>.", { library: libraryCounts(report.movies, report.shows, report.collections) }),
   ];
   if (report.removed) {
-    lines.push(`${plural(report.removed, "title")} that ${report.removed === 1 ? "wasn't" : "weren't"} in the file ${report.removed === 1 ? "was" : "were"} removed.`);
+    lines.push(tn(report.removed, "{n} title that wasn't in the file was removed.", "{n} titles that weren't in the file were removed."));
   }
-  if (report.backup) lines.push("Your previous library was downloaded as a backup first.");
+  if (report.backup) lines.push(t("Your previous library was downloaded as a backup first."));
   if (report.leftovers) {
-    lines.push(`${plural(report.leftovers, "old entry")} couldn't be removed and ${report.leftovers === 1 ? "is" : "are"} still there — you can delete ${report.leftovers === 1 ? "it" : "them"} by hand.`.replace("entrys", "entries"));
+    lines.push(
+      tn(
+        report.leftovers,
+        "{n} old entry couldn't be removed and is still there — you can delete it by hand.",
+        "{n} old entries couldn't be removed and are still there — you can delete them by hand."
+      )
+    );
   }
-  setImportHeader("Import data · Done", "Library replaced", importFileName.replace(/\.slate$/i, ""));
+  setImportHeader(t("Import data · Done"), t("Library replaced"), importFileName.replace(/\.slate$/i, ""));
   setImportView(
     "done",
     `<div class="import-done">
@@ -1359,7 +1386,7 @@ function showReplaceDone(report) {
     <div class="update-actions import-actions">
       <span></span>
       <div class="update-actions-right">
-        <button type="button" class="modal-search-btn" data-import-action="close">Done</button>
+        <button type="button" class="modal-search-btn" data-import-action="close">${t("Done")}</button>
       </div>
     </div>`
   );
