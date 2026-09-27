@@ -244,14 +244,20 @@ directly.
   invite-only call. Features are left for people to find in the app;
   don't add feature tours, FAQs or detail cards back without asking.
 - **Publishing on Cloudflare Pages** (free, chosen over Netlify and
-  Vercel). The steps:
-  1. Connect the GitHub repo. There's no build command, and the output
-     directory is the repo root.
+  Vercel). Since 2025 Cloudflare steers new projects to Workers (static
+  assets) and puts its new work there, but Pages stays fully supported;
+  Pages was kept for its simpler setup (no config files) and its nicer
+  free address (`<project>.pages.dev`, vs. `<project>.<account>.workers.dev`).
+  The whole repo root is served, docs and tests included: the repo is
+  public anyway and holds no secrets. Free plan (Sept. 2026): 500 builds a
+  month, 20,000 files and 25 MiB per file. The steps:
+  1. Connect the GitHub repo, production branch `main`. There's no build
+     command, and the output directory is the repo root.
   2. Add the new address to Supabase → Authentication → URL Configuration:
      the Site URL and the Redirect URLs, so password-reset links work.
   3. Update the address in Web3Forms' form settings.
   4. Put the address in the welcome-email tool (it remembers it).
-  5. Add a `_headers` file with the simple security headers only:
+  5. Done (`_headers` at the repo root): the simple security headers only:
      `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`
      and `X-Content-Type-Options: nosniff`. The owner and Claude decided
      against a full Content-Security-Policy for now: the risk of breaking
