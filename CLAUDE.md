@@ -119,7 +119,8 @@ directly.
 
 - Everything so far is in `main`: invite-only access, the welcome-email
   tool, the review note redesign, the trailer button that waits, disabled,
-  search + filters, and where to watch.
+  search + filters, where to watch, and rewatches of movies (all three
+  stages).
 - Search and filters (`js/librarySearch.js`) cover Movies, Shows, Movies To
   Watch and the Shows Queue; the owner chose to leave collections for later.
   Their decisions:
