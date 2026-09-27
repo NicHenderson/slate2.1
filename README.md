@@ -66,12 +66,12 @@ your data and don't break when your password does.
 | `auth.spec.js` | Requesting access, forgot password, the reset link, expired links |
 | `library.spec.js` | Marking titles watched, deleting safely, reviews shown as text |
 | `customOrder.spec.js` | Drag and drop in Custom order, and the drag bugs it once had |
-| `viewings.spec.js` | Rewatches: adding, changing and deleting a movie's viewings, and a watched movie never losing its date |
+| `viewings.spec.js` | Rewatches: adding, changing and deleting a movie's viewings, a watched movie never losing its date, and every viewing counting in the stats and the "Watched in" filter |
 | `whereToWatch.spec.js` | Where to watch titles not watched yet, by country |
 | `librarySearch.spec.js` | Searching and filtering Movies, Shows and the two watchlists, and Custom order pausing meanwhile |
 | `shows.spec.js` | A show from the queue to watching to finished |
 | `collections.spec.js` | Creating collections and filling them |
-| `yourData.spec.js` | Export, and import in both Add and Replace modes |
+| `yourData.spec.js` | Export, and import in both Add and Replace modes, viewings included (and version 1 files) |
 | `settings.spec.js` | Settings kept by the account, and saving the profile |
 | `account.spec.js` | Deleting an account: the locks, a wrong password, a server failure, and the account gone |
 | `mobile.spec.js` | Slate on a phone: nothing scrolls sideways, and the menu and adding a title work by tapping |

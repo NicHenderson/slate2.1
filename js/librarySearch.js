@@ -102,9 +102,11 @@ const LIBRARY_FILTERS = {
   },
   watchedIn: {
     label: "Watched in",
+    // A movie counts under every year it was watched in (its viewings), a
+    // show under the year it was finished.
     optionsOf: (row) => {
-      const year = yearOf(row.watched_date ?? row.finished_watching_date);
-      return year ? [String(year)] : [];
+      const dates = [row.watched_date ?? row.finished_watching_date, ...viewingsOf(row.id).map((v) => v.watched_on)];
+      return [...new Set(dates.map(yearOf).filter(Boolean))].map(String);
     },
     tag: (value) => `Watched in ${value}`,
     order: (a, b) => Number(b.value) - Number(a.value),

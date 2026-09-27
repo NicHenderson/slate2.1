@@ -408,9 +408,22 @@ function createBackend() {
         const existing = upsert && input[keyCol] != null ? db[table].find((r) => r[keyCol] === input[keyCol]) : null;
         if (existing) {
           if (!canSee(table, existing, userId)) return fail(403, "42501", `new row violates row-level security policy for table "${table}"`);
+          // An upsert that finds its row is an update: 0007's rules apply.
+          try {
+            if (table === "movies") checkMovieDateChange(existing, input);
+            if (table === "viewings") checkViewing({ ...existing, ...input }, userId);
+          } catch (e) {
+            return fail(e.status, e.code, e.message);
+          }
+          const before = { ...existing };
           Object.assign(existing, input);
           written.push(existing);
           pushChange(table, "UPDATE", existing, existing);
+          if (table === "viewings") {
+            syncWatchedDate(existing.movie_id);
+            if (before.movie_id !== existing.movie_id) syncWatchedDate(before.movie_id);
+          }
+          if (table === "movies" && "watched_date" in input) movieDateWritten(existing, before.watched_date);
           continue;
         }
         const row = {

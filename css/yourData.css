@@ -299,6 +299,11 @@
   color: var(--ink-muted);
 }
 
+/* "2 rewatches" wraps as a whole, never between the number and its word. */
+.import-stat-part {
+  white-space: nowrap;
+}
+
 .import-chips {
   display: flex;
   flex-wrap: wrap;

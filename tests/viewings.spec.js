@@ -145,3 +145,20 @@ test("marking a movie watched makes its first viewing, with only a date to pick;
   await expect.poll(() => matrix.review).toBe("Better the second time.");
   expect(viewingsOf(backend, matrix)).toEqual(["2026-09-01", "2026-09-10"]);
 });
+
+test("every viewing counts: Time watched, the Rewatches stat, and “Watched in” for each year", async ({ page, backend }) => {
+  const alien = alienOf(backend); // 117 min, watched 2026-08-01
+  backend.seed("viewings", [{ movie_id: alien.id, watched_on: "2024-10-31" }], backend.user.id);
+  await logIn(page);
+  await page.click('.nav-btn[data-section="movies-watched"]');
+  const stats = page.locator("#hstats-movies-watched");
+  await expect(stats.locator(".hs-item", { hasText: "Time watched" })).toContainText("3h 54m"); // 2 × 117 min
+  await expect(stats.locator(".hs-item", { hasText: "Rewatch" })).toContainText("1");
+
+  const tools = page.locator('[data-lib-section="movies-watched"]');
+  const watchedIn = tools.locator(".lib-filter-panel .lf-group", { hasText: "Watched in" }).locator(".lf-chip");
+  await tools.locator(".lib-filter-btn").click();
+  await expect(watchedIn).toHaveText([/^2026\s*1$/, /^2024\s*1$/]);
+  await watchedIn.filter({ hasText: "2024" }).click();
+  await expect(page.locator("#grid-movies-watched .card", { hasText: "Alien" })).toBeVisible();
+});

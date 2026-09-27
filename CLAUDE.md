@@ -165,10 +165,14 @@ directly.
        "Watched in" filter matches any viewing's year;
      - `.slate` goes to version 2 carrying viewings; version 1 files still
        import (one viewing per watched movie).
-     Next: stage 3 — `.slate` version 2 with viewings (and Replace's
-     rollback restoring them), Time watched + Rewatches stats, "Watched in"
-     matching any viewing. Until then an export carries only each movie's
-     latest date.
+     Stage 3 is done too: `.slate` version 2 lists each movie's viewings
+     (version 1 files still import, one viewing per watched movie), Replace
+     brings them in and its undo puts them back, Time watched counts every
+     viewing, a Rewatches stat shows once there's one, and "Watched in"
+     matches any viewing's year. Replace had broken when 0007 went live
+     (a movie watched in the account but not in the file can't lose its
+     date): such a movie is now deleted and recreated on the same id.
+     Nothing of this stage needs a migration or a redeploy.
   3. **Import from other apps:** IMDb (CSV with IMDb ids → TMDB `find`),
      Letterboxd (ZIP of CSVs, title + year matching, diary rewatches),
      Trakt (JSON with TMDB ids); TV Time only after seeing a real export.
