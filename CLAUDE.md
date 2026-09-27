@@ -143,8 +143,10 @@ directly.
 
 - Everything so far is in `main`: invite-only access, the welcome-email
   tool, the review note redesign, the trailer button that waits, disabled,
-  search + filters, where to watch, and rewatches of movies (all three
-  stages).
+  search + filters, where to watch, rewatches of movies (all three
+  stages), English + Spanish (the app and TMDB's data), genres and
+  posters escaped as text, and the search's info window in the detail
+  window's design (with its trailer).
 - Search and filters (`js/librarySearch.js`) cover Movies, Shows, Movies To
   Watch and the Shows Queue; the owner chose to leave collections for later.
   Their decisions:
@@ -208,13 +210,13 @@ directly.
      owner: the watched date for IMDb (it only has the date rated), films
      Letterboxd has as watched but not in the diary, titles already in
      Slate, and where shows go.
-- Next: translate the app, then publish. **Slate launches in English and
+- Translation is done; **next: publish.** **Slate launches in English and
   Spanish only** (the owner's decision); German and Italian are out for
   now, and adding a language later only takes its dictionary.
   The owner authorized the stages one at a time:
-  1. **The base** — done, not merged: `js/i18n.js`, every string through
+  1. **The base** — done: `js/i18n.js`, every string through
      `t()`/`tn()`, the tests. English looks exactly as before.
-  2. **Spanish** — done, not merged, waiting for the owner's review:
+  2. **Spanish** — done, reviewed by the owner:
      `js/lang/es.js` (neutral Spanish, "tú"; película / serie / colección,
      Por ver / Viendo / Visto / Abandonadas, calificación, reseña,
      visionado, "revisionados" for rewatches, Ajustes). Language pickers in
@@ -224,16 +226,15 @@ directly.
      now puts what doesn't fit on a second row instead of overlapping.
   3. ~~German and Italian~~ — dropped for the launch.
   4. **TMDB's data in the language**, before the launch (the owner's
-     choice) — done, not merged. Genres are saved in English (by TMDB id,
+     choice) — done. Genres are saved in English (by TMDB id,
      `TMDB_GENRES`) and shown translated (`GENRE_NAMES`), so one genre is
      one filter option. Searches and details come in the page's language:
      Spanish is TMDB's Latin American (`es-MX`, the owner's choice). The
      owner decided that **titles and synopses are saved in the language
      Slate is in when they're added, and always shown as saved** (a
      library can mix English and Spanish titles). A synopsis TMDB hasn't
-     translated comes from its English details. **Pending: the owner
-     redeploys the `tmdb` function** (it now takes `language`); until
-     then TMDB keeps answering in English, and nothing breaks.
+     translated comes from its English details. The owner redeployed the
+     live `tmdb` function with `language` (en-US or es-MX).
 - **Publishing on Cloudflare Pages** (free, chosen over Netlify and
   Vercel). The steps:
   1. Connect the GitHub repo. There's no build command, and the output
