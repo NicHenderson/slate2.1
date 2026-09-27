@@ -83,7 +83,7 @@ test("adding a title another tab just added says it's already there", async ({ p
   await page.fill("#modal-input", "paddington");
   await page.click("#modal-search-btn");
   await page.locator("#modal-results .tmdb-info-btn").first().click();
-  const add = page.locator('#info-modal .mini-add-btn:not([disabled])');
+  const add = page.locator('#info-modal .info-add-btn:not([disabled])');
   await expect(add).toBeVisible();
 
   backend.seed("movies", [{ tmdb_id: 346648, title: "Paddington 2", watched_date: null }], backend.user.id);

@@ -264,165 +264,16 @@
   color: var(--accent);
 }
 
-.mini-add-btn {
-  padding: 7px 14px;
-  border-radius: var(--radius-sm);
-  background: var(--accent-soft);
-  border: 1px solid var(--border);
-  color: var(--accent);
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-  transition: background var(--transition), border-color var(--transition),
-    color var(--transition);
-}
-
-.mini-add-btn:hover {
-  background: var(--accent-strong);
-  border-color: var(--accent-strong);
-  color: #fff;
-}
-
 .info-backdrop {
   z-index: 110;
 }
 
-/* Same Polaroid-poster + paper-panel shell as #detail-modal (.detail-layout
-   etc.) but its own dedicated classes — this is a single, non-browsable
-   title preview (no prev/next), so no nav arrows, and it's deliberately kept
-   separate from .detail-* so the two can keep evolving independently. */
-.info-layout {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  width: min(680px, calc(100vw - 48px));
-  max-height: calc(100vh - 48px);
-  animation: modal-in 0.2s ease;
-}
-
-.info-poster-box {
-  position: relative;
-  flex-shrink: 0;
-  background: var(--paper);
-  padding: 10px 10px 24px;
-  box-shadow: 4px 10px 22px rgba(0, 0, 0, 0.45);
-  transform: rotate(-3deg);
-}
-
-.info-poster-box::before {
-  content: "";
-  position: absolute;
-  top: -7px;
-  left: calc(50% - 7px);
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--accent-strong);
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4), inset -2px -2px 3px rgba(0, 0, 0, 0.3),
-    inset 2px 2px 2px rgba(255, 255, 255, 0.5);
-}
-
-.info-poster-img {
-  display: block;
-  width: 200px;
-  aspect-ratio: 2 / 3;
-  object-fit: cover;
-  border-radius: 0;
-  border: 1px solid var(--border);
-  background: var(--surface);
-}
-
-.info-poster-empty {
-  background: linear-gradient(135deg, #2a2338, #3a3050);
-}
-
-.info-panel {
-  position: relative;
-  flex: 1;
-  min-width: 0;
-  max-height: calc(100vh - 48px);
-  overflow-y: auto;
-  background: var(--paper);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 28px 32px;
-  box-shadow: 4px 10px 24px rgba(0, 0, 0, 0.4);
-}
-
-.info-close-btn {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-}
-
-.info-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-  padding-right: 36px;
-}
-
-.info-title {
-  font-family: var(--font-hand);
-  font-size: 30px;
-  font-weight: 400;
-  line-height: 1.1;
-}
-
-.info-genre-line {
-  margin-top: 4px;
-  font-family: var(--font-hand);
-  font-size: 15px;
-  color: var(--accent-deep);
-}
-
-.info-meta {
-  flex-shrink: 0;
-  text-align: right;
-}
-
-.info-meta-year {
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.info-meta-runtime {
-  margin-top: 2px;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.info-synopsis {
-  margin-top: 16px;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.info-actions {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-
-.info-actions .mini-add-btn {
-  background: var(--accent-strong);
-  border-color: var(--accent-strong);
-  color: #fff;
-  padding: 9px 18px;
-  font-size: 14px;
-}
-
-.info-actions .mini-add-btn:hover {
-  background: var(--accent-deep);
-  border-color: var(--accent-deep);
-}
-
-.mini-add-btn:disabled {
-  opacity: 0.7;
+/* Added already (or just now): the sticker lies flat and fades. */
+.detail-actions .info-add-btn:disabled {
+  opacity: 0.6;
   cursor: default;
+  transform: none;
+  box-shadow: 2px 3px 0 color-mix(in srgb, var(--accent-deep) 45%, transparent);
 }
 
 .detail-layout {
@@ -1939,24 +1790,6 @@ body:not(.no-hover) .col-item-card:hover .col-item-remove {
 .toast-error {
   border-color: #f87171;
   color: #f87171;
-}
-
-@media (max-width: 560px) {
-  .info-layout {
-    flex-direction: column;
-    align-items: center;
-    max-height: calc(100vh - 32px);
-    overflow-y: auto;
-  }
-
-  .info-poster-img {
-    width: 160px;
-  }
-
-  .info-panel {
-    max-height: none;
-    overflow-y: visible;
-  }
 }
 
 /* =====================================================================

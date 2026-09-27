@@ -57,15 +57,8 @@ function hideError() {
   modalError.classList.add("hidden");
 }
 
-function addButtonHtml(id, added = false) {
-  return added
-    ? `<button class="mini-add-btn" type="button" data-id="${id}" disabled>${t("Added")}</button>`
-    : `<button class="mini-add-btn" type="button" data-id="${id}">${t("+ Add")}</button>`;
-}
-
-// Same "add this TMDB title" action as addButtonHtml() above, styled to
-// match the ticket-stub row it lives in here instead of the info modal's
-// own button style.
+// "Add this TMDB title", in the ticket-stub row of a search result (the
+// info window has its own, js/infoModal.js).
 function tmdbAddButtonHtml(id, added = false) {
   return added
     ? `<button class="tmdb-add-btn added" type="button" data-id="${id}" disabled>${t("Added")}</button>`

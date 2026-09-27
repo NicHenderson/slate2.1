@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="css/sidebar.css?v=b0c4cd07" />
   <link rel="stylesheet" href="css/content.css?v=42b1b03a" />
   <link rel="stylesheet" href="css/cards.css?v=8bb24eb5" />
-  <link rel="stylesheet" href="css/modal.css?v=48351daa" />
+  <link rel="stylesheet" href="css/modal.css?v=0adc06fd" />
   <link rel="stylesheet" href="css/auth.css?v=17c2cd2c" />
   <link rel="stylesheet" href="css/landing.css?v=2e15fdb2" />
   <link rel="stylesheet" href="css/transitions.css?v=bf37ef65" />
@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="css/viewings.css?v=a12c11bd" />
   <link rel="stylesheet" href="css/whereToWatch.css?v=7528c42f" />
   <link rel="stylesheet" href="css/librarySearch.css?v=cce1cb12" />
-  <link rel="stylesheet" href="css/responsive.css?v=1d55d7b9" />
+  <link rel="stylesheet" href="css/responsive.css?v=1ad90db7" />
 </head>
 <body>
   <!-- ============================================================
@@ -1363,12 +1363,15 @@
     </div>
   </div>
 
+  <!-- A title from a TMDB search, before it's added: dressed like the
+       detail window of one in the library (#detail-modal), without its
+       arrows. -->
   <div class="modal-backdrop info-backdrop hidden" id="info-modal">
-    <div class="info-layout">
-      <div class="info-poster-box" id="info-poster"></div>
-      <div class="info-panel">
-        <button class="modal-close info-close-btn" id="info-close" aria-label="Close">✕</button>
-        <div class="info-body" id="info-body"></div>
+    <div class="detail-layout">
+      <div class="detail-poster-box" id="info-poster"></div>
+      <div class="detail-panel">
+        <button class="modal-close detail-close-btn" id="info-close" aria-label="Close">✕</button>
+        <div class="detail-body" id="info-body"></div>
       </div>
     </div>
   </div>
@@ -1522,14 +1525,14 @@
   <script src="js/realtime.js?v=13b98b55"></script>
   <script src="js/tmdb.js?v=b33a45f6"></script>
   <script src="js/addItem.js?v=25eded67"></script>
-  <script src="js/searchModal.js?v=4705971a"></script>
+  <script src="js/searchModal.js?v=2d31f6a5"></script>
   <script src="js/libraryModal.js?v=cebc1c59"></script>
   <script src="js/emojiData.js?v=00b8c396"></script>
   <script src="js/iconData.js?v=051d09a4"></script>
   <script src="js/icons.js?v=3a450da2"></script>
   <script src="js/iconPicker.js?v=60949f19"></script>
   <script src="js/collections.js?v=6314b5ec"></script>
-  <script src="js/infoModal.js?v=fefa93e6"></script>
+  <script src="js/infoModal.js?v=86f47156"></script>
   <script src="js/detailModal.js?v=c8a716d1"></script>
   <script src="js/starsInput.js?v=4457c4a6"></script>
   <script src="js/updateModal.js?v=91c839e0"></script>
