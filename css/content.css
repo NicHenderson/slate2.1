@@ -696,6 +696,9 @@
 
 .hstats {
   display: flex;
+  /* Items never squeeze into each other: what doesn't fit (longer labels,
+     in some languages) goes on to a second row. */
+  flex-wrap: wrap;
   align-items: stretch;
   max-width: 100%;
   padding: 7px 2px;
@@ -715,7 +718,6 @@
   flex-direction: column;
   justify-content: center;
   gap: 5px;
-  min-width: 0;
   padding: 2px 18px;
   font: inherit;
   color: inherit;
@@ -787,7 +789,10 @@ button.hs-item:focus-visible .hs-value {
 
 .hs-extremes {
   gap: 1px;
-  width: 230px;
+  /* The one item that fits itself to the room the others leave, rather
+     than moving down a row. */
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .hs-progress {

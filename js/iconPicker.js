@@ -21,7 +21,7 @@ let ipColor = DEFAULT_ICON_COLOR;
 let ipSearchTimer = null;
 
 const ipTokens = () => ipSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
-const ipMatches = (words, tokens) => tokens.every((t) => words.includes(t));
+const ipMatches = (words, tokens) => tokens.every((token) => words.includes(token));
 
 function ipIsSelected(cellValue) {
   const current = ipHidden.value;
@@ -30,8 +30,33 @@ function ipIsSelected(cellValue) {
   return !current.startsWith("icon:") && stripVariation(current) === stripVariation(cellValue);
 }
 
+// The group names of js/emojiData.js and js/iconData.js, as shown. (The
+// emoji and icons themselves are found by their English names: their
+// tooltips stay in English too.)
+const IP_GROUP_LABELS = {
+  "Smileys & emotion": t("Smileys & emotion"),
+  People: t("People"),
+  "Animals & nature": t("Animals & nature"),
+  "Food & drink": t("Food & drink"),
+  Activities: t("Activities"),
+  "Travel & places": t("Travel & places"),
+  Objects: t("Objects"),
+  Symbols: t("Symbols"),
+  Animals: t("Animals"),
+  "Film & TV": t("Film & TV"),
+  "Games & fun": t("Games & fun"),
+  "Music & audio": t("Music & audio"),
+  "Nature & weather": t("Nature & weather"),
+  "People & faces": t("People & faces"),
+  "Places & travel": t("Places & travel"),
+  "Space & science": t("Space & science"),
+  Sports: t("Sports"),
+  "Symbols & shapes": t("Symbols & shapes"),
+};
+const ipGroupLabel = (label) => IP_GROUP_LABELS[label] ?? label;
+
 function ipEmptyHtml() {
-  return `<p class="icon-empty">Nothing matches “<span id="icon-empty-q"></span>”.</p>`;
+  return `<p class="icon-empty">${t("Nothing matches “{query}”.", { query: '<span id="icon-empty-q"></span>' })}</p>`;
 }
 
 function ipEmojiHtml(tokens) {
@@ -43,8 +68,8 @@ function ipEmojiHtml(tokens) {
   return groups
     .map(
       (g) => `
-      <p class="icon-group-label">${g.label}</p>
-      <div class="icon-cells">
+      <p class="icon-group-label">${ipGroupLabel(g.label)}</p>
+      <div class="icon-cells" translate="no">
         ${g.items
           .map(
             ([char, file, words]) =>
@@ -69,8 +94,8 @@ function ipIconsHtml(tokens) {
   return groups
     .map(
       (g) => `
-      <p class="icon-group-label">${g.label}</p>
-      <div class="icon-cells">
+      <p class="icon-group-label">${ipGroupLabel(g.label)}</p>
+      <div class="icon-cells" translate="no">
         ${g.icons
           .map(
             (name) =>
@@ -104,7 +129,7 @@ function ipShowTab(tab) {
     b.classList.toggle("active", b.dataset.itab === tab);
   });
   ipColors.classList.toggle("hidden", tab !== "icons");
-  ipSearch.placeholder = tab === "icons" ? "Search icons…" : "Search emoji…";
+  ipSearch.placeholder = tab === "icons" ? t("Search icons…") : t("Search emoji…");
   ipRenderGrid();
 }
 
@@ -112,7 +137,7 @@ function ipSetValue(value) {
   ipHidden.value = value;
   const has = Boolean(value);
   ipPreview.innerHTML = has ? iconHtml(value) : `<span class="icon-preview-empty" aria-hidden="true">+</span>`;
-  ipLabel.textContent = has ? "Change icon" : "Choose an icon";
+  ipLabel.textContent = has ? t("Change icon") : t("Choose an icon");
   ipGrid.querySelectorAll(".icon-cell").forEach((cell) => {
     cell.classList.toggle("selected", ipIsSelected(cell.dataset.value));
   });

@@ -12,10 +12,10 @@
 
 // TMDB's kinds, as shown; "free" and "ads" (free with ads) read as one.
 const WTW_GROUPS = [
-  { label: "Stream", kinds: ["flatrate"] },
-  { label: "Free", kinds: ["free", "ads"] },
-  { label: "Rent", kinds: ["rent"] },
-  { label: "Buy", kinds: ["buy"] },
+  { label: t("Stream"), kinds: ["flatrate"] },
+  { label: t("Free"), kinds: ["free", "ads"] },
+  { label: t("Rent"), kinds: ["rent"] },
+  { label: t("Buy"), kinds: ["buy"] },
 ];
 
 const WTW_LOGO_RE = /^\/[A-Za-z0-9_-]+\.(jpg|jpeg|png|svg)$/;
@@ -49,7 +49,7 @@ function watchRegion() {
 
 function regionName(code) {
   try {
-    return new Intl.DisplayNames(["en"], { type: "region" }).of(code) ?? code;
+    return new Intl.DisplayNames([LOCALE], { type: "region" }).of(code) ?? code;
   } catch {
     return code;
   }
@@ -74,8 +74,8 @@ function fetchWatchProviders(type, tmdbId) {
 function whereToWatchSlotHtml() {
   return `
     <section class="where-to-watch" aria-live="polite">
-      <p class="wtw-title">Where to watch · ${escapeHtml(regionName(watchRegion()))}</p>
-      <p class="wtw-loading">Looking for where to watch…</p>
+      <p class="wtw-title">${t("Where to watch · {country}", { country: escapeHtml(regionName(watchRegion())) })}</p>
+      <p class="wtw-loading">${t("Looking for where to watch…")}</p>
     </section>`;
 }
 
@@ -102,11 +102,11 @@ function whereToWatchHtml(results, region) {
     return `<div class="wtw-group"><p class="wtw-kind">${label}</p><div class="wtw-logos">${providers.map((p) => providerLogoHtml(p, link)).join("")}</div></div>`;
   }).join("");
 
-  const title = `<p class="wtw-title">Where to watch · ${name}</p>`;
+  const title = `<p class="wtw-title">${t("Where to watch · {country}", { country: name })}</p>`;
   if (!groups) {
-    return `${title}<p class="wtw-none">We couldn't find where to watch this in ${name} — sorry. You can pick another country in Settings.</p>`;
+    return `${title}<p class="wtw-none">${t("We couldn't find where to watch this in {country} — sorry. You can pick another country in Settings.", { country: name })}</p>`;
   }
-  return `${title}<div class="wtw-groups">${groups}</div><p class="wtw-credit">Availability by <a href="https://www.justwatch.com" target="_blank" rel="noopener">JustWatch</a>.</p>`;
+  return `${title}<div class="wtw-groups">${groups}</div><p class="wtw-credit">${t("Availability by {justwatch}.", { justwatch: '<a href="https://www.justwatch.com" target="_blank" rel="noopener">JustWatch</a>' })}</p>`;
 }
 
 // Fills a slot from whereToWatchSlotHtml(). `stillShowing` says whether the
@@ -119,7 +119,7 @@ async function loadWhereToWatch(slot, type, tmdbId, stillShowing) {
     html = whereToWatchHtml(await fetchWatchProviders(type, tmdbId), region);
   } catch (err) {
     console.error("Where to watch error:", err.message);
-    html = `<p class="wtw-title">Where to watch · ${escapeHtml(regionName(region))}</p><p class="wtw-none">Couldn't check where to watch right now.</p>`;
+    html = `<p class="wtw-title">${t("Where to watch · {country}", { country: escapeHtml(regionName(region)) })}</p><p class="wtw-none">${t("Couldn't check where to watch right now.")}</p>`;
   }
   if (slot.isConnected && stillShowing()) slot.innerHTML = html;
 }
@@ -136,11 +136,13 @@ let watchRegionsLoaded = false;
 function renderWatchRegionOptions() {
   if (!watchRegionSelect) return;
   const saved = typeof currentSettings === "undefined" ? "" : currentSettings.watchRegion;
-  const codes = new Map(watchRegionList.filter((r) => REGION_RE.test(r.iso_3166_1 ?? "")).map((r) => [r.iso_3166_1, r.english_name || regionName(r.iso_3166_1)]));
+  // TMDB's own English names, or the browser's in any other language.
+  const nameOf = (r) => (LANGUAGE === "en" && r.english_name) || regionName(r.iso_3166_1);
+  const codes = new Map(watchRegionList.filter((r) => REGION_RE.test(r.iso_3166_1 ?? "")).map((r) => [r.iso_3166_1, nameOf(r)]));
   if (REGION_RE.test(saved ?? "") && !codes.has(saved)) codes.set(saved, regionName(saved));
-  const options = [...codes].sort((a, b) => a[1].localeCompare(b[1]));
+  const options = [...codes].sort((a, b) => a[1].localeCompare(b[1], LOCALE));
   watchRegionSelect.innerHTML =
-    `<option value="">Automatic (${escapeHtml(regionName(browserRegion()))})</option>` +
+    `<option value="">${t("Automatic ({country})", { country: escapeHtml(regionName(browserRegion())) })}</option>` +
     options.map(([code, name]) => `<option value="${code}">${escapeHtml(name)}</option>`).join("");
   watchRegionSelect.value = REGION_RE.test(saved ?? "") ? saved : "";
 }

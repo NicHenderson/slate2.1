@@ -10,7 +10,7 @@ function renderSortMenuFor(menuEl, gridId) {
       lastGroup = opt.group;
       const active = key === effectiveSort(gridId) ? " active" : "";
       if (key === "custom" && locked) {
-        return `${heading}<button class="sort-option is-locked" type="button" data-sort="${key}" disabled><span class="sort-stub">${opt.stub}</span><span class="sort-option-label">${opt.label}</span></button><p class="sort-locked-note">Temporarily locked — clear your search and filters first.</p>`;
+        return `${heading}<button class="sort-option is-locked" type="button" data-sort="${key}" disabled><span class="sort-stub">${opt.stub}</span><span class="sort-option-label">${opt.label}</span></button><p class="sort-locked-note">${t("Temporarily locked — clear your search and filters first.")}</p>`;
       }
       return `${heading}<button class="sort-option${active}" type="button" data-sort="${key}"><span class="sort-stub">${opt.stub}</span><span class="sort-option-label">${opt.label}</span></button>`;
     })

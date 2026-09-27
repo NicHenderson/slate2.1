@@ -59,7 +59,7 @@ function pendingRows() {
 
 function libraryRowHtml(row) {
   const poster = row.poster
-    ? `<img class="add-poster" src="${row.poster}" alt="" loading="lazy" />`
+    ? `<img class="add-poster" src="${escapeHtml(row.poster)}" alt="" loading="lazy" />`
     : `<div class="add-poster add-poster-empty"></div>`;
   const selected = collectionAddMode && librarySelection.has(row.id);
   return `
@@ -68,7 +68,7 @@ function libraryRowHtml(row) {
         ${poster}
         ${collectionAddMode ? `<span class="add-check" aria-hidden="true">✓</span>` : ""}
       </div>
-      <p class="add-title">${escapeHtml(row.title ?? "Untitled")}</p>
+      <p class="add-title">${escapeHtml(row.title ?? t("Untitled"))}</p>
     </div>`;
 }
 
@@ -79,11 +79,11 @@ function renderLibraryList() {
   );
   const emptyText = collectionAddMode
     ? q
-      ? "No matches in your To Watch list."
-      : "Nothing left on your To Watch list to add."
+      ? t("No matches in your To Watch list.")
+      : t("Nothing left on your To Watch list to add.")
     : q
-      ? "No matches in your library."
-      : "Nothing pending yet.";
+      ? t("No matches in your library.")
+      : t("Nothing pending yet.");
   libraryResults.innerHTML = rows.length
     ? rows.map(libraryRowHtml).join("")
     : `<p class="results-status">${emptyText}</p>`;
@@ -91,8 +91,8 @@ function renderLibraryList() {
 
 function updateLibraryFooter() {
   const n = librarySelection.size;
-  libraryCount.textContent = `${n} selected`;
-  libraryAddBtn.textContent = `Add Selected (${n})`;
+  libraryCount.textContent = tn(n, "{n} selected", "{n} selected");
+  libraryAddBtn.textContent = t("Add Selected ({n})", { n });
   libraryAddBtn.disabled = n === 0;
 }
 
@@ -106,10 +106,10 @@ function openLibraryModal(type) {
   libraryType = type;
   dualSearchOpen = false;
   libraryTitle.textContent = collectionAddMode
-    ? "Add Titles"
+    ? t("Add Titles")
     : type === "movie"
-      ? "Add Movie"
-      : "Add TV Show";
+      ? t("Add Movie")
+      : t("Add TV Show");
   libraryTabs.classList.toggle("hidden", !collectionAddMode);
   libraryFooter.classList.toggle("hidden", !collectionAddMode);
   syncLibraryTabs();
@@ -161,17 +161,17 @@ libraryResults.addEventListener("click", (e) => {
 libraryAddBtn.addEventListener("click", async () => {
   if (!librarySelection.size || !openCollectionId) return;
   libraryAddBtn.disabled = true;
-  libraryAddBtn.textContent = "Adding…";
+  libraryAddBtn.textContent = t("Adding…");
   try {
     const ids = [...librarySelection];
     const added = await addLibraryTitlesToCollection(ids);
     librarySelection.clear();
     refreshCollectionAfterAdd(collectionTypeOfIds(ids));
     closeLibraryModal();
-    showToast(`Added ${added} title${added === 1 ? "" : "s"}.`);
+    showToast(tn(added, "Added {n} title.", "Added {n} titles."));
   } catch (err) {
     console.error("Add to collection error:", err.message);
-    showToast("Could not add titles — try again.", true);
+    showToast(t("Could not add titles — try again."), true);
   }
   updateLibraryFooter();
 });

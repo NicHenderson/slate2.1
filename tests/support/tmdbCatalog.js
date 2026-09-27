@@ -2,24 +2,32 @@
 // TMDB's own answers (search results and details share one object here —
 // the app only reads fields both have, or the details' extra ones).
 
+// TMDB's own genre ids (js/detailModal.js saves genres by them).
+const GENRE_IDS = { Action: 28, Adventure: 12, Comedy: 35, Crime: 80, Drama: 18, Family: 10751, Horror: 27, Mystery: 9648, "Science Fiction": 878, "Sci-Fi & Fantasy": 10765 };
+const genresOf = (names) => names.map((name) => ({ id: GENRE_IDS[name], name }));
+
 const movie = (id, title, date, runtime, genres, overview, extra = {}) => ({
   id,
   title,
+  original_title: title,
+  original_language: "en",
   release_date: date,
   runtime,
-  genres: genres.map((name, i) => ({ id: i + 1, name })),
+  genres: genresOf(genres),
   overview,
   poster_path: `/poster-${id}.jpg`,
   ...extra,
 });
 
-const show = (id, name, date, seasons, episodes, genres, overview) => ({
+const show = (id, name, date, seasons, episodes, genres, overview, language = "en") => ({
   id,
   name,
+  original_name: name,
+  original_language: language,
   first_air_date: date,
   number_of_seasons: seasons,
   number_of_episodes: episodes,
-  genres: genres.map((g, i) => ({ id: i + 1, name: g })),
+  genres: genresOf(genres),
   overview,
   poster_path: `/poster-tv-${id}.jpg`,
 });
@@ -35,9 +43,30 @@ const TMDB_CATALOG = {
   ],
   tv: [
     show(1399, "Game of Thrones", "2011-04-17", 8, 73, ["Sci-Fi & Fantasy", "Drama"], "Seven noble families fight for control of Westeros."),
-    show(70523, "Dark", "2017-12-01", 3, 26, ["Crime", "Drama", "Mystery"], "A missing child sets four families on a frantic hunt for answers."),
+    show(70523, "Dark", "2017-12-01", 3, 26, ["Crime", "Drama", "Mystery"], "A missing child sets four families on a frantic hunt for answers.", "de"),
   ],
 };
+
+// What TMDB answers in Latin American Spanish ("es-MX"): these names and
+// synopses over the English ones (Inception has no Spanish synopsis: TMDB
+// leaves it empty), and the genres by their Spanish names.
+const TMDB_SPANISH = {
+  "movie/348": { title: "Alien: el octavo pasajero", overview: "La tripulación de una nave comercial se topa con una forma de vida mortal." },
+  "movie/603": { title: "Matrix", overview: "Un hacker descubre la verdad sobre su realidad." },
+  "movie/27205": { title: "El origen", overview: "" },
+  "tv/1399": { name: "Juego de tronos", overview: "Siete familias nobles luchan por el control de Westeros." },
+};
+const SPANISH_GENRES = { Action: "Acción", Adventure: "Aventura", Comedy: "Comedia", Crime: "Crimen", Family: "Familia", Horror: "Terror", Mystery: "Misterio", "Science Fiction": "Ciencia ficción" };
+
+// A title as TMDB answers it in `language`.
+function inLanguage(type, title, language) {
+  if (language !== "es-MX") return title;
+  return {
+    ...title,
+    ...TMDB_SPANISH[`${type}/${title.id}`],
+    genres: title.genres.map((g) => ({ id: g.id, name: SPANISH_GENRES[g.name] ?? g.name })),
+  };
+}
 
 // Where to watch, as TMDB's watch/providers answers it: every country at
 // once, each with the services by kind. A title missing here has none.
@@ -60,4 +89,4 @@ const TMDB_WATCH_REGIONS = [
   { iso_3166_1: "US", english_name: "United States of America", native_name: "United States" },
 ];
 
-module.exports = { TMDB_CATALOG, TMDB_WATCH_PROVIDERS, TMDB_WATCH_REGIONS };
+module.exports = { TMDB_CATALOG, TMDB_WATCH_PROVIDERS, TMDB_WATCH_REGIONS, inLanguage };

@@ -84,7 +84,7 @@ function collectionCoverHtml(col, posters) {
   const slots = posters
     .map((p) =>
       p
-        ? `<img src="${p}" alt="" loading="lazy" />`
+        ? `<img src="${escapeHtml(p)}" alt="" loading="lazy" />`
         : `<div class="stamp-slot-empty"></div>`
     )
     .join("");
@@ -99,10 +99,10 @@ function collectionProgressHtml(watched, total) {
   // An empty collection keeps the (empty) bar so every footer lines up.
   const complete = total > 0 && watched === total;
   const pct = total ? Math.round((watched / total) * 100) : 0;
-  const label = total ? `${watched}/${total} watched` : "Empty";
+  const label = total ? t("{watched}/{total} watched", { watched, total }) : t("Empty");
   return `
     <div class="booklet-progress${complete ? " is-complete" : ""}">
-      <div class="booklet-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${watched}" aria-label="${total ? `${watched} of ${total} watched` : "No titles yet"}">
+      <div class="booklet-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${watched}" aria-label="${total ? t("{watched} of {total} watched", { watched, total }) : t("No titles yet")}">
         <span style="width: ${pct}%"></span>
       </div>
       <p class="booklet-progress-text">
@@ -124,7 +124,7 @@ function collectionCardHtml(col, items) {
       <div class="booklet-body">
         <div class="booklet-ribbon" aria-hidden="true"></div>
         ${collectionCoverHtml(col, posters)}
-        <p class="booklet-title">${escapeHtml(col.name ?? "Untitled")}</p>
+        <p class="booklet-title">${escapeHtml(col.name ?? t("Untitled"))}</p>
         <div class="booklet-footer">${collectionProgressHtml(watched, resolved.length)}</div>
       </div>
     </article>`;
@@ -149,7 +149,7 @@ function collectionsGridHtml() {
       <span class="booklet-ghost-spine"></span>
       <span class="booklet-ghost-body">
         <span class="booklet-ghost-slot"><span class="booklet-ghost-plus">+</span></span>
-        <span class="booklet-ghost-label">Add Collection</span>
+        <span class="booklet-ghost-label">${t("Add Collection")}</span>
       </span>
     </button>`
   );
@@ -202,16 +202,16 @@ function gridIdFor(table, row) {
 
 // The badge in the corner of a collection card: one circle, four states.
 const STATUS_BADGES = {
-  watched: { label: "Watched", inner: "✓" },
+  watched: { label: t("Watched"), inner: "✓" },
   watching: {
-    label: "Watching",
+    label: t("Watching"),
     inner: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>`,
   },
   dropped: {
-    label: "Dropped",
+    label: t("Dropped"),
     inner: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="5" width="4" height="14" rx="1"/><rect x="13.5" y="5" width="4" height="14" rx="1"/></svg>`,
   },
-  towatch: { label: "To watch", inner: "" }, // an empty dashed circle
+  towatch: { label: t("To watch"), inner: "" }, // an empty dashed circle
 };
 
 function colItemCardHtml(item) {
@@ -219,7 +219,7 @@ function colItemCardHtml(item) {
   if (!resolved) return "";
   const { row, table } = resolved;
   const poster = row.poster
-    ? `<img class="card-poster" src="${row.poster}" alt="" loading="lazy" />`
+    ? `<img class="card-poster" src="${escapeHtml(row.poster)}" alt="" loading="lazy" />`
     : `<div class="card-poster card-poster-empty"></div>`;
   const status = itemStatus(table, row);
   const badge = STATUS_BADGES[status];
@@ -227,10 +227,10 @@ function colItemCardHtml(item) {
     status === "watched" ? `<div class="card-rating">${starsHtml(row.rating)}</div>` : "";
   return `
     <article class="card col-item-card item-${status}" data-binding-id="${item.id}" data-item-id="${row.id}" data-table="${table}">
-      <button class="col-item-remove" type="button" data-binding-id="${item.id}" aria-label="Remove from collection">✕</button>
+      <button class="col-item-remove" type="button" data-binding-id="${item.id}" aria-label="${t("Remove from collection")}">✕</button>
       <span class="status-badge is-${status}" title="${badge.label}" role="img" aria-label="${badge.label}">${badge.inner}</span>
       ${poster}
-      <p class="card-title">${escapeHtml(row.title ?? "Untitled")}</p>
+      <p class="card-title">${escapeHtml(row.title ?? t("Untitled"))}</p>
       ${rating}
     </article>`;
 }
@@ -292,13 +292,13 @@ function collectionDetailGridHtml(colId) {
   const items = collectionItemsFor(colId).filter((item) => itemType(item) === colTab);
   const empty = items.length
     ? ""
-    : `<p class="grid-empty">No ${colTab === "movie" ? "movies" : "shows"} in this collection yet.</p>`;
+    : `<p class="grid-empty">${colTab === "movie" ? t("No movies in this collection yet.") : t("No shows in this collection yet.")}</p>`;
   return (
     items.map(colItemCardHtml).join("") +
     empty +
     `<button class="ghost-card" type="button" data-type="collection-titles">
       <span class="ghost-slot"><span class="ghost-plus">+</span></span>
-      <span class="ghost-label">+ Add Titles</span>
+      <span class="ghost-label">${t("+ Add Titles")}</span>
     </button>`
   );
 }
@@ -321,17 +321,17 @@ function collectionStatsHtml(colId) {
     : null;
 
   return `
-    <span class="cs-scope" title="Progress and ratings count every title in this collection, movies and shows together.">Whole collection</span>
+    <span class="cs-scope" title="${t("Progress and ratings count every title in this collection, movies and shows together.")}">${t("Whole collection")}</span>
     <div class="cs-item cs-progress">
       <span class="cs-value">${watched}/${total}</span>
       <div class="cs-meta">
-        <div class="stat-bar${complete ? " is-complete" : ""}" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${watched}" aria-label="${watched} of ${total} watched"><span style="width: ${pct}%"></span></div>
-        <span class="cs-label">${complete ? "Watched · complete ✓" : `Watched · ${pct}%`}</span>
+        <div class="stat-bar${complete ? " is-complete" : ""}" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${watched}" aria-label="${t("{watched} of {total} watched", { watched, total })}"><span style="width: ${pct}%"></span></div>
+        <span class="cs-label">${complete ? t("Watched · complete ✓") : t("Watched · {pct}%", { pct })}</span>
       </div>
     </div>
     <div class="cs-item">
-      <span class="cs-value">${avg == null ? "–" : `${avg.toFixed(1)}<small>/10</small>`}</span>
-      <span class="cs-label">${avg == null ? "No ratings" : `Avg rating · ${rated.length} rated`}</span>
+      <span class="cs-value">${avg == null ? "–" : `${formatDecimal(avg)}<small>/10</small>`}</span>
+      <span class="cs-label">${avg == null ? t("No ratings") : t("Avg rating · {n} rated", { n: rated.length })}</span>
     </div>
     <div class="cs-item cs-extremes">${collectionExtremesHtml(rated)}</div>`;
 }
@@ -341,32 +341,32 @@ function collectionStatsHtml(colId) {
 // the rating; when every rated title has the same score there's no best or
 // worst to name, so it says so instead of picking one arbitrarily.
 function collectionExtremesHtml(rated) {
-  if (!rated.length) return `<span class="cs-label">Best &amp; worst · no ratings yet</span>`;
+  if (!rated.length) return `<span class="cs-label">${t("Best &amp; worst · no ratings yet")}</span>`;
 
   const top = Math.max(...rated.map((r) => r.row.rating));
   const bottom = Math.min(...rated.map((r) => r.row.rating));
   if (top === bottom) {
     return `<span class="cs-label">${
-      rated.length === 1 ? "Only rated title" : `All ${rated.length} rated titles tie`
+      rated.length === 1 ? t("Only rated title") : t("All {n} rated titles tie", { n: rated.length })
     } · ${top}/10</span>`;
   }
 
   const row = (tag, arrow, score) => {
     const ties = rated.filter((r) => r.row.rating === score);
     const pick = ties[0];
-    const others = ties.slice(1).map((r) => escapeHtml(r.row.title ?? "Untitled"));
+    const others = ties.slice(1).map((r) => escapeHtml(r.row.title ?? t("Untitled")));
     const tieNote = others.length
-      ? `<span class="extreme-ties" title="Also ${score}/10: ${others.join(", ")}">+${others.length}</span>`
+      ? `<span class="extreme-ties" title="${t("Also {score}/10: {titles}", { score, titles: others.join(", ") })}">+${others.length}</span>`
       : "";
     return `
       <button class="extreme-row" type="button" data-item-id="${pick.row.id}" data-table="${pick.table}" title="${tag}">
         <span class="extreme-arrow" aria-hidden="true">${arrow}</span>
-        <span class="extreme-title">${escapeHtml(pick.row.title ?? "Untitled")}</span>
+        <span class="extreme-title">${escapeHtml(pick.row.title ?? t("Untitled"))}</span>
         <span class="extreme-rating">${score}/10</span>
         ${tieNote}
       </button>`;
   };
-  return `${row("Highest rated", "▲", top)}${row("Lowest rated", "▼", bottom)}`;
+  return `${row(t("Highest rated"), "▲", top)}${row(t("Lowest rated"), "▼", bottom)}`;
 }
 
 function renderCollectionDetail() {
@@ -387,11 +387,11 @@ function renderCollectionDetail() {
   });
   document.getElementById("col-detail-drag-hint").hidden = counts[colTab] < 2;
   colDetailIcon.innerHTML = iconHtml(col.icon);
-  colDetailName.textContent = col.name ?? "Untitled";
+  colDetailName.textContent = col.name ?? t("Untitled");
   const parts = [];
-  if (counts.movie) parts.push(`${counts.movie} movie${counts.movie === 1 ? "" : "s"}`);
-  if (counts.tv) parts.push(`${counts.tv} show${counts.tv === 1 ? "" : "s"}`);
-  colDetailCount.textContent = parts.length ? parts.join(" · ") : "No titles yet";
+  if (counts.movie) parts.push(tn(counts.movie, "{n} movie", "{n} movies"));
+  if (counts.tv) parts.push(tn(counts.tv, "{n} show", "{n} shows"));
+  colDetailCount.textContent = parts.length ? parts.join(" · ") : t("No titles yet");
   paintGrid(colDetailGrid, collectionDetailGridHtml(col.id));
 }
 
@@ -849,7 +849,7 @@ async function persistOrder(table, storeKey, orderedIds) {
       "Reorder not saved:",
       error?.message ?? "the upsert wrote fewer rows than expected (missing INSERT/UPDATE policy?)"
     );
-    showToast("Could not save the new order.", true);
+    showToast(t("Could not save the new order."), true);
     // Show what the database really holds, not the order we optimistically drew.
     forgetPendingPositions(storeKey);
     const fresh = await fetchAllRows(table).catch(() => null);
@@ -894,7 +894,7 @@ colDetailGrid.addEventListener("click", async (e) => {
       .eq("id", removeBtn.dataset.bindingId);
     if (error) {
       console.error("Remove item error:", error.message);
-      showToast("Could not remove title — try again.", true);
+      showToast(t("Could not remove title — try again."), true);
       return;
     }
     STORE.collectionItems.delete(removeBtn.dataset.bindingId);
@@ -971,7 +971,7 @@ function rollSurprise(btn, pool, openPick) {
   const onlyOption = pool.length === 1;
   setTimeout(() => {
     btn.classList.remove("is-rolling");
-    if (onlyOption) showToast("Only one pick in the queue — this is it!");
+    if (onlyOption) showToast(t("Only one pick in the queue — this is it!"));
     openPick(pick);
   }, 280);
 }
@@ -981,8 +981,8 @@ colSurpriseBtn.addEventListener("click", () => {
   if (!pool.length) {
     showToast(
       colTab === "movie"
-        ? "No movies to watch in this collection yet."
-        : "No shows to watch in this collection yet."
+        ? t("No movies to watch in this collection yet.")
+        : t("No shows to watch in this collection yet.")
     );
     return;
   }
@@ -1094,8 +1094,8 @@ function collectionTypeOfIds(ids) {
 // iconPicker.js, which keeps the hidden #collection-icon input up to date.
 function openCreateCollectionModal() {
   editingCollectionId = null;
-  collectionModalTitle.textContent = "New Collection";
-  collectionSave.textContent = "Create";
+  collectionModalTitle.textContent = t("New Collection");
+  collectionSave.textContent = t("Create");
   collectionName.value = "";
   collectionError.classList.add("hidden");
   iconPickerSet("", true); // an icon is required, so start with the picker open
@@ -1105,8 +1105,8 @@ function openCreateCollectionModal() {
 
 function openCollectionEditor(col) {
   editingCollectionId = col.id;
-  collectionModalTitle.textContent = "Edit Collection";
-  collectionSave.textContent = "Save Changes";
+  collectionModalTitle.textContent = t("Edit Collection");
+  collectionSave.textContent = t("Save Changes");
   collectionName.value = col.name ?? "";
   collectionError.classList.add("hidden");
   iconPickerSet(col.icon ?? "", false);
@@ -1122,14 +1122,14 @@ collectionForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   if (!collectionIcon.value) {
-    collectionError.textContent = "Pick an icon for the collection.";
+    collectionError.textContent = t("Pick an icon for the collection.");
     collectionError.classList.remove("hidden");
     return;
   }
 
   collectionSave.disabled = true;
   const savingLabel = collectionSave.textContent;
-  collectionSave.textContent = "Saving…";
+  collectionSave.textContent = t("Saving…");
 
   let result;
   if (editingCollectionId) {
@@ -1160,7 +1160,7 @@ collectionForm.addEventListener("submit", async (e) => {
 
   if (result.error) {
     console.error("Collection error:", result.error.message);
-    collectionError.textContent = "Could not save collection — try again.";
+    collectionError.textContent = t("Could not save collection — try again.");
     collectionError.classList.remove("hidden");
     return;
   }
@@ -1171,7 +1171,7 @@ collectionForm.addEventListener("submit", async (e) => {
   closeCollectionModal();
   collectionForm.reset();
   iconPickerSet("", false);
-  showToast(editingCollectionId ? "Collection updated." : "Collection created.");
+  showToast(editingCollectionId ? t("Collection updated.") : t("Collection created."));
   editingCollectionId = null;
 });
 

@@ -50,43 +50,44 @@ const yearOf = (date) => (date ? Number(String(date).slice(0, 4)) : null);
 
 const LIBRARY_FILTERS = {
   genres: {
-    label: "Genre",
+    label: t("Genre"),
     matchAll: true,
     optionsOf: (row) =>
       String(row.genres ?? "")
         .split(",")
         .map((g) => g.trim())
         .filter(Boolean),
-    order: (a, b) => b.count - a.count || a.value.localeCompare(b.value),
+    name: (value) => genreName(value),
+    order: (a, b) => b.count - a.count || genreName(a.value).localeCompare(genreName(b.value), LOCALE),
   },
   decades: {
-    label: "Decade",
+    label: t("Decade"),
     optionsOf: (row) => (row.release_year ? [String(Math.floor(row.release_year / 10) * 10)] : []),
-    name: (value) => `${value}s`,
+    name: (value) => t("{decade}s", { decade: value }),
     order: (a, b) => Number(a.value) - Number(b.value),
   },
   runtime: {
-    label: "Length",
+    label: t("Length"),
     optionsOf: (row) => {
       if (!row.duration) return [];
       if (row.duration < 90) return ["short"];
       return [row.duration <= 120 ? "medium" : "long"];
     },
-    name: (value) => ({ short: "Under 90 min", medium: "90 min – 2 h", long: "Over 2 h" })[value],
+    name: (value) => ({ short: t("Under 90 min"), medium: t("90 min – 2 h"), long: t("Over 2 h") })[value],
     order: (a, b) => ["short", "medium", "long"].indexOf(a.value) - ["short", "medium", "long"].indexOf(b.value),
   },
   seasons: {
-    label: "Length",
+    label: t("Length"),
     optionsOf: (row) => {
       if (!row.total_seasons) return [];
       if (row.total_seasons === 1) return ["mini"];
       return [row.total_seasons <= 4 ? "some" : "many"];
     },
-    name: (value) => ({ mini: "Miniseries · 1 season", some: "2–4 seasons", many: "5+ seasons" })[value],
+    name: (value) => ({ mini: t("Miniseries · 1 season"), some: t("2–4 seasons"), many: t("5+ seasons") })[value],
     order: (a, b) => ["mini", "some", "many"].indexOf(a.value) - ["mini", "some", "many"].indexOf(b.value),
   },
   rating: {
-    label: "Rating",
+    label: t("Rating"),
     single: true,
     // Which of the numbers 1–10 a title counts under depends on the mode
     // picked: an 8 is "at least" 1–8, "at most" 8–10, "exactly" 8.
@@ -96,19 +97,19 @@ const LIBRARY_FILTERS = {
       const test = RATING_MODES[ratingModeOf(sectionId)].test;
       return RATING_VALUES.filter((n) => test(rated, Number(n)));
     },
-    name: (value) => (value === "unrated" ? "Unrated" : value),
-    tag: (value, sectionId) => (value === "unrated" ? "Unrated" : RATING_MODES[ratingModeOf(sectionId)].tag(Number(value))),
+    name: (value) => (value === "unrated" ? t("Unrated") : value),
+    tag: (value, sectionId) => (value === "unrated" ? t("Unrated") : RATING_MODES[ratingModeOf(sectionId)].tag(Number(value))),
     order: (a, b) => (a.value === "unrated") - (b.value === "unrated") || Number(a.value) - Number(b.value),
   },
   watchedIn: {
-    label: "Watched in",
+    label: t("Watched in"),
     // A movie counts under every year it was watched in (its viewings), a
     // show under the year it was finished.
     optionsOf: (row) => {
       const dates = [row.watched_date ?? row.finished_watching_date, ...viewingsOf(row.id).map((v) => v.watched_on)];
       return [...new Set(dates.map(yearOf).filter(Boolean))].map(String);
     },
-    tag: (value) => `Watched in ${value}`,
+    tag: (value) => t("Watched in {year}", { year: value }),
     order: (a, b) => Number(b.value) - Number(a.value),
   },
 };
@@ -116,9 +117,9 @@ const LIBRARY_FILTERS = {
 const RATING_VALUES = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
 const RATING_MODES = {
-  atLeast: { label: "At least", symbol: "≥", test: (rated, n) => rated >= n, tag: (n) => (n === 10 ? "Rated 10" : `Rated ${n}+`) },
-  atMost: { label: "At most", symbol: "≤", test: (rated, n) => rated <= n, tag: (n) => (n === 1 ? "Rated 1" : `Rated ${n} or less`) },
-  exactly: { label: "Exactly", symbol: "=", test: (rated, n) => rated === n, tag: (n) => `Rated exactly ${n}` },
+  atLeast: { label: t("At least"), symbol: "≥", test: (rated, n) => rated >= n, tag: (n) => (n === 10 ? t("Rated 10") : t("Rated {n}+", { n })) },
+  atMost: { label: t("At most"), symbol: "≤", test: (rated, n) => rated <= n, tag: (n) => (n === 1 ? t("Rated 1") : t("Rated {n} or less", { n })) },
+  exactly: { label: t("Exactly"), symbol: "=", test: (rated, n) => rated === n, tag: (n) => t("Rated exactly {n}", { n }) },
 };
 
 // Which filters each section offers.
@@ -212,11 +213,11 @@ function libraryEmptyHtml(gridId) {
   const typed = libraryTools(sectionId)?.querySelector(".lib-search-input").value.trim() ?? "";
   const filtered = pickCount(sectionId) > 0;
   const text = !filtered
-    ? `Nothing here matches “${escapeHtml(typed)}”.`
+    ? t("Nothing here matches “{query}”.", { query: escapeHtml(typed) })
     : typed
-      ? "Nothing here matches your search and filters."
-      : "Nothing here matches these filters.";
-  return `<p class="grid-empty lib-empty">${text}<button class="lib-empty-clear" type="button" data-lib-clear>${filtered ? "Clear all" : "Clear search"}</button></p>`;
+      ? t("Nothing here matches your search and filters.")
+      : t("Nothing here matches these filters.");
+  return `<p class="grid-empty lib-empty">${text}<button class="lib-empty-clear" type="button" data-lib-clear>${filtered ? t("Clear all") : t("Clear search")}</button></p>`;
 }
 
 // "Showing 3 of 120", for the grid on screen in that section (the Shows
@@ -233,7 +234,7 @@ function updateLibraryCount(sectionId) {
   const cfg = GRID_CONFIG[grid.id];
   const all = [...STORE[cfg.table].values()].filter(cfg.match);
   const shown = all.filter((row) => libraryMatches(grid.id, row)).length;
-  count.textContent = `Showing ${shown} of ${all.length}`;
+  count.textContent = t("Showing {shown} of {total}", { shown, total: all.length });
   count.hidden = false;
 }
 
@@ -247,11 +248,11 @@ function renderActiveFilters(sectionId) {
   const tags = (SECTION_FILTERS[sectionId] ?? []).flatMap((key) =>
     [...picksOf(sectionId, key)].map((value) => {
       const tag = optionTag(key, value, sectionId);
-      return `<button class="lib-tag" type="button" data-remove-filter="${key}" data-value="${escapeHtml(value)}" aria-label="Remove filter: ${escapeHtml(tag)}">${escapeHtml(tag)}<span aria-hidden="true">✕</span></button>`;
+      return `<button class="lib-tag" type="button" data-remove-filter="${key}" data-value="${escapeHtml(value)}" aria-label="${t("Remove filter: {filter}", { filter: escapeHtml(tag) })}">${escapeHtml(tag)}<span aria-hidden="true">✕</span></button>`;
     })
   );
   const active = tools.querySelector(".lib-active");
-  active.innerHTML = tags.length ? `${tags.join("")}<button class="lib-tags-clear" type="button" data-clear-filters>Clear filters</button>` : "";
+  active.innerHTML = tags.length ? `${tags.join("")}<button class="lib-tags-clear" type="button" data-clear-filters>${t("Clear filters")}</button>` : "";
   active.hidden = !tags.length;
 }
 
@@ -265,7 +266,7 @@ function renderFilterPanel(sectionId) {
       const filter = LIBRARY_FILTERS[key];
       const modes =
         key === "rating"
-          ? `<div class="lf-modes" role="group" aria-label="Compare the rating">${Object.entries(RATING_MODES)
+          ? `<div class="lf-modes" role="group" aria-label="${t("Compare the rating")}">${Object.entries(RATING_MODES)
               .map(
                 ([mode, { label, symbol }]) =>
                   `<button class="lf-mode" type="button" data-rating-mode="${mode}" aria-pressed="${mode === ratingModeOf(sectionId)}"><span class="lf-mode-symbol" aria-hidden="true">${symbol}</span>${label}</button>`
@@ -278,15 +279,15 @@ function renderFilterPanel(sectionId) {
             `<button class="lf-chip" type="button" data-filter="${key}" data-value="${escapeHtml(value)}" aria-pressed="${picked.has(value)}">${escapeHtml(optionName(key, value))}<span class="lf-n">${count}</span></button>`
         )
         .join("");
-      const hint = filter.matchAll ? `<span class="lf-hint">titles with all you pick</span>` : "";
+      const hint = filter.matchAll ? `<span class="lf-hint">${t("titles with all you pick")}</span>` : "";
       return `<fieldset class="lf-group"><legend class="lf-label">${filter.label}${hint}</legend>${modes}<div class="lf-chips">${chips}</div></fieldset>`;
     })
     .join("");
   panel.innerHTML = `
-    <div class="lf-body">${groups || `<p class="lf-empty">Nothing to filter yet.</p>`}</div>
+    <div class="lf-body">${groups || `<p class="lf-empty">${t("Nothing to filter yet.")}</p>`}</div>
     <div class="lf-foot">
-      <button class="lf-clear" type="button" data-clear-filters ${pickCount(sectionId) ? "" : "disabled"}>Clear filters</button>
-      <button class="lf-done" type="button" data-close-filters>Done</button>
+      <button class="lf-clear" type="button" data-clear-filters ${pickCount(sectionId) ? "" : "disabled"}>${t("Clear filters")}</button>
+      <button class="lf-done" type="button" data-close-filters>${t("Done")}</button>
     </div>`;
 }
 
@@ -313,7 +314,7 @@ function changeLibrary(sectionId, change) {
   change(stateOf(sectionId));
   const after = sectionNarrowed(sectionId);
   if (!before && after && pausesCustomOrder(sectionId)) {
-    showToast("Custom order is paused while you search or filter — clear them to use it again.");
+    showToast(t("Custom order is paused while you search or filter — clear them to use it again."));
   }
   refreshSection(sectionId);
 }

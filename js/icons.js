@@ -11,15 +11,15 @@
    Data: js/emojiData.js (EMOJI_GROUPS) and js/iconData.js (PH_ICONS). */
 
 const ICON_COLORS = [
-  { key: "violet", hex: "#6d28d9", label: "Violet" },
-  { key: "pink", hex: "#db2777", label: "Pink" },
-  { key: "red", hex: "#dc2626", label: "Red" },
-  { key: "orange", hex: "#ea580c", label: "Orange" },
-  { key: "amber", hex: "#d97706", label: "Amber" },
-  { key: "green", hex: "#16a34a", label: "Green" },
-  { key: "teal", hex: "#0d9488", label: "Teal" },
-  { key: "blue", hex: "#2563eb", label: "Blue" },
-  { key: "slate", hex: "#4b5563", label: "Slate" },
+  { key: "violet", hex: "#6d28d9", label: t("Violet") },
+  { key: "pink", hex: "#db2777", label: t("Pink") },
+  { key: "red", hex: "#dc2626", label: t("Red") },
+  { key: "orange", hex: "#ea580c", label: t("Orange") },
+  { key: "amber", hex: "#d97706", label: t("Amber") },
+  { key: "green", hex: "#16a34a", label: t("Green") },
+  { key: "teal", hex: "#0d9488", label: t("Teal") },
+  { key: "blue", hex: "#2563eb", label: t("Blue") },
+  { key: "slate", hex: "#4b5563", label: t("Slate") },
 ];
 const ICON_COLOR_HEX = Object.fromEntries(ICON_COLORS.map((c) => [c.key, c.hex]));
 const DEFAULT_ICON_COLOR = "violet";

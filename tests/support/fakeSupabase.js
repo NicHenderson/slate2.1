@@ -26,7 +26,7 @@
 
 const fs = require("fs");
 const crypto = require("crypto");
-const { TMDB_CATALOG, TMDB_WATCH_PROVIDERS, TMDB_WATCH_REGIONS } = require("./tmdbCatalog");
+const { TMDB_CATALOG, TMDB_WATCH_PROVIDERS, TMDB_WATCH_REGIONS, inLanguage } = require("./tmdbCatalog");
 
 const SUPABASE_JS = fs.readFileSync(require.resolve("@supabase/supabase-js/dist/umd/supabase.js"), "utf8");
 // Supabase's default cap on the rows one request returns.
@@ -508,11 +508,14 @@ function createBackend() {
     if (req.method() === "OPTIONS") return route.fulfill({ status: 204, body: "" });
     if (url.pathname !== "/functions/v1/tmdb") return reply(404, { error: "no such function" });
     if (!userFromRequest(req)) return reply(401, { error: "Sign in to use TMDB." });
-    const { path, query } = req.postDataJSON() ?? {};
+    const { path, query, language } = req.postDataJSON() ?? {};
     let m;
     if ((m = /^search\/(movie|tv)$/.exec(path))) {
+      // Like TMDB: found by any of its names, answered in the language asked.
       const q = String(query ?? "").toLowerCase();
-      const results = TMDB_CATALOG[m[1]].filter((t) => (t.title ?? t.name).toLowerCase().includes(q));
+      const results = TMDB_CATALOG[m[1]]
+        .filter((t) => [t, inLanguage(m[1], t, "es-MX")].some((v) => (v.title ?? v.name).toLowerCase().includes(q)))
+        .map((t) => inLanguage(m[1], t, language));
       return reply(200, { page: 1, results, total_results: results.length });
     }
     if (path === "watch/providers/regions") return reply(200, { results: TMDB_WATCH_REGIONS });
@@ -522,7 +525,7 @@ function createBackend() {
     if ((m = /^(movie|tv)\/(\d+)(\/videos)?$/.exec(path))) {
       const title = TMDB_CATALOG[m[1]].find((t) => t.id === Number(m[2]));
       if (!title) return reply(404, { success: false, status_code: 34, status_message: "The resource you requested could not be found." });
-      return reply(200, m[3] ? { id: title.id, results: title.videos ?? [] } : title);
+      return reply(200, m[3] ? { id: title.id, results: title.videos ?? [] } : inLanguage(m[1], title, language));
     }
     return reply(400, { error: "Not a TMDB request Slate makes." });
   }

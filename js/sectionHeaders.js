@@ -9,15 +9,10 @@
 /* ---------- formatting ---------- */
 
 function formatWatchTime(minutes) {
-  if (!minutes) return "0m";
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  if (h && m) return `${h}h ${m}m`;
-  return h ? `${h}h` : `${m}m`;
-}
-
-function plural(n, word) {
-  return `${n} ${word}${n === 1 ? "" : "s"}`;
+  const h = Math.floor((minutes || 0) / 60);
+  const m = (minutes || 0) % 60;
+  if (h && m) return t("{h}h {m}m", { h, m });
+  return h ? t("{h}h", { h }) : t("{m}m", { m });
 }
 
 // One segment: a big value over a small label. With `attrs` it becomes a
@@ -42,11 +37,11 @@ function listRows(gridId) {
 
 function ratingItem(rows, { showCount = true } = {}) {
   const rated = rows.filter((r) => r.rating != null);
-  if (!rated.length) return hsItem("–", "No ratings yet");
+  if (!rated.length) return hsItem("–", t("No ratings yet"));
   const avg = rated.reduce((sum, r) => sum + r.rating, 0) / rated.length;
   return hsItem(
-    `${avg.toFixed(1)}<small>/10</small>`,
-    showCount ? `Avg rating · ${rated.length} rated` : "Avg rating"
+    `${formatDecimal(avg)}<small>/10</small>`,
+    showCount ? t("Avg rating · {n} rated", { n: rated.length }) : t("Avg rating")
   );
 }
 
@@ -59,7 +54,7 @@ function topGenreItem(rows) {
   );
   if (!counts.size) return "";
   const [name, count] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
-  return hsItem(escapeHtml(name), `Top genre · ${Math.round((count / rows.length) * 100)}%`, {
+  return hsItem(escapeHtml(genreName(name)), t("Top genre · {pct}%", { pct: Math.round((count / rows.length) * 100) }), {
     text: true,
   });
 }
@@ -68,10 +63,10 @@ function topGenreItem(rows) {
 function oldestWaitingItem(rows, table) {
   const oldest = [...rows].sort((a, b) => (a.created_at ?? "").localeCompare(b.created_at ?? ""))[0];
   const days = daysSince(oldest.created_at);
-  const label = days ? `Waiting ${plural(days, "day")}` : "Added today";
-  return hsItem(escapeHtml(oldest.title ?? "Untitled"), label, {
+  const label = days ? tn(days, "Waiting {n} day", "Waiting {n} days") : t("Added today");
+  return hsItem(escapeHtml(oldest.title ?? t("Untitled")), label, {
     text: true,
-    attrs: `data-open-title="${oldest.id}" data-table="${table}" title="Open ${escapeHtml(oldest.title ?? "")}"`,
+    attrs: `data-open-title="${oldest.id}" data-table="${table}" title="${t("Open {title}", { title: escapeHtml(oldest.title ?? "") })}"`,
   });
 }
 
@@ -87,9 +82,9 @@ function moviesWatchedStats() {
   const rewatches = rows.reduce((n, r) => n + times(r) - 1, 0);
   const rated = rows.filter((r) => r.rating != null).map((row) => ({ table: "movies", row }));
   return (
-    hsItem(rows.length, "Movies watched") +
-    hsItem(formatWatchTime(minutes), "Time watched") +
-    (rewatches ? hsItem(rewatches, rewatches === 1 ? "Rewatch" : "Rewatches") : "") +
+    hsItem(rows.length, t("Movies watched")) +
+    hsItem(formatWatchTime(minutes), t("Time watched")) +
+    (rewatches ? hsItem(rewatches, tn(rewatches, "Rewatch", "Rewatches")) : "") +
     ratingItem(rows, { showCount: false }) +
     topGenreItem(rows) +
     `<div class="hs-item hs-extremes">${collectionExtremesHtml(rated)}</div>`
@@ -108,10 +103,10 @@ function showsWatchedStats() {
   let finish = "";
   if (spans.length) {
     const avg = Math.round(spans.reduce((a, b) => a + b, 0) / spans.length);
-    finish = hsItem(avg ? `${avg}<small>${avg === 1 ? " day" : " days"}</small>` : "Same day", "Avg time to finish");
+    finish = hsItem(avg ? tn(avg, "{n}<small> day</small>", "{n}<small> days</small>") : t("Same day"), t("Avg time to finish"));
   }
 
-  return hsItem(rows.length, "Shows finished") + ratingItem(rows) + topGenreItem(rows) + finish;
+  return hsItem(rows.length, t("Shows finished")) + ratingItem(rows) + topGenreItem(rows) + finish;
 }
 
 function moviesTowatchStats() {
@@ -119,7 +114,7 @@ function moviesTowatchStats() {
   if (!rows.length) return "";
   const minutes = rows.reduce((sum, r) => sum + (r.duration || 0), 0);
   return (
-    hsItem(rows.length, minutes ? `In queue · ${formatWatchTime(minutes)}` : "In queue") +
+    hsItem(rows.length, minutes ? t("In queue · {time}", { time: formatWatchTime(minutes) }) : t("In queue")) +
     oldestWaitingItem(rows, "movies") +
     topGenreItem(rows)
   );
@@ -130,7 +125,7 @@ function showsTowatchStats() {
   if (!rows.length) return "";
   const episodes = rows.reduce((sum, r) => sum + (r.total_episodes || 0), 0);
   return (
-    hsItem(rows.length, episodes ? `In queue · ${plural(episodes, "episode")}` : "In queue") +
+    hsItem(rows.length, episodes ? tn(episodes, "In queue · {n} episode", "In queue · {n} episodes") : t("In queue")) +
     oldestWaitingItem(rows, "shows")
   );
 }
@@ -140,8 +135,8 @@ function showsWatchingStats() {
   if (!rows.length) return "";
   const stale = rows.filter((r) => daysSince(r.started_watching_date) >= STALE_WATCHING_DAYS).length;
   return (
-    hsItem(rows.length, "Watching now") +
-    hsItem(stale, `Started ${STALE_WATCHING_DAYS}+ days ago`, { cls: stale ? "is-alert" : "" })
+    hsItem(rows.length, t("Watching now")) +
+    hsItem(stale, t("Started {n}+ days ago", { n: STALE_WATCHING_DAYS }), { cls: stale ? "is-alert" : "" })
   );
 }
 
@@ -153,7 +148,7 @@ function showsDroppedStats() {
     (r) => r.started_watching_date != null || r.is_dropped
   ).length;
   const pct = Math.round((dropped / Math.max(started, dropped)) * 100);
-  return hsItem(dropped, `Dropped · ${pct}% of the shows you started`);
+  return hsItem(dropped, t("Dropped · {pct}% of the shows you started", { pct }));
 }
 
 function collectionsStats() {
@@ -180,13 +175,13 @@ function collectionsStats() {
   const overall = `
     <div class="hs-item hs-progress">
       <span class="hs-value">${pct}<small>%</small></span>
-      <div class="stat-bar${titles.size && pct === 100 ? " is-complete" : ""}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="${pct}% watched"><span style="width: ${pct}%"></span></div>
-      <span class="hs-label">Watched overall</span>
+      <div class="stat-bar${titles.size && pct === 100 ? " is-complete" : ""}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="${t("{pct}% watched", { pct })}"><span style="width: ${pct}%"></span></div>
+      <span class="hs-label">${t("Watched overall")}</span>
     </div>`;
 
   return (
-    hsItem(`${complete}<small>/${filled.length}</small>`, "Complete") +
-    hsItem(titles.size, "Titles collected") +
+    hsItem(`${complete}<small>/${filled.length}</small>`, t("Complete")) +
+    hsItem(titles.size, t("Titles collected")) +
     overall
   );
 }
@@ -234,12 +229,12 @@ function initWatchlistSurprise(btnId, gridId, emptyMessage) {
     // From what the search leaves showing, when there is one.
     const pool = getOrderedList(gridId);
     if (!pool.length) {
-      showToast(isLibraryFiltered(gridId) ? "Nothing in your search to pick from." : emptyMessage);
+      showToast(isLibraryFiltered(gridId) ? t("Nothing in your search to pick from.") : emptyMessage);
       return;
     }
     rollSurprise(btn, pool, (row) => openDetailModal(gridId, row.id));
   });
 }
 
-initWatchlistSurprise("movies-surprise-btn", "grid-movies-towatch", "No movies on your list yet.");
-initWatchlistSurprise("shows-surprise-btn", "grid-shows-towatch", "No shows waiting in your queue yet.");
+initWatchlistSurprise("movies-surprise-btn", "grid-movies-towatch", t("No movies on your list yet."));
+initWatchlistSurprise("shows-surprise-btn", "grid-shows-towatch", t("No shows waiting in your queue yet."));

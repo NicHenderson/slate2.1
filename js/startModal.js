@@ -31,13 +31,13 @@ function openStartWatchingModal(row, isNewInsert = false) {
   startFinishDate.value = row.finished_watching_date || "";
   startReview.value = row.review || "";
   document.getElementById("start-title").textContent = isNewInsert
-    ? "Add TV Show"
-    : "Start watching";
-  document.getElementById("start-show-title").textContent = row.title ?? "Untitled";
+    ? t("Add TV Show")
+    : t("Start watching");
+  document.getElementById("start-show-title").textContent = row.title ?? t("Untitled");
   document.getElementById("start-show-meta").textContent =
     `${row.release_year ?? "—"} · ${detailDurationLine("shows", row)}`;
   document.getElementById("start-poster").innerHTML = row.poster
-    ? `<img class="update-poster-img" src="${row.poster}" alt="" />`
+    ? `<img class="update-poster-img" src="${escapeHtml(row.poster)}" alt="" />`
     : `<div class="update-poster-img update-poster-empty"></div>`;
   document
     .getElementById("start-delete")
@@ -63,7 +63,7 @@ startForm.addEventListener("submit", async (e) => {
   if (finished) {
     const rating = startStarsInput.get();
     if (rating <= 0) {
-      showToast("A rating is required when you set a finish date.", true);
+      showToast(t("A rating is required when you set a finish date."), true);
       return;
     }
     payload.rating = rating;
@@ -74,22 +74,22 @@ startForm.addEventListener("submit", async (e) => {
   }
 
   startSave.disabled = true;
-  startSave.textContent = "Saving…";
+  startSave.textContent = t("Saving…");
 
   const { error } = await db.from("shows").update(payload).eq("id", startRow.id);
 
   startSave.disabled = false;
-  startSave.textContent = "Save Changes";
+  startSave.textContent = t("Save Changes");
 
   if (error) {
     console.error("Update error:", error.message);
-    showToast("Could not save changes — please try again.", true);
+    showToast(t("Could not save changes — please try again."), true);
     return;
   }
 
   closeStartModal();
   closeDetailModal();
-  showToast(finished ? "Marked as watched." : "Started watching.");
+  showToast(finished ? t("Marked as watched.") : t("Started watching."));
 });
 
 startCancel.addEventListener("click", closeStartModal);

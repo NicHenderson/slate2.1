@@ -11,6 +11,9 @@
 //   POST { "path": "movie/348/watch/providers" }          → where to watch it
 //   POST { "path": "watch/providers/regions" }            → the countries that covers
 //
+// Any of them can say which language TMDB answers in, from Slate's own
+// ("language": "es-MX"); without one, or with any other, it's English.
+//
 // Only those kinds of request, and only for a signed-in user: the
 // caller's session token is checked with Supabase Auth, so the function
 // can't be used as a free TMDB key by anyone who finds its address.
@@ -32,6 +35,9 @@ const ALLOWED_PATHS = [
 ];
 
 const MAX_QUERY_LENGTH = 200;
+
+// The languages Slate is in, as TMDB names them (Spanish: Latin American).
+const LANGUAGES = ["en-US", "es-MX"];
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -64,7 +70,7 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
   }
   if (!deps.tmdbKey) return json(500, { error: "The TMDB key isn't set up on the server." });
 
-  let body: { path?: unknown; query?: unknown };
+  let body: { path?: unknown; query?: unknown; language?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -75,7 +81,8 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
     return json(400, { error: "Not a TMDB request Slate makes." });
   }
 
-  const params = new URLSearchParams({ api_key: deps.tmdbKey, language: "en-US" });
+  const language = LANGUAGES.includes(body.language as string) ? (body.language as string) : "en-US";
+  const params = new URLSearchParams({ api_key: deps.tmdbKey, language });
   if (path.startsWith("search/")) {
     const query = typeof body.query === "string" ? body.query.trim() : "";
     if (!query || query.length > MAX_QUERY_LENGTH) {

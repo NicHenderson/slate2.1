@@ -79,7 +79,7 @@ function handleViewingChange(payload) {
 // "×3" on a card of a movie watched more than once.
 function rewatchBadgeHtml(row) {
   const n = viewingsOf(row.id).length;
-  return n > 1 ? `<span class="card-rewatch" title="Watched ${n} times">×${n}</span>` : "";
+  return n > 1 ? `<span class="card-rewatch" title="${t("Watched {n} times", { n })}">×${n}</span>` : "";
 }
 
 // The date part of a watched movie's summary: the latest date, and with
@@ -88,13 +88,13 @@ function watchedDateBlockHtml(row) {
   const viewings = viewingsOf(row.id);
   const latest = viewings[0];
   const date = formatDate(latest?.watched_on ?? row.watched_date);
-  if (viewings.length <= 1) return `<p class="detail-label">Watched on</p><p class="detail-date-value">${date}</p>`;
+  if (viewings.length <= 1) return `<p class="detail-label">${t("Watched on")}</p><p class="detail-date-value">${date}</p>`;
   const open = Boolean(currentDetail?.viewingsOpen);
   return `
-    <p class="detail-label">Last watched</p>
+    <p class="detail-label">${t("Last watched")}</p>
     <p class="detail-date-value">${date}</p>
     <button class="viewings-toggle" type="button" data-action="toggle-viewings" aria-expanded="${open}" aria-controls="viewings-list">
-      <span class="viewings-caret" aria-hidden="true">▾</span>${viewings.length} viewings
+      <span class="viewings-caret" aria-hidden="true">▾</span>${t("{n} viewings", { n: viewings.length })}
     </button>`;
 }
 
@@ -108,7 +108,7 @@ function viewingsListHtml(row) {
       <li>
         <button class="viewing-item" type="button" data-action="open-viewing" data-viewing-id="${v.id}">
           <span class="viewing-item-date">${formatDate(v.watched_on)}</span>
-          ${i === viewings.length - 1 ? `<span class="viewing-item-note">The first time you saw this movie</span>` : ""}
+          ${i === viewings.length - 1 ? `<span class="viewing-item-note">${t("The first time you saw this movie")}</span>` : ""}
           <span class="viewing-item-go" aria-hidden="true">›</span>
         </button>
       </li>`
@@ -125,17 +125,17 @@ function openViewingView(movie, viewing) {
   const count = viewingsOf(movie.id).length;
   const deletable = viewing && count > 1;
   detailBody.innerHTML = `
-    <button class="viewing-back" type="button" data-action="back-to-summary">← Back to ${escapeHtml(movie.title ?? "Untitled")}</button>
-    <p class="viewing-eyebrow">${viewing ? "Viewing" : "Watched it again"}</p>
-    <h2 class="detail-title">${escapeHtml(movie.title ?? "Untitled")}</h2>
+    <button class="viewing-back" type="button" data-action="back-to-summary">${t("← Back to {title}", { title: escapeHtml(movie.title ?? t("Untitled")) })}</button>
+    <p class="viewing-eyebrow">${viewing ? t("Viewing") : t("Watched it again")}</p>
+    <h2 class="detail-title">${escapeHtml(movie.title ?? t("Untitled"))}</h2>
     <form class="viewing-form" id="viewing-form" novalidate>
-      <label class="field-label" for="viewing-date">Watched on</label>
+      <label class="field-label" for="viewing-date">${t("Watched on")}</label>
       <input type="date" id="viewing-date" class="field-input" required value="${viewing?.watched_on ?? localToday()}" />
-      <p class="field-error hidden" id="viewing-date-error" role="alert">Pick the day you watched it.</p>
+      <p class="field-error hidden" id="viewing-date-error" role="alert">${t("Pick the day you watched it.")}</p>
       <p class="viewing-error hidden" id="viewing-error" role="alert"></p>
       <div class="detail-actions viewing-actions">
-        ${deletable ? `<button class="delete-btn" type="button" data-action="delete-viewing">🗑 Delete viewing</button>` : ""}
-        <button class="complete-btn" type="submit" id="viewing-save">${viewing ? "Save" : "Add viewing"}</button>
+        ${deletable ? `<button class="delete-btn" type="button" data-action="delete-viewing">${t("🗑 Delete viewing")}</button>` : ""}
+        <button class="complete-btn" type="submit" id="viewing-save">${viewing ? t("Save") : t("Add viewing")}</button>
       </div>
     </form>`;
   updateDetailNav();
@@ -175,14 +175,14 @@ async function saveViewing() {
   btn.disabled = false;
   if (error) {
     console.error("Viewing save error:", error.message);
-    viewingError("Couldn't save this viewing. Please try again.");
+    viewingError(t("Couldn't save this viewing. Please try again."));
     return;
   }
   storeViewing(data);
   afterViewingsChanged(movie.id);
   currentDetail.viewingsOpen = true;
   backToSummary();
-  showToast(id ? "Viewing saved." : "Viewing added.");
+  showToast(id ? t("Viewing saved.") : t("Viewing added."));
 }
 
 function deleteViewing() {
@@ -195,7 +195,7 @@ function deleteViewing() {
     forgetViewing(viewing.id);
     afterViewingsChanged(movie.id);
     backToSummary();
-    showToast("Viewing deleted.");
+    showToast(t("Viewing deleted."));
     return null;
   });
 }

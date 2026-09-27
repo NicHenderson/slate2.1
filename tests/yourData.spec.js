@@ -63,7 +63,8 @@ test("Add: new titles come in, ones already there are left alone, same-name coll
     slateFile({
       movies: [
         { id: "f-alien", tmdb_id: 348, title: "Alien", rating: 2, review: "Changed my mind", watched_date: "2020-01-01" },
-        { id: "f-inception", tmdb_id: 27205, title: "Inception", rating: 9, review: "Dreams.", watched_date: "2026-09-12", release_year: 2010 },
+        { id: "f-inception", tmdb_id: 27205, title: "Inception", rating: 9, review: "Dreams.", watched_date: "2026-09-12", release_year: 2010,
+          poster: 'https://image.tmdb.org/t/p/w500/a.jpg" onload="alert(1)' },
       ],
       shows: [],
       collections: [{ name: "  sci-fi NIGHT ", icon: "🚀", items: [
@@ -87,6 +88,7 @@ test("Add: new titles come in, ones already there are left alone, same-name coll
   expect(backend.db.movies.find((m) => m.tmdb_id === 348)).toMatchObject({ rating: 9, review: "Still terrifying." }); // untouched
   const inception = backend.db.movies.find((m) => m.tmdb_id === 27205);
   expect(inception).toMatchObject({ rating: 9, review: "Dreams.", watched_date: "2026-09-12", release_year: 2010, user_id: backend.user.id });
+  expect(inception.poster).toBeNull(); // not a plain TMDB image address: left out
   // A version 1 file: one viewing per watched movie, on its date.
   expect(viewingDates(backend, inception)).toEqual(["2026-09-12"]);
   expect(backend.db.collections).toHaveLength(1);

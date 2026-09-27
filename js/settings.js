@@ -24,14 +24,14 @@ const LAST_SECTION_KEY = "slate_last_section";
 // a theme you're not on yet. Keep both in sync when adding a theme.
 // Dark themes: paper = text, ink = bg (base.css derives them that way).
 const THEME_META = {
-  midnight: { label: "Midnight", mode: "Dark", bg: "#0d0c15", sidebar: "#120e1b", text: "#ece8f5", paper: "#ece8f5", ink: "#0d0c15", accent: "#a78bfa", strong: "#8b5cf6", deep: "#6d28d9", pop: "#2979ff" },
-  ocean: { label: "Ocean", mode: "Dark", bg: "#07131c", sidebar: "#0a1822", text: "#e4f3f7", paper: "#e4f3f7", ink: "#07131c", accent: "#4fd1e0", strong: "#0b8a9c", deep: "#07606e", pop: "#e05a47" },
-  forest: { label: "Forest", mode: "Dark", bg: "#0c1712", sidebar: "#0f1a14", text: "#e9f3ec", paper: "#e9f3ec", ink: "#0c1712", accent: "#6fcf9b", strong: "#2f9e68", deep: "#1f7a4e", pop: "#2f7fbf" },
-  sunset: { label: "Sunset", mode: "Dark", bg: "#1c1015", sidebar: "#1f1218", text: "#f7e9e2", paper: "#f7e9e2", ink: "#1c1015", accent: "#f0916a", strong: "#d9623a", deep: "#b0441f", pop: "#7b4dd6" },
-  arcade: { label: "Arcade", mode: "Dark", bg: "#110a24", sidebar: "#150c2b", text: "#f4ecff", paper: "#f4ecff", ink: "#110a24", accent: "#ff5fb0", strong: "#e0368e", deep: "#b01f6c", pop: "#2d6cff" },
-  paper: { label: "Paper", mode: "Light", bg: "#f6f1e7", sidebar: "#efe6d4", text: "#2b2318", paper: "#fffdf8", ink: "#2b2318", accent: "#c2703d", strong: "#b35f2c", deep: "#8f4620", pop: "#3f7d6e" },
-  blossom: { label: "Blossom", mode: "Light", bg: "#fbf0f2", sidebar: "#f5dfe4", text: "#3a1f29", paper: "#fffafb", ink: "#3a1f29", accent: "#d6457a", strong: "#c2356a", deep: "#93224d", pop: "#4f8a66" },
-  glacier: { label: "Glacier", mode: "Light", bg: "#eef3f8", sidebar: "#e3ebf3", text: "#16233a", paper: "#ffffff", ink: "#16233a", accent: "#2f6fd6", strong: "#2459b8", deep: "#1a3f85", pop: "#c9542f" },
+  midnight: { label: t("Midnight"), mode: t("Dark"), bg: "#0d0c15", sidebar: "#120e1b", text: "#ece8f5", paper: "#ece8f5", ink: "#0d0c15", accent: "#a78bfa", strong: "#8b5cf6", deep: "#6d28d9", pop: "#2979ff" },
+  ocean: { label: t("Ocean"), mode: t("Dark"), bg: "#07131c", sidebar: "#0a1822", text: "#e4f3f7", paper: "#e4f3f7", ink: "#07131c", accent: "#4fd1e0", strong: "#0b8a9c", deep: "#07606e", pop: "#e05a47" },
+  forest: { label: t("Forest"), mode: t("Dark"), bg: "#0c1712", sidebar: "#0f1a14", text: "#e9f3ec", paper: "#e9f3ec", ink: "#0c1712", accent: "#6fcf9b", strong: "#2f9e68", deep: "#1f7a4e", pop: "#2f7fbf" },
+  sunset: { label: t("Sunset"), mode: t("Dark"), bg: "#1c1015", sidebar: "#1f1218", text: "#f7e9e2", paper: "#f7e9e2", ink: "#1c1015", accent: "#f0916a", strong: "#d9623a", deep: "#b0441f", pop: "#7b4dd6" },
+  arcade: { label: t("Arcade"), mode: t("Dark"), bg: "#110a24", sidebar: "#150c2b", text: "#f4ecff", paper: "#f4ecff", ink: "#110a24", accent: "#ff5fb0", strong: "#e0368e", deep: "#b01f6c", pop: "#2d6cff" },
+  paper: { label: t("Paper"), mode: t("Light"), bg: "#f6f1e7", sidebar: "#efe6d4", text: "#2b2318", paper: "#fffdf8", ink: "#2b2318", accent: "#c2703d", strong: "#b35f2c", deep: "#8f4620", pop: "#3f7d6e" },
+  blossom: { label: t("Blossom"), mode: t("Light"), bg: "#fbf0f2", sidebar: "#f5dfe4", text: "#3a1f29", paper: "#fffafb", ink: "#3a1f29", accent: "#d6457a", strong: "#c2356a", deep: "#93224d", pop: "#4f8a66" },
+  glacier: { label: t("Glacier"), mode: t("Light"), bg: "#eef3f8", sidebar: "#e3ebf3", text: "#16233a", paper: "#ffffff", ink: "#16233a", accent: "#2f6fd6", strong: "#2459b8", deep: "#1a3f85", pop: "#c9542f" },
 };
 
 // The sections "Open to" can land on (and "last page viewed" can remember):
@@ -175,7 +175,7 @@ function renderSettingsPage() {
           class="theme-swatch${active ? " is-active" : ""}"
           type="button"
           data-theme-key="${key}"
-          aria-label="Use ${m.label} theme"
+          aria-label="${t("Use {theme} theme", { theme: m.label })}"
           aria-pressed="${active}"
           style="--sw-bg:${m.bg};--sw-sidebar:${m.sidebar};--sw-text:${m.text};--sw-paper:${m.paper};--sw-ink:${m.ink};--sw-accent:${m.accent};--sw-strong:${m.strong};--sw-deep:${m.deep};--sw-pop:${m.pop}"
         >
@@ -288,7 +288,7 @@ async function saveSetting(key, value) {
   });
   if (error) {
     console.error("Settings save error:", error.message);
-    showToast("Could not save settings — try again.", true);
+    showToast(t("Could not save settings — try again."), true);
   }
 }
 

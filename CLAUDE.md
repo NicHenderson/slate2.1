@@ -25,8 +25,10 @@ directly.
 
 ## Working with the owner
 
-- **Talk to them in Spanish. Everything in the app stays in English**:
-  UI copy, emails, code, comments, commit messages and docs.
+- **Talk to them in Spanish. Everything in the repo is written in
+  English**: the app's text, emails, code, comments, commit messages and
+  docs. Other languages are translations of the English text (see
+  Languages below).
 - They aren't a professional developer. Explain in plain terms, with
   reasons, and skip jargon unless you explain it.
 - **When they ask you to explain before doing anything, only explain, then
@@ -67,6 +69,28 @@ directly.
   binary or with `newline=""`.
 - **Comments explain why**, in the same style as the code around them.
 - **Anything user-provided goes through `escapeHtml`.**
+- **Languages** (`js/i18n.js`). Every string the app shows goes through
+  translation, so none can be written as bare English:
+  - in scripts, `t("English text", { name })` and
+    `tn(count, "{n} movie", "{n} movies")`, always with the string written
+    out (the tests collect them from the source). A whole sentence per
+    string, never one glued from pieces: word order and genders change.
+    Values go in as given, so user text still needs `escapeHtml` when the
+    result lands in HTML;
+  - in `index.html`, text and placeholder/aria-label/title/alt are
+    translated automatically at load; `data-i18n` translates an element
+    whole (a sentence with markup inside), `translate="no"` skips one;
+  - dictionaries (`js/lang/<code>.js`, loaded before `i18n.js`) map each
+    English string to its translation; the language is the one picked on
+    the device, else the browser's, else English, and changing it reloads.
+    Dates use `LOCALE`.
+  - `tests/i18n.spec.js` fails if a language lacks a string or has one
+    nothing uses, if placeholders or markup differ, or if the main screens
+    show text that doesn't go through translation.
+  - Stays in English on purpose: the owner's emails (Web3Forms request,
+    the welcome-email tool), Supabase's own emails and error texts (like
+    weak passwords), emoji and icon names in the icon picker, and the
+    "Untitled" saved as a title when TMDB has none.
 - **supabase-js is pinned** in `index.html` (exact version + SRI hash) to
   the version in `package.json`. Update it only with
   `npm run update-supabase -- <version>` (`scripts/supabase-js.js`);
@@ -119,8 +143,10 @@ directly.
 
 - Everything so far is in `main`: invite-only access, the welcome-email
   tool, the review note redesign, the trailer button that waits, disabled,
-  search + filters, where to watch, and rewatches of movies (all three
-  stages).
+  search + filters, where to watch, rewatches of movies (all three
+  stages), English + Spanish (the app and TMDB's data), genres and
+  posters escaped as text, and the search's info window in the detail
+  window's design (with its trailer).
 - Search and filters (`js/librarySearch.js`) cover Movies, Shows, Movies To
   Watch and the Shows Queue; the owner chose to leave collections for later.
   Their decisions:
@@ -174,12 +200,41 @@ directly.
      (a movie watched in the account but not in the file can't lose its
      date): such a movie is now deleted and recreated on the same id.
      Nothing of this stage needs a migration or a redeploy.
-  3. **Import from other apps:** IMDb (CSV with IMDb ids → TMDB `find`),
-     Letterboxd (ZIP of CSVs, title + year matching, diary rewatches),
-     Trakt (JSON with TMDB ids); TV Time only after seeing a real export.
-     Reuse the `.slate` import flow, with a review of what didn't match.
-     Needs real export files from the owner.
-- Then: translate the app, then publish.
+  3. **Import from other apps: moved to a later update (maybe v3.1.0)**,
+     the owner's decision. The plan so far: IMDb (CSV with IMDb ids → TMDB
+     `find`), Letterboxd (ZIP of CSVs, title + year matching, diary
+     rewatches), Trakt (JSON with TMDB ids). TV Time shut down on July 15,
+     2026, and JustWatch has no official export, so both are out. Reuse
+     the `.slate` import flow in Add mode, with a review of what didn't
+     match. Needs real export files from the owner. Open questions for the
+     owner: the watched date for IMDb (it only has the date rated), films
+     Letterboxd has as watched but not in the diary, titles already in
+     Slate, and where shows go.
+- Translation is done; **next: publish.** **Slate launches in English and
+  Spanish only** (the owner's decision); German and Italian are out for
+  now, and adding a language later only takes its dictionary.
+  The owner authorized the stages one at a time:
+  1. **The base** — done: `js/i18n.js`, every string through
+     `t()`/`tn()`, the tests. English looks exactly as before.
+  2. **Spanish** — done, reviewed by the owner:
+     `js/lang/es.js` (neutral Spanish, "tú"; película / serie / colección,
+     Por ver / Viendo / Visto / Abandonadas, calificación, reseña,
+     visionado, "revisionados" for rewatches, Ajustes). Language pickers in
+     Settings → Defaults, the landing page's footer and under the login
+     card; the choice is per device (not saved to the account). Decimals
+     follow the language (`formatDecimal`: "7,8"). The header stats strip
+     now puts what doesn't fit on a second row instead of overlapping.
+  3. ~~German and Italian~~ — dropped for the launch.
+  4. **TMDB's data in the language**, before the launch (the owner's
+     choice) — done. Genres are saved in English (by TMDB id,
+     `TMDB_GENRES`) and shown translated (`GENRE_NAMES`), so one genre is
+     one filter option. Searches and details come in the page's language:
+     Spanish is TMDB's Latin American (`es-MX`, the owner's choice). The
+     owner decided that **titles and synopses are saved in the language
+     Slate is in when they're added, and always shown as saved** (a
+     library can mix English and Spanish titles). A synopsis TMDB hasn't
+     translated comes from its English details. The owner redeployed the
+     live `tmdb` function with `language` (en-US or es-MX).
 - **Publishing on Cloudflare Pages** (free, chosen over Netlify and
   Vercel). The steps:
   1. Connect the GitHub repo. There's no build command, and the output
@@ -193,7 +248,6 @@ directly.
      and `X-Content-Type-Options: nosniff`. The owner and Claude decided
      against a full Content-Security-Policy for now: the risk of breaking
      part of Slate outweighs the benefit for a small private app.
-- Translation: Spanish, German and Italian, besides English.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - a privacy policy page;

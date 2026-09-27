@@ -18,8 +18,8 @@ const lastResults = new Map();
 
 function updateBatchFooter() {
   const n = batchSelection.size;
-  batchCount.textContent = `${n} selected`;
-  batchAddBtn.textContent = `Add Selected (${n})`;
+  batchCount.textContent = tn(n, "{n} selected", "{n} selected");
+  batchAddBtn.textContent = t("Add Selected ({n})", { n });
   batchAddBtn.disabled = n === 0;
 }
 
@@ -34,7 +34,7 @@ function openModal(type) {
   batchFooter.classList.toggle("hidden", !batchMode);
 
   currentType = type;
-  modalTitle.textContent = type === "movie" ? "Add Movie" : "Add TV Show";
+  modalTitle.textContent = type === "movie" ? t("Add Movie") : t("Add TV Show");
   modalInput.value = "";
   modalResults.innerHTML = "";
   hideError();
@@ -57,23 +57,16 @@ function hideError() {
   modalError.classList.add("hidden");
 }
 
-function addButtonHtml(id, added = false) {
-  return added
-    ? `<button class="mini-add-btn" type="button" data-id="${id}" disabled>Added</button>`
-    : `<button class="mini-add-btn" type="button" data-id="${id}">+ Add</button>`;
-}
-
-// Same "add this TMDB title" action as addButtonHtml() above, styled to
-// match the ticket-stub row it lives in here instead of the info modal's
-// own button style.
+// "Add this TMDB title", in the ticket-stub row of a search result (the
+// info window has its own, js/infoModal.js).
 function tmdbAddButtonHtml(id, added = false) {
   return added
-    ? `<button class="tmdb-add-btn added" type="button" data-id="${id}" disabled>Added</button>`
-    : `<button class="tmdb-add-btn" type="button" data-id="${id}">+ Add</button>`;
+    ? `<button class="tmdb-add-btn added" type="button" data-id="${id}" disabled>${t("Added")}</button>`
+    : `<button class="tmdb-add-btn" type="button" data-id="${id}">${t("+ Add")}</button>`;
 }
 
 function resultRow(item, added) {
-  const title = item.title ?? item.name ?? "No title";
+  const title = item.title ?? item.name ?? t("No title");
   const date = item.release_date ?? item.first_air_date ?? "";
   const year = date ? date.slice(0, 4) : "—";
   const poster = item.poster_path
@@ -83,7 +76,7 @@ function resultRow(item, added) {
   const action = batchMode
     ? `<input type="checkbox" class="row-check" data-id="${item.id}"
         ${batchSelection.has(item.id) ? "checked" : ""} ${added ? "disabled" : ""}
-        title="${added ? "Already in your library" : "Select"}" />`
+        title="${added ? t("Already in your library") : t("Select")}" />`
     : tmdbAddButtonHtml(item.id, added);
 
   return `
@@ -94,7 +87,7 @@ function resultRow(item, added) {
         <p class="tmdb-row-year">${year}</p>
       </div>
       <div class="tmdb-row-actions">
-        <button class="tmdb-info-btn" type="button" data-id="${item.id}">Info</button>
+        <button class="tmdb-info-btn" type="button" data-id="${item.id}">${t("Info")}</button>
         ${action}
       </div>
     </div>`;
@@ -105,12 +98,12 @@ async function runSearch() {
   const query = modalInput.value.trim();
 
   if (!query) {
-    showError("Enter a title to search");
+    showError(t("Enter a title to search"));
     return;
   }
 
   hideError();
-  modalResults.innerHTML = `<p class="results-status">Searching…</p>`;
+  modalResults.innerHTML = `<p class="results-status">${t("Searching…")}</p>`;
 
   const idMatch = query.match(/^\[(\d+)\]$/);
 
@@ -126,13 +119,15 @@ async function runSearch() {
     results.forEach((r) => lastResults.set(r.id, r));
     modalResults.innerHTML = results.length
       ? results.map((item) => resultRow(item, existing.has(item.id))).join("")
-      : `<p class="results-status">No results.</p>`;
+      : `<p class="results-status">${t("No results.")}</p>`;
   } catch (err) {
     modalResults.innerHTML = "";
     showError(
       idMatch
-        ? `No ${currentType === "movie" ? "movie" : "TV show"} found with ID ${idMatch[1]}.`
-        : "Search failed. Please try again."
+        ? currentType === "movie"
+          ? t("No movie found with ID {id}.", { id: idMatch[1] })
+          : t("No TV show found with ID {id}.", { id: idMatch[1] })
+        : t("Search failed. Please try again.")
     );
     console.error("TMDB error:", err.message);
   }
@@ -192,7 +187,7 @@ async function runBatchAdd() {
   let failed = 0;
 
   for (let i = 0; i < items.length; i++) {
-    batchCount.textContent = `Adding ${i + 1} of ${items.length}…`;
+    batchCount.textContent = t("Adding {n} of {total}…", { n: i + 1, total: items.length });
     const item = items[i];
     try {
       if (collectionAddMode) {
@@ -232,7 +227,7 @@ async function runBatchAdd() {
   if (collectionAddMode) refreshCollectionAfterAdd(ok > 0 ? currentType : undefined);
 
   showToast(
-    `Added ${ok} · Skipped ${skipped} · Failed ${failed}`,
+    t("Added {added} · Skipped {skipped} · Failed {failed}", { added: ok, skipped, failed }),
     failed > 0
   );
   closeModal();

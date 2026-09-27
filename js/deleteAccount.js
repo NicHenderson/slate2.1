@@ -12,7 +12,8 @@
    backup of the library is downloaded before anything is deleted, unless
    unticked. Nothing is deleted unless every step before it succeeded. */
 
-const DELETE_PHRASE = "Delete my account";
+// Typed as it reads, in whichever language that is.
+const DELETE_PHRASE = t("Delete my account");
 const DELETE_WAIT_SECONDS = 3;
 
 const deleteAccountBtn = document.getElementById("delete-account-btn");
@@ -36,38 +37,40 @@ function syncDeleteReady() {
 // The danger view. `error`: why the last attempt stopped (the boxes then
 // open at once — the wait already happened).
 function showDeleteAccount(error = null) {
-  setImportHeader("Your account · Delete", "This deletes your account", deleteEmail);
+  setImportHeader(t("Your account · Delete"), t("This deletes your account"), deleteEmail);
   setImportView(
     "danger",
     `<div class="import-danger">
       <p class="import-danger-text">
-        Your account — <strong>${plural(STORE.movies.size, "movie")}, ${plural(STORE.shows.size, "show")} and ${plural(STORE.collections.size, "collection")}</strong>, your profile, your settings and the login itself — will be deleted.
-        <strong>This can't be undone.</strong>
+        ${t("Your account — <strong>{library}</strong>, your profile, your settings and the login itself — will be deleted.", {
+          library: libraryCounts(STORE.movies.size, STORE.shows.size, STORE.collections.size),
+        })}
+        <strong>${t("This can't be undone.")}</strong>
       </p>
 
       <label class="import-check">
         <input type="checkbox" id="delete-backup-first" checked />
         <span class="import-check-box" aria-hidden="true"></span>
         <span class="import-check-text">
-          <span class="import-check-title">Download a backup of my library first</span>
-          <span class="import-check-hint">A .slate file you can import into any Slate account later.</span>
+          <span class="import-check-title">${t("Download a backup of my library first")}</span>
+          <span class="import-check-hint">${t("A .slate file you can import into any Slate account later.")}</span>
         </span>
       </label>
 
-      <label class="import-confirm-label" for="delete-password">Your password</label>
-      <input type="password" class="field-input import-confirm-input" id="delete-password" autocomplete="current-password" disabled placeholder="Wait ${DELETE_WAIT_SECONDS}…" />
+      <label class="import-confirm-label" for="delete-password">${t("Your password")}</label>
+      <input type="password" class="field-input import-confirm-input" id="delete-password" autocomplete="current-password" disabled placeholder="${t("Wait {n}…", { n: DELETE_WAIT_SECONDS })}" />
 
-      <label class="import-confirm-label" for="delete-confirm-input">To confirm, type <strong>${DELETE_PHRASE}</strong></label>
+      <label class="import-confirm-label" for="delete-confirm-input">${t("To confirm, type <strong>{phrase}</strong>", { phrase: DELETE_PHRASE })}</label>
       <div class="import-confirm-wrap">
-        <input type="text" class="field-input import-confirm-input" id="delete-confirm-input" autocomplete="off" autocapitalize="off" spellcheck="false" disabled placeholder="Wait ${DELETE_WAIT_SECONDS}…" />
+        <input type="text" class="field-input import-confirm-input" id="delete-confirm-input" autocomplete="off" autocapitalize="off" spellcheck="false" disabled placeholder="${t("Wait {n}…", { n: DELETE_WAIT_SECONDS })}" />
         <span class="import-confirm-timer" aria-hidden="true"></span>
       </div>
       ${error ? `<p class="delete-error" role="alert">${escapeHtml(error)}</p>` : ""}
     </div>
     <div class="update-actions import-actions">
-      <button type="button" class="cancel-btn" data-account-action="cancel">Cancel</button>
+      <button type="button" class="cancel-btn" data-account-action="cancel">${t("Cancel")}</button>
       <div class="update-actions-right">
-        <button type="button" class="delete-btn import-replace-btn" data-account-action="delete" disabled>Delete my account</button>
+        <button type="button" class="delete-btn import-replace-btn" data-account-action="delete" disabled>${DELETE_PHRASE}</button>
       </div>
     </div>`
   );
@@ -95,7 +98,7 @@ function showDeleteAccount(error = null) {
       return;
     }
     if (left > 0) {
-      password.placeholder = phrase.placeholder = `Wait ${left}…`;
+      password.placeholder = phrase.placeholder = t("Wait {n}…", { n: left });
       return;
     }
     clearInterval(deleteCountdown);
@@ -105,12 +108,12 @@ function showDeleteAccount(error = null) {
 }
 
 function showDeleting(step) {
-  setImportHeader("Your account · Delete", "Deleting your account", deleteEmail);
+  setImportHeader(t("Your account · Delete"), t("Deleting your account"), deleteEmail);
   setImportView(
     "working",
     `<div class="import-reading" role="status">
       <p class="import-reading-title">${escapeHtml(step)}</p>
-      <p class="import-reading-hint">Keep this page open.</p>
+      <p class="import-reading-hint">${t("Keep this page open.")}</p>
       <div class="import-progress" aria-hidden="true"><span></span></div>
     </div>`
   );
@@ -129,31 +132,31 @@ async function runDeleteAccount() {
   let stopped = null;
   try {
     // 1. It's really you: the password again (a fresh sign-in, same account).
-    showDeleting("Checking your password…");
+    showDeleting(t("Checking your password…"));
     const { error: signInError } = await db.auth.signInWithPassword({ email: deleteEmail, password });
-    if (signInError) throw new DeleteStopped("That password isn't right. Nothing was deleted.");
+    if (signInError) throw new DeleteStopped(t("That password isn't right. Nothing was deleted."));
 
     // 2. The backup, before anything goes.
     if (backupFirst) {
-      showDeleting("Saving a backup of your library…");
+      showDeleting(t("Saving a backup of your library…"));
       try {
         const file = await buildSlateBackup();
         downloadFile(file.name.replace("slate-backup-", "slate-backup-before-deleting-"), file.text);
       } catch (err) {
         console.error("Backup before deleting failed:", err);
-        throw new DeleteStopped("Your backup couldn't be downloaded, so nothing was deleted.");
+        throw new DeleteStopped(t("Your backup couldn't be downloaded, so nothing was deleted."));
       }
     }
 
     // 3. The account, and everything in it with it.
-    showDeleting("Deleting your account…");
+    showDeleting(t("Deleting your account…"));
     const { error } = await db.rpc("delete_my_account");
     if (error) {
       console.error("Account delete failed:", error.message);
-      throw new DeleteStopped("Your account couldn't be deleted. Nothing was deleted — try again.");
+      throw new DeleteStopped(t("Your account couldn't be deleted. Nothing was deleted — try again."));
     }
   } catch (err) {
-    stopped = err instanceof DeleteStopped ? err.message : "Something went wrong. Nothing was deleted — try again.";
+    stopped = err instanceof DeleteStopped ? err.message : t("Something went wrong. Nothing was deleted — try again.");
     if (!(err instanceof DeleteStopped)) console.error("Account delete failed:", err);
   }
 
@@ -167,7 +170,7 @@ async function runDeleteAccount() {
   // land on the landing page.
   closeImportModal();
   await db.auth.signOut({ scope: "local" });
-  showToast("Your account and everything in it were deleted.");
+  showToast(t("Your account and everything in it were deleted."));
 }
 
 async function openDeleteAccount() {

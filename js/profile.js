@@ -16,7 +16,19 @@ const BIO_MAX = 160;
 // the row isn't used in an <img src>.
 const POSTER_PATH_RE = /^\/[A-Za-z0-9_-]+\.(jpg|jpeg|png)$/;
 const FAVORITE_COLUMN = { movie: "favorite_movie", tv: "favorite_show" };
-const FAVORITE_NOUN = { movie: "movie", tv: "show" };
+// Whole sentences for each kind: other languages change more than the noun.
+const FAVORITE_TEXT = {
+  movie: {
+    pick: t("Pick a movie"),
+    change: (title) => t("Change favorite movie ({title})", { title }),
+    prompt: t("Search TMDB for any movie — it doesn't need to be in your lists."),
+  },
+  tv: {
+    pick: t("Pick a show"),
+    change: (title) => t("Change favorite show ({title})", { title }),
+    prompt: t("Search TMDB for any show — it doesn't need to be in your lists."),
+  },
+};
 
 const emptyProfile = () => ({ username: null, bio: null, favorite_movie: null, favorite_show: null });
 
@@ -120,27 +132,27 @@ profileForm.addEventListener("submit", async (e) => {
   if (profileSaving || !isProfileDirty()) return;
   const draft = draftProfile();
   if (draft.username && !USERNAME_RE.test(draft.username)) {
-    showUsernameError("Use 3–20 letters, numbers, _ or . (no spaces).");
+    showUsernameError(t("Use 3–20 letters, numbers, _ or . (no spaces)."));
     usernameInput.focus();
     return;
   }
 
   profileSaving = true;
-  profileSaveBtn.textContent = "Saving…";
+  profileSaveBtn.textContent = t("Saving…");
   updateProfileFormState();
   const result = draft.username
     ? { ...(await upsertProfile(draft)), username: draft.username }
     : await upsertWithDefaultUsername(draft);
   profileSaving = false;
-  profileSaveBtn.textContent = "Save profile";
+  profileSaveBtn.textContent = t("Save profile");
 
   if (result.error) {
     if (result.error.code === "23505" && draft.username) {
-      showUsernameError("That username is already taken.");
+      showUsernameError(t("That username is already taken."));
       usernameInput.focus();
     } else {
       console.error("Profile save error:", result.error.message);
-      showToast("Could not save your profile — try again.", true);
+      showToast(t("Could not save your profile — try again."), true);
     }
     updateProfileFormState();
     return;
@@ -148,7 +160,7 @@ profileForm.addEventListener("submit", async (e) => {
   savedProfile = { ...draft, username: result.username };
   usernameInput.value = result.username;
   updateProfileFormState();
-  showToast(draft.username ? "Profile saved." : `Profile saved — your username is @${result.username}.`);
+  showToast(draft.username ? t("Profile saved.") : t("Profile saved — your username is @{username}.", { username: result.username }));
 });
 
 /* ---------- default username ----------
@@ -185,26 +197,26 @@ async function upsertWithDefaultUsername(fields) {
 
 function favoriteSlotHtml(type) {
   const fav = draftFavorites[FAVORITE_COLUMN[type]];
-  const noun = FAVORITE_NOUN[type];
+  const text = FAVORITE_TEXT[type];
   if (!fav) {
     return `
       <button class="favorite-empty" type="button" data-fav-action="pick" data-fav-type="${type}">
         <span class="favorite-empty-slot" aria-hidden="true">+</span>
-        <span class="favorite-empty-label">Pick a ${noun}</span>
+        <span class="favorite-empty-label">${text.pick}</span>
       </button>`;
   }
-  const title = escapeHtml(fav.title ?? "Untitled");
+  const title = escapeHtml(fav.title ?? t("Untitled"));
   const year = String(fav.year ?? "").replace(/\D/g, "");
   const poster = POSTER_PATH_RE.test(fav.poster_path ?? "")
     ? `<img class="favorite-poster" src="${TMDB_IMG_LG}${fav.poster_path}" alt="" loading="lazy" />`
     : `<span class="favorite-poster favorite-poster-empty"></span>`;
   return `
-    <button class="favorite-card" type="button" data-fav-action="pick" data-fav-type="${type}" aria-label="Change favorite ${noun} (${title})">
+    <button class="favorite-card" type="button" data-fav-action="pick" data-fav-type="${type}" aria-label="${text.change(title)}">
       ${poster}
       <span class="favorite-title">${title}</span>
       ${year ? `<span class="favorite-year">${year}</span>` : ""}
     </button>
-    <button class="favorite-remove" type="button" data-fav-action="remove" data-fav-type="${type}">Remove</button>`;
+    <button class="favorite-remove" type="button" data-fav-action="remove" data-fav-type="${type}">${t("Remove")}</button>`;
 }
 
 function renderFavorites() {
@@ -242,7 +254,7 @@ function previewFavoriteHtml(fav, kind) {
       ${poster}
       <div class="pp-fav-text">
         <span class="pp-fav-kind">${kind}</span>
-        <span class="pp-fav-title">${escapeHtml(fav.title ?? "Untitled")}</span>
+        <span class="pp-fav-title">${escapeHtml(fav.title ?? t("Untitled"))}</span>
       </div>
     </div>`;
 }
@@ -253,9 +265,9 @@ function renderProfilePreview() {
   const username = draft.username ?? accountInfo.defaultUsername;
   const initial = escapeHtml((username.match(/[A-Za-z0-9]/)?.[0] ?? "?").toUpperCase());
   const favorites =
-    previewFavoriteHtml(draft.favorite_movie, "Movie") + previewFavoriteHtml(draft.favorite_show, "Show");
+    previewFavoriteHtml(draft.favorite_movie, t("Movie")) + previewFavoriteHtml(draft.favorite_show, t("Show"));
   const since = accountInfo.createdAt
-    ? new Date(accountInfo.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+    ? new Date(accountInfo.createdAt).toLocaleDateString(LOCALE, { month: "short", year: "numeric" })
     : null;
   // This file loads before data.js, whose STORE the very first render
   // (at script load) can't see yet.
@@ -270,16 +282,16 @@ function renderProfilePreview() {
     <div class="pp-head">
       <span class="pp-monogram" aria-hidden="true">${initial}</span>
       <div class="pp-names">
-        <p class="pp-username">${username ? `@${escapeHtml(username)}` : "No username yet"}</p>
-        ${since ? `<p class="pp-since">Member since ${since}</p>` : ""}
+        <p class="pp-username">${username ? `@${escapeHtml(username)}` : t("No username yet")}</p>
+        ${since ? `<p class="pp-since">${t("Member since {date}", { date: since })}</p>` : ""}
       </div>
     </div>
-    <p class="pp-bio${draft.bio ? "" : " is-empty"}">${draft.bio ? escapeHtml(draft.bio) : "No bio yet."}</p>
+    <p class="pp-bio${draft.bio ? "" : " is-empty"}">${draft.bio ? escapeHtml(draft.bio) : t("No bio yet.")}</p>
     ${favorites ? `<div class="pp-favs">${favorites}</div>` : ""}
     <div class="pp-stats">
-      ${stat(movies, movies === 1 ? "Movie" : "Movies")}
-      ${stat(shows, shows === 1 ? "Show" : "Shows")}
-      ${stat(collections, collections === 1 ? "Collection" : "Collections")}
+      ${stat(movies, tn(movies, "Movie", "Movies"))}
+      ${stat(shows, tn(shows, "Show", "Shows"))}
+      ${stat(collections, tn(collections, "Collection", "Collections"))}
     </div>`;
 }
 
@@ -296,15 +308,15 @@ let pickerSearchSeq = 0;
 let pickerSearchTimer = null;
 
 function pickerPromptHtml() {
-  return `<p class="results-status">Search TMDB for any ${FAVORITE_NOUN[pickerType]} — it doesn't need to be in your lists.</p>`;
+  return `<p class="results-status">${FAVORITE_TEXT[pickerType].prompt}</p>`;
 }
 
 function openFavoritePicker(type) {
   pickerType = type;
   pickerResults = new Map();
-  favoriteModalTitle.textContent = type === "movie" ? "Favorite movie" : "Favorite show";
+  favoriteModalTitle.textContent = type === "movie" ? t("Favorite movie") : t("Favorite show");
   favoriteInput.value = "";
-  favoriteInput.placeholder = type === "movie" ? "Search movies" : "Search TV shows";
+  favoriteInput.placeholder = type === "movie" ? t("Search movies") : t("Search TV shows");
   favoriteError.classList.add("hidden");
   favoriteResults.innerHTML = pickerPromptHtml();
   favoriteModal.classList.remove("hidden");
@@ -318,15 +330,15 @@ function closeFavoritePicker() {
 }
 
 function pickerRowHtml(item) {
-  const title = escapeHtml(item.title ?? item.name ?? "Untitled");
+  const title = escapeHtml(item.title ?? item.name ?? t("Untitled"));
   const date = item.release_date ?? item.first_air_date ?? "";
   const poster = item.poster_path
     ? `<img class="tmdb-poster" src="${TMDB_IMG}${escapeHtml(item.poster_path)}" alt="" loading="lazy" />`
     : `<div class="tmdb-poster tmdb-poster-empty"></div>`;
   const current = favoriteId(draftFavorites[FAVORITE_COLUMN[pickerType]]) === item.id;
   const action = current
-    ? `<button class="tmdb-add-btn added" type="button" disabled>Current</button>`
-    : `<button class="tmdb-add-btn" type="button" data-pick-id="${item.id}">Choose</button>`;
+    ? `<button class="tmdb-add-btn added" type="button" disabled>${t("Current")}</button>`
+    : `<button class="tmdb-add-btn" type="button" data-pick-id="${item.id}">${t("Choose")}</button>`;
   return `
     <div class="tmdb-row">
       <span class="tmdb-stub">${poster}</span>
@@ -350,19 +362,19 @@ async function runFavoriteSearch() {
     return;
   }
   const seq = ++pickerSearchSeq;
-  favoriteResults.innerHTML = `<p class="results-status">Searching…</p>`;
+  favoriteResults.innerHTML = `<p class="results-status">${t("Searching…")}</p>`;
   try {
     const results = await tmdbSearch(pickerType, query);
     if (seq !== pickerSearchSeq) return;
     pickerResults = new Map(results.map((r) => [r.id, r]));
     favoriteResults.innerHTML = results.length
       ? results.map(pickerRowHtml).join("")
-      : `<p class="results-status">No results.</p>`;
+      : `<p class="results-status">${t("No results.")}</p>`;
   } catch (err) {
     if (seq !== pickerSearchSeq) return;
     console.error("TMDB error:", err.message);
     favoriteResults.innerHTML = "";
-    favoriteError.textContent = "Search failed. Please try again.";
+    favoriteError.textContent = t("Search failed. Please try again.");
     favoriteError.classList.remove("hidden");
   }
 }
@@ -418,7 +430,7 @@ async function loadProfile() {
     createdAt: user?.created_at ?? null,
     defaultUsername: user ? usernameFromEmail(user.email) : "",
   };
-  usernameInput.placeholder = accountInfo.defaultUsername || "yourname";
+  usernameInput.placeholder = accountInfo.defaultUsername || t("yourname");
 
   const { data, error } = await db
     .from("profiles")
@@ -440,7 +452,7 @@ async function loadProfile() {
 function resetProfileState() {
   savedProfile = emptyProfile();
   accountInfo = { email: "", createdAt: null, defaultUsername: "" };
-  usernameInput.placeholder = "yourname";
+  usernameInput.placeholder = t("yourname");
   closeFavoritePicker();
   renderProfile();
 }
