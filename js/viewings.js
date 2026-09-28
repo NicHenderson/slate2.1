@@ -130,7 +130,7 @@ function openViewingView(movie, viewing) {
     <h2 class="detail-title">${escapeHtml(movie.title ?? t("Untitled"))}</h2>
     <form class="viewing-form" id="viewing-form" novalidate>
       <label class="field-label" for="viewing-date">${t("Watched on")}</label>
-      <input type="date" id="viewing-date" class="field-input" required value="${viewing?.watched_on ?? localToday()}" />
+      <input type="date" id="viewing-date" class="field-input" required data-future-note value="${viewing?.watched_on ?? localToday()}" />
       <p class="field-error hidden" id="viewing-date-error" role="alert">${t("Pick the day you watched it.")}</p>
       <p class="viewing-error hidden" id="viewing-error" role="alert"></p>
       <div class="detail-actions viewing-actions">
@@ -139,6 +139,7 @@ function openViewingView(movie, viewing) {
       </div>
     </form>`;
   updateDetailNav();
+  syncFutureNote(document.getElementById("viewing-date"));
   document.getElementById("viewing-date").focus();
 }
 

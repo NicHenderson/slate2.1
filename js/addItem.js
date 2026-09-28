@@ -99,12 +99,14 @@ async function addToLibrary(type, id, btn) {
     // the database keeps one copy per title (migration 0004).
     if (error?.code === UNIQUE_VIOLATION) {
       btn.textContent = t("Added");
+      markResultAdded(id);
       showToast(t("Already in your library."));
       return;
     }
     if (error) throw new Error(error.message);
 
     btn.textContent = t("Added");
+    markResultAdded(id);
     if (collectionAddMode) {
       STORE[table].set(inserted.id, inserted);
       await bindToOpenCollection(table, inserted);

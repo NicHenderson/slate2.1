@@ -33,17 +33,19 @@ test("a show goes from the queue to watching to finished, and is saved at every 
   await expect(page.locator("#grid-shows-watching .card-title")).toHaveText(["Game of Thrones"]);
   await expect.poll(() => saved().started_watching_date).toBe("2026-09-01");
 
-  // Finished: a finish date asks for a rating (and takes a review), then
-  // it's on Shows with the rest.
+  // Finished: never before it started; a rating and review are optional
+  // (both given here), then it's on Shows with the rest.
   await page.locator("#grid-shows-watching .card", { hasText: "Game of Thrones" }).click();
   await page.locator('#detail-modal [data-action="edit"]').click();
   await expect(page.locator("#start-extra")).toBeHidden();
-  await page.fill("#start-finish-date", "2026-09-20");
+  await page.fill("#start-finish-date", "2026-08-20");
   await expect(page.locator("#start-extra")).toBeVisible();
-  await page.fill("#start-review", "The ending, though.");
   await page.click("#start-save");
-  await expect(page.locator(".toast").last()).toHaveText("A rating is required when you set a finish date.");
+  await expect(page.locator("#start-dates-error")).toBeVisible();
   expect(saved().finished_watching_date).toBeNull();
+  await page.fill("#start-finish-date", "2026-09-20");
+  await expect(page.locator("#start-dates-error")).toBeHidden();
+  await page.fill("#start-review", "The ending, though.");
 
   const stars = page.locator("#start-stars");
   const box = await stars.boundingBox();

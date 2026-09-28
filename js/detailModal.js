@@ -76,6 +76,31 @@ function localToday() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+// A date after today in a "when did you watch it" field isn't refused
+// (the owner's call): the field turns amber and Slate says something,
+// and it saves anyway. Date fields opt in with data-future-note; the forms
+// call it again after filling a field in, which fires no input event.
+function syncFutureNote(input) {
+  const future = Boolean(input.value) && input.value > localToday();
+  let note = input.nextElementSibling?.classList.contains("date-future-note") ? input.nextElementSibling : null;
+  input.classList.toggle("is-future", future);
+  if (!future) {
+    note?.remove();
+    return;
+  }
+  if (!note) {
+    note = document.createElement("p");
+    note.className = "date-future-note";
+    note.setAttribute("role", "status");
+    input.after(note);
+  }
+  note.textContent = t("Sure you watched this on {date}? That hasn't happened yet 👀", { date: formatDate(input.value) });
+}
+
+document.addEventListener("input", (e) => {
+  if (e.target.matches?.("input[type=date][data-future-note]")) syncFutureNote(e.target);
+});
+
 function formatRuntime(minutes) {
   if (!minutes) return t("Runtime unknown");
   const h = Math.floor(minutes / 60);

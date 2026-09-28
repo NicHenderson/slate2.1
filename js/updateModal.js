@@ -37,6 +37,7 @@ function openMarkAsWatchedModal(row, isNewInsert = false) {
   updateStarsInput.set(row.rating ?? 0);
   updateDate.value = updateViewing?.watched_on || row.watched_date || localToday();
   updateDateError.classList.add("hidden");
+  syncFutureNote(updateDate);
   updateReview.value = row.review || "";
   updateViewingFields.classList.toggle("hidden", updateManyViewings);
   updateViewingsHint.classList.toggle("hidden", !updateManyViewings);

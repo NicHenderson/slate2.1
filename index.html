@@ -34,17 +34,17 @@
   <link rel="stylesheet" href="css/base.css?v=34e685e8" />
   <link rel="stylesheet" href="css/sidebar.css?v=b0c4cd07" />
   <link rel="stylesheet" href="css/content.css?v=42b1b03a" />
-  <link rel="stylesheet" href="css/cards.css?v=8bb24eb5" />
-  <link rel="stylesheet" href="css/modal.css?v=0adc06fd" />
-  <link rel="stylesheet" href="css/auth.css?v=17c2cd2c" />
+  <link rel="stylesheet" href="css/cards.css?v=a7ce3579" />
+  <link rel="stylesheet" href="css/modal.css?v=f5f56134" />
+  <link rel="stylesheet" href="css/auth.css?v=6de0fa2a" />
   <link rel="stylesheet" href="css/landing.css?v=8ed108b2" />
   <link rel="stylesheet" href="css/transitions.css?v=bf37ef65" />
-  <link rel="stylesheet" href="css/settings.css?v=76a3748b" />
-  <link rel="stylesheet" href="css/yourData.css?v=f979fb6e" />
-  <link rel="stylesheet" href="css/viewings.css?v=a12c11bd" />
+  <link rel="stylesheet" href="css/settings.css?v=2c7876ab" />
+  <link rel="stylesheet" href="css/yourData.css?v=6c896678" />
+  <link rel="stylesheet" href="css/viewings.css?v=57cd530d" />
   <link rel="stylesheet" href="css/whereToWatch.css?v=7528c42f" />
   <link rel="stylesheet" href="css/librarySearch.css?v=cce1cb12" />
-  <link rel="stylesheet" href="css/responsive.css?v=70bd1363" />
+  <link rel="stylesheet" href="css/responsive.css?v=d26c006d" />
 </head>
 <body>
   <!-- ============================================================
@@ -164,19 +164,6 @@
         </div>
       </section>
 
-      <!-- ---------- love note ---------- -->
-      <section class="lp-section lp-section--note">
-        <div class="lp-letter lp-paper reveal">
-          <span class="lp-letter-tape lp-letter-tape--l" aria-hidden="true"></span>
-          <span class="lp-letter-tape lp-letter-tape--r" aria-hidden="true"></span>
-          <p>Hi, dear movie lover. First things first — how are you? Everything okay?</p>
-          <p>Slate was made so that no record would ever be lost again.</p>
-          <p>Before it existed, I wrote down every movie and show I watched in a notebook. Over the years it grew into a huge record — and one day I lost that notebook. I lost it all. That's how Slate was born: so that would never happen again.</p>
-          <p>Today it's much more than a digital notebook: it's a place where every movie and show I watch stays saved forever, like fixed stars in a sky that can no longer be lost.</p>
-          <p class="lp-letter-sign" data-i18n>With love, Nicholas Henderson,<br />the creator of Slate ♥</p>
-        </div>
-      </section>
-
       <!-- ---------- final call ---------- -->
       <section class="lp-final reveal">
         <div class="lp-final-stub" aria-hidden="true"><span>Admit one</span></div>
@@ -188,6 +175,19 @@
             <a class="lp-btn lp-btn--solid lp-btn--lg" href="#request-access">Request access</a>
             <a class="lp-btn lp-btn--paper lp-btn--lg" href="#login">Log in</a>
           </div>
+        </div>
+      </section>
+
+      <!-- ---------- love note: last, as the page's goodbye (the owner's call) ---------- -->
+      <section class="lp-section lp-section--note">
+        <div class="lp-letter lp-paper reveal">
+          <span class="lp-letter-tape lp-letter-tape--l" aria-hidden="true"></span>
+          <span class="lp-letter-tape lp-letter-tape--r" aria-hidden="true"></span>
+          <p>Hi, dear movie lover. First things first — how are you? Everything okay?</p>
+          <p>Slate was made so that no record would ever be lost again.</p>
+          <p>Before it existed, I wrote down every movie and show I watched in a notebook. Over the years it grew into a huge record — and one day I lost that notebook. I lost it all. That's how Slate was born: so that would never happen again.</p>
+          <p>Today it's much more than a digital notebook: it's a place where every movie and show I watch stays saved forever, like fixed stars in a sky that can no longer be lost.</p>
+          <p class="lp-letter-sign" data-i18n>With love, Nicholas Henderson,<br />the creator of Slate ♥</p>
         </div>
       </section>
     </main>
@@ -1015,7 +1015,7 @@
         <form id="update-form" class="update-form-body" novalidate>
           <div id="update-viewing-fields">
             <label class="field-label" for="update-date">Watched on</label>
-            <input type="date" id="update-date" class="field-input" required />
+            <input type="date" id="update-date" class="field-input" required data-future-note />
             <p class="field-error hidden" id="update-date-error" role="alert">Pick the day you watched it.</p>
           </div>
           <p class="update-viewings-hint hidden" id="update-viewings-hint"></p>
@@ -1058,10 +1058,11 @@
         </div>
         <form id="start-form" class="update-form-body">
           <label class="field-label" for="start-date">Started on</label>
-          <input type="date" id="start-date" class="field-input" />
+          <input type="date" id="start-date" class="field-input" data-future-note />
 
           <label class="field-label" for="start-finish-date">Finished on (optional)</label>
-          <input type="date" id="start-finish-date" class="field-input" />
+          <input type="date" id="start-finish-date" class="field-input" data-future-note />
+          <p class="field-error hidden" id="start-dates-error" role="alert">It can't end before it starts 😉 Check the dates.</p>
 
           <div id="start-extra" class="hidden">
             <p class="field-label">Rating</p>
@@ -1126,7 +1127,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-  <script src="js/lang/es.js?v=1a7f5e9d"></script>
+  <script src="js/lang/es.js?v=636d716d"></script>
   <script src="js/i18n.js?v=028fb3d5"></script>
   <script src="js/escapeHtml.js?v=28c1feb8"></script>
   <script src="js/viewTransitions.js?v=d587d807"></script>
@@ -1137,31 +1138,31 @@
   <script src="js/imageGuard.js?v=3e57b5e2"></script>
   <script src="js/realtime.js?v=13b98b55"></script>
   <script src="js/tmdb.js?v=b33a45f6"></script>
-  <script src="js/addItem.js?v=25eded67"></script>
-  <script src="js/searchModal.js?v=2d31f6a5"></script>
+  <script src="js/addItem.js?v=3ba54de2"></script>
+  <script src="js/searchModal.js?v=56d9e820"></script>
   <script src="js/libraryModal.js?v=cebc1c59"></script>
   <script src="js/emojiData.js?v=00b8c396"></script>
   <script src="js/iconData.js?v=051d09a4"></script>
   <script src="js/icons.js?v=3a450da2"></script>
   <script src="js/iconPicker.js?v=60949f19"></script>
-  <script src="js/collections.js?v=6314b5ec"></script>
+  <script src="js/collections.js?v=bd965d9e"></script>
   <script src="js/infoModal.js?v=86f47156"></script>
-  <script src="js/detailModal.js?v=c8a716d1"></script>
+  <script src="js/detailModal.js?v=fdd25b93"></script>
   <script src="js/starsInput.js?v=4457c4a6"></script>
-  <script src="js/updateModal.js?v=91c839e0"></script>
-  <script src="js/startModal.js?v=76c9ff11"></script>
+  <script src="js/updateModal.js?v=50e2829a"></script>
+  <script src="js/startModal.js?v=f7f95de3"></script>
   <script src="js/confirmModal.js?v=20776f87"></script>
-  <script src="js/viewings.js?v=3ecfa2e6"></script>
+  <script src="js/viewings.js?v=f907cb0e"></script>
   <script src="js/settings.js?v=43fc49de"></script>
   <script src="js/whereToWatch.js?v=60bb1455"></script>
   <script src="js/profile.js?v=4f320145"></script>
-  <script src="js/librarySearch.js?v=458e1e99"></script>
+  <script src="js/librarySearch.js?v=caede38f"></script>
   <script src="js/data.js?v=e952d8ac"></script>
   <script src="js/sortMenu.js?v=477f7128"></script>
   <script src="js/watchlistOrder.js?v=dfb1f50a"></script>
   <script src="js/sectionHeaders.js?v=1ff2ab07"></script>
-  <script src="js/yourData.js?v=30b17cab"></script>
-  <script src="js/deleteAccount.js?v=8000d345"></script>
+  <script src="js/yourData.js?v=f3415a0a"></script>
+  <script src="js/deleteAccount.js?v=bb8fa209"></script>
   <script src="js/landing.js?v=69197ae5"></script>
   <script src="js/auth.js?v=43a43f19"></script>
 </body>

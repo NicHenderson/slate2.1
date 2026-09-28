@@ -1729,6 +1729,8 @@ body:not(.no-hover) .col-item-card:hover .col-item-remove {
 .detail-review {
   position: relative;
   margin: 0 10px;
+  /* The line breaks typed in the review, kept. */
+  white-space: pre-line;
   font-family: var(--font-hand);
   font-size: 17px;
   line-height: 1.55;
@@ -1773,8 +1775,14 @@ body:not(.no-hover) .col-item-card:hover .col-item-remove {
 .toast {
   position: fixed;
   bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
+  /* Centered with margins, not translateX(-50%): the entrance animation
+     (modal-in) sets transform too, and for its first frames the toast
+     sat off to the right before jumping to the middle. */
+  left: 0;
+  right: 0;
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  margin-inline: auto;
   z-index: 200;
   padding: 12px 20px;
   background: var(--paper);

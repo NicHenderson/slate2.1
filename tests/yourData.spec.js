@@ -204,9 +204,9 @@ test("Replace: locked for 3 seconds, needs “Delete Data”, backs up first, th
   await expect(input).toHaveAttribute("placeholder", "Wait 3…");
   await expect(page.locator("#import-backup-first")).toBeChecked();
   await expect(input).toBeEnabled({ timeout: 4000 });
-  await input.fill("delete dat");
+  await input.fill("delete data"); // exactly as it reads, capitals included
   await expect(go).toBeDisabled();
-  await input.fill("  delete   DATA ");
+  await input.fill(" Delete Data ");
   await expect(go).toBeEnabled();
 
   const writesBefore = backend.log.length;

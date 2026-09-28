@@ -57,6 +57,23 @@ function hideError() {
   modalError.classList.add("hidden");
 }
 
+// A title added from its info window (js/infoModal.js) while the search
+// is still open behind it: its row turns "added" too, so it can't be
+// picked for Add Selected again.
+function markResultAdded(id) {
+  const tmdbId = Number(id);
+  batchSelection.delete(tmdbId);
+  const check = modalResults.querySelector(`.row-check[data-id="${tmdbId}"]`);
+  if (check) {
+    check.checked = false;
+    check.disabled = true;
+    check.title = t("Already in your library");
+  }
+  const addBtn = modalResults.querySelector(`.tmdb-add-btn[data-id="${tmdbId}"]`);
+  if (addBtn) addBtn.outerHTML = tmdbAddButtonHtml(tmdbId, true);
+  updateBatchFooter();
+}
+
 // "Add this TMDB title", in the ticket-stub row of a search result (the
 // info window has its own, js/infoModal.js).
 function tmdbAddButtonHtml(id, added = false) {

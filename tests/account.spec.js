@@ -28,11 +28,11 @@ test("locked for 3 seconds, then needs the password and “Delete my account”"
   await expect(page.locator("#delete-backup-first")).toBeChecked();
 
   await expect(password).toBeEnabled({ timeout: 4000 });
-  await phrase.fill("  delete   MY account ");
+  await phrase.fill(" Delete my account ");
   await expect(go).toBeDisabled(); // no password yet
   await password.fill("anything");
   await expect(go).toBeEnabled();
-  await phrase.fill("delete my acount");
+  await phrase.fill("delete MY account"); // exactly as it reads
   await expect(go).toBeDisabled();
 });
 
