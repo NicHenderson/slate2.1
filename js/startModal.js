@@ -40,6 +40,7 @@ startDate.addEventListener("input", syncDatesError);
 
 function openStartWatchingModal(row, isNewInsert = false) {
   startRow = row;
+  clearStaleNote(startForm);
   startStarsInput.set(row.rating ?? 0);
   startDate.value = row.started_watching_date || localToday();
   startFinishDate.value = row.finished_watching_date || "";
@@ -97,7 +98,7 @@ startForm.addEventListener("submit", async (e) => {
   startSave.disabled = true;
   startSave.textContent = t("Saving…");
 
-  const { error } = await db.from("shows").update(payload).eq("id", startRow.id);
+  const { data, error } = await db.from("shows").update(payload).eq("id", startRow.id).select().single();
 
   startSave.disabled = false;
   startSave.textContent = t("Save Changes");
@@ -110,6 +111,7 @@ startForm.addEventListener("submit", async (e) => {
 
   closeStartModal();
   closeDetailModal();
+  applyLocalChange("shows", "UPDATE", data);
   showToast(finished ? t("Marked as watched.") : t("Started watching."));
 });
 

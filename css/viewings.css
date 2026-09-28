@@ -181,6 +181,28 @@
   color: #dc2626;
 }
 
+/* An Edit form whose title changed in another window meanwhile. */
+.form-stale {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  background: color-mix(in srgb, #f59e0b 14%, transparent);
+  border-left: 3px solid #f59e0b;
+}
+
+.form-stale-load {
+  font: inherit;
+  font-weight: 700;
+  color: var(--accent-deep, var(--accent));
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
 .update-viewings-hint {
   margin-top: 4px;
   padding: 10px 12px;

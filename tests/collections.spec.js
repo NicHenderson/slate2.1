@@ -40,3 +40,23 @@ test("opening a collection shows its titles, and titles can be added from the wa
   const heat = backend.db.movies.find((m) => m.tmdb_id === 949);
   await expect.poll(() => backend.db.collection_items.filter((i) => i.item_id === heat.id).length).toBe(1);
 });
+
+// Regression: a title added from TMDB inside a collection only reached the
+// To Watch list with its realtime echo, so when that was late (or lost)
+// it wasn't there until a reload. Here the echo never comes.
+test("a title added from TMDB in a collection is on To Watch at once, echo or not", async ({ page, backend }) => {
+  await logIn(page);
+  backend.hooks.holdRealtime = true;
+  await page.click('.nav-btn[data-section="collections"]');
+  await page.locator("#grid-collections .collection-card", { hasText: "Sci-fi night" }).click();
+  await page.click('#collection-view .add-btn[data-type="collection-titles"]');
+  await page.click("#library-search-hint");
+  await page.fill("#modal-input", "paddington");
+  await page.click("#modal-search-btn");
+  await page.locator("#modal-results .row-check").first().check();
+  await page.click("#batch-add-btn");
+  await expect(page.locator("#col-detail-grid")).toContainText("Paddington 2");
+
+  await page.click('.nav-btn[data-section="movies-towatch"]');
+  await expect(page.locator("#grid-movies-towatch .card-title")).toContainText(["Paddington 2"]);
+});
