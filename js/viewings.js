@@ -122,9 +122,6 @@ function viewingsListHtml(row) {
 // `viewing` null: a new one ("Watched it again").
 function openViewingView(movie, viewing) {
   currentDetail.viewing = { id: viewing?.id ?? null };
-  // Already adding or looking at one: the poster's sticker steps aside
-  // until the summary is back.
-  detailPoster.querySelector(".again-sticker")?.remove();
   const count = viewingsOf(movie.id).length;
   const deletable = viewing && count > 1;
   detailBody.innerHTML = `
@@ -218,14 +215,9 @@ detailBody.addEventListener("click", (e) => {
     const viewing = STORE.viewings.get(e.target.closest("[data-viewing-id]").dataset.viewingId);
     if (viewing) openViewingView(currentDetail.row, viewing);
   }
+  if (action === "watched-again") openViewingView(currentDetail.row, null);
   if (action === "back-to-summary") backToSummary();
   if (action === "delete-viewing") deleteViewing();
-});
-
-// "Watched it again!" is a sticker on the poster, outside the body.
-detailPoster.addEventListener("click", (e) => {
-  if (!currentDetail || currentDetail.cfg.table !== "movies") return;
-  if (e.target.closest('[data-action="watched-again"]')) openViewingView(currentDetail.row, null);
 });
 
 detailBody.addEventListener("submit", (e) => {

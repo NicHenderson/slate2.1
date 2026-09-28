@@ -142,18 +142,9 @@ function detailDurationLine(table, row) {
 }
 
 function renderDetail(cfg, row) {
-  // A watched movie gets "Watched it again!" as a sticker on its poster
-  // (js/viewings.js handles it): the owner's pick over a button in the
-  // action row.
-  const againHtml =
-    cfg.table === "movies" && row.watched_date
-      ? `<button class="again-sticker" type="button" data-action="watched-again"><span class="again-sticker-icon" aria-hidden="true">↻</span>${t("Watched it again!")}</button>`
-      : "";
-  detailPoster.innerHTML = `${
-    row.poster
-      ? `<img class="detail-poster-img" src="${escapeHtml(row.poster)}" alt="" />`
-      : `<div class="detail-poster-img detail-poster-empty"></div>`
-  }${againHtml}`;
+  detailPoster.innerHTML = row.poster
+    ? `<img class="detail-poster-img" src="${escapeHtml(row.poster)}" alt="" />`
+    : `<div class="detail-poster-img detail-poster-empty"></div>`;
 
   const genreLine = parseGenres(row.genres).map(genreName).join(" · ");
 
@@ -224,9 +215,12 @@ function renderDetail(cfg, row) {
   }
 
   // A movie's date part lists its viewings (js/viewings.js); a show's is its span.
+  // A watched movie's date has "Watched it again!" beside it, a round
+  // sticker (js/viewings.js handles it): an action on that date. On the
+  // poster it read as a label and was half hidden behind the panel.
   const dateHtml =
     cfg.table === "movies"
-      ? watchedDateBlockHtml(row)
+      ? `<div class="detail-date-block">${watchedDateBlockHtml(row)}</div><button class="again-sticker" type="button" data-action="watched-again"><span class="again-sticker-icon" aria-hidden="true">↻</span>${t("Watched it again!")}</button>`
       : `<p class="detail-label">${t("Watched on")}</p><p class="detail-date-value">${t("Started {start} · Finished {end}", { start: formatDate(row.started_watching_date), end: formatDate(row.finished_watching_date) })}</p>`;
   const review = row.review
     ? `<p class="detail-review">${escapeHtml(row.review)}</p>`
@@ -235,7 +229,7 @@ function renderDetail(cfg, row) {
   detailBody.innerHTML = `
     ${head}
     <div class="detail-meta-strip">
-      <div class="detail-field">
+      <div class="detail-field${cfg.table === "movies" ? " detail-field-again" : ""}">
         ${dateHtml}
       </div>
       <div class="detail-field">

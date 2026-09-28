@@ -105,58 +105,70 @@
   line-height: 1;
 }
 
-/* "Watched it again!": a round sticker slapped on the poster's corner
-   (the owner's pick), in the theme's pop color. */
+/* "Watched it again!": a round sticker beside the watched date (the
+   owner's pick), in the theme's pop color. */
+.detail-field-again {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
 .again-sticker {
-  position: absolute;
-  right: -24px;
-  bottom: 4px;
-  z-index: 2;
   display: grid;
   place-content: center;
-  width: 98px;
-  height: 98px;
-  padding: 8px;
+  width: 74px;
+  height: 74px;
+  flex: none;
+  margin-block: -8px;
+  padding: 6px;
   border: 0;
   border-radius: 50%;
   background: var(--pop);
   color: #fff;
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 10.5px;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: 0.04em;
   text-align: center;
   text-transform: uppercase;
-  box-shadow: 2px 4px 0 rgba(0, 0, 0, 0.35);
-  transform: rotate(-12deg);
+  box-shadow: 2px 3px 0 rgba(0, 0, 0, 0.35);
+  transform: rotate(-10deg);
   cursor: pointer;
-  transition: transform var(--transition), filter var(--transition);
+  transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
 }
 
 .again-sticker:hover,
 .again-sticker:focus-visible {
-  transform: rotate(-4deg) scale(1.06);
+  transform: rotate(-3deg) scale(1.07);
+  box-shadow: 3px 5px 0 rgba(0, 0, 0, 0.35);
   filter: brightness(1.08);
+}
+
+.again-sticker:active {
+  transform: rotate(-3deg) scale(0.97);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
 }
 
 .again-sticker-icon {
   display: block;
   font-family: var(--font-body);
-  font-size: 22px;
+  font-size: 18px;
   line-height: 1;
 }
 
-@media (max-width: 860px) {
-  .again-sticker {
-    right: -26px;
-    width: 80px;
-    height: 80px;
-    font-size: 11px;
+/* On a phone the date and its sticker get the strip's first row to
+   themselves, the rating below: side by side, there was no room. */
+@media (max-width: 480px) {
+  .detail-meta-strip:has(.detail-field-again) {
+    flex-wrap: wrap;
+    row-gap: 18px;
   }
 
-  .again-sticker-icon {
-    font-size: 18px;
+  .detail-field-again {
+    flex-basis: 100%;
+    justify-content: space-between;
   }
 }
 

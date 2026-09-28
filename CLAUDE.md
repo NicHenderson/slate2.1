@@ -328,8 +328,10 @@ directly.
      5a — built, waiting for the owner's test (their picks of three
      mockups each): toasts are stickers in the theme's color with a hard
      shadow, a ✓ (errors red with !), a × to close, 5 seconds;
-     "Watched it again!" is a round sticker on the detail window's
-     poster (in the theme's pop color), out of the action row; adding
+     "Watched it again!" is a round sticker beside the watched date in
+     the detail window (the theme's pop color), out of the action row
+     (on the poster, the owner found it read as a label, and the panel
+     hid half of it); adding
      titles to a collection has "Show watched ones too" (off each time
      the window opens), watched titles mixed in after the To Watch ones
      and stamped Seen / Watching / Abandoned.
