@@ -316,7 +316,7 @@ directly.
      answer never comes back, the app says the library is either as it was
      or exactly the file, and to refresh. Tested on a local Postgres with
      2,000 movies and 3,000 viewings: under a second.
-  4. Ratings as hearts — built, waiting for the owner's test: of three
+  4. Ratings as hearts — done, in `main`: of three
      mockups (clean, classic red, doodle) the owner picked the doodle:
      hearts drawn in ink, slightly tilted, the theme's color stuck a touch
      off the line like a sticker (`css/hearts.css`). The picker
@@ -325,7 +325,7 @@ directly.
      and the detail window draw the row with CSS masks (one element, fine
      for 1,000+ cards); on cards the ink line is dropped, too thin to read.
   5. Redesigns, mockups first, in two parts.
-     5a — built, waiting for the owner's test (their picks of three
+     5a — done, in `main` (their picks of three
      mockups each): toasts are stickers in the theme's color with a hard
      shadow, a ✓ (errors red with !), a × to close, 5 seconds;
      "↻ Watched it again" is a small dashed button under the watched
@@ -335,7 +335,7 @@ directly.
      titles to a collection has "Show watched ones too" (off each time
      the window opens), watched titles mixed in after the To Watch ones
      and stamped Seen / Watching / Abandoned.
-     5b — built, waiting for the owner's test: the TMDB search window is
+     5b — done, in `main`: the TMDB search window is
      results on the left and the picked one's details on the right (the
      owner's pick of three mockups; `js/searchModal.js`,
      `css/searchModal.css`), replacing the separate info window (gone,
@@ -347,7 +347,7 @@ directly.
      or the side's button) and the add bar only shows once something is
      picked, listing it. On a phone the side replaces the list, with
      "← Results".
-  6. Settings in two — built, waiting for the owner's test (their pick
+  6. Settings in two — done, in `main` (their pick
      of three mockups, "menu and page"): a menu with the profile card on
      top (the old "Preview") and two groups, Your Slate profile (Profile,
      Your Data, Account: log out + delete account) and App settings
@@ -356,6 +356,12 @@ directly.
      page in its place with "← Settings" (js/settings.js, .at-menu). The
      owner decided Your Data and Account belong to the profile. Log out is
      now in Account too, for the phone (no sidebar there).
+  Next, before the phone project (the owner's request): more themes.
+  There are 8 (5 dark, 3 light); the owner wants 7 more for variety.
+  Plan: a mockup page with ~10 candidates on a mini Slate screen, the
+  owner picks 7 (and names them), then each is built and checked across
+  the app (cards, hearts, toasts, stamps, windows, login). Aim for gaps,
+  not look-alikes: more light ones, a neutral grey, a high-contrast one.
   Then the phone project below, on `claude/mobile-app` brought up to date
   with `main`.
   The owner's decisions from that pass:
