@@ -410,8 +410,22 @@ directly.
   - `shows.total_episodes` (saved when the show was added) is refreshed
     whenever its details are loaded, so the card's bar stays right.
   Still open, for the mockups: episodes shown for finished shows too?
-  Stages: mockups → database + function →
-  "Up next" → the episodes window → the card, backups and import.
+  Stages, each checked by the owner on the branch's preview: 1 mockups
+  (1a "Up next" and its states, 1b the episodes window, 1c the card);
+  2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
+  it" and "Where are you?" (its own quick pick, the window comes later);
+  5 up to date / the finale / finishing ticks all; 6 the window,
+  ticking one by one; 7 "Up to here", finished and dropped shows; 8 the
+  card and the refreshed episode count; 9 `.slate` and Replace.
+  The owner's flow for it: all stages on their own branch,
+  `claude/episode-tracking-shows-s9gixh` (made from
+  `claude/funny-pascal-bk99gr`; preview at
+  claude-episode-tracking-show.myslate.pages.dev, Cloudflare cuts the
+  name at 28 characters). When done, it's merged into
+  `claude/funny-pascal-bk99gr` (bring in whatever landed there or in
+  `main` meanwhile), tested again there, and goes to `main` only with
+  the owner's second go-ahead. `claude/funny-pascal-bk99gr` stays for
+  small fixes meanwhile.
   Then the phone project below, on `claude/mobile-app` brought up to date
   with `main`.
   The owner's decisions from that pass:
