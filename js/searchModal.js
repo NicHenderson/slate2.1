@@ -220,14 +220,17 @@ async function runBatchAdd() {
       }
       const details = await tmdbDetails(currentType, item.id);
       const table = currentType === "movie" ? "movies" : "shows";
-      const { error } = await db
+      const { data, error } = await db
         .from(table)
-        .insert(buildRecord(currentType, details));
+        .insert(buildRecord(currentType, details))
+        .select()
+        .single();
       if (error?.code === UNIQUE_VIOLATION) {
         skipped++; // added from elsewhere since the check above
         continue;
       }
       if (error) throw new Error(error.message);
+      applyLocalChange(table, "INSERT", data);
       ok++;
     } catch (err) {
       console.error("Batch item failed:", item.id, err.message);

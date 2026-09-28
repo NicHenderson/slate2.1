@@ -424,6 +424,99 @@ function toggleTrailer(btn) {
   wrap.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
 
+/* ---------- following live changes ----------
+   A title can change while a window shows it: in another tab or on another
+   device (realtime), or by this tab's own save. The windows follow, so
+   nothing old is shown, or saved back over the newer version: once, an Edit
+   opened after another tab had changed the review brought the old text
+   back, and saving would have put it back in place of the new one. */
+
+const sameRow = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+// Called by js/realtime.js after STORE has taken the change. `before` is the
+// title as STORE held it until now.
+function followLiveChange(table, payload, before) {
+  if (payload.eventType === "DELETE") {
+    closeWindowsOf(table, payload.old.id);
+    return;
+  }
+  const row = STORE[table].get(payload.new.id);
+  // The echo of a change already shown: nothing to redraw.
+  if (!row || (before && sameRow(before, row))) return;
+  noteStaleForms(table, row);
+  if (detailModal.classList.contains("hidden") || !currentDetail) return;
+  if (currentDetail.cfg.table !== table || currentDetail.row.id !== row.id) return;
+  // One of its viewings open for editing stays as it is; going back to the
+  // summary draws it from STORE anyway.
+  if (currentDetail.viewing) return;
+  // It may have moved lists (a show finished elsewhere): new buttons too.
+  const gridId = gridIdFor(table, row);
+  currentDetail = { ...currentDetail, row, gridId, cfg: GRID_CONFIG[gridId] };
+  showDetailMain();
+}
+
+// Deleted elsewhere: every window showing it closes, and says why. A delete
+// made here closes its windows first, so this says nothing then.
+function closeWindowsOf(table, id) {
+  let closed = false;
+  const open = (el) => !el.classList.contains("hidden");
+  if (open(detailModal) && currentDetail?.cfg.table === table && currentDetail.row.id === id) {
+    closeDetailModal();
+    closed = true;
+  }
+  if (table === "movies" && open(updateModal) && updateRow?.id === id) {
+    closeUpdateModal();
+    closed = true;
+  }
+  if (table === "shows" && open(startModal) && startRow?.id === id) {
+    closeStartModal();
+    closed = true;
+  }
+  if (open(confirmModal) && pendingDelete?.table === table && pendingDelete.row?.id === id) {
+    closeConfirmModal();
+    closed = true;
+  }
+  if (closed) showToast(t("This title was deleted in another window."));
+}
+
+// An Edit form open on a title that just changed elsewhere isn't refilled
+// under the user's hands: it says so, and offers the new version.
+function noteStaleForms(table, row) {
+  if (table === "movies" && !updateModal.classList.contains("hidden") && updateRow?.id === row.id && !updateSave.disabled) {
+    showStaleNote(updateForm, () => reopenKeepingDelete("update-delete", () => openMarkAsWatchedModal(STORE.movies.get(row.id) ?? row)));
+  }
+  if (table === "shows" && !startModal.classList.contains("hidden") && startRow?.id === row.id && !startSave.disabled) {
+    showStaleNote(startForm, () => reopenKeepingDelete("start-delete", () => openStartWatchingModal(STORE.shows.get(row.id) ?? row)));
+  }
+}
+
+// The form's delete button is shown or not by where it was opened from:
+// reopening it with the new version keeps that as it was.
+function reopenKeepingDelete(deleteId, reopen) {
+  const hidden = document.getElementById(deleteId).classList.contains("hidden");
+  reopen();
+  document.getElementById(deleteId).classList.toggle("hidden", hidden);
+}
+
+function showStaleNote(form, reload) {
+  clearStaleNote(form);
+  const note = document.createElement("p");
+  note.className = "form-stale";
+  note.setAttribute("role", "status");
+  note.textContent = t("This title just changed in another window. Saving now would replace that change.");
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "form-stale-load";
+  btn.textContent = t("Load the changes");
+  btn.addEventListener("click", reload);
+  note.append(" ", btn);
+  form.prepend(note);
+}
+
+function clearStaleNote(form) {
+  form.querySelector(".form-stale")?.remove();
+}
+
 detailNavPrev.addEventListener("click", () => navigateDetail(-1));
 detailNavNext.addEventListener("click", () => navigateDetail(1));
 
@@ -483,10 +576,12 @@ function detailColMenuHtml(row) {
 
 async function dropSeries(row, btn) {
   btn.disabled = true;
-  const { error } = await db
+  const { data, error } = await db
     .from("shows")
     .update({ is_dropped: true })
-    .eq("id", row.id);
+    .eq("id", row.id)
+    .select()
+    .single();
   btn.disabled = false;
 
   if (error) {
@@ -495,6 +590,7 @@ async function dropSeries(row, btn) {
     return;
   }
   closeDetailModal();
+  applyLocalChange("shows", "UPDATE", data);
   showToast(t("Series dropped."));
 }
 
@@ -509,7 +605,9 @@ async function sendToWatchlist(row, btn) {
       review: null,
       is_dropped: false,
     })
-    .eq("id", row.id);
+    .eq("id", row.id)
+    .select()
+    .single();
   btn.disabled = false;
 
   if (error) {
@@ -518,6 +616,7 @@ async function sendToWatchlist(row, btn) {
     return;
   }
   closeDetailModal();
+  applyLocalChange("shows", "UPDATE", data);
   showToast(t('Moved back to "To Watch".'));
 }
 

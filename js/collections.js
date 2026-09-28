@@ -1053,7 +1053,7 @@ async function addTmdbTitleToCollection(type, tmdbId) {
       .select()
       .single();
     if (error) throw new Error(error.message);
-    STORE[table].set(data.id, data);
+    applyLocalChange(table, "INSERT", data);
     local = data;
   }
   return (await bindToOpenCollection(table, local)) ? "added" : "skipped";

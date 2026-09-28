@@ -29,6 +29,7 @@ updateDate.addEventListener("input", () => {
 
 function openMarkAsWatchedModal(row, isNewInsert = false) {
   updateRow = row;
+  clearStaleNote(updateForm);
   const watched = row.watched_date != null;
   const viewings = viewingsOf(row.id);
   updateManyViewings = watched && viewings.length > 1;

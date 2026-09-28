@@ -146,17 +146,23 @@ async function deleteRecord(table, row) {
     closeCollectionView();
     renderCollections();
   } else {
+    applyLocalChange(table, "DELETE", row);
     // A deleted movie/show can still be sitting in one or more collections —
     // without this, its collection_items row(s) would outlive it, and every
     // collection view would have to keep silently filtering out dead
-    // references forever. Realtime's own DELETE handler cleans up STORE and
-    // re-renders once this echoes back, same as it does for the row above.
+    // references forever.
     const { error: cleanupError } = await db
       .from("collection_items")
       .delete()
       .eq("item_id", row.id);
     if (cleanupError) {
       console.error("Collection cleanup error:", cleanupError.message);
+    } else {
+      [...STORE.collectionItems.values()]
+        .filter((item) => item.item_id === row.id)
+        .forEach((item) => STORE.collectionItems.delete(item.id));
+      renderCollections();
+      refreshOpenCollection();
     }
   }
   showToast(t("Deleted from your library."));

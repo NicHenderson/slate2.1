@@ -92,6 +92,42 @@ test("adding a title another tab just added says it's already there", async ({ p
   expect(backend.db.movies.filter((m) => m.tmdb_id === 346648)).toHaveLength(1);
 });
 
+// Two tabs of one account. A window open in one follows what the other
+// changes, so its Edit never brings back (and saves over) the old review;
+// a title deleted in the other closes its window here, saying why.
+test("an open window follows another tab's changes, and closes when the title is deleted there", async ({ page, backend, context }) => {
+  await logIn(page);
+  await page.locator("#grid-movies-watched .card", { hasText: "Alien" }).click();
+  await expect(page.locator("#detail-modal .detail-review")).toHaveText("Still terrifying.");
+
+  const other = await context.newPage();
+  await backend.install(other);
+  await other.goto("/");
+  await expect(other.locator("#app")).toBeVisible();
+  await other.locator("#grid-movies-watched .card", { hasText: "Alien" }).click();
+  await other.locator('#detail-modal [data-action="edit"]').click();
+  await other.fill("#update-review", "Changed in the other tab.");
+  await other.click("#update-save");
+  await expect.poll(() => backend.db.movies.find((m) => m.title === "Alien").review).toBe("Changed in the other tab.");
+
+  await expect(page.locator("#detail-modal .detail-review")).toHaveText("Changed in the other tab.");
+  await page.locator('#detail-modal [data-action="edit"]').click();
+  await expect(page.locator("#update-review")).toHaveValue("Changed in the other tab.");
+  await page.click("#update-cancel");
+  await page.keyboard.press("Escape");
+
+  await page.click('.nav-btn[data-section="movies-towatch"]');
+  await page.locator("#grid-movies-towatch .card", { hasText: "The Matrix" }).click();
+  await other.click('.nav-btn[data-section="movies-towatch"]');
+  await other.locator("#grid-movies-towatch .card", { hasText: "The Matrix" }).click();
+  await other.locator('#detail-modal [data-action="delete"]').click();
+  await other.click("#confirm-yes");
+  await expect(page.locator("#detail-modal")).toBeHidden();
+  await expect(page.locator(".toast").last()).toHaveText("This title was deleted in another window.");
+  await expect(page.locator("#grid-movies-towatch .card")).toHaveCount(0);
+  await other.close();
+});
+
 // The trailer button is there from the moment the window opens — disabled
 // while TMDB is asked — so nothing in the window jumps when it answers.
 test("the trailer button waits, disabled, where it will be; then turns on or says there's none", async ({ page }) => {

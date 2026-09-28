@@ -8,6 +8,8 @@ function rerenderGrids(gridIds) {
 }
 
 function handleChange(storeKey, gridIds, payload) {
+  const id = payload.eventType === "DELETE" ? payload.old.id : payload.new.id;
+  const before = STORE[storeKey].get(id);
   switch (payload.eventType) {
     case "INSERT":
     case "UPDATE":
@@ -19,12 +21,24 @@ function handleChange(storeKey, gridIds, payload) {
       break;
   }
   rerenderGrids(gridIds);
+  // An open window showing this title follows it (js/detailModal.js).
+  if (typeof followLiveChange === "function") followLiveChange(storeKey, payload, before);
   // Collection covers and cards show watched progress / state, so they need
   // to follow a title changing (renders skip themselves when nothing changed).
   if (typeof renderCollections === "function") renderCollections();
   if (typeof renderCollectionDetail === "function" && openCollectionId) {
     renderCollectionDetail();
   }
+}
+
+// A write of this tab's own, shown the moment it succeeds rather than when
+// its realtime echo comes back: the echo can be late, or lost (once, a
+// title added from a collection never showed on To Watch until a reload).
+// The echo still arrives and changes nothing. `row` is what the database
+// answered with (or, for a delete, at least the row's id).
+function applyLocalChange(storeKey, eventType, row) {
+  const gridIds = storeKey === "movies" ? MOVIE_GRIDS : SHOW_GRIDS;
+  handleChange(storeKey, gridIds, eventType === "DELETE" ? { eventType, old: row } : { eventType, new: row });
 }
 
 function handleCollectionChange(storeKey, payload) {

@@ -298,11 +298,15 @@ directly.
      the card); adding from Info disables the title's row in the search;
      an empty list's Filters says there's nothing to filter; toasts no
      longer jump sideways; line breaks show in reviews and bios.
-  2. Always up to date: lists show a title the moment it's saved (today
-     they wait for the realtime echo, so one added from a collection
-     once didn't show in To Watch until a reload), and open windows follow
-     live changes (an Edit opened before another tab changed the review
-     would save the old text over it) or close if the title is deleted.
+  2. Always up to date — done: every write to movies / shows is applied
+     to STORE and the grids the moment it succeeds (`applyLocalChange`,
+     js/realtime.js), not only when its realtime echo comes back (adding,
+     batch adding, adding from a collection, starting / finishing /
+     dropping / un-dropping a show, deleting). An open detail window
+     follows a title changed elsewhere (`followLiveChange`,
+     js/detailModal.js) and closes, saying so, if it's deleted there; an
+     Edit form open on it says it changed and offers "Load the changes"
+     rather than refilling under the user's hands.
   3. Replace everything in one step, inside the database (a migration):
      today a tab closed halfway leaves the library half replaced.
   4. Ratings as hearts (see decisions); show the owner 2–3 styles first.

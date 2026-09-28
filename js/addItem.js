@@ -107,8 +107,8 @@ async function addToLibrary(type, id, btn) {
 
     btn.textContent = t("Added");
     markResultAdded(id);
+    applyLocalChange(table, "INSERT", inserted);
     if (collectionAddMode) {
-      STORE[table].set(inserted.id, inserted);
       await bindToOpenCollection(table, inserted);
       refreshCollectionAfterAdd(type);
       showToast(t("Added to your library and this collection."));
