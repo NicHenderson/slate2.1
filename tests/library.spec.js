@@ -95,12 +95,14 @@ test("a review, genres and a poster are shown as text, never run as HTML", async
 // instead of failing, and no second copy appears.
 test("adding a title another tab just added says it's already there", async ({ page, backend }) => {
   await logIn(page);
-  await page.click('.nav-btn[data-section="movies-towatch"]');
-  await page.click("#movies-towatch .add-btn");
+  // From Movies (watched): one title at a time, added from its details.
+  await page.click('.nav-btn[data-section="movies-watched"]');
+  await page.click("#movies-watched .add-btn");
+  await page.click("#library-search-hint");
   await page.fill("#modal-input", "paddington");
-  await page.click("#modal-search-btn");
-  await page.locator("#modal-results .tmdb-info-btn").first().click();
-  const add = page.locator('#info-modal .info-add-btn:not([disabled])');
+  await page.press("#modal-input", "Enter");
+  await page.locator("#modal-results .tmdb-hit-main").first().click();
+  const add = page.locator('#modal-preview .tmdb-preview-action:not([disabled])');
   await expect(add).toBeVisible();
 
   backend.seed("movies", [{ tmdb_id: 346648, title: "Paddington 2", watched_date: null }], backend.user.id);

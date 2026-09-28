@@ -172,8 +172,8 @@ directly.
 - **Next: v3.0.0**, in this order, one at a time and each only with the
   owner's go-ahead:
   1. **Where to watch** (`js/whereToWatch.js`) — done: below the buttons of
-     the detail window (to watch, watching, dropped) and of the search's
-     info window; Stream / Free / Rent / Buy logos linking to TMDB's watch
+     the detail window (to watch, watching, dropped) and in the search
+     window's details side; Stream / Free / Rent / Buy logos linking to TMDB's watch
      page, credited to JustWatch; the country is the browser's unless
      picked in Settings → Defaults (`watchRegion`). The `tmdb` Edge
      Function allows `(movie|tv)/<id>/watch/providers` and
@@ -335,7 +335,18 @@ directly.
      titles to a collection has "Show watched ones too" (off each time
      the window opens), watched titles mixed in after the To Watch ones
      and stamped Seen / Watching / Abandoned.
-     5b — next: the TMDB search / add window (the owner finds it dated).
+     5b — built, waiting for the owner's test: the TMDB search window is
+     results on the left and the picked one's details on the right (the
+     owner's pick of three mockups; `js/searchModal.js`,
+     `css/searchModal.css`), replacing the separate info window (gone,
+     with `js/infoModal.js`). The side says "pick a title…" until one is
+     picked and "loading its details…" while it loads (the owner asked
+     for both), and only ever shows the last one picked. It searches as
+     you type; "[id]" still works; titles already there say so; from To
+     Watch / a collection titles are picked (a round toggle on each row,
+     or the side's button) and the add bar only shows once something is
+     picked, listing it. On a phone the side replaces the list, with
+     "← Results".
   6. Settings split into "App settings" and "Your Slate profile" (two
      tabs), mockups first, designed with the phone's "You" tab in mind.
   Then the phone project below, on `claude/mobile-app` brought up to date

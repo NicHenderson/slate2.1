@@ -94,9 +94,9 @@ test.describe("in a Spanish browser", () => {
     await page.click('.nav-btn[data-section="movies-towatch"]');
     await page.locator("#movies-towatch .add-btn").click();
     await page.fill("#modal-input", "origen");
-    await page.click("#modal-search-btn");
+    await page.press("#modal-input", "Enter");
     await expect(page.locator("#modal-results .tmdb-row-title")).toHaveText(["El origen"]);
-    await page.locator("#modal-results .row-check").check();
+    await page.locator("#modal-results .tmdb-pick").click();
     await page.click("#batch-add-btn");
     await expect.poll(() => backend.db.movies.find((m) => m.tmdb_id === 27205)).toMatchObject({
       title: "El origen",

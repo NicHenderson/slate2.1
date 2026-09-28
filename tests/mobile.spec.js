@@ -49,8 +49,8 @@ test("on a phone: landing, login, the menu and adding a title all fit and work",
   await page.locator("#movies-towatch .add-btn").tap();
   await expectOnScreen(page.locator("#modal-input"));
   await page.fill("#modal-input", "paddington");
-  await page.locator("#modal-search-btn").tap();
-  await page.locator("#modal-results .row-check").tap();
+  await page.press("#modal-input", "Enter");
+  await page.locator("#modal-results .tmdb-pick").tap();
   await expectOnScreen(page.locator("#batch-add-btn"));
   await page.locator("#batch-add-btn").tap();
   await expect(page.locator("#grid-movies-towatch .card-title")).toContainText(["Paddington 2"]);

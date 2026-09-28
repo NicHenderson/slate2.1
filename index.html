@@ -35,17 +35,18 @@
   <link rel="stylesheet" href="css/sidebar.css?v=b0c4cd07" />
   <link rel="stylesheet" href="css/content.css?v=42b1b03a" />
   <link rel="stylesheet" href="css/cards.css?v=13cc816f" />
-  <link rel="stylesheet" href="css/modal.css?v=f789e4aa" />
+  <link rel="stylesheet" href="css/modal.css?v=3982f90f" />
   <link rel="stylesheet" href="css/auth.css?v=6de0fa2a" />
   <link rel="stylesheet" href="css/landing.css?v=90b40814" />
   <link rel="stylesheet" href="css/transitions.css?v=bf37ef65" />
   <link rel="stylesheet" href="css/settings.css?v=2c7876ab" />
   <link rel="stylesheet" href="css/yourData.css?v=6c896678" />
+  <link rel="stylesheet" href="css/searchModal.css?v=cc050e87" />
   <link rel="stylesheet" href="css/hearts.css?v=a68715f0" />
   <link rel="stylesheet" href="css/viewings.css?v=0cd9462b" />
   <link rel="stylesheet" href="css/whereToWatch.css?v=7528c42f" />
   <link rel="stylesheet" href="css/librarySearch.css?v=cce1cb12" />
-  <link rel="stylesheet" href="css/responsive.css?v=bb94fb16" />
+  <link rel="stylesheet" href="css/responsive.css?v=dd07ab14" />
 </head>
 <body>
   <!-- ============================================================
@@ -860,7 +861,7 @@
   </div>
 
   <div class="modal-backdrop hidden" id="search-modal">
-    <div class="modal modal-add">
+    <div class="modal modal-add modal-tmdb">
       <div class="modal-head">
         <div class="modal-head-left">
           <button class="modal-close hidden" id="modal-back" aria-label="Back">
@@ -872,15 +873,19 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
         </button>
       </div>
-      <div class="tmdb-search-row">
-        <input id="modal-input" type="text" placeholder="Title or [ID]" autocomplete="off" />
-        <button class="tmdb-go-btn" id="modal-search-btn">Search</button>
+      <div class="tmdb-search-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.5" y2="15.5"/></svg>
+        <input id="modal-input" type="search" autocomplete="off" aria-label="Search TMDB" enterkeyhint="search" />
+        <button class="tmdb-clear" id="modal-clear" type="button" aria-label="Clear search" hidden>×</button>
       </div>
-      <p class="modal-error hidden" id="modal-error"></p>
-      <div class="tmdb-list" id="modal-results"></div>
+      <p class="tmdb-status" id="modal-status" aria-live="polite"></p>
+      <div class="tmdb-split" id="modal-split">
+        <div class="tmdb-hits" id="modal-results"></div>
+        <div class="tmdb-preview" id="modal-preview" aria-live="polite"></div>
+      </div>
       <div class="batch-footer hidden" id="batch-footer">
-        <span class="batch-count" id="batch-count">0 selected</span>
-        <button class="tmdb-go-btn" id="batch-add-btn" type="button" disabled>Add Selected (0)</button>
+        <div class="batch-picked" id="batch-picked"></div>
+        <button class="tmdb-go-btn" id="batch-add-btn" type="button"></button>
       </div>
     </div>
   </div>
@@ -981,19 +986,6 @@
           <button type="submit" class="modal-search-btn" id="collection-save">Create</button>
         </div>
       </form>
-    </div>
-  </div>
-
-  <!-- A title from a TMDB search, before it's added: dressed like the
-       detail window of one in the library (#detail-modal), without its
-       arrows. -->
-  <div class="modal-backdrop info-backdrop hidden" id="info-modal">
-    <div class="detail-layout">
-      <div class="detail-poster-box" id="info-poster"></div>
-      <div class="detail-panel">
-        <button class="modal-close detail-close-btn" id="info-close" aria-label="Close">✕</button>
-        <div class="detail-body" id="info-body"></div>
-      </div>
     </div>
   </div>
 
@@ -1129,7 +1121,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-  <script src="js/lang/es.js?v=d3a36776"></script>
+  <script src="js/lang/es.js?v=ba72c754"></script>
   <script src="js/i18n.js?v=dde7afb9"></script>
   <script src="js/escapeHtml.js?v=28c1feb8"></script>
   <script src="js/viewTransitions.js?v=d587d807"></script>
@@ -1141,14 +1133,13 @@
   <script src="js/realtime.js?v=f6aba001"></script>
   <script src="js/tmdb.js?v=b33a45f6"></script>
   <script src="js/addItem.js?v=32dd6365"></script>
-  <script src="js/searchModal.js?v=22322e05"></script>
+  <script src="js/searchModal.js?v=ff9b79d8"></script>
   <script src="js/libraryModal.js?v=2619ff43"></script>
   <script src="js/emojiData.js?v=00b8c396"></script>
   <script src="js/iconData.js?v=051d09a4"></script>
   <script src="js/icons.js?v=3a450da2"></script>
   <script src="js/iconPicker.js?v=60949f19"></script>
   <script src="js/collections.js?v=a2da4383"></script>
-  <script src="js/infoModal.js?v=86f47156"></script>
   <script src="js/detailModal.js?v=7c3d5cc0"></script>
   <script src="js/heartsInput.js?v=75776d63"></script>
   <script src="js/updateModal.js?v=462c7f71"></script>

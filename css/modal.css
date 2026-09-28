@@ -264,18 +264,6 @@
   color: var(--accent);
 }
 
-.info-backdrop {
-  z-index: 110;
-}
-
-/* Added already (or just now): the sticker lies flat and fades. */
-.detail-actions .info-add-btn:disabled {
-  opacity: 0.6;
-  cursor: default;
-  transform: none;
-  box-shadow: 2px 3px 0 color-mix(in srgb, var(--accent-deep) 45%, transparent);
-}
-
 .detail-layout {
   position: relative;
   display: flex;

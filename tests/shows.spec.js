@@ -10,9 +10,9 @@ test("a show goes from the queue to watching to finished, and is saved at every 
   // Added from TMDB: into the queue, with its seasons and episodes.
   await page.click('#shows-towatch .add-btn[data-type="tv"]');
   await page.fill("#modal-input", "game of thrones");
-  await page.click("#modal-search-btn");
+  await page.press("#modal-input", "Enter");
   await expect(page.locator("#modal-results .tmdb-row-title")).toHaveText(["Game of Thrones"]);
-  await page.locator("#modal-results .row-check").check();
+  await page.locator("#modal-results .tmdb-pick").click();
   await page.locator("#batch-add-btn").click();
 
   await expect(page.locator("#grid-shows-towatch .card-title")).toHaveText(["Game of Thrones"]);

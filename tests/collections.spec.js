@@ -84,8 +84,8 @@ test("a title added from TMDB in a collection is on To Watch at once, echo or no
   await page.click('#collection-view .add-btn[data-type="collection-titles"]');
   await page.click("#library-search-hint");
   await page.fill("#modal-input", "paddington");
-  await page.click("#modal-search-btn");
-  await page.locator("#modal-results .row-check").first().check();
+  await page.press("#modal-input", "Enter");
+  await page.locator("#modal-results .tmdb-pick").first().click();
   await page.click("#batch-add-btn");
   await expect(page.locator("#col-detail-grid")).toContainText("Paddington 2");
 
