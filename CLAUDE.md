@@ -409,6 +409,13 @@ directly.
   - the new table is realtime, like movies and shows;
   - `shows.total_episodes` (saved when the show was added) is refreshed
     whenever its details are loaded, so the card's bar stays right.
+  Mockup 1a (https://claude.ai/artifact/6Xf5LBNaB1X5YapV5gMTUA): of a
+  taped photo, a sticky note and a to-do list, the owner picked the
+  sticky note, a touch smaller: a note in the theme's color under the
+  started date, the episode's image clipped to it, "Up next S1 · E4",
+  name, description, a hand-drawn box "Watched it" and "See all
+  episodes →". "Where are you?" picks season + episode ("Tick them")
+  or, just starting, offers E1.
   Still open, for the mockups: episodes shown for finished shows too?
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
