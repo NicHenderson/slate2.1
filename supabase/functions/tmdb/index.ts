@@ -10,6 +10,7 @@
 //   POST { "path": "tv/1399/videos" }                     → its trailers
 //   POST { "path": "movie/348/watch/providers" }          → where to watch it
 //   POST { "path": "watch/providers/regions" }            → the countries that covers
+//   POST { "path": "tv/1399/season/2" }                    → a season's episodes
 //
 // Any of them can say which language TMDB answers in, from Slate's own
 // ("language": "es-MX"); without one, or with any other, it's English.
@@ -32,6 +33,8 @@ const ALLOWED_PATHS = [
   /^(movie|tv)\/\d{1,10}\/videos$/,
   /^(movie|tv)\/\d{1,10}\/watch\/providers$/,
   /^watch\/providers\/regions$/,
+  // Episode tracking. Seasons from 1: specials (season 0) are left out.
+  /^tv\/\d{1,10}\/season\/[1-9]\d{0,3}$/,
 ];
 
 const MAX_QUERY_LENGTH = 200;

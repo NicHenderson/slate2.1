@@ -133,9 +133,10 @@ directly.
 
 ## The live Supabase project
 
-- Migrations `0001`–`0008` in `supabase/migrations/` have all been applied
+- Migrations `0001`–`0009` in `supabase/migrations/` have all been applied
   to the live project (0008 by the owner before testing stage 3's preview,
-  where Replace worked). **Never re-run `0006_invite_only.sql`**: it would
+  where Replace worked; 0009, episode tracking, by the owner in Sept. 2026,
+  checked: the table empty and in `supabase_realtime`). **Never re-run `0006_invite_only.sql`**: it would
   mark accounts made by hand as already having their own password.
 - Test a new migration on a throwaway local Postgres before the owner runs
   it in the SQL Editor. Supabase warns about any `delete`/`update` without
@@ -434,7 +435,7 @@ directly.
   "14/26", a hand-drawn bar of the whole show, and the "Started 27d
   ago" line as today. Nothing ticked: "Where are you?"; all aired
   ticked: "Up to date"; dropped: "Stopped at S2 · E5" and the bar.
-  Stage 2 — written, not yet applied live: `0009_watched_episodes.sql`
+  Stage 2 — done, applied live by the owner: `0009_watched_episodes.sql`
   (the table, one row per ticked episode, unique per show + season +
   episode, seasons from 1; row-level security like viewings, no
   update; realtime; "back to To Watch" clears a show's episodes in the
@@ -443,6 +444,8 @@ directly.
   every rule, the published app's calls unchanged, a second run fails
   harmlessly, and a Replace of 2,000 movies + 300 shows + 15,000
   episodes in half a second.
+  Stage 3 — written, waiting for the owner's redeploy: the `tmdb`
+  function allows `tv/<id>/season/<n>` (n from 1), with Deno tests.
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
