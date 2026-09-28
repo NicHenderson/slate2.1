@@ -105,16 +105,59 @@
   line-height: 1;
 }
 
-.detail-actions-review [data-action="watched-again"] {
-  border: 1.5px solid var(--accent-deep);
-  background: transparent;
-  color: var(--accent-deep);
-  padding: 10px 16px;
-  border-radius: 7px;
+/* "Watched it again!": a round sticker slapped on the poster's corner
+   (the owner's pick), in the theme's pop color. */
+.again-sticker {
+  position: absolute;
+  right: -24px;
+  bottom: 4px;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  width: 98px;
+  height: 98px;
+  padding: 8px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--pop);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+  box-shadow: 2px 4px 0 rgba(0, 0, 0, 0.35);
+  transform: rotate(-12deg);
+  cursor: pointer;
+  transition: transform var(--transition), filter var(--transition);
 }
 
-.detail-actions-review [data-action="watched-again"]:hover {
-  background: color-mix(in srgb, var(--accent-strong) 12%, transparent);
+.again-sticker:hover,
+.again-sticker:focus-visible {
+  transform: rotate(-4deg) scale(1.06);
+  filter: brightness(1.08);
+}
+
+.again-sticker-icon {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 22px;
+  line-height: 1;
+}
+
+@media (max-width: 860px) {
+  .again-sticker {
+    right: -26px;
+    width: 80px;
+    height: 80px;
+    font-size: 11px;
+  }
+
+  .again-sticker-icon {
+    font-size: 18px;
+  }
 }
 
 /* ---------- one viewing, in the window ---------- */

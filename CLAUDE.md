@@ -324,10 +324,16 @@ directly.
      clicking the current rating clears it ("Clear it" on hover). Cards
      and the detail window draw the row with CSS masks (one element, fine
      for 1,000+ cards); on cards the ink line is dropped, too thin to read.
-  5. Redesigns, mockups first: the TMDB search / add window (the owner
-     finds it dated), bigger and nicer toasts, a better place for
-     "Watched it again", and "Show watched ones too" when adding titles
-     to a collection.
+  5. Redesigns, mockups first, in two parts.
+     5a — built, waiting for the owner's test (their picks of three
+     mockups each): toasts are stickers in the theme's color with a hard
+     shadow, a ✓ (errors red with !), a × to close, 5 seconds;
+     "Watched it again!" is a round sticker on the detail window's
+     poster (in the theme's pop color), out of the action row; adding
+     titles to a collection has "Show watched ones too" (off each time
+     the window opens), watched titles mixed in after the To Watch ones
+     and stamped Seen / Watching / Abandoned.
+     5b — next: the TMDB search / add window (the owner finds it dated).
   6. Settings split into "App settings" and "Your Slate profile" (two
      tabs), mockups first, designed with the phone's "You" tab in mind.
   Then the phone project below, on `claude/mobile-app` brought up to date

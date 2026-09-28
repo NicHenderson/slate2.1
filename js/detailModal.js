@@ -142,9 +142,18 @@ function detailDurationLine(table, row) {
 }
 
 function renderDetail(cfg, row) {
-  detailPoster.innerHTML = row.poster
-    ? `<img class="detail-poster-img" src="${escapeHtml(row.poster)}" alt="" />`
-    : `<div class="detail-poster-img detail-poster-empty"></div>`;
+  // A watched movie gets "Watched it again!" as a sticker on its poster
+  // (js/viewings.js handles it): the owner's pick over a button in the
+  // action row.
+  const againHtml =
+    cfg.table === "movies" && row.watched_date
+      ? `<button class="again-sticker" type="button" data-action="watched-again"><span class="again-sticker-icon" aria-hidden="true">↻</span>${t("Watched it again!")}</button>`
+      : "";
+  detailPoster.innerHTML = `${
+    row.poster
+      ? `<img class="detail-poster-img" src="${escapeHtml(row.poster)}" alt="" />`
+      : `<div class="detail-poster-img detail-poster-empty"></div>`
+  }${againHtml}`;
 
   const genreLine = parseGenres(row.genres).map(genreName).join(" · ");
 
@@ -241,7 +250,6 @@ function renderDetail(cfg, row) {
     </div>
     <div class="detail-actions detail-actions-review">
       <button class="edit-btn" type="button" data-action="edit">${t("✎ Edit")}</button>
-      ${cfg.table === "movies" ? `<button class="edit-btn" type="button" data-action="watched-again">${t("↻ Watched it again")}</button>` : ""}
       ${addToColHtml}
     </div>`;
 }
