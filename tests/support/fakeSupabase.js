@@ -26,7 +26,7 @@
 
 const fs = require("fs");
 const crypto = require("crypto");
-const { TMDB_CATALOG, TMDB_WATCH_PROVIDERS, TMDB_WATCH_REGIONS, inLanguage } = require("./tmdbCatalog");
+const { TMDB_CATALOG, TMDB_WATCH_PROVIDERS, TMDB_WATCH_REGIONS, inLanguage, tmdbSeason } = require("./tmdbCatalog");
 
 const SUPABASE_JS = fs.readFileSync(require.resolve("@supabase/supabase-js/dist/umd/supabase.js"), "utf8");
 // Supabase's default cap on the rows one request returns.
@@ -48,6 +48,7 @@ const TABLES = {
   user_settings: { owner: "user_id", key: "user_id", required: [], defaults: () => ({ settings: {} }) },
   profiles: { owner: "user_id", key: "user_id", required: [], defaults: () => ({}) },
   viewings: { owner: "user_id", required: ["movie_id", "watched_on"], defaults: () => ({ note: null }) },
+  watched_episodes: { owner: "user_id", required: ["show_id", "season", "episode"], defaults: () => ({}) },
 };
 
 // Migration 0007's rules, as the database enforces them (a refusal is
@@ -257,6 +258,25 @@ function createBackend() {
     gone.forEach((v) => pushChange("viewings", "DELETE", null, v));
   }
 
+  /* ---------- watched episodes (migration 0009) ---------- */
+
+  function checkEpisode(row, userId) {
+    const show = db.shows.find((s) => s.id === row.show_id);
+    if (!show || show.user_id !== userId) refuse('new row violates row-level security policy for table "watched_episodes"', "42501", 403);
+    if (!(row.season >= 1 && row.season <= 999)) refuse('new row for relation "watched_episodes" violates check constraint "watched_episodes_season_check"', "23514");
+    if (db.watched_episodes.some((e) => e.show_id === row.show_id && e.season === row.season && e.episode === row.episode)) {
+      refuse('duplicate key value violates unique constraint "watched_episodes_show_id_season_episode_key"', "23505", 409);
+    }
+  }
+
+  // A show's episodes go with it (on delete cascade), and when it's sent
+  // back to To Watch (the migration's rule).
+  function dropEpisodesOf(showIds) {
+    const gone = db.watched_episodes.filter((e) => showIds.includes(e.show_id));
+    db.watched_episodes = db.watched_episodes.filter((e) => !gone.includes(e));
+    gone.forEach((e) => pushChange("watched_episodes", "DELETE", null, e));
+  }
+
   /* ---------- database (PostgREST) ---------- */
 
   function canSee(table, row, userId) {
@@ -326,7 +346,7 @@ function createBackend() {
     users.delete(userId);
     for (const [token, id] of sessions) if (id === userId) sessions.delete(token);
     for (const [token, id] of refreshTokens) if (id === userId) refreshTokens.delete(token);
-    for (const table of ["movies", "shows", "collections", "user_settings", "profiles", "viewings"]) {
+    for (const table of ["movies", "shows", "collections", "user_settings", "profiles", "viewings", "watched_episodes"]) {
       db[table] = db[table].filter((row) => row.user_id !== userId);
     }
     const colIds = new Set(db.collections.map((c) => c.id));
@@ -528,6 +548,7 @@ function createBackend() {
         if (!canSee(table, row, userId)) return fail(403, "42501", `new row violates row-level security policy for table "${table}"`);
         try {
           if (table === "viewings") checkViewing(row, userId);
+          if (table === "watched_episodes") checkEpisode(row, userId);
         } catch (e) {
           return fail(e.status, e.code, e.message);
         }
@@ -543,6 +564,7 @@ function createBackend() {
 
     if (method === "PATCH") {
       const changes = req.postDataJSON();
+      if (table === "watched_episodes") return fail(403, "42501", "permission denied for table watched_episodes");
       const rows = db[table].filter((row) => canSee(table, row, userId)).filter(rowFilter(url));
       // All or nothing, as one statement: every row checked first.
       try {
@@ -562,6 +584,7 @@ function createBackend() {
           if (before.movie_id !== row.movie_id) syncWatchedDate(before.movie_id);
         }
         if (table === "movies" && "watched_date" in changes) movieDateWritten(row, before.watched_date);
+        if (table === "shows" && before.started_watching_date != null && row.started_watching_date == null) dropEpisodesOf([row.id]);
       });
       log.push(`UPDATE ${table} ${rows.length}`);
       return answer(rows);
@@ -578,6 +601,7 @@ function createBackend() {
       db[table] = db[table].filter((row) => !gone.includes(row));
       gone.forEach((row) => pushChange(table, "DELETE", null, row));
       if (table === "movies") dropViewingsOf(gone.map((m) => m.id));
+      if (table === "shows") dropEpisodesOf(gone.map((s) => s.id));
       if (table === "viewings") new Set(gone.map((v) => v.movie_id)).forEach(syncWatchedDate);
       log.push(`DELETE ${table} ${gone.length}`);
       return answer(gone);
@@ -607,6 +631,11 @@ function createBackend() {
     if (path === "watch/providers/regions") return reply(200, { results: TMDB_WATCH_REGIONS });
     if ((m = /^(movie|tv)\/(\d+)\/watch\/providers$/.exec(path))) {
       return reply(200, { id: Number(m[2]), results: TMDB_WATCH_PROVIDERS[`${m[1]}/${m[2]}`] ?? {} });
+    }
+    if ((m = /^tv\/(\d+)\/season\/([1-9]\d*)$/.exec(path))) {
+      const season = tmdbSeason(Number(m[1]), Number(m[2]), language);
+      if (!season) return reply(404, { success: false, status_code: 34, status_message: "The resource you requested could not be found." });
+      return reply(200, season);
     }
     if ((m = /^(movie|tv)\/(\d+)(\/videos)?$/.exec(path))) {
       const title = TMDB_CATALOG[m[1]].find((t) => t.id === Number(m[2]));

@@ -199,12 +199,14 @@ function renderDetail(cfg, row) {
   }
 
   if (cfg.state === "watching") {
+    // Under the date: where you are in it (js/episodes.js).
     detailBody.innerHTML = `
       ${head}
       <div class="detail-section">
         <p class="detail-label">${t("Started on")}</p>
         <p class="detail-date-value">${formatDate(row.started_watching_date)}</p>
       </div>
+      ${upNextSlotHtml(row)}
       <div class="detail-actions detail-actions-start">
         <button class="edit-btn" type="button" data-action="edit">${t("✎ Edit")}</button>
         ${addToColHtml}
@@ -297,6 +299,7 @@ function showDetailMain() {
   renderDetail(cfg, row);
   loadDetailTrailer(cfg.table, row);
   loadDetailWhereToWatch(cfg.table, row);
+  loadUpNext(row);
   updateDetailNav();
 }
 

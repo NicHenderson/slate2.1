@@ -19,7 +19,7 @@ const movie = (id, title, date, runtime, genres, overview, extra = {}) => ({
   ...extra,
 });
 
-const show = (id, name, date, seasons, episodes, genres, overview, language = "en") => ({
+const show = (id, name, date, seasons, episodes, genres, overview, language = "en", extra = {}) => ({
   id,
   name,
   original_name: name,
@@ -30,7 +30,12 @@ const show = (id, name, date, seasons, episodes, genres, overview, language = "e
   genres: genresOf(genres),
   overview,
   poster_path: `/poster-tv-${id}.jpg`,
+  ...extra,
 });
+
+// A show's seasons as its details list them: [number, episodes, first air
+// date], season 0 being its specials (which Slate leaves out).
+const seasonsOf = (list) => list.map(([season_number, episode_count, air_date]) => ({ season_number, episode_count, air_date, name: `Season ${season_number}` }));
 
 const TMDB_CATALOG = {
   movie: [
@@ -42,8 +47,16 @@ const TMDB_CATALOG = {
     movie(27205, "Inception", "2010-07-15", 148, ["Action", "Science Fiction", "Adventure"], "A thief who steals corporate secrets through dreams."),
   ],
   tv: [
-    show(1399, "Game of Thrones", "2011-04-17", 8, 73, ["Sci-Fi & Fantasy", "Drama"], "Seven noble families fight for control of Westeros."),
-    show(70523, "Dark", "2017-12-01", 3, 26, ["Crime", "Drama", "Mystery"], "A missing child sets four families on a frantic hunt for answers.", "de"),
+    show(1399, "Game of Thrones", "2011-04-17", 8, 73, ["Sci-Fi & Fantasy", "Drama"], "Seven noble families fight for control of Westeros.", "en", {
+      status: "Ended",
+      seasons: seasonsOf([[1, 10, "2011-04-17"], [2, 10, "2012-04-01"], [3, 10, "2013-03-31"], [4, 10, "2014-04-06"], [5, 10, "2015-04-12"], [6, 10, "2016-04-24"], [7, 7, "2017-07-16"], [8, 6, "2019-04-14"]]),
+      next_episode_to_air: null,
+    }),
+    show(70523, "Dark", "2017-12-01", 3, 26, ["Crime", "Drama", "Mystery"], "A missing child sets four families on a frantic hunt for answers.", "de", {
+      status: "Ended",
+      seasons: seasonsOf([[0, 1, "2017-11-20"], [1, 10, "2017-12-01"], [2, 8, "2019-06-21"], [3, 8, "2020-06-27"]]),
+      next_episode_to_air: null,
+    }),
   ],
 };
 
@@ -89,4 +102,30 @@ const TMDB_WATCH_REGIONS = [
   { iso_3166_1: "US", english_name: "United States of America", native_name: "United States" },
 ];
 
-module.exports = { TMDB_CATALOG, TMDB_WATCH_PROVIDERS, TMDB_WATCH_REGIONS, inLanguage };
+// A season's episodes, as tv/<id>/season/<n> answers them. Dark's first
+// season has its real titles; the rest are "Episode N". In Spanish, only
+// Dark's first three episodes have a synopsis (TMDB leaves the others
+// empty) and an untranslated name comes back as "Episodio N", as TMDB
+// does. Dark 1x5 has no image.
+const DARK_S1 = ["Secrets", "Lies", "Past and Present", "Double Lives", "Truths", "Sic Mundus Creatus Est", "Crossroads", "As You Sow, so You Shall Reap", "Everything Is Now", "Alpha and Omega"];
+const DARK_S1_ES = ["Secretos", "Mentiras", "Pasado y presente", "Vidas dobles", "Verdades"];
+
+function tmdbSeason(tvId, number, language) {
+  const title = TMDB_CATALOG.tv.find((t) => t.id === tvId);
+  const season = title?.seasons?.find((s) => s.season_number === number);
+  if (!season) return null;
+  const spanish = language === "es-MX";
+  const episodes = Array.from({ length: season.episode_count }, (_, i) => {
+    const e = i + 1;
+    const dark1 = tvId === 70523 && number === 1;
+    const english = dark1 ? DARK_S1[i] : `Episode ${e}`;
+    const name = spanish ? (dark1 && DARK_S1_ES[i]) || `Episodio ${e}` : english;
+    const overview = spanish ? (dark1 && e <= 3 ? `Resumen de ${name}.` : "") : `What happens in ${english}.`;
+    // A week apart from the season's first air date.
+    const air = new Date(Date.parse(season.air_date) + i * 7 * 86400000).toISOString().slice(0, 10);
+    return { season_number: number, episode_number: e, name, overview, air_date: air, still_path: tvId === 70523 && number === 1 && e === 5 ? null : `/still-${tvId}-${number}-${e}.jpg` };
+  });
+  return { id: tvId * 100 + number, season_number: number, episodes };
+}
+
+module.exports = { TMDB_CATALOG, TMDB_WATCH_PROVIDERS, TMDB_WATCH_REGIONS, inLanguage, tmdbSeason };

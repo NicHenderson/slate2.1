@@ -47,6 +47,7 @@ const STORE = {
   collections: new Map(),
   collectionItems: new Map(),
   viewings: new Map(), // every time a movie was watched (js/viewings.js)
+  episodes: new Map(), // every episode of a show ticked as watched (js/episodes.js)
 };
 
 function makeSorts(dateField) {
@@ -332,8 +333,8 @@ async function loadData() {
 
   // Whole tables, however long (fetchAllRows, supabaseClient.js); each
   // settles as { data, error } so one failing table doesn't sink the rest.
-  const [moviesRes, showsRes, colsRes, colItemsRes, viewingsRes] = await Promise.all(
-    ["movies", "shows", "collections", "collection_items", "viewings"].map((table) =>
+  const [moviesRes, showsRes, colsRes, colItemsRes, viewingsRes, episodesRes] = await Promise.all(
+    ["movies", "shows", "collections", "collection_items", "viewings", "watched_episodes"].map((table) =>
       fetchAllRows(table).then(
         (data) => ({ data, error: null }),
         (error) => ({ data: null, error })
@@ -347,6 +348,12 @@ async function loadData() {
     console.error("Viewings error:", viewingsRes.error.message);
   } else {
     viewingsRes.data.forEach(storeViewing);
+  }
+  // Without them, a show's window can't say where you are; the rest works.
+  if (episodesRes.error) {
+    console.error("Episodes error:", episodesRes.error.message);
+  } else {
+    episodesRes.data.forEach(storeEpisode);
   }
 
   if (moviesRes.error) {
@@ -413,6 +420,7 @@ function clearAppData() {
   STORE.collections.clear();
   STORE.collectionItems.clear();
   resetViewings();
+  resetEpisodes();
   resetSettingsState();
   resetProfileState();
   resetLibrarySearch();

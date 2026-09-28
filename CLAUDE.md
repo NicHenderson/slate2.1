@@ -444,8 +444,18 @@ directly.
   every rule, the published app's calls unchanged, a second run fails
   harmlessly, and a Replace of 2,000 movies + 300 shows + 15,000
   episodes in half a second.
-  Stage 3 — written, waiting for the owner's redeploy: the `tmdb`
-  function allows `tv/<id>/season/<n>` (n from 1), with Deno tests.
+  Stage 3 — done, redeployed live by the owner: the `tmdb` function
+  allows `tv/<id>/season/<n>` (n from 1), with Deno tests.
+  Stage 4 — built, waiting for the owner's check on the preview:
+  `js/episodes.js` + `css/episodes.css`. Episodes load with the library
+  (`STORE.episodes`), follow realtime, and are dropped locally when a
+  show is deleted or sent back to To Watch (as the database does). TMDB
+  season / details lookups are cached 30 minutes. The note: "Where are
+  you?" (season + aired episode picker, "Tick them", or "Watched it" on
+  E1), "Up next S1 · E4" with "Watched it", and a plain "You're up to
+  date!" (stage 5 adds the next air date and the finale). Until stage 9,
+  a `.slate` backup doesn't carry episodes, and Replace loses them.
+  `tests/episodes.spec.js` covers it (plus Spanish's generic line).
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
