@@ -395,12 +395,15 @@ directly.
     Finishing it the usual way ticks the ones missing; ticking the
     finale of an ended / canceled show opens the usual finish window
     (TMDB's status tells; a show still airing says "You're up to
-    date!" instead);
+    date!" instead). Closing that window without saving unticks the
+    finale again;
   - specials (season 0) are left out entirely;
   - "up to date" says when the next episode airs, if TMDB knows;
     episodes not aired yet can't be ticked;
-  - dropping a show keeps where it stopped ("Stopped at S2 · E5"), and
-    picking it up again goes on from there;
+  - dropping a show keeps where it stopped ("Stopped at S2 · E5"; no
+    "Up next" or "Finished it?"). A dropped show is never picked up
+    again: in Slate you start it over, so "Back to To Watch" clears
+    its dates, rating and review, and now its ticked episodes too;
   - no date per episode: only the show's started / finished dates, as
     now;
   - the new table is realtime, like movies and shows;

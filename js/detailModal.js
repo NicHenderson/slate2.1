@@ -595,7 +595,7 @@ async function dropSeries(row, btn) {
 
 async function sendToWatchlist(row, btn) {
   btn.disabled = true;
-  const { error } = await db
+  const { data, error } = await db
     .from("shows")
     .update({
       started_watching_date: null,

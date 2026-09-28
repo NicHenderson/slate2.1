@@ -66,3 +66,30 @@ test("a show goes from the queue to watching to finished, and is saved at every 
     .poll(saved)
     .toMatchObject({ started_watching_date: "2026-09-01", finished_watching_date: "2026-09-20", rating: 6, review: "The ending, though." });
 });
+
+test("a dropped show goes back to the queue, starting over", async ({ page, backend }) => {
+  const [lost] = backend.seed(
+    "shows",
+    [{ tmdb_id: 4607, title: "Lost", total_seasons: 6, total_episodes: 118, started_watching_date: "2026-03-01", rating: 4, review: "Lost me.", is_dropped: true }],
+    backend.user.id
+  );
+  await logIn(page);
+  await page.click('.nav-btn[data-section="shows-towatch"]');
+  await page.click('[data-subtab="grid-shows-dropped"]');
+  await page.locator("#grid-shows-dropped .card", { hasText: "Lost" }).click();
+  await page.locator('#detail-modal [data-action="send-to-watchlist"]').click();
+
+  // Saved as never started, and the window closes saying so.
+  await expect(page.locator("#detail-modal")).toBeHidden();
+  await expect(page.locator(".toast")).toHaveText('Moved back to "To Watch".');
+  expect(backend.db.shows.find((s) => s.id === lost.id)).toMatchObject({
+    started_watching_date: null,
+    finished_watching_date: null,
+    rating: null,
+    review: null,
+    is_dropped: false,
+  });
+  await expect(page.locator("#grid-shows-dropped .card")).toHaveCount(0);
+  await page.click('[data-subtab="grid-shows-towatch"]');
+  await expect(page.locator("#grid-shows-towatch .card-title")).toHaveText(["Lost"]);
+});
