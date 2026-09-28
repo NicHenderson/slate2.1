@@ -387,10 +387,27 @@ directly.
   by one (a new table), so it needs: a migration (tested on a local
   Postgres first), `.slate` export / import and `replace_my_library()`
   carrying them, and the `tmdb` function allowing
-  `tv/<id>/season/<n>` (the owner redeploys it). Open questions, answered
-  in the mockups: episodes shown for finished shows too? finishing a
-  show ticks all its episodes (Claude: yes)? dropping one keeps where it
-  stopped (Claude: yes)? Stages: mockups → database + function →
+  `tv/<id>/season/<n>` (the owner redeploys it). The owner's answers
+  (Sept. 2026), before the mockups:
+  - nothing ticked yet: the block asks "Where are you?" instead of
+    assuming S1 · E1 (shows already being watched start that way);
+  - a finished show has all its episodes ticked, stored as rows.
+    Finishing it the usual way ticks the ones missing; ticking the
+    finale of an ended / canceled show opens the usual finish window
+    (TMDB's status tells; a show still airing says "You're up to
+    date!" instead);
+  - specials (season 0) are left out entirely;
+  - "up to date" says when the next episode airs, if TMDB knows;
+    episodes not aired yet can't be ticked;
+  - dropping a show keeps where it stopped ("Stopped at S2 · E5"), and
+    picking it up again goes on from there;
+  - no date per episode: only the show's started / finished dates, as
+    now;
+  - the new table is realtime, like movies and shows;
+  - `shows.total_episodes` (saved when the show was added) is refreshed
+    whenever its details are loaded, so the card's bar stays right.
+  Still open, for the mockups: episodes shown for finished shows too?
+  Stages: mockups → database + function →
   "Up next" → the episodes window → the card, backups and import.
   Then the phone project below, on `claude/mobile-app` brought up to date
   with `main`.
