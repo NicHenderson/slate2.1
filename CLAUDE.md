@@ -133,14 +133,10 @@ directly.
 
 ## The live Supabase project
 
-- Migrations `0001`–`0007` in `supabase/migrations/` have all been applied
-  to the live project. **Never re-run `0006_invite_only.sql`**: it would mark
-  accounts made by hand as already having their own password.
-- `0008_replace_library.sql` is **not applied live yet**. The app code on
-  `claude/funny-pascal-bk99gr` needs it (Replace calls
-  `replace_my_library()`), so it must be run before that code is tested on
-  a preview or merged into `main`. Running it first is harmless: the
-  published app doesn't call it.
+- Migrations `0001`–`0008` in `supabase/migrations/` have all been applied
+  to the live project (0008 by the owner before testing stage 3's preview,
+  where Replace worked). **Never re-run `0006_invite_only.sql`**: it would
+  mark accounts made by hand as already having their own password.
 - Test a new migration on a throwaway local Postgres before the owner runs
   it in the SQL Editor. Supabase warns about any `delete`/`update` without
   `where`; explain that before they click "Run query".
@@ -312,8 +308,7 @@ directly.
      js/detailModal.js) and closes, saying so, if it's deleted there; an
      Edit form open on it says it changed and offers "Load the changes"
      rather than refilling under the user's hands.
-  3. Replace everything in one step — built, waiting for the owner to run
-     0008 and test: Import → Replace everything is now one call to
+  3. Replace everything in one step — done, tested by the owner: Import → Replace everything is now one call to
      `replace_my_library()` (0008), one transaction, so a tab closed or a
      connection lost halfway can't leave the library half replaced (the
      old way, many requests plus an undo, could). The backup still
