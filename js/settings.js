@@ -318,3 +318,49 @@ function resetSettingsState() {
 }
 
 renderSettingsPage();
+
+/* ---------- The menu and its pages ----------
+
+   One page at a time beside the menu. Where there's no room for both
+   (css/settings.css: .at-menu), the menu comes first, a page takes its
+   place, and "← Settings" goes back. Coming to Settings from the sidebar
+   starts at the menu there; beside it, the page last opened stays. */
+
+const settingsLayout = document.getElementById("settings-c");
+
+function showSettingsPage(name) {
+  settingsLayout.querySelectorAll(".settings-page").forEach((page) => {
+    page.hidden = page.dataset.page !== name;
+  });
+  settingsLayout.querySelectorAll("[data-settings-page]").forEach((item) => {
+    if (item.dataset.settingsPage === name) item.setAttribute("aria-current", "page");
+    else item.removeAttribute("aria-current");
+  });
+  settingsLayout.classList.remove("at-menu");
+}
+
+settingsLayout.querySelector(".settings-menu").addEventListener("click", (e) => {
+  const item = e.target.closest("[data-settings-page]");
+  if (!item) return;
+  showSettingsPage(item.dataset.settingsPage);
+  // One at a time: the page opens from its top, as a new screen would.
+  if (getComputedStyle(document.getElementById("settings-back")).display !== "none") {
+    document.querySelector(".content")?.scrollTo(0, 0);
+    window.scrollTo(0, 0);
+  }
+});
+
+document.getElementById("settings-back").addEventListener("click", () => {
+  const current = settingsLayout.querySelector('[data-settings-page][aria-current="page"]');
+  settingsLayout.classList.add("at-menu");
+  current?.focus();
+});
+
+document.querySelector('.nav-btn[data-section="settings"]').addEventListener("click", () => {
+  settingsLayout.classList.add("at-menu");
+});
+
+// Log out, from Account too: on a phone, with no sidebar at hand, it's here.
+document.getElementById("settings-logout-btn").addEventListener("click", () => {
+  document.getElementById("logout-btn").click();
+});

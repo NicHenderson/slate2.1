@@ -4,7 +4,7 @@ const { test, expect, logIn, USER } = require("./support/fixtures");
 async function openDelete(page) {
   await logIn(page);
   await page.click('.nav-btn[data-section="settings"]');
-  await page.locator(".tile-danger").scrollIntoViewIfNeeded();
+  await page.click('[data-settings-page="account"]');
   await page.click("#delete-account-btn");
   await expect(page.locator("#import-title")).toHaveText("This deletes your account");
 }

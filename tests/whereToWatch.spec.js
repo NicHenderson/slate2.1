@@ -54,6 +54,7 @@ test("the search's details side says so when TMDB knows nowhere to watch it, or 
 test("another country picked in Settings is saved to the account and used everywhere", async ({ page, backend }) => {
   await logIn(page);
   await page.click('.nav-btn[data-section="settings"]');
+  await page.click('[data-settings-page="lang"]');
   const country = page.locator("#setting-watch-region");
   await expect(country.locator("option").first()).toHaveText("Automatic (Chile)");
   await expect(country.locator("option")).toHaveCount(4); // automatic + TMDB's three countries

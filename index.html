@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="css/auth.css?v=6de0fa2a" />
   <link rel="stylesheet" href="css/landing.css?v=90b40814" />
   <link rel="stylesheet" href="css/transitions.css?v=bf37ef65" />
-  <link rel="stylesheet" href="css/settings.css?v=2c7876ab" />
+  <link rel="stylesheet" href="css/settings.css?v=7a63171f" />
   <link rel="stylesheet" href="css/yourData.css?v=6c896678" />
   <link rel="stylesheet" href="css/searchModal.css?v=e99bf1ca" />
   <link rel="stylesheet" href="css/hearts.css?v=a68715f0" />
@@ -679,178 +679,246 @@
           </div>
         </header>
 
+        <!-- Two groups, each a few pages (the owner's pick of three
+             mockups): a menu, and the page picked beside it; where the
+             room runs out (a phone), the menu first and the page in its
+             place, with a way back. js/settings.js switches them. -->
         <div class="settings-bento">
-          <div class="settings-grid">
-            <div class="settings-tile tile-profile">
-              <h2 class="settings-tile-title">Profile</h2>
+          <div class="settings-c at-menu" id="settings-c">
+            <nav class="settings-menu" aria-label="Settings sections">
+              <div class="profile-preview" id="profile-preview"></div>
 
-              <form class="profile-form" id="profile-form" novalidate>
-                <div class="profile-field">
-                  <label class="settings-row-title" for="profile-username">Username</label>
-                  <div class="profile-username-wrap">
-                    <span class="profile-at" aria-hidden="true">@</span>
-                    <input class="profile-input profile-username" id="profile-username" type="text" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="yourname" aria-describedby="profile-username-hint profile-username-error" />
+              <p class="settings-menu-group">Your Slate profile</p>
+              <button class="settings-menu-item" type="button" data-settings-page="profile" aria-current="page">
+                <span class="settings-menu-icon" aria-hidden="true">👤</span>
+                <span class="settings-menu-label">Profile</span>
+                <span class="settings-menu-go" aria-hidden="true">›</span>
+              </button>
+              <button class="settings-menu-item" type="button" data-settings-page="data">
+                <span class="settings-menu-icon" aria-hidden="true">📦</span>
+                <span class="settings-menu-label">Your Data</span>
+                <span class="settings-menu-go" aria-hidden="true">›</span>
+              </button>
+              <button class="settings-menu-item" type="button" data-settings-page="account">
+                <span class="settings-menu-icon" aria-hidden="true">🔑</span>
+                <span class="settings-menu-label">Account</span>
+                <span class="settings-menu-go" aria-hidden="true">›</span>
+              </button>
+
+              <p class="settings-menu-group">App settings</p>
+              <button class="settings-menu-item" type="button" data-settings-page="look">
+                <span class="settings-menu-icon" aria-hidden="true">🎨</span>
+                <span class="settings-menu-label">Appearance</span>
+                <span class="settings-menu-go" aria-hidden="true">›</span>
+              </button>
+              <button class="settings-menu-item" type="button" data-settings-page="lang">
+                <span class="settings-menu-icon" aria-hidden="true">🌎</span>
+                <span class="settings-menu-label">Language &amp; country</span>
+                <span class="settings-menu-go" aria-hidden="true">›</span>
+              </button>
+              <button class="settings-menu-item" type="button" data-settings-page="lists">
+                <span class="settings-menu-icon" aria-hidden="true">🗂️</span>
+                <span class="settings-menu-label">Your lists</span>
+                <span class="settings-menu-go" aria-hidden="true">›</span>
+              </button>
+            </nav>
+
+            <div class="settings-pages">
+              <button class="settings-back" id="settings-back" type="button">← Settings</button>
+
+              <div class="settings-page" data-page="profile">
+                <div class="settings-tile tile-profile">
+                  <h2 class="settings-tile-title">Profile</h2>
+
+                <form class="profile-form" id="profile-form" novalidate>
+                  <div class="profile-field">
+                    <label class="settings-row-title" for="profile-username">Username</label>
+                    <div class="profile-username-wrap">
+                      <span class="profile-at" aria-hidden="true">@</span>
+                      <input class="profile-input profile-username" id="profile-username" type="text" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="yourname" aria-describedby="profile-username-hint profile-username-error" />
+                    </div>
+                    <p class="settings-row-hint" id="profile-username-hint">3–20 letters, numbers, _ and . — leave it empty to use the name from your email.</p>
+                    <p class="profile-error hidden" id="profile-username-error" role="alert"></p>
                   </div>
-                  <p class="settings-row-hint" id="profile-username-hint">3–20 letters, numbers, _ and . — leave it empty to use the name from your email.</p>
-                  <p class="profile-error hidden" id="profile-username-error" role="alert"></p>
-                </div>
 
-                <div class="profile-field">
-                  <div class="profile-label-row">
-                    <label class="settings-row-title" for="profile-bio">Bio</label>
-                    <span class="profile-counter" id="profile-bio-count" aria-live="polite">0/160</span>
+                  <div class="profile-field">
+                    <div class="profile-label-row">
+                      <label class="settings-row-title" for="profile-bio">Bio</label>
+                      <span class="profile-counter" id="profile-bio-count" aria-live="polite">0/160</span>
+                    </div>
+                    <textarea class="profile-input profile-bio" id="profile-bio" rows="3" maxlength="160" placeholder="A line or two about what you love to watch."></textarea>
                   </div>
-                  <textarea class="profile-input profile-bio" id="profile-bio" rows="3" maxlength="160" placeholder="A line or two about what you love to watch."></textarea>
-                </div>
 
-                <p class="settings-group-label profile-favorites-label">Favorites</p>
-                <div class="profile-favorites" id="profile-favorites">
-                  <div class="favorite-slot" data-fav-slot="movie">
-                    <p class="favorite-kind">Movie</p>
-                    <div class="favorite-body"></div>
+                  <p class="settings-group-label profile-favorites-label">Favorites</p>
+                  <div class="profile-favorites" id="profile-favorites">
+                    <div class="favorite-slot" data-fav-slot="movie">
+                      <p class="favorite-kind">Movie</p>
+                      <div class="favorite-body"></div>
+                    </div>
+                    <div class="favorite-slot" data-fav-slot="tv">
+                      <p class="favorite-kind">Show</p>
+                      <div class="favorite-body"></div>
+                    </div>
                   </div>
-                  <div class="favorite-slot" data-fav-slot="tv">
-                    <p class="favorite-kind">Show</p>
-                    <div class="favorite-body"></div>
+
+                  <div class="profile-actions">
+                    <p class="profile-dirty hidden" id="profile-dirty">Unsaved changes</p>
+                    <button class="profile-save-btn" id="profile-save" type="submit" disabled>Save profile</button>
                   </div>
-                  <div class="favorite-slot profile-preview-slot">
-                    <p class="favorite-kind">Preview</p>
-                    <div class="profile-preview" id="profile-preview"></div>
-                  </div>
+                </form>
                 </div>
-
-                <div class="profile-actions">
-                  <p class="profile-dirty hidden" id="profile-dirty">Unsaved changes</p>
-                  <button class="profile-save-btn" id="profile-save" type="submit" disabled>Save profile</button>
-                </div>
-              </form>
-            </div>
-
-            <div class="settings-tile tile-theme">
-              <h2 class="settings-tile-title">Theme</h2>
-              <div class="theme-swatches" id="theme-swatches"></div>
-            </div>
-
-            <div class="settings-tile tile-motion">
-              <h2 class="settings-tile-title">Animations</h2>
-              <div class="settings-row">
-                <div>
-                  <p class="settings-row-title">Reduce animations</p>
-                  <p class="settings-row-hint">Turns off hover lifts, drag animation and confetti.</p>
-                </div>
-                <button class="settings-toggle" id="reduce-motion-toggle" type="button" aria-label="Reduce animations">
-                  <span class="settings-toggle-track"></span>
-                  <span class="settings-toggle-thumb"></span>
-                </button>
               </div>
-            </div>
 
-            <div class="settings-tile tile-density">
-              <h2 class="settings-tile-title">Card density</h2>
-              <p class="settings-row-hint">Compact fits more titles on each page.</p>
-              <div class="settings-segmented" id="density-control" role="group" aria-label="Card density">
-                <button type="button" data-density-value="comfortable">Comfortable</button>
-                <button type="button" data-density-value="compact">Compact</button>
+              <div class="settings-page" data-page="data" hidden>
+              <div class="settings-tile tile-data">
+                <h2 class="settings-tile-title">Your Data</h2>
+                <p class="settings-row-hint">Everything you've logged, in one file you keep. Titles and collections only — your profile and settings stay out of it.</p>
+                <div class="data-actions">
+                  <div class="data-action">
+                    <span class="data-action-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
+                    </span>
+                    <div class="data-action-text">
+                      <p class="settings-row-title">Export data</p>
+                      <p class="settings-row-hint" data-i18n>Downloads a <span class="data-ext">.slate</span> file with <span id="data-export-summary">your whole library</span> — ratings, reviews, dates and custom order included.</p>
+                    </div>
+                    <button class="data-btn" id="data-export-btn" type="button">Export data</button>
+                  </div>
+                  <div class="data-action">
+                    <span class="data-action-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="M7 9l5-5 5 5"/><path d="M5 20h14"/></svg>
+                    </span>
+                    <div class="data-action-text">
+                      <p class="settings-row-title">Import data</p>
+                      <p class="settings-row-hint" data-i18n>Bring back a <span class="data-ext">.slate</span> file. You'll see what's inside before anything in your account changes.</p>
+                    </div>
+                    <button class="data-btn" id="data-import-btn" type="button">Import data</button>
+                    <input class="hidden" id="data-import-input" type="file" tabindex="-1" aria-hidden="true" />
+                  </div>
+                </div>
               </div>
-            </div>
+              </div>
 
-            <div class="settings-tile tile-defaults">
-              <h2 class="settings-tile-title">Defaults</h2>
-              <div class="settings-fields">
-                <div class="settings-field">
-                  <label class="settings-row-title" for="setting-language">Language</label>
-                  <p class="settings-row-hint">The language Slate is in on this device.</p>
-                  <div class="settings-select-wrap">
-                    <select class="settings-select" id="setting-language" data-language-picker translate="no"></select>
+              <div class="settings-page" data-page="account" hidden>
+                <div class="settings-tile tile-account">
+                  <h2 class="settings-tile-title">Account</h2>
+                  <div class="data-action">
+                    <span class="data-action-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H5v16h5"/><path d="M14 8l4 4-4 4"/><path d="M18 12H9"/></svg>
+                    </span>
+                    <div class="data-action-text">
+                      <p class="settings-row-title">Log out</p>
+                      <p class="settings-row-hint">On this device. Your library stays in your account.</p>
+                    </div>
+                    <button class="data-btn" id="settings-logout-btn" type="button">Log out</button>
                   </div>
                 </div>
 
-                <div class="settings-field">
-                  <label class="settings-row-title" for="setting-open-to">Open to</label>
-                  <p class="settings-row-hint">The page you land on when you log in.</p>
-                  <div class="settings-select-wrap">
-                    <select class="settings-select" id="setting-open-to">
-                      <option value="last">Last page you viewed</option>
-                      <option value="movies-watched">Movies</option>
-                      <option value="shows-watched">Shows</option>
-                      <option value="movies-towatch">Movies To Watch</option>
-                      <option value="shows-towatch">Shows Queue</option>
-                      <option value="collections">Collections</option>
-                    </select>
+                <div class="settings-tile tile-danger">
+                  <h2 class="settings-tile-title">Delete account</h2>
+                <div class="data-action">
+                  <span class="data-action-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
+                  </span>
+                  <div class="data-action-text">
+                    <p class="settings-row-title">Delete your account for good</p>
+                    <p class="settings-row-hint">Your library, collections, profile and settings go with it, and you won't be able to log in again. You can download a backup first.</p>
                   </div>
+                  <button class="data-btn danger-btn" id="delete-account-btn" type="button">Delete account</button>
                 </div>
+                </div>
+              </div>
 
-                <div class="settings-field">
-                  <label class="settings-row-title" for="setting-default-sort">Default sort</label>
-                  <p class="settings-row-hint">For lists you haven't sorted yourself.</p>
-                  <div class="settings-select-wrap">
-                    <select class="settings-select" id="setting-default-sort">
-                      <option value="recent">Most recent first</option>
-                      <option value="oldest">Oldest first</option>
-                      <option value="alpha-asc">A to Z</option>
-                      <option value="alpha-desc">Z to A</option>
-                    </select>
+              <div class="settings-page" data-page="look" hidden>
+              <div class="settings-tile tile-theme">
+                <h2 class="settings-tile-title">Theme</h2>
+                <div class="theme-swatches" id="theme-swatches"></div>
+              </div>
+              <div class="settings-tile tile-motion">
+                <h2 class="settings-tile-title">Animations</h2>
+                <div class="settings-row">
+                  <div>
+                    <p class="settings-row-title">Reduce animations</p>
+                    <p class="settings-row-hint">Turns off hover lifts, drag animation and confetti.</p>
                   </div>
-                </div>
-
-                <div class="settings-field">
-                  <label class="settings-row-title" for="setting-watch-region">Where to watch</label>
-                  <p class="settings-row-hint">The country whose streaming services show for titles you haven't watched.</p>
-                  <div class="settings-select-wrap">
-                    <select class="settings-select" id="setting-watch-region"></select>
-                  </div>
-                </div>
-
-                <div class="settings-field">
-                  <p class="settings-row-title" id="confirm-deletes-label">Confirm before deleting</p>
-                  <p class="settings-row-hint">When off, deleting happens right away — watched titles included.</p>
-                  <button class="settings-toggle settings-field-toggle" id="confirm-deletes-toggle" type="button" aria-labelledby="confirm-deletes-label">
+                  <button class="settings-toggle" id="reduce-motion-toggle" type="button" aria-label="Reduce animations">
                     <span class="settings-toggle-track"></span>
                     <span class="settings-toggle-thumb"></span>
                   </button>
                 </div>
               </div>
-            </div>
-
-            <div class="settings-tile tile-data">
-              <h2 class="settings-tile-title">Your Data</h2>
-              <p class="settings-row-hint">Everything you've logged, in one file you keep. Titles and collections only — your profile and settings stay out of it.</p>
-              <div class="data-actions">
-                <div class="data-action">
-                  <span class="data-action-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
-                  </span>
-                  <div class="data-action-text">
-                    <p class="settings-row-title">Export data</p>
-                    <p class="settings-row-hint" data-i18n>Downloads a <span class="data-ext">.slate</span> file with <span id="data-export-summary">your whole library</span> — ratings, reviews, dates and custom order included.</p>
-                  </div>
-                  <button class="data-btn" id="data-export-btn" type="button">Export data</button>
-                </div>
-                <div class="data-action">
-                  <span class="data-action-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="M7 9l5-5 5 5"/><path d="M5 20h14"/></svg>
-                  </span>
-                  <div class="data-action-text">
-                    <p class="settings-row-title">Import data</p>
-                    <p class="settings-row-hint" data-i18n>Bring back a <span class="data-ext">.slate</span> file. You'll see what's inside before anything in your account changes.</p>
-                  </div>
-                  <button class="data-btn" id="data-import-btn" type="button">Import data</button>
-                  <input class="hidden" id="data-import-input" type="file" tabindex="-1" aria-hidden="true" />
+              <div class="settings-tile tile-density">
+                <h2 class="settings-tile-title">Card density</h2>
+                <p class="settings-row-hint">Compact fits more titles on each page.</p>
+                <div class="settings-segmented" id="density-control" role="group" aria-label="Card density">
+                  <button type="button" data-density-value="comfortable">Comfortable</button>
+                  <button type="button" data-density-value="compact">Compact</button>
                 </div>
               </div>
-            </div>
+              </div>
 
-            <div class="settings-tile tile-danger">
-              <h2 class="settings-tile-title">Delete account</h2>
-              <div class="data-action">
-                <span class="data-action-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
-                </span>
-                <div class="data-action-text">
-                  <p class="settings-row-title">Delete your account for good</p>
-                  <p class="settings-row-hint">Your library, collections, profile and settings go with it, and you won't be able to log in again. You can download a backup first.</p>
+              <div class="settings-page" data-page="lang" hidden>
+                <div class="settings-tile tile-fields">
+                  <h2 class="settings-tile-title">Language &amp; country</h2>
+                  <div class="settings-fields">
+                    <div class="settings-field">
+                      <label class="settings-row-title" for="setting-language">Language</label>
+                      <p class="settings-row-hint">The language Slate is in on this device.</p>
+                      <div class="settings-select-wrap">
+                        <select class="settings-select" id="setting-language" data-language-picker translate="no"></select>
+                      </div>
+                    </div>
+                    <div class="settings-field">
+                      <label class="settings-row-title" for="setting-watch-region">Where to watch</label>
+                      <p class="settings-row-hint">The country whose streaming services show for titles you haven't watched.</p>
+                      <div class="settings-select-wrap">
+                        <select class="settings-select" id="setting-watch-region"></select>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <button class="data-btn danger-btn" id="delete-account-btn" type="button">Delete account</button>
+              </div>
+
+              <div class="settings-page" data-page="lists" hidden>
+                <div class="settings-tile tile-fields">
+                  <h2 class="settings-tile-title">Your lists</h2>
+                  <div class="settings-fields">
+                    <div class="settings-field">
+                      <label class="settings-row-title" for="setting-open-to">Open to</label>
+                      <p class="settings-row-hint">The page you land on when you log in.</p>
+                      <div class="settings-select-wrap">
+                        <select class="settings-select" id="setting-open-to">
+                          <option value="last">Last page you viewed</option>
+                          <option value="movies-watched">Movies</option>
+                          <option value="shows-watched">Shows</option>
+                          <option value="movies-towatch">Movies To Watch</option>
+                          <option value="shows-towatch">Shows Queue</option>
+                          <option value="collections">Collections</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="settings-field">
+                      <label class="settings-row-title" for="setting-default-sort">Default sort</label>
+                      <p class="settings-row-hint">For lists you haven't sorted yourself.</p>
+                      <div class="settings-select-wrap">
+                        <select class="settings-select" id="setting-default-sort">
+                          <option value="recent">Most recent first</option>
+                          <option value="oldest">Oldest first</option>
+                          <option value="alpha-asc">A to Z</option>
+                          <option value="alpha-desc">Z to A</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="settings-field">
+                      <p class="settings-row-title" id="confirm-deletes-label">Confirm before deleting</p>
+                      <p class="settings-row-hint">When off, deleting happens right away — watched titles included.</p>
+                      <button class="settings-toggle settings-field-toggle" id="confirm-deletes-toggle" type="button" aria-labelledby="confirm-deletes-label">
+                        <span class="settings-toggle-track"></span>
+                        <span class="settings-toggle-thumb"></span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1121,7 +1189,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-  <script src="js/lang/es.js?v=ba72c754"></script>
+  <script src="js/lang/es.js?v=00be522e"></script>
   <script src="js/i18n.js?v=dde7afb9"></script>
   <script src="js/escapeHtml.js?v=28c1feb8"></script>
   <script src="js/viewTransitions.js?v=d587d807"></script>
@@ -1146,7 +1214,7 @@
   <script src="js/startModal.js?v=c49f2489"></script>
   <script src="js/confirmModal.js?v=ed034088"></script>
   <script src="js/viewings.js?v=a3e4287a"></script>
-  <script src="js/settings.js?v=43fc49de"></script>
+  <script src="js/settings.js?v=8f24747a"></script>
   <script src="js/whereToWatch.js?v=60bb1455"></script>
   <script src="js/profile.js?v=4f320145"></script>
   <script src="js/librarySearch.js?v=4c06d6e6"></script>

@@ -77,6 +77,7 @@ test.describe("in a Spanish browser", () => {
     await expect(page.locator(".lp-nav-actions")).toContainText("Iniciar sesión");
     await logIn(page);
     await page.click('.nav-btn[data-section="settings"]');
+    await page.click('[data-settings-page="lang"]');
     await expect(page.locator("#setting-language")).toHaveValue("es");
     await Promise.all([page.waitForEvent("load"), page.selectOption("#setting-language", "en")]);
     await expect(page.locator("#app")).toBeVisible();

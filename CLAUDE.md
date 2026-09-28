@@ -347,8 +347,15 @@ directly.
      or the side's button) and the add bar only shows once something is
      picked, listing it. On a phone the side replaces the list, with
      "← Results".
-  6. Settings split into "App settings" and "Your Slate profile" (two
-     tabs), mockups first, designed with the phone's "You" tab in mind.
+  6. Settings in two — built, waiting for the owner's test (their pick
+     of three mockups, "menu and page"): a menu with the profile card on
+     top (the old "Preview") and two groups, Your Slate profile (Profile,
+     Your Data, Account: log out + delete account) and App settings
+     (Appearance, Language & country, Your lists); the page picked shows
+     beside it. With no room for both (a phone), the menu first and the
+     page in its place with "← Settings" (js/settings.js, .at-menu). The
+     owner decided Your Data and Account belong to the profile. Log out is
+     now in Account too, for the phone (no sidebar there).
   Then the phone project below, on `claude/mobile-app` brought up to date
   with `main`.
   The owner's decisions from that pass:

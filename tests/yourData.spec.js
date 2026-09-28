@@ -4,7 +4,7 @@ const { test, expect, logIn } = require("./support/fixtures");
 async function openYourData(page) {
   await logIn(page);
   await page.click('.nav-btn[data-section="settings"]');
-  await page.locator(".tile-data").scrollIntoViewIfNeeded();
+  await page.click('[data-settings-page="data"]');
 }
 
 // A .slate file built in the test, as Settings → Export writes them
@@ -112,6 +112,7 @@ test("a version 2 file brings every viewing: exported rewatches come back as the
   backend.db.collection_items = [];
   await page.reload();
   await page.click('.nav-btn[data-section="settings"]');
+  await page.click('[data-settings-page="data"]');
   await pickFile(page, { name: "back.slate", mimeType: "application/octet-stream", buffer: Buffer.from(JSON.stringify(file)) });
   await page.click('[data-import-action="continue"]');
   await page.click('[data-import-mode="add"]');
