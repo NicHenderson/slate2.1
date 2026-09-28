@@ -212,11 +212,16 @@ function showPreviewHint() {
     </div>`;
 }
 
-function previewPosterHtml(path) {
-  return path
+// The poster, stamped "In your library" (or "In this collection") when
+// the title is already there.
+function previewPosterHtml(id, path) {
+  const poster = path
     ? `<img class="tmdb-preview-poster" src="${TMDB_IMG_LG}${escapeHtml(path)}" alt="" />`
     : `<div class="tmdb-preview-poster tmdb-poster-empty"></div>`;
+  return `<div class="tmdb-preview-poster-wrap">${poster}${haveIds.has(id) ? previewStampHtml() : ""}</div>`;
 }
+
+const previewStampHtml = () => `<span class="tmdb-have-stamp">${haveLabel()}</span>`;
 
 // What the side's main button says, and whether it can be pressed.
 function previewActionHtml(id) {
@@ -248,7 +253,7 @@ async function showPreview(id) {
   modalPreview.innerHTML = `
     <button class="tmdb-preview-back" type="button" data-action="back">${t("← Results")}</button>
     <div class="tmdb-preview-top">
-      ${previewPosterHtml(item.poster_path)}
+      ${previewPosterHtml(id, item.poster_path)}
       <div class="tmdb-preview-head">
         <h3 class="detail-title">${escapeHtml(resultTitle(item))}</h3>
         <p class="detail-meta-runtime">${resultYear(item)}</p>
@@ -282,7 +287,7 @@ function renderPreviewDetails(details) {
   modalPreview.innerHTML = `
     <button class="tmdb-preview-back" type="button" data-action="back">${t("← Results")}</button>
     <div class="tmdb-preview-top">
-      ${previewPosterHtml(details.poster_path)}
+      ${previewPosterHtml(id, details.poster_path)}
       <div class="tmdb-preview-head">
         <h3 class="detail-title">${escapeHtml(details.title ?? details.name ?? t("No title"))}</h3>
         <p class="detail-meta-runtime">${date ? date.slice(0, 4) : "—"} · ${runtimeLine(currentType, details)}</p>
@@ -343,6 +348,8 @@ function markResultAdded(id) {
   if (previewId === tmdbId) {
     const btn = modalPreview.querySelector(".tmdb-preview-action");
     if (btn) btn.outerHTML = previewActionHtml(tmdbId);
+    const wrap = modalPreview.querySelector(".tmdb-preview-poster-wrap");
+    if (wrap && !wrap.querySelector(".tmdb-have-stamp")) wrap.insertAdjacentHTML("beforeend", previewStampHtml());
   }
   updateBatchFooter();
 }
