@@ -36,6 +36,9 @@ const haveIds = new Set(); // results already in the library (or this collection
 let searchTimer = null;
 let searchToken = 0; // a newer search makes an older one's answer moot
 let previewId = null; // the TMDB id the side shows, or null
+// Details already fetched while the window is open, by TMDB id: going back
+// to one shows it at once instead of loading it again.
+const previewDetails = new Map();
 
 const resultTitle = (item) => item.title ?? item.name ?? t("No title");
 const resultYear = (item) => (item.release_date ?? item.first_air_date ?? "").slice(0, 4) || "—";
@@ -62,6 +65,7 @@ function openModal(type) {
   batchSelection.clear();
   lastResults.clear();
   haveIds.clear();
+  previewDetails.clear();
   searchToken++;
   clearTimeout(searchTimer);
 
@@ -240,14 +244,26 @@ function refreshPreviewAction() {
   if (btn && previewId != null && !btn.textContent.endsWith("…")) btn.outerHTML = previewActionHtml(previewId);
 }
 
-async function showPreview(id) {
+async function showPreview(id, { retry = false } = {}) {
   const item = lastResults.get(id);
   if (!item) return;
+  // Already on the side, loaded or on its way: nothing to redo.
+  if (id === previewId && !retry) {
+    modalSplit.classList.add("is-previewing");
+    return;
+  }
   const had = previewId;
   previewId = id;
   if (had != null && had !== id) refreshRow(had);
   refreshRow(id);
   modalSplit.classList.add("is-previewing");
+
+  const known = previewDetails.get(id);
+  if (known) {
+    renderPreviewDetails(known);
+    modalPreview.scrollTop = 0;
+    return;
+  }
 
   // Straight away: what the search already knows, and that the rest is on its way.
   modalPreview.innerHTML = `
@@ -267,6 +283,7 @@ async function showPreview(id) {
 
   try {
     const details = await tmdbDetails(currentType, id);
+    previewDetails.set(id, details);
     if (previewId !== id) return;
     renderPreviewDetails(details);
   } catch (err) {
@@ -481,7 +498,7 @@ modalPreview.addEventListener("click", (e) => {
   const action = el.dataset.action;
   if (action === "pick") togglePick(Number(el.dataset.id));
   if (action === "add") addToLibrary(currentType, el.dataset.id, el);
-  if (action === "retry" && previewId != null) showPreview(previewId);
+  if (action === "retry" && previewId != null) showPreview(previewId, { retry: true });
   if (action === "back") {
     const id = previewId;
     showPreviewHint();

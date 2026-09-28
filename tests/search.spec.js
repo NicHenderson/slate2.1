@@ -40,3 +40,22 @@ test("the details side waits for a pick, says it's loading, and only ever shows 
   await expect(page.locator("#batch-picked")).toContainText("Paddington 2");
   await expect(page.locator("#batch-add-btn")).toHaveText("Add 1 movie");
 });
+
+test("picking the title the side already shows doesn't load it again", async ({ page }) => {
+  await logIn(page);
+  await page.click('.nav-btn[data-section="movies-towatch"]');
+  await page.click("#movies-towatch .add-btn");
+  await page.fill("#modal-input", "paddington");
+  const detailsAsked = [];
+  page.on("request", (req) => {
+    if (req.url().endsWith("/functions/v1/tmdb") && req.method() === "POST" && req.postDataJSON()?.path === "movie/346648") detailsAsked.push(req);
+  });
+  const row = page.locator("#modal-results .tmdb-hit-main", { hasText: "Paddington 2" });
+  await row.click();
+  await expect(page.locator("#modal-preview .tmdb-preview-action")).toHaveText("+ Pick");
+  await row.click();
+  await row.click();
+  await page.waitForTimeout(300);
+  await expect(page.locator("#modal-preview .tmdb-preview-action")).toHaveText("+ Pick");
+  expect(detailsAsked).toHaveLength(1);
+});
