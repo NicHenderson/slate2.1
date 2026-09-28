@@ -333,7 +333,92 @@ function createBackend() {
     log.push("ACCOUNT DELETED");
   }
 
+  // replace_my_library() (migration 0008): the caller's library swapped for
+  // the one sent, as one transaction. Everything is checked before anything
+  // changes; a refusal (thrown as { status, code, message }) leaves the
+  // library exactly as it was.
+  function replaceLibrary(userId, library) {
+    const list = (key) => (Array.isArray(library?.[key]) ? library[key] : []);
+    const mine = (table) => db[table].filter((row) => canSee(table, row, userId));
+    const taken = (table, id) => db[table].some((row) => row.id === id && !canSee(table, row, userId));
+
+    const rows = {};
+    for (const table of ["movies", "shows", "collections"]) {
+      const spec = TABLES[table];
+      rows[table] = list(table).map((input) => ({
+        created_at: new Date().toISOString(),
+        ...spec.defaults(),
+        ...Object.fromEntries(Object.entries(input).filter(([, v]) => v != null)),
+        user_id: userId,
+      }));
+      rows[table].forEach((row) => {
+        const missing = spec.required.find((col) => row[col] == null);
+        if (missing) refuse(`null value in column "${missing}" of relation "${table}" violates not-null constraint`, "23502");
+        if (taken(table, row.id)) refuse(`duplicate key value violates unique constraint "${table}_pkey"`, "23505", 409);
+      });
+      if (spec.uniqueTitle) {
+        const ids = rows[table].map((row) => row.tmdb_id).filter((id) => id != null);
+        if (new Set(ids).size !== ids.length) refuse(`duplicate key value violates unique constraint "${table}_user_tmdb_unique"`, "23505", 409);
+      }
+    }
+    const movieIds = new Set(rows.movies.map((row) => row.id));
+    const collectionIds = new Set(rows.collections.map((row) => row.id));
+    const viewings = list("viewings").map((v) => {
+      if (!movieIds.has(v.movie_id)) refuse('new row violates row-level security policy for table "viewings"', "42501", 403);
+      if (!v.watched_on) refuse('null value in column "watched_on" of relation "viewings" violates not-null constraint', "23502");
+      return { id: crypto.randomUUID(), user_id: userId, note: null, movie_id: v.movie_id, watched_on: v.watched_on, created_at: v.created_at ?? new Date().toISOString() };
+    });
+    const items = list("items").map((item) => {
+      if (!collectionIds.has(item.collection_id)) refuse('new row violates row-level security policy for table "collection_items"', "42501", 403);
+      return { id: crypto.randomUUID(), created_at: new Date().toISOString(), ...Object.fromEntries(Object.entries(item).filter(([, v]) => v != null)) };
+    });
+
+    const kept = { movies: new Set(rows.movies.map((r) => r.tmdb_id)), shows: new Set(rows.shows.map((r) => r.tmdb_id)) };
+    const removed = ["movies", "shows"].reduce((n, table) => n + mine(table).filter((row) => !kept[table].has(row.tmdb_id)).length, 0);
+
+    // Out with the old (items, viewings by cascade)…
+    for (const table of ["collection_items", "viewings", "collections", "movies", "shows"]) {
+      const gone = mine(table);
+      db[table] = db[table].filter((row) => !gone.includes(row));
+      gone.forEach((row) => pushChange(table, "DELETE", null, row));
+    }
+    // …and in with the file's. Movies go in undated; their viewings date them.
+    for (const [table, list] of [["movies", rows.movies], ["shows", rows.shows], ["viewings", viewings], ["collections", rows.collections], ["collection_items", items]]) {
+      list.forEach((row) => {
+        if (table === "movies") row.watched_date = null;
+        db[table].push(row);
+        pushChange(table, "INSERT", row);
+      });
+    }
+    new Set(viewings.map((v) => v.movie_id)).forEach(syncWatchedDate);
+    log.push("RPC replace_my_library");
+    return { removed };
+  }
+
   function handleRest(route, req, url) {
+    if (url.pathname === "/rest/v1/rpc/replace_my_library") {
+      const userId = userFromRequest(req);
+      const fail = (status, code, message) =>
+        route.fulfill({ status, contentType: "application/json", body: JSON.stringify({ code, message, details: null, hint: null }) });
+      if (!userId) return fail(401, "42501", "permission denied for function replace_my_library");
+      // "network": the connection drops before the call gets there;
+      // "network after": it goes through, but the answer never comes back.
+      const injected = hooks.failWhen?.(req.method(), "rpc/replace_my_library");
+      if (injected === "network") return route.abort("failed");
+      if (injected && injected !== "network after") {
+        log.push("RPC replace_my_library FAILED");
+        return fail(500, "XX000", injected);
+      }
+      let result;
+      try {
+        result = replaceLibrary(userId, req.postDataJSON()?.library);
+      } catch (e) {
+        if (!e.code) throw e;
+        return fail(e.status, e.code, e.message);
+      }
+      if (injected === "network after") return route.abort("failed");
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(result) });
+    }
     if (url.pathname === "/rest/v1/rpc/delete_my_account") {
       const userId = userFromRequest(req);
       if (!userId) {

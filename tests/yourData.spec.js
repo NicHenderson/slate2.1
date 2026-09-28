@@ -160,11 +160,16 @@ async function confirmReplace(page, content, { backupFirst = false } = {}) {
   await page.click('[data-import-action="confirm-replace"]');
 }
 
-test("Replace with viewings: every movie ends with exactly the file's viewings", async ({ page, backend }) => {
+test("Replace with viewings: one request, and every movie ends with exactly the file's viewings", async ({ page, backend }) => {
   seedRewatchLibrary(backend);
   await openYourData(page);
+  const writesBefore = backend.log.length;
   await confirmReplace(page, REWATCH_REPLACEMENT);
   await expect(page.locator("#import-title")).toHaveText("Library replaced", { timeout: 10000 });
+  await expect(page.locator("#import-body")).toContainText("1 title that wasn't in the file was removed.");
+  // The whole swap is one call (one transaction): a tab closed or a
+  // connection lost halfway can't leave the library half replaced.
+  expect(backend.log.slice(writesBefore)).toEqual(["RPC replace_my_library"]);
 
   const movie = (tmdbId) => backend.db.movies.find((m) => m.tmdb_id === tmdbId);
   expect(backend.db.movies.map((m) => m.title).sort()).toEqual(["Alien", "Heat", "Inception", "The Matrix"]);
@@ -235,14 +240,24 @@ const sorted = (snap) =>
     ])
   );
 
-test("Replace: if a write fails halfway, the library is put back exactly as it was — viewings too", async ({ page, backend }) => {
+test("Replace: if the database refuses it, nothing changes — viewings included", async ({ page, backend }) => {
   seedRewatchLibrary(backend);
   await openYourData(page);
   const before = sorted(backend.snapshot());
-  backend.hooks.failWhen = (method, table) => method === "POST" && table === "collection_items" && "simulated outage";
+  backend.hooks.failWhen = (method, table) => table === "rpc/replace_my_library" && "simulated outage";
   await confirmReplace(page, REWATCH_REPLACEMENT);
 
   await expect(page.locator("#import-title")).toHaveText("The import didn't finish", { timeout: 10000 });
-  await expect(page.locator("#import-body")).toContainText("your library is exactly as it was");
+  await expect(page.locator("#import-body")).toContainText("so nothing was changed: your library is exactly as it was");
   expect(sorted(backend.snapshot())).toEqual(before);
+});
+
+test("Replace: when the answer never comes back, it says the library is one or the other, never a mix", async ({ page, backend }) => {
+  await openYourData(page);
+  backend.hooks.failWhen = (method, table) => table === "rpc/replace_my_library" && "network after";
+  await confirmReplace(page, REPLACEMENT);
+
+  await expect(page.locator("#import-title")).toHaveText("The import didn't finish", { timeout: 10000 });
+  await expect(page.locator("#import-body")).toContainText("either exactly as it was or exactly this file");
+  expect(backend.db.movies.map((m) => m.title)).toEqual(["Inception"]);
 });

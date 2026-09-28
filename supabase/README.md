@@ -13,6 +13,7 @@ files, numbered in the order they apply:
 | `0005_delete_account.sql` | `delete_my_account()`: lets a signed-in user delete their own account (Settings → Delete account) |
 | `0006_invite_only.sql` | Marks every existing account as having its own password (see [Letting someone in](#letting-someone-in)) |
 | `0007_viewings.sql` | Rewatches: a `viewings` table (each time a movie was watched), one viewing per movie already watched, and the rules keeping `movies.watched_date` the latest viewing |
+| `0008_replace_library.sql` | `replace_my_library()`: Import → Replace everything in one transaction, so the library is never left half replaced |
 
 The data itself isn't here: that's what **Settings → Your Data → Export
 data** is for (a `.slate` file per account).
