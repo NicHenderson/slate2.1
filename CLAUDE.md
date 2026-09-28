@@ -316,7 +316,7 @@ directly.
      answer never comes back, the app says the library is either as it was
      or exactly the file, and to refresh. Tested on a local Postgres with
      2,000 movies and 3,000 viewings: under a second.
-  4. Ratings as hearts — built, waiting for the owner's test: of three
+  4. Ratings as hearts — done, in `main`: of three
      mockups (clean, classic red, doodle) the owner picked the doodle:
      hearts drawn in ink, slightly tilted, the theme's color stuck a touch
      off the line like a sticker (`css/hearts.css`). The picker
@@ -325,7 +325,7 @@ directly.
      and the detail window draw the row with CSS masks (one element, fine
      for 1,000+ cards); on cards the ink line is dropped, too thin to read.
   5. Redesigns, mockups first, in two parts.
-     5a — built, waiting for the owner's test (their picks of three
+     5a — done, in `main` (their picks of three
      mockups each): toasts are stickers in the theme's color with a hard
      shadow, a ✓ (errors red with !), a × to close, 5 seconds;
      "↻ Watched it again" is a small dashed button under the watched
@@ -335,7 +335,7 @@ directly.
      titles to a collection has "Show watched ones too" (off each time
      the window opens), watched titles mixed in after the To Watch ones
      and stamped Seen / Watching / Abandoned.
-     5b — built, waiting for the owner's test: the TMDB search window is
+     5b — done, in `main`: the TMDB search window is
      results on the left and the picked one's details on the right (the
      owner's pick of three mockups; `js/searchModal.js`,
      `css/searchModal.css`), replacing the separate info window (gone,
@@ -347,7 +347,7 @@ directly.
      or the side's button) and the add bar only shows once something is
      picked, listing it. On a phone the side replaces the list, with
      "← Results".
-  6. Settings in two — built, waiting for the owner's test (their pick
+  6. Settings in two — done, in `main` (their pick
      of three mockups, "menu and page"): a menu with the profile card on
      top (the old "Preview") and two groups, Your Slate profile (Profile,
      Your Data, Account: log out + delete account) and App settings
@@ -356,6 +356,42 @@ directly.
      page in its place with "← Settings" (js/settings.js, .at-menu). The
      owner decided Your Data and Account belong to the profile. Log out is
      now in Account too, for the phone (no sidebar there).
+  More themes — done, in `main`: of ten mockups the
+  owner picked seven, for 15 in all (8 dark, 7 light): Graphite, Gala,
+  Wine (dark); Lavender, Peach, Chalk, Sun (light). Each is a block in
+  css/base.css plus its swatch colors in js/settings.js (THEME_META; keep
+  both in sync). Checked across the app; while building, Chalk's,
+  Peach's and Sun's accents were nudged from the mockup so the header tag
+  and the profile card's numbers read (contrast ≥ 3), and some pops made
+  darker, as they carry white text.
+- **Next: episode tracking for shows being watched** (the owner's idea;
+  nothing built yet, each stage with their go-ahead). An older Slate had
+  a "favorite episode" picker so close to a streaming app's episode list
+  that the owner had to change it: it looked like it would play the
+  episode. Avoid that here: no ▶, no "Watch now"; Slate's paper look.
+  The owner's design and decisions:
+  - in a Watching show's detail window, "Up next: S1 · E24": the next
+    episode's still, name and description, with "✓ Watched it" that
+    marks it and moves on. The next episode is the one after the
+    furthest watched (a skipped one doesn't block it);
+  - a button opens a bigger window with every episode by season, to see
+    where you are and mark several at once: each episode can be ticked
+    or unticked on its own, and "Up to here" marks all before it too;
+  - descriptions in the language Slate is in; when TMDB has none in that
+    language, a generic one ("Episode 23 of Dark"), never the other
+    language. No still: the show's poster;
+  - last aired episode reached: "You're up to date!"; the series finale:
+    "Finished it?" (asks, doesn't move it by itself);
+  - the card on Watching shows "S2 · E5" and a progress bar.
+  Since episodes are ticked one by one, watched episodes are stored one
+  by one (a new table), so it needs: a migration (tested on a local
+  Postgres first), `.slate` export / import and `replace_my_library()`
+  carrying them, and the `tmdb` function allowing
+  `tv/<id>/season/<n>` (the owner redeploys it). Open questions, answered
+  in the mockups: episodes shown for finished shows too? finishing a
+  show ticks all its episodes (Claude: yes)? dropping one keeps where it
+  stopped (Claude: yes)? Stages: mockups → database + function →
+  "Up next" → the episodes window → the card, backups and import.
   Then the phone project below, on `claude/mobile-app` brought up to date
   with `main`.
   The owner's decisions from that pass:

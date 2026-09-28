@@ -29,9 +29,16 @@ const THEME_META = {
   forest: { label: t("Forest"), mode: t("Dark"), bg: "#0c1712", sidebar: "#0f1a14", text: "#e9f3ec", paper: "#e9f3ec", ink: "#0c1712", accent: "#6fcf9b", strong: "#2f9e68", deep: "#1f7a4e", pop: "#2f7fbf" },
   sunset: { label: t("Sunset"), mode: t("Dark"), bg: "#1c1015", sidebar: "#1f1218", text: "#f7e9e2", paper: "#f7e9e2", ink: "#1c1015", accent: "#f0916a", strong: "#d9623a", deep: "#b0441f", pop: "#7b4dd6" },
   arcade: { label: t("Arcade"), mode: t("Dark"), bg: "#110a24", sidebar: "#150c2b", text: "#f4ecff", paper: "#f4ecff", ink: "#110a24", accent: "#ff5fb0", strong: "#e0368e", deep: "#b01f6c", pop: "#2d6cff" },
+  graphite: { label: t("Graphite"), mode: t("Dark"), bg: "#111214", sidebar: "#141517", text: "#eceef1", paper: "#eceef1", ink: "#111214", accent: "#c8ccd4", strong: "#555b66", deep: "#3a3f48", pop: "#b86e12" },
+  gala: { label: t("Gala"), mode: t("Dark"), bg: "#0e0c08", sidebar: "#120f0a", text: "#f5efe0", paper: "#f5efe0", ink: "#0e0c08", accent: "#e3bf5c", strong: "#8c6a14", deep: "#6b500c", pop: "#c2413b" },
+  wine: { label: t("Wine"), mode: t("Dark"), bg: "#150a0d", sidebar: "#190c10", text: "#f6e8ec", paper: "#f6e8ec", ink: "#150a0d", accent: "#e8738f", strong: "#a3294a", deep: "#751a33", pop: "#9c6f1c" },
   paper: { label: t("Paper"), mode: t("Light"), bg: "#f6f1e7", sidebar: "#efe6d4", text: "#2b2318", paper: "#fffdf8", ink: "#2b2318", accent: "#c2703d", strong: "#b35f2c", deep: "#8f4620", pop: "#3f7d6e" },
   blossom: { label: t("Blossom"), mode: t("Light"), bg: "#fbf0f2", sidebar: "#f5dfe4", text: "#3a1f29", paper: "#fffafb", ink: "#3a1f29", accent: "#d6457a", strong: "#c2356a", deep: "#93224d", pop: "#4f8a66" },
   glacier: { label: t("Glacier"), mode: t("Light"), bg: "#eef3f8", sidebar: "#e3ebf3", text: "#16233a", paper: "#ffffff", ink: "#16233a", accent: "#2f6fd6", strong: "#2459b8", deep: "#1a3f85", pop: "#c9542f" },
+  lavender: { label: t("Lavender"), mode: t("Light"), bg: "#f3f0fa", sidebar: "#e8e1f5", text: "#221a3a", paper: "#ffffff", ink: "#221a3a", accent: "#7c5ce0", strong: "#6a45d6", deep: "#4b2aa8", pop: "#c2406f" },
+  peach: { label: t("Peach"), mode: t("Light"), bg: "#fdf1ea", sidebar: "#f7dfd2", text: "#3a1e14", paper: "#fffbf8", ink: "#3a1e14", accent: "#d85a38", strong: "#bf4424", deep: "#8e2f16", pop: "#2f6f94" },
+  chalk: { label: t("Chalk"), mode: t("Light"), bg: "#f2f2f0", sidebar: "#e6e6e3", text: "#1c1c1f", paper: "#ffffff", ink: "#1c1c1f", accent: "#6a6a70", strong: "#2f2f33", deep: "#1c1c1f", pop: "#c73b3b" },
+  sun: { label: t("Sun"), mode: t("Light"), bg: "#fbf6e2", sidebar: "#f3eac5", text: "#2e2508", paper: "#fffdf5", ink: "#2e2508", accent: "#a87800", strong: "#8a6300", deep: "#614500", pop: "#2f63c4" },
 };
 
 // The sections "Open to" can land on (and "last page viewed" can remember):

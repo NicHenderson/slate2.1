@@ -155,6 +155,54 @@
   --ink-muted: #5e4b80;
 }
 
+:root[data-theme="graphite"] {
+  --bg: #111214;
+  --bg-elevated: #191a1d;
+  --sidebar-bg: #141517;
+  --surface: #1e2023;
+  --border: #2e3035;
+  --accent: #c8ccd4;
+  --accent-strong: #555b66;
+  --accent-deep: #3a3f48;
+  --accent-soft: rgba(200, 204, 212, 0.12);
+  --pop: #b86e12;
+  --text: #eceef1;
+  --text-muted: #9a9ea6;
+  --ink-muted: #5a5e66;
+}
+
+:root[data-theme="gala"] {
+  --bg: #0e0c08;
+  --bg-elevated: #18140d;
+  --sidebar-bg: #120f0a;
+  --surface: #1f1a10;
+  --border: #342b1a;
+  --accent: #e3bf5c;
+  --accent-strong: #8c6a14;
+  --accent-deep: #6b500c;
+  --accent-soft: rgba(227, 191, 92, 0.13);
+  --pop: #c2413b;
+  --text: #f5efe0;
+  --text-muted: #b0a386;
+  --ink-muted: #6e6450;
+}
+
+:root[data-theme="wine"] {
+  --bg: #150a0d;
+  --bg-elevated: #1f1015;
+  --sidebar-bg: #190c10;
+  --surface: #26141a;
+  --border: #3a1f27;
+  --accent: #e8738f;
+  --accent-strong: #a3294a;
+  --accent-deep: #751a33;
+  --accent-soft: rgba(232, 115, 143, 0.14);
+  --pop: #9c6f1c;
+  --text: #f6e8ec;
+  --text-muted: #b8939d;
+  --ink-muted: #7d5a64;
+}
+
 /* ----- light ----- */
 
 :root[data-theme="paper"] {
@@ -212,6 +260,82 @@
   --paper-dim: #edf2f7;
   --ink: #16233a;
   --ink-muted: #607089;
+}
+
+:root[data-theme="lavender"] {
+  --bg: #f3f0fa;
+  --bg-elevated: #e9e3f6;
+  --sidebar-bg: #e8e1f5;
+  --surface: #faf8fe;
+  --border: #d6cdee;
+  --accent: #7c5ce0;
+  --accent-strong: #6a45d6;
+  --accent-deep: #4b2aa8;
+  --accent-soft: rgba(124, 92, 224, 0.12);
+  --pop: #c2406f;
+  --text: #221a3a;
+  --text-muted: #6e6590;
+  --paper: #ffffff;
+  --paper-dim: #f1ecfb;
+  --ink: #221a3a;
+  --ink-muted: #6e6590;
+}
+
+:root[data-theme="peach"] {
+  --bg: #fdf1ea;
+  --bg-elevated: #f8e3d8;
+  --sidebar-bg: #f7dfd2;
+  --surface: #fff8f4;
+  --border: #efcbb8;
+  --accent: #d85a38;
+  --accent-strong: #bf4424;
+  --accent-deep: #8e2f16;
+  --accent-soft: rgba(216, 90, 56, 0.13);
+  --pop: #2f6f94;
+  --text: #3a1e14;
+  --text-muted: #9a6b5b;
+  --paper: #fffbf8;
+  --paper-dim: #fbeae1;
+  --ink: #3a1e14;
+  --ink-muted: #9a6b5b;
+}
+
+:root[data-theme="chalk"] {
+  --bg: #f2f2f0;
+  --bg-elevated: #e7e7e4;
+  --sidebar-bg: #e6e6e3;
+  --surface: #fafaf9;
+  --border: #d2d2cd;
+  --accent: #6a6a70;
+  --accent-strong: #2f2f33;
+  --accent-deep: #1c1c1f;
+  --accent-soft: rgba(106, 106, 112, 0.12);
+  --pop: #c73b3b;
+  --text: #1c1c1f;
+  --text-muted: #6f6f73;
+  --paper: #ffffff;
+  --paper-dim: #efefed;
+  --ink: #1c1c1f;
+  --ink-muted: #6f6f73;
+}
+
+:root[data-theme="sun"] {
+  --bg: #fbf6e2;
+  --bg-elevated: #f4ecca;
+  --sidebar-bg: #f3eac5;
+  --surface: #fffcf0;
+  --border: #e6d9a2;
+  --accent: #a87800;
+  --accent-strong: #8a6300;
+  --accent-deep: #614500;
+  --accent-soft: rgba(168, 120, 0, 0.13);
+  --pop: #2f63c4;
+  --text: #2e2508;
+  --text-muted: #857a52;
+  --paper: #fffdf5;
+  --paper-dim: #f8f0d6;
+  --ink: #2e2508;
+  --ink-muted: #857a52;
 }
 
 /* ---------- Brand theme (landing page + login) ----------
