@@ -215,12 +215,11 @@ function renderDetail(cfg, row) {
   }
 
   // A movie's date part lists its viewings (js/viewings.js); a show's is its span.
-  // A watched movie's date has "Watched it again!" beside it, a round
-  // sticker (js/viewings.js handles it): an action on that date. On the
-  // poster it read as a label and was half hidden behind the panel.
+  // A watched movie's date has "Watched it again" under it (js/viewings.js
+  // handles it): an action on that date, where the owner wanted it.
   const dateHtml =
     cfg.table === "movies"
-      ? `<div class="detail-date-block">${watchedDateBlockHtml(row)}</div><button class="again-sticker" type="button" data-action="watched-again"><span class="again-sticker-icon" aria-hidden="true">↻</span>${t("Watched it again!")}</button>`
+      ? `${watchedDateBlockHtml(row)}<button class="again-btn" type="button" data-action="watched-again">${t("↻ Watched it again")}</button>`
       : `<p class="detail-label">${t("Watched on")}</p><p class="detail-date-value">${t("Started {start} · Finished {end}", { start: formatDate(row.started_watching_date), end: formatDate(row.finished_watching_date) })}</p>`;
   const review = row.review
     ? `<p class="detail-review">${escapeHtml(row.review)}</p>`

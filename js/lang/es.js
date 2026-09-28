@@ -190,7 +190,7 @@ window.SLATE_LANGUAGES = {
       "No review yet.": "Todavía sin reseña.",
       "Rating": "Calificación",
       "Personal review": "Reseña personal",
-      "Watched it again!": "¡La vi otra vez!",
+      "↻ Watched it again": "↻ La vi otra vez",
       "▶ Watch trailer": "▶ Ver tráiler",
       "Trailer unavailable": "Tráiler no disponible",
       "No trailer": "Sin tráiler",

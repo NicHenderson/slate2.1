@@ -105,61 +105,39 @@
   line-height: 1;
 }
 
-/* "Watched it again!": a round sticker beside the watched date (the
-   owner's pick), in the theme's pop color. */
-.detail-field-again {
-  display: flex;
-  flex-wrap: wrap;
+/* "Watched it again", under the watched date: a small button in the same
+   dashed style as "N viewings", beside it when both are there. */
+.again-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 10px 16px;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border: 1.5px dashed color-mix(in srgb, var(--accent-deep) 45%, transparent);
+  border-radius: 2px;
+  color: var(--accent-deep);
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: background var(--transition), border-color var(--transition);
 }
 
-.again-sticker {
-  display: grid;
-  place-content: center;
-  width: 74px;
-  height: 74px;
-  flex: none;
-  margin-block: -8px;
-  padding: 6px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--pop);
-  color: #fff;
-  font-family: var(--font-display);
-  font-size: 10.5px;
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: 0.04em;
-  text-align: center;
-  text-transform: uppercase;
-  box-shadow: 2px 3px 0 rgba(0, 0, 0, 0.35);
-  transform: rotate(-10deg);
-  cursor: pointer;
-  transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+.again-btn:hover,
+.again-btn:focus-visible {
+  background: color-mix(in srgb, var(--accent-strong) 10%, transparent);
+  border-color: var(--accent-deep);
+  border-style: solid;
 }
 
-.again-sticker:hover,
-.again-sticker:focus-visible {
-  transform: rotate(-3deg) scale(1.07);
-  box-shadow: 3px 5px 0 rgba(0, 0, 0, 0.35);
-  filter: brightness(1.08);
+.detail-field-again .viewings-toggle {
+  margin-right: 6px;
 }
 
-.again-sticker:active {
-  transform: rotate(-3deg) scale(0.97);
-  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+.again-btn,
+.detail-field-again .viewings-toggle {
+  white-space: nowrap;
 }
 
-.again-sticker-icon {
-  display: block;
-  font-family: var(--font-body);
-  font-size: 18px;
-  line-height: 1;
-}
-
-/* On a phone the date and its sticker get the strip's first row to
-   themselves, the rating below: side by side, there was no room. */
+/* On a phone the date and its buttons get the strip's first row to
+   themselves, the rating below: side by side, they squeezed. */
 @media (max-width: 480px) {
   .detail-meta-strip:has(.detail-field-again) {
     flex-wrap: wrap;
@@ -168,7 +146,6 @@
 
   .detail-field-again {
     flex-basis: 100%;
-    justify-content: space-between;
   }
 }
 
