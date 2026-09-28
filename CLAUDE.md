@@ -434,6 +434,15 @@ directly.
   "14/26", a hand-drawn bar of the whole show, and the "Started 27d
   ago" line as today. Nothing ticked: "Where are you?"; all aired
   ticked: "Up to date"; dropped: "Stopped at S2 · E5" and the bar.
+  Stage 2 — written, not yet applied live: `0009_watched_episodes.sql`
+  (the table, one row per ticked episode, unique per show + season +
+  episode, seasons from 1; row-level security like viewings, no
+  update; realtime; "back to To Watch" clears a show's episodes in the
+  database itself; `replace_my_library()` takes an optional
+  `episodes` list). Tested on a local Postgres with 0001–0008 first:
+  every rule, the published app's calls unchanged, a second run fails
+  harmlessly, and a Replace of 2,000 movies + 300 shows + 15,000
+  episodes in half a second.
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
