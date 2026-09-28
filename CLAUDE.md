@@ -320,8 +320,11 @@ directly.
     advice: in a 1–10 scale they read as a score, not "loved it");
     tapping the current heart clears the rating; they fill with a soft
     animation that "Reduce animations" turns off. Still 1–10 numbers;
-  - a watched date in the future is allowed, with an amber field and a
-    playful note; a show finished before it started is refused;
+  - a watched (or started / finished) date in the future is refused: the
+    field turns red with "Sure you watched this on {date}? That hasn't
+    happened yet 👀" as soon as it's picked, and the form won't save (the
+    owner first wanted it allowed, then changed their mind); a show
+    finished before it started is refused too;
   - "Delete Data" / "Delete my account" must be typed exactly as shown
     (spaces around them forgiven), like a title to delete a movie;
   - two collections can't share a name (case and spacing ignored);

@@ -165,6 +165,7 @@ async function saveViewing() {
     dateInput.focus();
     return;
   }
+  if (futureDateIn(dateInput)) return;
   const btn = document.getElementById("viewing-save");
   btn.disabled = true;
   viewingError("");

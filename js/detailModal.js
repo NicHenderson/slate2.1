@@ -76,12 +76,14 @@ function localToday() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-// A date after today in a "when did you watch it" field isn't refused
-// (the owner's call): the field turns amber and Slate says something,
-// and it saves anyway. Date fields opt in with data-future-note; the forms
-// call it again after filling a field in, which fires no input event.
+// A date after today in a "when did you watch it" field is refused (the
+// owner's call): Slate says so the moment it's picked, and the form won't
+// save until it's changed. Date fields opt in with data-future-note; the
+// forms call it again after filling a field in, which fires no input event.
+const isFutureDate = (input) => Boolean(input.value) && input.value > localToday();
+
 function syncFutureNote(input) {
-  const future = Boolean(input.value) && input.value > localToday();
+  const future = isFutureDate(input);
   let note = input.nextElementSibling?.classList.contains("date-future-note") ? input.nextElementSibling : null;
   input.classList.toggle("is-future", future);
   if (!future) {
@@ -91,7 +93,7 @@ function syncFutureNote(input) {
   if (!note) {
     note = document.createElement("p");
     note.className = "date-future-note";
-    note.setAttribute("role", "status");
+    note.setAttribute("role", "alert");
     input.after(note);
   }
   note.textContent = t("Sure you watched this on {date}? That hasn't happened yet 👀", { date: formatDate(input.value) });
@@ -100,6 +102,16 @@ function syncFutureNote(input) {
 document.addEventListener("input", (e) => {
   if (e.target.matches?.("input[type=date][data-future-note]")) syncFutureNote(e.target);
 });
+
+// On saving: the first of these fields holding a future date, shown and
+// focused, or null when none does.
+function futureDateIn(...inputs) {
+  const input = inputs.find((el) => el && isFutureDate(el));
+  if (!input) return null;
+  syncFutureNote(input);
+  input.focus();
+  return input;
+}
 
 function formatRuntime(minutes) {
   if (!minutes) return t("Runtime unknown");

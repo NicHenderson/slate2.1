@@ -79,6 +79,7 @@ updateForm.addEventListener("submit", async (e) => {
     updateDate.focus();
     return;
   }
+  if (!updateManyViewings && futureDateIn(updateDate)) return;
 
   updateSave.disabled = true;
   updateSave.textContent = t("Saving…");

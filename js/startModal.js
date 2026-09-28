@@ -71,6 +71,7 @@ startForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!startRow) return;
 
+  if (futureDateIn(startDate, startFinishDate)) return;
   if (datesOutOfOrder()) {
     startDatesError.classList.remove("hidden");
     startFinishDate.focus();

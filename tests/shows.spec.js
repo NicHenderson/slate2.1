@@ -33,12 +33,18 @@ test("a show goes from the queue to watching to finished, and is saved at every 
   await expect(page.locator("#grid-shows-watching .card-title")).toHaveText(["Game of Thrones"]);
   await expect.poll(() => saved().started_watching_date).toBe("2026-09-01");
 
-  // Finished: never before it started; a rating and review are optional
-  // (both given here), then it's on Shows with the rest.
+  // Finished: never in the future, never before it started; a rating and
+  // review are optional (both given here), then it's on Shows with the rest.
   await page.locator("#grid-shows-watching .card", { hasText: "Game of Thrones" }).click();
   await page.locator('#detail-modal [data-action="edit"]').click();
   await expect(page.locator("#start-extra")).toBeHidden();
+  await page.fill("#start-finish-date", "2099-01-01");
+  await expect(page.locator(".date-future-note")).toBeVisible();
+  await page.click("#start-save");
+  await expect(page.locator("#start-modal")).toBeVisible();
+  expect(saved().finished_watching_date).toBeNull();
   await page.fill("#start-finish-date", "2026-08-20");
+  await expect(page.locator(".date-future-note")).toHaveCount(0);
   await expect(page.locator("#start-extra")).toBeVisible();
   await page.click("#start-save");
   await expect(page.locator("#start-dates-error")).toBeVisible();
