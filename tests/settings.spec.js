@@ -14,9 +14,11 @@ test("settings are saved to the account and apply when Slate opens again", async
   await logIn(page);
   await page.click('.nav-btn[data-section="settings"]');
 
+  await page.click('[data-settings-page="look"]');
   await page.click('[data-theme-key="ocean"]');
   await page.click("#reduce-motion-toggle");
   await page.click('[data-density-value="compact"]');
+  await page.click('[data-settings-page="lists"]');
   await page.selectOption("#setting-open-to", "movies-towatch");
   await page.click("#confirm-deletes-toggle");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "ocean");
@@ -96,4 +98,23 @@ test("the profile checks the username, saves only on Save profile, and comes bac
   await expect(page.locator("#profile-bio")).toHaveValue("Sci-fi first, everything else after.");
   await expect(page.locator('[data-fav-slot="movie"] .favorite-title')).toHaveText("Inception");
   await expect(page.locator('[data-fav-slot="tv"] .favorite-title')).toHaveText("Dark");
+});
+
+// On a phone the menu comes first and a page takes its place; Account's
+// "Log out" is there because the sidebar isn't.
+test("on a phone Settings is a menu, then a page with a way back; Account logs out", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 });
+  await logIn(page);
+  await page.click("#menu-toggle");
+  await page.locator('.nav-btn[data-section="settings"]').click();
+  await expect(page.locator('[data-settings-page="account"]')).toBeVisible();
+  await expect(page.locator("#profile-username")).toBeHidden();
+
+  await page.click('[data-settings-page="profile"]');
+  await expect(page.locator("#profile-username")).toBeVisible();
+  await expect(page.locator('[data-settings-page="account"]')).toBeHidden();
+  await page.click("#settings-back");
+  await page.click('[data-settings-page="account"]');
+  await page.click("#settings-logout-btn");
+  await expect(page.locator("#app")).toBeHidden();
 });

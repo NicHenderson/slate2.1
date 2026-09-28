@@ -392,7 +392,6 @@
   .cancel-btn,
   .delete-btn,
   .edit-btn,
-  .info-add-btn,
   .result-info-btn,
   .auth-submit {
     min-height: 44px;
@@ -564,26 +563,5 @@
   .update-modal {
     padding-left: 8px;
     padding-right: 8px;
-  }
-
-  .stars.stars-input {
-    font-size: 37px;
-    letter-spacing: 0;
-  }
-
-  /* Only here, where the 10-star row is wide enough to need the line to
-     itself, does the value drop below it — on desktop it stays right next
-     to the stars (see .rating-row:has(.stars-input) .stars-value). */
-  .rating-row:has(.stars-input) .stars-value {
-    flex-basis: 100%;
-  }
-}
-
-/* A 10-star row this wide has nowhere left to shrink to on genuinely tiny
-   screens (old iPhone SE and similar, ~320px) without overflowing past the
-   modal's edge — step it back down there rather than let it visibly clip. */
-@media (max-width: 340px) {
-  .stars.stars-input {
-    font-size: 31px;
   }
 }

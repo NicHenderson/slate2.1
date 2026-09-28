@@ -224,7 +224,7 @@ function colItemCardHtml(item) {
   const status = itemStatus(table, row);
   const badge = STATUS_BADGES[status];
   const rating =
-    status === "watched" ? `<div class="card-rating">${starsHtml(row.rating)}</div>` : "";
+    status === "watched" ? `<div class="card-rating">${heartsHtml(row.rating)}</div>` : "";
   return `
     <article class="card col-item-card item-${status}" data-binding-id="${item.id}" data-item-id="${row.id}" data-table="${table}">
       <button class="col-item-remove" type="button" data-binding-id="${item.id}" aria-label="${t("Remove from collection")}">✕</button>

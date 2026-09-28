@@ -120,19 +120,17 @@ function formatRuntime(minutes) {
   return h ? t("{h}h {m}m", { h, m }) : t("{m}m", { m });
 }
 
-function starsHtml(rating) {
+// A rating as ten hearts (css/hearts.css), filled up to it, and "9/10"
+// beside them for reading (and for screen readers: the hearts are hidden).
+function heartsHtml(rating) {
   if (rating === null || rating === undefined) {
     return `<p class="detail-unrated">${t("Unrated")}</p>`;
   }
   const pct = Math.max(0, Math.min(10, rating)) * 10;
-  const stars = "★".repeat(10);
   return `
     <div class="rating-row">
-      <div class="stars">
-        <span class="stars-base">${stars}</span>
-        <span class="stars-fill" style="width: ${pct}%">${stars}</span>
-      </div>
-      <span class="stars-value">${rating}/10</span>
+      <span class="hearts" aria-hidden="true"><span class="hearts-fill" style="width: ${pct}%"></span></span>
+      <span class="hearts-value">${rating}/10</span>
     </div>`;
 }
 
@@ -217,9 +215,11 @@ function renderDetail(cfg, row) {
   }
 
   // A movie's date part lists its viewings (js/viewings.js); a show's is its span.
+  // A watched movie's date has "Watched it again" under it (js/viewings.js
+  // handles it): an action on that date, where the owner wanted it.
   const dateHtml =
     cfg.table === "movies"
-      ? watchedDateBlockHtml(row)
+      ? `${watchedDateBlockHtml(row)}<button class="again-btn" type="button" data-action="watched-again">${t("↻ Watched it again")}</button>`
       : `<p class="detail-label">${t("Watched on")}</p><p class="detail-date-value">${t("Started {start} · Finished {end}", { start: formatDate(row.started_watching_date), end: formatDate(row.finished_watching_date) })}</p>`;
   const review = row.review
     ? `<p class="detail-review">${escapeHtml(row.review)}</p>`
@@ -228,12 +228,12 @@ function renderDetail(cfg, row) {
   detailBody.innerHTML = `
     ${head}
     <div class="detail-meta-strip">
-      <div class="detail-field">
+      <div class="detail-field${cfg.table === "movies" ? " detail-field-again" : ""}">
         ${dateHtml}
       </div>
       <div class="detail-field">
         <p class="detail-label">${t("Rating")}</p>
-        ${starsHtml(row.rating)}
+        ${heartsHtml(row.rating)}
       </div>
     </div>
     ${cfg.table === "movies" ? viewingsListHtml(row) : ""}
@@ -243,7 +243,6 @@ function renderDetail(cfg, row) {
     </div>
     <div class="detail-actions detail-actions-review">
       <button class="edit-btn" type="button" data-action="edit">${t("✎ Edit")}</button>
-      ${cfg.table === "movies" ? `<button class="edit-btn" type="button" data-action="watched-again">${t("↻ Watched it again")}</button>` : ""}
       ${addToColHtml}
     </div>`;
 }

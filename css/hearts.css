@@ -1,0 +1,226 @@
+/* ---------- Ratings as hearts ----------
+
+   Ten hearts for a 1–10 rating, drawn by hand in ink, a little crooked,
+   with the color stuck on slightly off the line like a sticker (the
+   owner's pick of three styles). The picker (js/heartsInput.js) draws
+   each heart as its own SVG so they can fill one after another; the
+   display (heartsHtml, js/detailModal.js) is one element and two masks,
+   as a grid can hold over a thousand cards.
+
+   The masks tile two hearts (one tilted left, one right) and run the
+   width of ten; the fill is the same row cut at the rating, so a 7.5
+   from an imported file shows seven and a half hearts. */
+
+:root {
+  --heart-line: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linejoin='round'%3E%3Cpath transform='rotate(-6 12 12)' d='M12.4 20.7c-2.9-1.9-8-5.5-9.3-9.2-1.2-3.4.7-6.8 3.9-7.1 2.3-.2 4.1 1 5.1 3 1.3-2.1 3.3-3.4 5.7-3.1 3.2.4 4.9 3.8 3.6 7.1-1.5 3.9-6.1 7.1-9 9.3z'/%3E%3Cpath transform='translate(24 1) rotate(5 12 12)' d='M12.4 20.7c-2.9-1.9-8-5.5-9.3-9.2-1.2-3.4.7-6.8 3.9-7.1 2.3-.2 4.1 1 5.1 3 1.3-2.1 3.3-3.4 5.7-3.1 3.2.4 4.9 3.8 3.6 7.1-1.5 3.9-6.1 7.1-9 9.3z'/%3E%3C/svg%3E");
+  --heart-line-bold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linejoin='round'%3E%3Cpath transform='rotate(-6 12 12)' d='M12.4 20.7c-2.9-1.9-8-5.5-9.3-9.2-1.2-3.4.7-6.8 3.9-7.1 2.3-.2 4.1 1 5.1 3 1.3-2.1 3.3-3.4 5.7-3.1 3.2.4 4.9 3.8 3.6 7.1-1.5 3.9-6.1 7.1-9 9.3z'/%3E%3Cpath transform='translate(24 1) rotate(5 12 12)' d='M12.4 20.7c-2.9-1.9-8-5.5-9.3-9.2-1.2-3.4.7-6.8 3.9-7.1 2.3-.2 4.1 1 5.1 3 1.3-2.1 3.3-3.4 5.7-3.1 3.2.4 4.9 3.8 3.6 7.1-1.5 3.9-6.1 7.1-9 9.3z'/%3E%3C/svg%3E");
+  --heart-solid: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 24'%3E%3Cpath transform='rotate(-6 12 12)' d='M12.4 20.7c-2.9-1.9-8-5.5-9.3-9.2-1.2-3.4.7-6.8 3.9-7.1 2.3-.2 4.1 1 5.1 3 1.3-2.1 3.3-3.4 5.7-3.1 3.2.4 4.9 3.8 3.6 7.1-1.5 3.9-6.1 7.1-9 9.3z'/%3E%3Cpath transform='translate(24 1) rotate(5 12 12)' d='M12.4 20.7c-2.9-1.9-8-5.5-9.3-9.2-1.2-3.4.7-6.8 3.9-7.1 2.3-.2 4.1 1 5.1 3 1.3-2.1 3.3-3.4 5.7-3.1 3.2.4 4.9 3.8 3.6 7.1-1.5 3.9-6.1 7.1-9 9.3z'/%3E%3C/svg%3E");
+  --heart-one: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12.4 20.7c-2.9-1.9-8-5.5-9.3-9.2-1.2-3.4.7-6.8 3.9-7.1 2.3-.2 4.1 1 5.1 3 1.3-2.1 3.3-3.4 5.7-3.1 3.2.4 4.9 3.8 3.6 7.1-1.5 3.9-6.1 7.1-9 9.3z'/%3E%3C/svg%3E");
+}
+
+.hearts {
+  --heart: 19px;
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: calc(var(--heart) * 10);
+  height: var(--heart);
+}
+
+.hearts::before,
+.hearts-fill::before,
+.hearts-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--heart) * 10);
+  height: var(--heart);
+  -webkit-mask: var(--heart-line) 0 0 / calc(var(--heart) * 2) var(--heart) repeat-x;
+  mask: var(--heart-line) 0 0 / calc(var(--heart) * 2) var(--heart) repeat-x;
+  background: var(--ink);
+}
+
+.hearts-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+/* The color, a touch down and right of its outline. */
+.hearts-fill::before {
+  -webkit-mask-image: var(--heart-solid);
+  mask-image: var(--heart-solid);
+  background: var(--accent);
+  translate: calc(var(--heart) * 0.06) calc(var(--heart) * 0.05);
+}
+
+.hearts-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* On a card the ink line is too thin to read: a lighter, bolder outline
+   and the color right on it. */
+.card-rating .hearts {
+  --heart: 11px;
+  flex-shrink: 1;
+}
+
+.card-rating .hearts::before {
+  -webkit-mask-image: var(--heart-line-bold);
+  mask-image: var(--heart-line-bold);
+  background: color-mix(in srgb, var(--ink) 32%, transparent);
+}
+
+.card-rating .hearts-fill::before {
+  translate: none;
+}
+
+.card-rating .hearts-fill::after {
+  display: none;
+}
+
+/* Ten hearts plus "9/10" don't fit a compact card's width, so the rating
+   collapses to one heart and the number. */
+[data-density="compact"] .card-rating .hearts {
+  display: none;
+}
+
+[data-density="compact"] .card-rating .rating-row {
+  justify-content: flex-start;
+}
+
+[data-density="compact"] .card-rating .hearts-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+[data-density="compact"] .card-rating .hearts-value::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  -webkit-mask: var(--heart-one) center / contain no-repeat;
+  mask: var(--heart-one) center / contain no-repeat;
+  background: var(--accent);
+}
+
+/* ---------- the picker ---------- */
+
+.heart-picker {
+  --pick: 32px;
+  display: inline-flex;
+  gap: 4px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.heart-pick {
+  position: relative;
+  width: var(--pick);
+  height: var(--pick);
+  flex: none;
+  transform: rotate(-6deg);
+}
+
+.heart-pick:nth-child(even) {
+  transform: rotate(5deg) translateY(1px);
+}
+
+.heart-pick svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.heart-pick path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.7;
+  stroke-linejoin: round;
+}
+
+.heart-pick .heart-pick-color {
+  fill: var(--accent);
+  stroke: none;
+}
+
+/* A heart fills with a soft pop, each a beat after the one before it
+   (--delay, set by the picker). "Reduce animations" makes it instant. */
+.heart-pick-fill {
+  opacity: 0;
+  transform: scale(0.2);
+  transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.22s ease;
+  transition-delay: var(--delay, 0ms);
+}
+
+.heart-pick.on .heart-pick-fill {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* An imported 7.5: the eighth heart half full. */
+.heart-pick.part .heart-pick-fill {
+  clip-path: inset(0 calc(100% - var(--part)) 0 0);
+}
+
+/* Hovering shows what a click would pick: hearts it would add, lighter;
+   hearts it would take away, faded. Over the current rating, all of them
+   fade, as a click clears it. */
+.heart-pick.preview:not(.on) .heart-pick-fill,
+.heart-picker.is-clearing .heart-pick.on .heart-pick-fill {
+  opacity: 0.35;
+  transform: scale(1);
+  transition-duration: 0.1s;
+  transition-delay: 0ms;
+}
+
+.heart-picker.is-previewing .heart-pick.on:not(.preview) .heart-pick-fill {
+  opacity: 0.2;
+  transition-duration: 0.1s;
+  transition-delay: 0ms;
+}
+
+.heart-picker:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* The value under the picker reads as its own answer, not a caption.
+   Always on its own line, whatever it says: beside the hearts, the long
+   "Unrated" had to wrap below them while "5/10" fit alongside, so
+   hovering made the row jump from under the pointer. */
+.rating-row:has(.heart-picker) .hearts-value {
+  flex-basis: 100%;
+  font-size: 17px;
+  line-height: 1.3;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.rating-row:has(.heart-picker) .hearts-value.is-hint {
+  color: var(--ink-muted);
+}
+
+@media (max-width: 860px) {
+  .heart-picker {
+    --pick: 28px;
+  }
+}
+
+@media (max-width: 340px) {
+  .heart-picker {
+    --pick: 24px;
+  }
+}

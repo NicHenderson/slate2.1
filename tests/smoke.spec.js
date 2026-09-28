@@ -35,10 +35,10 @@ test("searching TMDB and adding a title puts it on the watchlist", async ({ page
 
   await page.click("#movies-towatch .add-btn");
   await page.fill("#modal-input", "paddington");
-  await page.click("#modal-search-btn");
+  await page.press("#modal-input", "Enter");
   await expect(page.locator("#modal-results .tmdb-row-title")).toHaveText(["Paddington 2"]);
   // The To Watch list's search adds in batches: tick it, then add.
-  await page.locator("#modal-results .row-check").check();
+  await page.locator("#modal-results .tmdb-pick").click();
   await page.locator("#batch-add-btn").click();
 
   await expect(page.locator("#grid-movies-towatch .card-title")).toContainText(["Paddington 2"]);

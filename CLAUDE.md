@@ -172,8 +172,8 @@ directly.
 - **Next: v3.0.0**, in this order, one at a time and each only with the
   owner's go-ahead:
   1. **Where to watch** (`js/whereToWatch.js`) — done: below the buttons of
-     the detail window (to watch, watching, dropped) and of the search's
-     info window; Stream / Free / Rent / Buy logos linking to TMDB's watch
+     the detail window (to watch, watching, dropped) and in the search
+     window's details side; Stream / Free / Rent / Buy logos linking to TMDB's watch
      page, credited to JustWatch; the country is the browser's unless
      picked in Settings → Defaults (`watchRegion`). The `tmdb` Edge
      Function allows `(movie|tv)/<id>/watch/providers` and
@@ -316,13 +316,46 @@ directly.
      answer never comes back, the app says the library is either as it was
      or exactly the file, and to refresh. Tested on a local Postgres with
      2,000 movies and 3,000 viewings: under a second.
-  4. Ratings as hearts (see decisions); show the owner 2–3 styles first.
-  5. Redesigns, mockups first: the TMDB search / add window (the owner
-     finds it dated), bigger and nicer toasts, a better place for
-     "Watched it again", and "Show watched ones too" when adding titles
-     to a collection.
-  6. Settings split into "App settings" and "Your Slate profile" (two
-     tabs), mockups first, designed with the phone's "You" tab in mind.
+  4. Ratings as hearts — built, waiting for the owner's test: of three
+     mockups (clean, classic red, doodle) the owner picked the doodle:
+     hearts drawn in ink, slightly tilted, the theme's color stuck a touch
+     off the line like a sticker (`css/hearts.css`). The picker
+     (`js/heartsInput.js`) pops each heart in after the one before;
+     clicking the current rating clears it ("Clear it" on hover). Cards
+     and the detail window draw the row with CSS masks (one element, fine
+     for 1,000+ cards); on cards the ink line is dropped, too thin to read.
+  5. Redesigns, mockups first, in two parts.
+     5a — built, waiting for the owner's test (their picks of three
+     mockups each): toasts are stickers in the theme's color with a hard
+     shadow, a ✓ (errors red with !), a × to close, 5 seconds;
+     "↻ Watched it again" is a small dashed button under the watched
+     date in the detail window, out of the action row (the owner tried
+     a round sticker on the poster, then beside the date, and settled
+     on a plain button there); adding
+     titles to a collection has "Show watched ones too" (off each time
+     the window opens), watched titles mixed in after the To Watch ones
+     and stamped Seen / Watching / Abandoned.
+     5b — built, waiting for the owner's test: the TMDB search window is
+     results on the left and the picked one's details on the right (the
+     owner's pick of three mockups; `js/searchModal.js`,
+     `css/searchModal.css`), replacing the separate info window (gone,
+     with `js/infoModal.js`). The side says "pick a title…" until one is
+     picked and "loading its details…" while it loads (the owner asked
+     for both), and only ever shows the last one picked. It searches as
+     you type; "[id]" still works; titles already there say so; from To
+     Watch / a collection titles are picked (a round toggle on each row,
+     or the side's button) and the add bar only shows once something is
+     picked, listing it. On a phone the side replaces the list, with
+     "← Results".
+  6. Settings in two — built, waiting for the owner's test (their pick
+     of three mockups, "menu and page"): a menu with the profile card on
+     top (the old "Preview") and two groups, Your Slate profile (Profile,
+     Your Data, Account: log out + delete account) and App settings
+     (Appearance, Language & country, Your lists); the page picked shows
+     beside it. With no room for both (a phone), the menu first and the
+     page in its place with "← Settings" (js/settings.js, .at-menu). The
+     owner decided Your Data and Account belong to the profile. Log out is
+     now in Account too, for the phone (no sidebar there).
   Then the phone project below, on `claude/mobile-app` brought up to date
   with `main`.
   The owner's decisions from that pass:

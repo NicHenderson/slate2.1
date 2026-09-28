@@ -287,8 +287,9 @@ function createBackend() {
       else if (op === "neq") tests.push((row) => String(row[column]) !== String(parseValue(arg)));
       else if (op === "is") tests.push((row) => row[column] === parseValue(arg));
       else if (op === "in") {
-        const values = arg.replace(/^\(|\)$/g, "").split(",").map(parseValue);
-        tests.push((row) => values.includes(row[column]));
+        // As text, like eq: the query string can't say 348 is a number.
+        const values = arg.replace(/^\(|\)$/g, "").split(",").map((v) => String(parseValue(v)));
+        tests.push((row) => values.includes(String(row[column])));
       } else throw new Error(`fake db: unsupported filter ${column}=${expr}`);
     }
     return (row) => tests.every((t) => t(row));

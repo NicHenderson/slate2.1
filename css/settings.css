@@ -1,16 +1,15 @@
 /* ---------- Settings page ----------
 
-   Profile is one full-width tile on top; the other categories below are a
-   collage of tiles packed edge to edge (tiles sharing a row stretch to the
-   same height):
+   A menu (your profile card on top, then two groups: Your Slate profile,
+   App settings) and beside it the page picked, made of the tiles below:
 
-     Profile ------------------------------------
-     Theme (2 rows)            | Animations
-                               | Card density
-     Defaults -----------------------------------
-     Your Data ----------------------------------
+     Profile card    | Profile / Your data / Account /
+     Your Slate…     | Appearance / Language & country / Your lists
+     App settings…   |
 
-   Layout reacts to the width the grid actually gets (container queries),
+   Where there's no room for both (a phone), the menu comes first and a
+   page takes its place, with "← Settings" back (.at-menu, js/settings.js).
+   Layout reacts to the width the page actually gets (container queries),
    not the viewport — the sidebar takes a varying share of it. */
 
 .settings-bento {
@@ -18,10 +17,93 @@
   max-width: 1100px;
 }
 
-.settings-grid {
+.settings-c {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: 270px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.settings-menu {
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.settings-menu .profile-preview {
+  margin-bottom: 8px;
+}
+
+.settings-menu-group {
+  margin: 12px 0 2px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.settings-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 14.5px;
+  font-weight: 600;
+  text-align: left;
+  box-shadow: 2px 3px 0 rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform var(--transition), background var(--transition);
+}
+
+.settings-menu-item:hover {
+  transform: translateX(3px);
+}
+
+.settings-menu-item[aria-current="page"] {
+  background: var(--accent-strong);
+  color: #fff;
+}
+
+.settings-menu-icon {
+  width: 22px;
+  text-align: center;
+}
+
+.settings-menu-go {
+  margin-left: auto;
+  font-size: 18px;
+  line-height: 1;
+  opacity: 0.6;
+}
+
+.settings-back {
+  display: none;
+  margin-bottom: 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 14.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.settings-page {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
+}
+
+.settings-page[hidden] {
+  display: none;
 }
 
 .settings-tile {
@@ -50,23 +132,6 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--ink-muted);
-}
-
-.tile-profile,
-.tile-defaults,
-.tile-data,
-.tile-danger {
-  grid-column: 1 / -1;
-}
-
-.tile-theme {
-  grid-column: span 8;
-  grid-row: span 2;
-}
-
-.tile-motion,
-.tile-density {
-  grid-column: span 4;
 }
 
 .settings-row {
@@ -557,10 +622,10 @@
   border-top: 1px solid var(--border);
 }
 
-/* Two Polaroids, then the profile preview filling the rest of the row. */
+/* Two Polaroids (the preview of the profile is the menu's top card). */
 .profile-favorites {
   display: grid;
-  grid-template-columns: repeat(2, 150px) minmax(0, 1fr);
+  grid-template-columns: repeat(2, 150px);
   gap: 26px;
 }
 
@@ -790,17 +855,13 @@
   color: var(--text-muted);
 }
 
-.profile-preview-slot .profile-preview {
-  flex: 1;
-}
-
 /* ---------- Tile contents ---------- */
 
-/* Defaults: three fields side by side (stacked when narrow), each a
-   label, a hint, then the select at full width. */
+/* Language & country, Your lists: fields side by side (stacked when
+   narrow), each a label, a hint, then the control. */
 .settings-fields {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 18px 22px;
 }
 
@@ -973,42 +1034,37 @@
    Last in the file on purpose: these override base rules above with the
    same specificity, so they have to come after them. */
 
-/* Too narrow for the collage: one column, the two small toggles still
-   sharing a row. */
-@container (max-width: 760px) {
-  .tile-theme {
-    grid-column: 1 / -1;
-    grid-row: auto;
-  }
-
-  .tile-motion,
-  .tile-density {
-    grid-column: span 6;
-  }
-
-  .settings-fields {
+/* No room for the menu and a page side by side: one at a time. */
+@container (max-width: 700px) {
+  .settings-c {
     grid-template-columns: minmax(0, 1fr);
   }
-}
 
-/* No room left for the preview beside the two Polaroids (it needs ~260px):
-   it drops below at full width, and the Polaroids share the row above. */
-@container (max-width: 660px) {
-  .profile-favorites {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .settings-menu {
+    position: static;
   }
 
-  .profile-preview-slot {
-    grid-column: 1 / -1;
+  .settings-c.at-menu .settings-pages,
+  .settings-c:not(.at-menu) .settings-menu {
+    display: none;
+  }
+
+  .settings-back {
+    display: inline-block;
+  }
+
+  /* Only one page is ever open here: no "current" to show in the menu. */
+  .settings-menu-item[aria-current="page"] {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .profile-favorites {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @container (max-width: 480px) {
-  .tile-motion,
-  .tile-density {
-    grid-column: 1 / -1;
-  }
-
   /* The button drops under the text, full width. */
   .data-action {
     flex-wrap: wrap;

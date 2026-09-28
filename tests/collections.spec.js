@@ -41,6 +41,38 @@ test("opening a collection shows its titles, and titles can be added from the wa
   await expect.poll(() => backend.db.collection_items.filter((i) => i.item_id === heat.id).length).toBe(1);
 });
 
+test("“Show watched ones too” lists watched titles, stamped, and adds them; switched off, it lets go of them", async ({ page, backend }) => {
+  backend.seed("movies", [
+    { tmdb_id: 949, title: "Heat", watched_date: "2025-01-01" },
+    { tmdb_id: 438631, title: "Dune", watched_date: null },
+  ], backend.user.id);
+  await logIn(page);
+  await page.click('.nav-btn[data-section="collections"]');
+  await page.locator("#grid-collections .collection-card", { hasText: "Sci-fi night" }).click();
+  await page.click('#collection-view .add-btn[data-type="collection-titles"]');
+  await expect(page.locator("#library-results .add-title")).toHaveText(["Dune"]);
+
+  const toggle = page.locator(".library-watched-toggle");
+  await toggle.click();
+  await expect(page.locator("#library-results .add-title")).toHaveText(["Dune", "Heat"]);
+  const heat = page.locator("#library-results .library-row", { hasText: "Heat" });
+  await expect(heat.locator(".add-stamp")).toHaveText("Seen");
+  await heat.click();
+  await expect(page.locator("#library-count")).toHaveText("1 selected");
+
+  // Off: Heat is gone from the list, and from what would be added.
+  await toggle.click();
+  await expect(page.locator("#library-results .add-title")).toHaveText(["Dune"]);
+  await expect(page.locator("#library-count")).toHaveText("0 selected");
+
+  await toggle.click();
+  await heat.click();
+  await page.click("#library-add-btn");
+  await expect(page.locator("#col-detail-grid")).toContainText("Heat");
+  const heatRow = backend.db.movies.find((m) => m.tmdb_id === 949);
+  await expect.poll(() => backend.db.collection_items.filter((i) => i.item_id === heatRow.id).length).toBe(1);
+});
+
 // Regression: a title added from TMDB inside a collection only reached the
 // To Watch list with its realtime echo, so when that was late (or lost)
 // it wasn't there until a reload. Here the echo never comes.
@@ -52,8 +84,8 @@ test("a title added from TMDB in a collection is on To Watch at once, echo or no
   await page.click('#collection-view .add-btn[data-type="collection-titles"]');
   await page.click("#library-search-hint");
   await page.fill("#modal-input", "paddington");
-  await page.click("#modal-search-btn");
-  await page.locator("#modal-results .row-check").first().check();
+  await page.press("#modal-input", "Enter");
+  await page.locator("#modal-results .tmdb-pick").first().click();
   await page.click("#batch-add-btn");
   await expect(page.locator("#col-detail-grid")).toContainText("Paddington 2");
 

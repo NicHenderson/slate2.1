@@ -24,26 +24,6 @@
   font-size: 15px;
 }
 
-/* Ten stars plus "9/10" don't fit a compact card's width (they'd overlap),
-   so the rating collapses to a single star and the number. */
-[data-density="compact"] .card-rating .stars {
-  display: none;
-}
-
-[data-density="compact"] .card-rating .rating-row {
-  justify-content: flex-start;
-}
-
-[data-density="compact"] .card-rating .stars-value {
-  font-size: 12px;
-  color: var(--ink);
-}
-
-[data-density="compact"] .card-rating .stars-value::before {
-  content: "★ ";
-  color: var(--accent);
-}
-
 /* Shows Queue > Watching: "Started 12d ago" under the title; a show started
    STALE_WATCHING_DAYS (data.js) ago or more reads as stalled, so its line
    switches to the accent instead of looking like one started yesterday. */
@@ -236,14 +216,7 @@ body:not(.no-hover) .card-grid .card:hover {
   justify-content: space-between;
 }
 
-.card-rating .stars {
-  font-size: 12px;
-  letter-spacing: 0;
-  flex-shrink: 1;
-  min-width: 0;
-}
-
-.card-rating .stars-value {
+.card-rating .hearts-value {
   font-size: 11px;
   white-space: nowrap;
   flex-shrink: 0;

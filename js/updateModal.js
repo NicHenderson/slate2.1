@@ -9,9 +9,8 @@ const updateViewingFields = document.getElementById("update-viewing-fields");
 const updateDateError = document.getElementById("update-date-error");
 const updateViewingsHint = document.getElementById("update-viewings-hint");
 
-const updateStarsInput = createStarsInput(
-  document.getElementById("update-stars"),
-  document.getElementById("update-stars-fill"),
+const updateHeartsInput = createHeartsInput(
+  document.getElementById("update-hearts"),
   document.getElementById("update-rating-value")
 );
 
@@ -35,7 +34,7 @@ function openMarkAsWatchedModal(row, isNewInsert = false) {
   updateManyViewings = watched && viewings.length > 1;
   updateViewing = watched && viewings.length === 1 ? viewings[0] : null;
 
-  updateStarsInput.set(row.rating ?? 0);
+  updateHeartsInput.set(row.rating ?? 0);
   updateDate.value = updateViewing?.watched_on || row.watched_date || localToday();
   updateDateError.classList.add("hidden");
   syncFutureNote(updateDate);
@@ -84,7 +83,7 @@ updateForm.addEventListener("submit", async (e) => {
 
   updateSave.disabled = true;
   updateSave.textContent = t("Saving…");
-  const rating = updateStarsInput.get();
+  const rating = updateHeartsInput.get();
   const opinion = { rating: rating > 0 ? rating : null, review: updateReview.value.trim() || null };
 
   let error = null;

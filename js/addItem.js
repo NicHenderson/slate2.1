@@ -39,13 +39,33 @@ async function existingTmdbIds(type, ids) {
   );
 }
 
+const TOAST_MS = 5000;
+const TOAST_LEAVE_MS = 250;
+
+// A sticker at the bottom of the screen (css/modal.css). Its ✓ / ! and ×
+// are drawn by CSS, so the toast's text is exactly the message.
 function showToast(message, isError = false) {
-  document.querySelector(".toast")?.remove();
+  document.querySelectorAll(".toast").forEach((old) => old.remove());
   const toast = document.createElement("div");
   toast.className = `toast${isError ? " toast-error" : ""}`;
-  toast.textContent = message;
+  toast.setAttribute("role", isError ? "alert" : "status");
+  const text = document.createElement("span");
+  text.className = "toast-text";
+  text.textContent = message;
+  const close = document.createElement("button");
+  close.type = "button";
+  close.className = "toast-close";
+  close.setAttribute("aria-label", t("Close"));
+  close.addEventListener("click", () => dismissToast(toast));
+  toast.append(text, close);
   document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3500);
+  setTimeout(() => dismissToast(toast), TOAST_MS);
+}
+
+function dismissToast(toast) {
+  if (!toast.isConnected || toast.classList.contains("is-leaving")) return;
+  toast.classList.add("is-leaving");
+  setTimeout(() => toast.remove(), TOAST_LEAVE_MS);
 }
 
 function buildRecord(type, details) {

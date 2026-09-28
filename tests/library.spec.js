@@ -9,9 +9,9 @@ test("marking a watchlist title as watched moves it to Movies with its rating an
 
   await expect(page.locator("#update-movie-title")).toHaveText("The Matrix");
   await page.fill("#update-date", "2026-09-20");
-  const stars = page.locator("#update-stars");
-  const box = await stars.boundingBox();
-  await stars.click({ position: { x: box.width * 0.75, y: box.height / 2 } }); // the 8th star
+  const hearts = page.locator("#update-hearts");
+  const box = await hearts.boundingBox();
+  await hearts.click({ position: { x: box.width * 0.75, y: box.height / 2 } }); // the 8th heart
   await expect(page.locator("#update-rating-value")).toHaveText("8/10");
   await page.fill("#update-review", "Holds up.");
   await page.click("#update-save");
@@ -20,6 +20,23 @@ test("marking a watchlist title as watched moves it to Movies with its rating an
   await page.click('.nav-btn[data-section="movies-watched"]');
   await expect(page.locator("#grid-movies-watched .card-title")).toContainText(["The Matrix"]);
   expect(backend.db.movies.find((m) => m.tmdb_id === 603)).toMatchObject({ watched_date: "2026-09-20", rating: 8, review: "Holds up." });
+});
+
+test("clicking the heart that is already the rating clears it", async ({ page, backend }) => {
+  await logIn(page);
+  await page.click('.nav-btn[data-section="movies-watched"]');
+  await page.locator("#grid-movies-watched .card", { hasText: "Alien" }).click();
+  await page.locator('#detail-modal [data-action="edit"]').click();
+  await expect(page.locator("#update-rating-value")).toHaveText("9/10");
+  const hearts = page.locator("#update-hearts");
+  const box = await hearts.boundingBox();
+  await hearts.click({ position: { x: box.width * 0.85, y: box.height / 2 } }); // the 9th heart
+  await expect(page.locator("#update-rating-value")).toHaveText("Unrated");
+  await page.click("#update-save");
+
+  await expect(page.locator("#update-modal")).toBeHidden();
+  await expect.poll(() => backend.db.movies.find((m) => m.tmdb_id === 348).rating).toBeNull();
+  expect(backend.db.movies.find((m) => m.tmdb_id === 348).review).toBe("Still terrifying.");
 });
 
 test("deleting a watched title asks for its name first; a watchlist one just asks", async ({ page, backend }) => {
@@ -78,12 +95,14 @@ test("a review, genres and a poster are shown as text, never run as HTML", async
 // instead of failing, and no second copy appears.
 test("adding a title another tab just added says it's already there", async ({ page, backend }) => {
   await logIn(page);
-  await page.click('.nav-btn[data-section="movies-towatch"]');
-  await page.click("#movies-towatch .add-btn");
+  // From Movies (watched): one title at a time, added from its details.
+  await page.click('.nav-btn[data-section="movies-watched"]');
+  await page.click("#movies-watched .add-btn");
+  await page.click("#library-search-hint");
   await page.fill("#modal-input", "paddington");
-  await page.click("#modal-search-btn");
-  await page.locator("#modal-results .tmdb-info-btn").first().click();
-  const add = page.locator('#info-modal .info-add-btn:not([disabled])');
+  await page.press("#modal-input", "Enter");
+  await page.locator("#modal-results .tmdb-hit-main").first().click();
+  const add = page.locator('#modal-preview .tmdb-preview-action:not([disabled])');
   await expect(add).toBeVisible();
 
   backend.seed("movies", [{ tmdb_id: 346648, title: "Paddington 2", watched_date: null }], backend.user.id);
@@ -160,4 +179,29 @@ test("the trailer button waits, disabled, where it will be; then turns on or say
   await page.locator("#grid-movies-towatch .card", { hasText: "The Matrix" }).click();
   await expect(btn).toHaveText("No trailer");
   await expect(btn).toBeDisabled();
+});
+
+test.describe("in Spanish", () => {
+  test.use({ locale: "es-CL" });
+
+  // "Sin calificar" is longer than "5/10": when the value sat beside the
+  // hearts, it wrapped below them and hovering pulled it back up, so the
+  // row jumped from under the pointer.
+  test("hovering the hearts never moves them", async ({ page }) => {
+    await logIn(page);
+    await page.click('.nav-btn[data-section="movies-towatch"]');
+    await page.locator("#grid-movies-towatch .card", { hasText: "The Matrix" }).click();
+    await page.locator('#detail-modal [data-action="mark-watched"]').click();
+    const hearts = page.locator("#update-hearts");
+    const value = page.locator("#update-rating-value");
+    await expect(value).toHaveText("Sin calificar");
+    // Measured once the window has finished opening.
+    await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== "running"));
+    const before = { hearts: await hearts.boundingBox(), value: await value.boundingBox() };
+
+    await page.mouse.move(before.hearts.x + before.hearts.width * 0.45, before.hearts.y + before.hearts.height / 2);
+    await expect(value).toHaveText("5/10");
+    expect(await hearts.boundingBox()).toEqual(before.hearts);
+    expect((await value.boundingBox()).y).toBe(before.value.y);
+  });
 });

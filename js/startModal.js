@@ -9,9 +9,8 @@ const startCancel = document.getElementById("start-cancel");
 const startClose = document.getElementById("start-close");
 const startDatesError = document.getElementById("start-dates-error");
 
-const startStarsInput = createStarsInput(
-  document.getElementById("start-stars"),
-  document.getElementById("start-stars-fill"),
+const startHeartsInput = createHeartsInput(
+  document.getElementById("start-hearts"),
   document.getElementById("start-rating-value")
 );
 
@@ -41,7 +40,7 @@ startDate.addEventListener("input", syncDatesError);
 function openStartWatchingModal(row, isNewInsert = false) {
   startRow = row;
   clearStaleNote(startForm);
-  startStarsInput.set(row.rating ?? 0);
+  startHeartsInput.set(row.rating ?? 0);
   startDate.value = row.started_watching_date || localToday();
   startFinishDate.value = row.finished_watching_date || "";
   startReview.value = row.review || "";
@@ -87,7 +86,7 @@ startForm.addEventListener("submit", async (e) => {
 
   // The rating and review are optional, as for a movie.
   if (finished) {
-    const rating = startStarsInput.get();
+    const rating = startHeartsInput.get();
     payload.rating = rating > 0 ? rating : null;
     payload.review = startReview.value.trim() || null;
   } else {

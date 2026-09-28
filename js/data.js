@@ -66,13 +66,13 @@ function makeSorts(dateField) {
     "rating-desc": {
       label: t("Highest rated first"),
       group: t("By rating"),
-      stub: "★",
+      stub: "♥",
       cmp: (a, b) => (b.rating ?? -1) - (a.rating ?? -1),
     },
     "rating-asc": {
       label: t("Lowest rated first"),
       group: t("By rating"),
-      stub: "☆",
+      stub: "♡",
       cmp: (a, b) => (a.rating ?? 11) - (b.rating ?? 11),
     },
     "alpha-asc": {
@@ -222,7 +222,7 @@ function cardHtml(item, showRating = false, extra = "") {
     ? `<img class="card-poster" src="${escapeHtml(item.poster)}" alt="" loading="lazy" />`
     : `<div class="card-poster card-poster-empty"></div>`;
   const rating = showRating
-    ? `<div class="card-rating">${starsHtml(item.rating)}</div>`
+    ? `<div class="card-rating">${heartsHtml(item.rating)}</div>`
     : "";
   return `
     <article class="card" data-id="${item.id}">

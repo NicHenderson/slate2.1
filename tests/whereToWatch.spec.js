@@ -30,31 +30,31 @@ test("a title to watch shows where to watch it in the browser's country, below i
   await expect(page.locator("#detail-modal .where-to-watch")).toHaveCount(0);
 });
 
-test("the search's info window says so when TMDB knows nowhere to watch it, or can't be asked", async ({ page }) => {
+test("the search's details side says so when TMDB knows nowhere to watch it, or can't be asked", async ({ page }) => {
   await logIn(page);
   await page.click('.nav-btn[data-section="movies-towatch"]');
   await page.click("#movies-towatch .add-btn");
   await page.fill("#modal-input", "paddington");
-  await page.click("#modal-search-btn");
-  await page.locator("#modal-results .tmdb-info-btn").first().click();
-  await expect(page.locator("#info-modal .wtw-none")).toHaveText(
+  await page.press("#modal-input", "Enter");
+  await page.locator("#modal-results .tmdb-hit-main").first().click();
+  await expect(page.locator("#modal-preview .wtw-none")).toHaveText(
     "We couldn't find where to watch this in Chile — sorry. You can pick another country in Settings."
   );
-  await page.keyboard.press("Escape");
 
   // TMDB unreachable for this: a plain "couldn't check", nothing broken.
   await page.route("**/functions/v1/tmdb", (route) =>
     route.request().postDataJSON()?.path?.endsWith("/watch/providers") ? route.fulfill({ status: 500, body: "{}" }) : route.fallback()
   );
   await page.fill("#modal-input", "inception");
-  await page.click("#modal-search-btn");
-  await page.locator("#modal-results .tmdb-info-btn").first().click();
-  await expect(page.locator("#info-modal .wtw-none")).toHaveText("Couldn't check where to watch right now.");
+  await page.press("#modal-input", "Enter");
+  await page.locator("#modal-results .tmdb-hit-main").first().click();
+  await expect(page.locator("#modal-preview .wtw-none")).toHaveText("Couldn't check where to watch right now.");
 });
 
 test("another country picked in Settings is saved to the account and used everywhere", async ({ page, backend }) => {
   await logIn(page);
   await page.click('.nav-btn[data-section="settings"]');
+  await page.click('[data-settings-page="lang"]');
   const country = page.locator("#setting-watch-region");
   await expect(country.locator("option").first()).toHaveText("Automatic (Chile)");
   await expect(country.locator("option")).toHaveCount(4); // automatic + TMDB's three countries
@@ -72,8 +72,8 @@ test("another country picked in Settings is saved to the account and used everyw
   await page.click('.nav-btn[data-section="shows-towatch"]');
   await page.click("#shows-towatch .add-btn");
   await page.fill("#modal-input", "game of thrones");
-  await page.click("#modal-search-btn");
-  await page.locator("#modal-results .tmdb-info-btn").first().click();
-  await expect(page.locator("#info-modal .wtw-kind")).toHaveText(["Stream", "Free"]);
-  await expect(page.locator("#info-modal .wtw-group", { hasText: "Free" }).locator(".wtw-provider")).toHaveAttribute("aria-label", "Pluto TV");
+  await page.press("#modal-input", "Enter");
+  await page.locator("#modal-results .tmdb-hit-main").first().click();
+  await expect(page.locator("#modal-preview .wtw-kind")).toHaveText(["Stream", "Free"]);
+  await expect(page.locator("#modal-preview .wtw-group", { hasText: "Free" }).locator(".wtw-provider")).toHaveAttribute("aria-label", "Pluto TV");
 });
