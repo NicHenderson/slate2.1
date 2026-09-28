@@ -437,15 +437,8 @@ function showImportSummary(fileName, parsed) {
       <span class="import-stat-sub">${sub ? parts(sub) : "&nbsp;"}</span>
     </div>`;
 
-  const shownCols = collections.slice(0, 6);
-  const chips = shownCols
-    .map(
-      (col) =>
-        `<li class="import-chip"><span class="import-chip-icon">${iconHtml(escapeHtml(col.icon ?? ""))}</span>${escapeHtml(col.name)}<span class="import-chip-count">${col.items.length}</span></li>`
-    )
-    .join("");
-  const moreCols = collections.length - shownCols.length;
-
+  // Collections are counted, never listed by name: a file can hold
+  // hundreds of them (the owner's call).
   const exported = parsed.exportedAt
     ? t("Exported {date}", { date: new Date(parsed.exportedAt).toLocaleString(LOCALE, { dateStyle: "medium", timeStyle: "short" }) })
     : t("Export date unknown");
@@ -468,7 +461,6 @@ function showImportSummary(fileName, parsed) {
       ]))}
       ${stat(collections.length, tn(collections.length, "Collection", "Collections"), itemCount ? tn(itemCount, "{n} title inside", "{n} titles inside") : "")}
     </div>
-    ${chips ? `<ul class="import-chips">${chips}${moreCols > 0 ? `<li class="import-chip import-chip-more">${t("+{n} more", { n: moreCols })}</li>` : ""}</ul>` : ""}
     ${skipped ? `<p class="import-warn">${tn(skipped, "{n} entry in this file couldn't be read and will be left out.", "{n} entries in this file couldn't be read and will be left out.")}</p>` : ""}
     <p class="import-note">${t("Nothing changes in your account until you choose how to import it.")}</p>
     <div class="update-actions import-actions">
@@ -993,12 +985,12 @@ const REPLACE_CONFIRM_WORD = t("Delete Data");
 const REPLACE_WAIT_SECONDS = 3;
 let replaceCountdown = null;
 
-// Case and extra spaces don't matter: what matters is typing it on purpose.
+// Exactly as it reads (only spaces around it are forgiven), the same rule
+// as typing a title to delete it: the owner's call.
 function replaceConfirmed() {
   const input = document.getElementById("import-confirm-input");
   if (!input || input.disabled) return false;
-  const typed = input.value.trim().replace(/\s+/g, " ").toLowerCase();
-  return typed === REPLACE_CONFIRM_WORD.toLowerCase();
+  return input.value.trim() === REPLACE_CONFIRM_WORD;
 }
 
 function syncReplaceConfirm() {

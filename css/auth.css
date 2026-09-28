@@ -12,14 +12,20 @@
   position: fixed;
   inset: 0;
   z-index: 300;
-  display: flex;
+  /* One row at least a screen tall that grows with the card: zoomed in,
+     or with the longer Request Access form, the card can be taller than
+     the window, and both panes must grow with it. As a flex row they
+     stopped at one screen and the landing page showed through below. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 440px;
+  grid-template-rows: minmax(max-content, 1fr);
   overflow-y: auto;
+  background: var(--bg);
 }
 
 /* ---------- hero (brand) ---------- */
 
 .auth-hero {
-  flex: 1 1 56%;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -160,7 +166,6 @@
 /* ---------- panel (the actual form) ---------- */
 
 .auth-panel {
-  flex: 0 0 440px;
   display: flex;
   flex-direction: column;
   gap: 22px;
@@ -337,13 +342,17 @@
   line-height: 1.5;
 }
 
-/* The bot trap: in the form, never on screen. */
+/* The bot trap: in the form, never on screen. Hidden where it stands, not
+   pushed 10000px to the left: inside the tilted card, that far out the
+   tilt carried it some 250px down, and the login screen scrolled into
+   the landing page below. */
 .auth-trap {
   position: absolute;
-  left: -10000px;
   width: 1px;
   height: 1px;
   overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* Signed in by a reset link or a temporary password: no way back to the

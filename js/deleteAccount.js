@@ -20,13 +20,12 @@ const deleteAccountBtn = document.getElementById("delete-account-btn");
 let deleteCountdown = null;
 let deleteEmail = "";
 
-const normalizePhrase = (text) => text.trim().replace(/\s+/g, " ").toLowerCase();
-
 function deleteReady() {
   const password = document.getElementById("delete-password");
   const phrase = document.getElementById("delete-confirm-input");
   if (!password || !phrase || password.disabled) return false;
-  return password.value.length > 0 && normalizePhrase(phrase.value) === normalizePhrase(DELETE_PHRASE);
+  // Exactly as it reads, like the phrase for replacing a library.
+  return password.value.length > 0 && phrase.value.trim() === DELETE_PHRASE;
 }
 
 function syncDeleteReady() {

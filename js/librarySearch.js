@@ -195,8 +195,9 @@ function filterOptions(sectionId, key) {
     LIBRARY_FILTERS[key].optionsOf(row, sectionId).forEach((value) => counts.set(value, (counts.get(value) ?? 0) + 1));
   });
   // The rating's numbers are always all there, so the row doesn't reshuffle
-  // as the mode changes; a number no title counts under shows 0.
-  if (key === "rating") RATING_VALUES.forEach((value) => counts.set(value, counts.get(value) ?? 0));
+  // as the mode changes; a number no title counts under shows 0. An empty
+  // list has nothing to rate, though: then the panel says so instead.
+  if (key === "rating" && counts.size) RATING_VALUES.forEach((value) => counts.set(value, counts.get(value) ?? 0));
   return [...counts].map(([value, count]) => ({ value, count })).sort(LIBRARY_FILTERS[key].order);
 }
 

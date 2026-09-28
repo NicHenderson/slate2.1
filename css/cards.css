@@ -438,7 +438,9 @@ body:not(.no-hover) .card-grid .booklet-card:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  /* Room for a name at its 60-character limit (about 19 capitals a line)
+     before the "…". */
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
 }
 

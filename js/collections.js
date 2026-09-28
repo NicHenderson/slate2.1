@@ -124,7 +124,7 @@ function collectionCardHtml(col, items) {
       <div class="booklet-body">
         <div class="booklet-ribbon" aria-hidden="true"></div>
         ${collectionCoverHtml(col, posters)}
-        <p class="booklet-title">${escapeHtml(col.name ?? t("Untitled"))}</p>
+        <p class="booklet-title" title="${escapeHtml(col.name ?? t("Untitled"))}">${escapeHtml(col.name ?? t("Untitled"))}</p>
         <div class="booklet-footer">${collectionProgressHtml(watched, resolved.length)}</div>
       </div>
     </article>`;
@@ -1118,8 +1118,21 @@ function closeCollectionModal() {
   collectionModal.classList.add("hidden");
 }
 
+// Two collections can't share a name (the owner's call): in "Add to
+// collection" they'd look the same. Case and spacing don't make it new.
+const sameName = (a, b) => a.trim().replace(/\s+/g, " ").toLowerCase() === b.trim().replace(/\s+/g, " ").toLowerCase();
+
 collectionForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  const name = collectionName.value.trim();
+  const twin = [...STORE.collections.values()].find((col) => col.id !== editingCollectionId && sameName(col.name ?? "", name));
+  if (twin) {
+    collectionError.textContent = t("You already have a collection called “{name}”.", { name: twin.name });
+    collectionError.classList.remove("hidden");
+    collectionName.focus();
+    return;
+  }
 
   if (!collectionIcon.value) {
     collectionError.textContent = t("Pick an icon for the collection.");

@@ -253,8 +253,8 @@ directly.
   Hero ("Every movie. Every show. All saved in one place."), "Sound
   familiar?" (three notes: did I see it, the lost recommendation, the
   lost notebook), "Slate keeps it for you" (what you watched, what you
-  want to watch, for good), the owner's letter word for word, and the
-  invite-only call. Features are left for people to find in the app;
+  want to watch, for good), the invite-only call, and last, as the page's
+  goodbye, the owner's letter word for word. Features are left for people to find in the app;
   don't add feature tours, FAQs or detail cards back without asking.
 - **Publishing on Cloudflare Pages** (free, chosen over Netlify and
   Vercel). Since 2025 Cloudflare steers new projects to Workers (static
@@ -289,6 +289,63 @@ directly.
      and `X-Content-Type-Options: nosniff`. The owner and Claude decided
      against a full Content-Security-Policy for now: the risk of breaking
      part of Slate outweighs the benefit for a small private app.
+- **After the PC test pass (the owner's bug hunt), in this order**, each
+  stage only with the owner's go-ahead. Stages 1–6 go on
+  `claude/funny-pascal-bk99gr`, each to `main` once approved:
+  1. Quick fixes — done: login / Request Access no longer show the landing
+     page when zoomed in (the bot-trap field, pushed 10000px left inside
+     the tilted card, was carried ~250px down; and the panes now grow with
+     the card); adding from Info disables the title's row in the search;
+     an empty list's Filters says there's nothing to filter; toasts no
+     longer jump sideways; line breaks show in reviews and bios.
+  2. Always up to date: lists show a title the moment it's saved (today
+     they wait for the realtime echo, so one added from a collection
+     once didn't show in To Watch until a reload), and open windows follow
+     live changes (an Edit opened before another tab changed the review
+     would save the old text over it) or close if the title is deleted.
+  3. Replace everything in one step, inside the database (a migration):
+     today a tab closed halfway leaves the library half replaced.
+  4. Ratings as hearts (see decisions); show the owner 2–3 styles first.
+  5. Redesigns, mockups first: the TMDB search / add window (the owner
+     finds it dated), bigger and nicer toasts, a better place for
+     "Watched it again", and "Show watched ones too" when adding titles
+     to a collection.
+  6. Settings split into "App settings" and "Your Slate profile" (two
+     tabs), mockups first, designed with the phone's "You" tab in mind.
+  Then the phone project below, on `claude/mobile-app` brought up to date
+  with `main`.
+  The owner's decisions from that pass:
+  - rating and review are optional for shows too, as for movies;
+  - ratings become hearts, not stars (the owner's call, against Claude's
+    advice: in a 1–10 scale they read as a score, not "loved it");
+    tapping the current heart clears the rating; they fill with a soft
+    animation that "Reduce animations" turns off. Still 1–10 numbers;
+  - a watched (or started / finished) date in the future is refused: the
+    field turns red with "Sure you watched this on {date}? That hasn't
+    happened yet 👀" as soon as it's picked, and the form won't save (the
+    owner first wanted it allowed, then changed their mind); a show
+    finished before it started is refused too;
+  - "Delete Data" / "Delete my account" must be typed exactly as shown
+    (spaces around them forgiven), like a title to delete a movie;
+  - two collections can't share a name (case and spacing ignored);
+  - Import's summary counts collections, never lists their names;
+  - collection names get up to four lines on their card before "…";
+  - later, not now: an automatic, read-only drop date for shows (needs a
+    migration). Not wanted: dropping a show never started (delete it).
+    Two viewings on the same day stay allowed.
+- **Then: Slate that feels like a phone app** (the owner's request),
+  on its own branch, `claude/mobile-app`, which goes straight to `main`
+  when done; `claude/funny-pascal-bk99gr` stays for small fixes meanwhile.
+  Phone-only changes; the computer layout stays as it is. Claude reviewed
+  every screen at phone size and proposed stages (installable app, bottom
+  tab bar and compact headers, windows as bottom sheets, full-screen
+  search and touch polish); none is built until the owner says so.
+- **The test scenario** the owner follows to hunt bugs (PC first, then
+  the phone): https://claude.ai/artifact/WV8WgTtnTG5LsviRT4amDm. It runs
+  with a throwaway account (`+slate1` / `+slate2` Gmail aliases), never a
+  real one. Each step is marked ok / bug / odd with a note, saved in the
+  page's database: read them with ArtifactData, collection `results`,
+  documents `<pc|phone>__<step id>`.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - a privacy policy page;

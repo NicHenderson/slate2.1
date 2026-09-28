@@ -7,6 +7,7 @@ const startReview = document.getElementById("start-review");
 const startSave = document.getElementById("start-save");
 const startCancel = document.getElementById("start-cancel");
 const startClose = document.getElementById("start-close");
+const startDatesError = document.getElementById("start-dates-error");
 
 const startStarsInput = createStarsInput(
   document.getElementById("start-stars"),
@@ -19,10 +20,23 @@ let startRow = null;
 function syncStartExtra() {
   const finished = Boolean(startFinishDate.value);
   startExtra.classList.toggle("hidden", !finished);
-  startReview.required = finished;
 }
 
-startFinishDate.addEventListener("input", syncStartExtra);
+// A show can't be finished before it was started: unlike a date in the
+// future, that one is refused, as it would give "Avg time to finish" a
+// negative number of days.
+const datesOutOfOrder = () =>
+  Boolean(startDate.value && startFinishDate.value) && startFinishDate.value < startDate.value;
+
+function syncDatesError() {
+  if (!datesOutOfOrder()) startDatesError.classList.add("hidden");
+}
+
+startFinishDate.addEventListener("input", () => {
+  syncStartExtra();
+  syncDatesError();
+});
+startDate.addEventListener("input", syncDatesError);
 
 function openStartWatchingModal(row, isNewInsert = false) {
   startRow = row;
@@ -30,6 +44,9 @@ function openStartWatchingModal(row, isNewInsert = false) {
   startDate.value = row.started_watching_date || localToday();
   startFinishDate.value = row.finished_watching_date || "";
   startReview.value = row.review || "";
+  startDatesError.classList.add("hidden");
+  syncFutureNote(startDate);
+  syncFutureNote(startFinishDate);
   document.getElementById("start-title").textContent = isNewInsert
     ? t("Add TV Show")
     : t("Start watching");
@@ -54,20 +71,24 @@ startForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!startRow) return;
 
+  if (futureDateIn(startDate, startFinishDate)) return;
+  if (datesOutOfOrder()) {
+    startDatesError.classList.remove("hidden");
+    startFinishDate.focus();
+    return;
+  }
+
   const finished = startFinishDate.value || null;
   const payload = {
     started_watching_date: startDate.value || null,
     finished_watching_date: finished,
   };
 
+  // The rating and review are optional, as for a movie.
   if (finished) {
     const rating = startStarsInput.get();
-    if (rating <= 0) {
-      showToast(t("A rating is required when you set a finish date."), true);
-      return;
-    }
-    payload.rating = rating;
-    payload.review = startReview.value.trim();
+    payload.rating = rating > 0 ? rating : null;
+    payload.review = startReview.value.trim() || null;
   } else {
     payload.rating = null;
     payload.review = null;

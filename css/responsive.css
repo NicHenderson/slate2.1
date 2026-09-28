@@ -214,11 +214,11 @@
 /* =============================== AUTH SCREEN (≤860px) =============================== */
 @media (max-width: 860px) {
   .auth-screen {
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: max-content minmax(max-content, 1fr);
   }
 
   .auth-hero {
-    flex: none;
     min-height: 0;
     padding: 44px 28px 32px;
   }
@@ -246,7 +246,6 @@
   }
 
   .auth-panel {
-    flex: 1;
     min-height: 0;
     padding: 36px 28px 48px;
   }
