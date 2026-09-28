@@ -427,6 +427,13 @@ directly.
   "episodio", as the app already does, and the generic line is
   "Episode 5 of season 2 of Dark." (Claude's defaults; the owner
   didn't object).
+  Mockup 1c (https://claude.ai/artifact/Pt2SXRQBGSLFNcpzoTJVFg): of a
+  line and bar, a sticker on the poster and this season's boxes, the
+  owner picked the line and bar: under the card's title, the **last
+  episode ticked** in handwriting ("S2 · E5", not the next one) with
+  "14/26", a hand-drawn bar of the whole show, and the "Started 27d
+  ago" line as today. Nothing ticked: "Where are you?"; all aired
+  ticked: "Up to date"; dropped: "Stopped at S2 · E5" and the bar.
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
