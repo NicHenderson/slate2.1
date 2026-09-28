@@ -55,7 +55,6 @@ function createHeartsInput(pickerEl, valueEl) {
     return Math.min(10, Math.max(1, Math.ceil(ratio * 10)));
   }
 
-  // Short enough to sit beside the hearts without pushing to a new line.
   function preview(n) {
     const clearing = n === selected;
     hearts.forEach((heart, i) => heart.classList.toggle("preview", i < n));

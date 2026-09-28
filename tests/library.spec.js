@@ -178,3 +178,28 @@ test("the trailer button waits, disabled, where it will be; then turns on or say
   await expect(btn).toHaveText("No trailer");
   await expect(btn).toBeDisabled();
 });
+
+test.describe("in Spanish", () => {
+  test.use({ locale: "es-CL" });
+
+  // "Sin calificar" is longer than "5/10": when the value sat beside the
+  // hearts, it wrapped below them and hovering pulled it back up, so the
+  // row jumped from under the pointer.
+  test("hovering the hearts never moves them", async ({ page }) => {
+    await logIn(page);
+    await page.click('.nav-btn[data-section="movies-towatch"]');
+    await page.locator("#grid-movies-towatch .card", { hasText: "The Matrix" }).click();
+    await page.locator('#detail-modal [data-action="mark-watched"]').click();
+    const hearts = page.locator("#update-hearts");
+    const value = page.locator("#update-rating-value");
+    await expect(value).toHaveText("Sin calificar");
+    // Measured once the window has finished opening.
+    await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== "running"));
+    const before = { hearts: await hearts.boundingBox(), value: await value.boundingBox() };
+
+    await page.mouse.move(before.hearts.x + before.hearts.width * 0.45, before.hearts.y + before.hearts.height / 2);
+    await expect(value).toHaveText("5/10");
+    expect(await hearts.boundingBox()).toEqual(before.hearts);
+    expect((await value.boundingBox()).y).toBe(before.value.y);
+  });
+});

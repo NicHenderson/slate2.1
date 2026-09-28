@@ -197,9 +197,14 @@
   border-radius: 4px;
 }
 
-/* The value beside the picker reads as its own answer, not a caption. */
+/* The value under the picker reads as its own answer, not a caption.
+   Always on its own line, whatever it says: beside the hearts, the long
+   "Unrated" had to wrap below them while "5/10" fit alongside, so
+   hovering made the row jump from under the pointer. */
 .rating-row:has(.heart-picker) .hearts-value {
+  flex-basis: 100%;
   font-size: 17px;
+  line-height: 1.3;
   color: var(--ink);
   white-space: nowrap;
 }
@@ -211,13 +216,6 @@
 @media (max-width: 860px) {
   .heart-picker {
     --pick: 28px;
-  }
-}
-
-@media (max-width: 480px) {
-  /* Where the row needs the line to itself, the value drops below it. */
-  .rating-row:has(.heart-picker) .hearts-value {
-    flex-basis: 100%;
   }
 }
 
