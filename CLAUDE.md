@@ -356,12 +356,14 @@ directly.
      page in its place with "← Settings" (js/settings.js, .at-menu). The
      owner decided Your Data and Account belong to the profile. Log out is
      now in Account too, for the phone (no sidebar there).
-  Next, before the phone project (the owner's request): more themes.
-  There are 8 (5 dark, 3 light); the owner wants 7 more for variety.
-  Plan: a mockup page with ~10 candidates on a mini Slate screen, the
-  owner picks 7 (and names them), then each is built and checked across
-  the app (cards, hearts, toasts, stamps, windows, login). Aim for gaps,
-  not look-alikes: more light ones, a neutral grey, a high-contrast one.
+  More themes — built, waiting for the owner's test: of ten mockups the
+  owner picked seven, for 15 in all (8 dark, 7 light): Graphite, Gala,
+  Wine (dark); Lavender, Peach, Chalk, Sun (light). Each is a block in
+  css/base.css plus its swatch colors in js/settings.js (THEME_META; keep
+  both in sync). Checked across the app; while building, Chalk's,
+  Peach's and Sun's accents were nudged from the mockup so the header tag
+  and the profile card's numbers read (contrast ≥ 3), and some pops made
+  darker, as they carry white text.
   Then the phone project below, on `claude/mobile-app` brought up to date
   with `main`.
   The owner's decisions from that pass:
