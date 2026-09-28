@@ -316,7 +316,14 @@ directly.
      answer never comes back, the app says the library is either as it was
      or exactly the file, and to refresh. Tested on a local Postgres with
      2,000 movies and 3,000 viewings: under a second.
-  4. Ratings as hearts (see decisions); show the owner 2–3 styles first.
+  4. Ratings as hearts — built, waiting for the owner's test: of three
+     mockups (clean, classic red, doodle) the owner picked the doodle:
+     hearts drawn in ink, slightly tilted, the theme's color stuck a touch
+     off the line like a sticker (`css/hearts.css`). The picker
+     (`js/heartsInput.js`) pops each heart in after the one before;
+     clicking the current rating clears it ("Clear it" on hover). Cards
+     and the detail window draw the row with CSS masks (one element, fine
+     for 1,000+ cards); on cards the ink line is dropped, too thin to read.
   5. Redesigns, mockups first: the TMDB search / add window (the owner
      finds it dated), bigger and nicer toasts, a better place for
      "Watched it again", and "Show watched ones too" when adding titles

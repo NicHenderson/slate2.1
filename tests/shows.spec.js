@@ -53,9 +53,9 @@ test("a show goes from the queue to watching to finished, and is saved at every 
   await expect(page.locator("#start-dates-error")).toBeHidden();
   await page.fill("#start-review", "The ending, though.");
 
-  const stars = page.locator("#start-stars");
-  const box = await stars.boundingBox();
-  await stars.click({ position: { x: box.width * 0.55, y: box.height / 2 } }); // the 6th star
+  const hearts = page.locator("#start-hearts");
+  const box = await hearts.boundingBox();
+  await hearts.click({ position: { x: box.width * 0.55, y: box.height / 2 } }); // the 6th heart
   await expect(page.locator("#start-rating-value")).toHaveText("6/10");
   await page.click("#start-save");
 

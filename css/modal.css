@@ -392,7 +392,7 @@
    shadow and slight rotation paint a few px past that (transform/box-shadow
    don't count toward layout size), and overflow-y:auto clips paint beyond
    the box regardless of whether a scrollbar is showing. Same trap as the
-   drag-ghost and the mobile stars override before it — see the CSS-cascade
+   drag-ghost and the mobile rating override before it — see the CSS-cascade
    gotcha notes. */
 .detail-body {
   flex: 1;
@@ -930,13 +930,6 @@
 
 .field-input.review-input:focus {
   box-shadow: 0 0 0 2px var(--accent), 2px 6px 12px rgba(0, 0, 0, 0.2);
-}
-
-.stars.stars-input {
-  cursor: pointer;
-  user-select: none;
-  font-size: 40px;
-  letter-spacing: 2px;
 }
 
 .update-actions {
@@ -1678,42 +1671,6 @@ body:not(.no-hover) .col-item-card:hover .col-item-remove {
   flex-wrap: wrap;
 }
 
-/* The value next to the *input* stars (picking a rating) reads as its own
-   answer, not a caption — bigger and dark instead of the small muted label
-   used for the passive display elsewhere (cards, detail modal). Scoped to
-   .stars-input specifically so those other .rating-row uses are untouched. */
-.rating-row:has(.stars-input) .stars-value {
-  font-size: 17px;
-  color: var(--ink);
-}
-
-.stars {
-  position: relative;
-  font-size: 20px;
-  letter-spacing: 2px;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.stars-base {
-  color: #3a3050;
-}
-
-.stars-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  color: var(--accent);
-}
-
-.stars-value {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
-}
 
 .detail-unrated {
   font-size: 14px;
@@ -2219,26 +2176,11 @@ body:not(.no-hover) .col-item-card:hover .col-item-remove {
     width: 100%;
   }
 
-  /* The stacked layout leaves less room for the star row than a plain
+  /* The stacked layout leaves less room for the rating row than a plain
      .update-modal shell does (that mobile padding tweak lives on
      .update-modal, now only the New Collection modal) — this is the panel's own. */
   .update-form-body {
     padding-left: 10px;
     padding-right: 10px;
-  }
-
-  .rating-row:has(.stars-input) .stars.stars-input {
-    font-size: 33px;
-  }
-}
-
-/* Same specificity as the rule above, later in the file, so it wins for the
-   narrowest phones instead of losing to it — a plain .stars.stars-input
-   rule at this breakpoint (see responsive.css) is a lower-specificity match
-   here and would never win against the :has() rule above regardless of
-   which one is "more specific" by width. */
-@media (max-width: 340px) {
-  .rating-row:has(.stars-input) .stars.stars-input {
-    font-size: 28px;
   }
 }

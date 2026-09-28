@@ -120,19 +120,17 @@ function formatRuntime(minutes) {
   return h ? t("{h}h {m}m", { h, m }) : t("{m}m", { m });
 }
 
-function starsHtml(rating) {
+// A rating as ten hearts (css/hearts.css), filled up to it, and "9/10"
+// beside them for reading (and for screen readers: the hearts are hidden).
+function heartsHtml(rating) {
   if (rating === null || rating === undefined) {
     return `<p class="detail-unrated">${t("Unrated")}</p>`;
   }
   const pct = Math.max(0, Math.min(10, rating)) * 10;
-  const stars = "★".repeat(10);
   return `
     <div class="rating-row">
-      <div class="stars">
-        <span class="stars-base">${stars}</span>
-        <span class="stars-fill" style="width: ${pct}%">${stars}</span>
-      </div>
-      <span class="stars-value">${rating}/10</span>
+      <span class="hearts" aria-hidden="true"><span class="hearts-fill" style="width: ${pct}%"></span></span>
+      <span class="hearts-value">${rating}/10</span>
     </div>`;
 }
 
@@ -233,7 +231,7 @@ function renderDetail(cfg, row) {
       </div>
       <div class="detail-field">
         <p class="detail-label">${t("Rating")}</p>
-        ${starsHtml(row.rating)}
+        ${heartsHtml(row.rating)}
       </div>
     </div>
     ${cfg.table === "movies" ? viewingsListHtml(row) : ""}

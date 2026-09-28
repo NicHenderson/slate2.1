@@ -176,6 +176,7 @@ window.SLATE_LANGUAGES = {
       "{h}h {m}m": "{h} h {m} min",
       "{m}m": "{m} min",
       "Unrated": "Sin calificar",
+      "Clear it": "Quitarla",
       "No synopsis available.": "No hay sinopsis disponible.",
       "🗂 Add to collection": "🗂 Agregar a una colección",
       "✓ Mark as watched": "✓ Marcar como vista",

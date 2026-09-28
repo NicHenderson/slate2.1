@@ -9,9 +9,9 @@ test("marking a watchlist title as watched moves it to Movies with its rating an
 
   await expect(page.locator("#update-movie-title")).toHaveText("The Matrix");
   await page.fill("#update-date", "2026-09-20");
-  const stars = page.locator("#update-stars");
-  const box = await stars.boundingBox();
-  await stars.click({ position: { x: box.width * 0.75, y: box.height / 2 } }); // the 8th star
+  const hearts = page.locator("#update-hearts");
+  const box = await hearts.boundingBox();
+  await hearts.click({ position: { x: box.width * 0.75, y: box.height / 2 } }); // the 8th heart
   await expect(page.locator("#update-rating-value")).toHaveText("8/10");
   await page.fill("#update-review", "Holds up.");
   await page.click("#update-save");
@@ -20,6 +20,23 @@ test("marking a watchlist title as watched moves it to Movies with its rating an
   await page.click('.nav-btn[data-section="movies-watched"]');
   await expect(page.locator("#grid-movies-watched .card-title")).toContainText(["The Matrix"]);
   expect(backend.db.movies.find((m) => m.tmdb_id === 603)).toMatchObject({ watched_date: "2026-09-20", rating: 8, review: "Holds up." });
+});
+
+test("clicking the heart that is already the rating clears it", async ({ page, backend }) => {
+  await logIn(page);
+  await page.click('.nav-btn[data-section="movies-watched"]');
+  await page.locator("#grid-movies-watched .card", { hasText: "Alien" }).click();
+  await page.locator('#detail-modal [data-action="edit"]').click();
+  await expect(page.locator("#update-rating-value")).toHaveText("9/10");
+  const hearts = page.locator("#update-hearts");
+  const box = await hearts.boundingBox();
+  await hearts.click({ position: { x: box.width * 0.85, y: box.height / 2 } }); // the 9th heart
+  await expect(page.locator("#update-rating-value")).toHaveText("Unrated");
+  await page.click("#update-save");
+
+  await expect(page.locator("#update-modal")).toBeHidden();
+  await expect.poll(() => backend.db.movies.find((m) => m.tmdb_id === 348).rating).toBeNull();
+  expect(backend.db.movies.find((m) => m.tmdb_id === 348).review).toBe("Still terrifying.");
 });
 
 test("deleting a watched title asks for its name first; a watchlist one just asks", async ({ page, backend }) => {

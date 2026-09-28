@@ -93,7 +93,7 @@ const LIBRARY_FILTERS = {
     // picked: an 8 is "at least" 1–8, "at most" 8–10, "exactly" 8.
     optionsOf: (row, sectionId) => {
       if (row.rating == null) return ["unrated"];
-      const rated = Math.round(row.rating); // as the stars show it (an imported 7.5 reads as 8)
+      const rated = Math.round(row.rating); // as the hearts show it (an imported 7.5 reads as 8)
       const test = RATING_MODES[ratingModeOf(sectionId)].test;
       return RATING_VALUES.filter((n) => test(rated, Number(n)));
     },

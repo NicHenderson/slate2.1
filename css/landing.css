@@ -482,11 +482,11 @@ html.auth-open {
   font-size: 17px;
 }
 
-.landing-screen .card-rating .stars {
-  display: block;
+.landing-screen .card .card-rating .hearts {
+  display: inline-block;
 }
 
-.landing-screen .card-rating .stars-value::before {
+.landing-screen .card .card-rating .hearts-value::before {
   content: none;
 }
 

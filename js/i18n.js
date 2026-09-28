@@ -87,7 +87,7 @@ function tn(count, one, other, vars) {
 const TRANSLATED_ATTRIBUTES = ["placeholder", "aria-label", "title", "alt"];
 const SKIPPED_TAGS = new Set(["SCRIPT", "STYLE", "svg", "TEMPLATE", "NOSCRIPT"]);
 
-// Only what has a letter in it: stars, "9/10" and "✕" stay as they are.
+// Only what has a letter in it: stars and hearts, "9/10" and "✕" stay as they are.
 const hasWords = (text) => /\p{L}/u.test(text);
 const normalizeText = (text) => text.replace(/\s+/g, " ").trim();
 
