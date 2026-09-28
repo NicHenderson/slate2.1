@@ -416,7 +416,17 @@ directly.
   name, description, a hand-drawn box "Watched it" and "See all
   episodes →". "Where are you?" picks season + episode ("Tick them")
   or, just starting, offers E1.
-  Still open, for the mockups: episodes shown for finished shows too?
+  Mockup 1b (https://claude.ai/artifact/MnAXSybJVDrwEppQU2UnSD): of
+  season tabs, folded seasons and numbered boxes, the owner picked the
+  season tabs (like To Watch / Watching / Dropped, each with "4/8"),
+  one season at a time: each row a hand-drawn box, "E4", the name, a
+  small description (up to three lines) and the image; "Up next"
+  marked; "Tick up to here" on hover (always, on a phone); it opens on
+  the next episode. The window shows for finished and dropped shows
+  too, **only to look** (nothing can be ticked there). Spanish says
+  "episodio", as the app already does, and the generic line is
+  "Episode 5 of season 2 of Dark." (Claude's defaults; the owner
+  didn't object).
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
