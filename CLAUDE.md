@@ -133,9 +133,10 @@ directly.
 
 ## The live Supabase project
 
-- Migrations `0001`–`0007` in `supabase/migrations/` have all been applied
-  to the live project. **Never re-run `0006_invite_only.sql`**: it would mark
-  accounts made by hand as already having their own password.
+- Migrations `0001`–`0008` in `supabase/migrations/` have all been applied
+  to the live project (0008 by the owner before testing stage 3's preview,
+  where Replace worked). **Never re-run `0006_invite_only.sql`**: it would
+  mark accounts made by hand as already having their own password.
 - Test a new migration on a throwaway local Postgres before the owner runs
   it in the SQL Editor. Supabase warns about any `delete`/`update` without
   `where`; explain that before they click "Run query".
@@ -307,8 +308,14 @@ directly.
      js/detailModal.js) and closes, saying so, if it's deleted there; an
      Edit form open on it says it changed and offers "Load the changes"
      rather than refilling under the user's hands.
-  3. Replace everything in one step, inside the database (a migration):
-     today a tab closed halfway leaves the library half replaced.
+  3. Replace everything in one step — done, tested by the owner: Import → Replace everything is now one call to
+     `replace_my_library()` (0008), one transaction, so a tab closed or a
+     connection lost halfway can't leave the library half replaced (the
+     old way, many requests plus an undo, could). The backup still
+     downloads first. If the database refuses, nothing changed; if the
+     answer never comes back, the app says the library is either as it was
+     or exactly the file, and to refresh. Tested on a local Postgres with
+     2,000 movies and 3,000 viewings: under a second.
   4. Ratings as hearts (see decisions); show the owner 2–3 styles first.
   5. Redesigns, mockups first: the TMDB search / add window (the owner
      finds it dated), bigger and nicer toasts, a better place for
