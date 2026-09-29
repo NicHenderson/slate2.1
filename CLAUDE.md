@@ -639,12 +639,35 @@ directly.
   every screen at phone size and proposed stages (installable app, bottom
   tab bar and compact headers, windows as bottom sheets, full-screen
   search and touch polish); none is built until the owner says so.
+  Talked over in Sept. 2026: the owner wants it polished until it feels
+  like a real phone app, and it's the next project (native Android / iOS
+  ports are out for now: Play's $25 and 12-tester closed test, Apple's
+  $99 a year and a Mac; a store port would wrap this same web app later).
+  Add to the stages: gestures, loading without a connection, performance,
+  and, early, **back navigation through history** (`pushState` for
+  sections and windows): an installed iOS web app does have the edge
+  swipe back (since iOS 12.2), but Slate pushes no history, so today it
+  does nothing (and leaves Slate in Safari; Android's back button too).
+  iOS's own back animation may clash with Slate's: tune on a real phone.
+  The owner tests on an iPhone 15, and has an Android for tests.
 - **The test scenario** the owner follows to hunt bugs (PC first, then
   the phone): https://claude.ai/artifact/WV8WgTtnTG5LsviRT4amDm. It runs
   with a throwaway account (`+slate1` / `+slate2` Gmail aliases), never a
   real one. Each step is marked ok / bug / odd with a note, saved in the
   page's database: read them with ArtifactData, collection `results`,
   documents `<pc|phone>__<step id>`.
+- **Later, a big one: an owl assistant for recommendations** (the
+  owner's idea; they'll draw the owl and name it). Not planned yet.
+  Claude's advice, which the owner took as realistic: no AI training;
+  an algorithm of its own, prototyped in Python on the owner's `.slate`
+  export, then ported to JavaScript to run in the browser (Slate has no
+  server; Supabase functions aren't Python). Signals: hearts, reviews,
+  dropped shows, rewatches, where you stopped, To Watch, where to watch
+  in your country, TMDB's keywords / people / similar titles; always
+  saying why. "People like you" doesn't work with an invite-only
+  crowd; free-text surveys are hard without an LLM (a keyword map
+  first). Stages: "Because you loved X", context filters, feedback
+  buttons, its own scoring, the survey.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - a privacy policy page;
