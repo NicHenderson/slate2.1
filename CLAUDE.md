@@ -546,7 +546,14 @@ directly.
   the finish window says the rating and review are from before the new
   episodes, and can stay as they are. Work on
   `claude/episode-tracking-shows-s9gixh`, then funny-pascal, then
-  `main`, as before. Stages proposed, not started yet.
+  `main`, as before. Stages: 1 mockups (1a the notice + "Keep
+  watching", 1b the list's new episodes, 1c the card sticker, 1d the
+  finish window's note; https://claude.ai/artifact/6nr6xj9CiFH68y1Y9Kzf65,
+  waiting for the owner's picks); 2 the list and the notice; 3 "Keep
+  watching" (and Edit without a finished date no longer wiping rating /
+  review); 4 finishing again, with the note; 5 the card sticker
+  (background TMDB checks, cached per device); 6 funny-pascal, then
+  `main`.
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
