@@ -609,7 +609,12 @@ function openFinishFromFinale(row, finale) {
 async function tickAllEpisodes(row) {
   if (!row.tmdb_id) return;
   try {
-    const aired = (await showOutline(row.tmdb_id)).seasons.filter((s) => hasAired(s.airDate));
+    // What was out by the date it was finished: one finished in the past
+    // hadn't seen what came out after (that's new, newSinceFinished).
+    const outline = await showOutline(row.tmdb_id);
+    const cutoff = finishedCutoff(row, outline);
+    const outBy = (date) => hasAired(date) && (!cutoff || date <= cutoff);
+    const aired = outline.seasons.filter((s) => outBy(s.airDate));
     const latest = aired.pop();
     const list = [];
     aired.forEach((s) => {
@@ -617,7 +622,7 @@ async function tickAllEpisodes(row) {
     });
     if (latest) {
       (await seasonEpisodes(row.tmdb_id, latest.number))
-        .filter((ep) => hasAired(ep.airDate))
+        .filter((ep) => outBy(ep.airDate))
         .forEach((ep) => list.push({ season: latest.number, episode: ep.number }));
     }
     if (!(await tickEpisodes(row, list))) throw new Error("the episodes weren't saved");

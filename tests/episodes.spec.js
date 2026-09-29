@@ -122,6 +122,22 @@ test("a show finished the usual way gets every episode ticked", async ({ page, b
   await page.fill("#start-finish-date", "2026-09-20");
   await page.click("#start-save");
   await expect.poll(() => ticked(backend, got).length).toBe(73);
+
+  // Finished on a date in the past: only what was out by then. Severance's
+  // season 2 came out in 2025, after it.
+  const [sev] = backend.seed(
+    "shows",
+    [{ tmdb_id: 95396, title: "Severance", total_seasons: 3, total_episodes: 19, started_watching_date: "2022-02-20", finished_watching_date: null }],
+    backend.user.id
+  );
+  await page.reload();
+  await expect(page.locator("#app")).toBeVisible();
+  await openWatching(page, "Severance");
+  await page.locator('#detail-modal [data-action="edit"]').click();
+  await page.fill("#start-finish-date", "2022-05-01");
+  await page.click("#start-save");
+  await expect.poll(() => ticked(backend, sev).length).toBe(9);
+  expect(ticked(backend, sev).every((e) => e.startsWith("1x"))).toBe(true);
 });
 
 test("up to date with a show still airing: when the next one airs", async ({ page, backend }) => {

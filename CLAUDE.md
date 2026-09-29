@@ -560,7 +560,9 @@ directly.
   before); the finished window's note and stamp (no button yet); the
   list shows the new ones unticked and flagged, opens on the first
   season with news, and a season still airing now counts only what's
-  out (TMDB's `last_episode_to_air`). 2 the list and the notice; 3 "Keep
+  out (TMDB's `last_episode_to_air`). Finishing a show now ticks only
+  what was out by its finished date (a past date had ticked episodes
+  that came out after it). 2 the list and the notice; 3 "Keep
   watching" (and Edit without a finished date no longer wiping rating /
   review); 4 finishing again, with the note; 5 the card sticker
   (background TMDB checks, cached per device); 6 funny-pascal, then
