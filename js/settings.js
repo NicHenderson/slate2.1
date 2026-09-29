@@ -273,6 +273,112 @@ backgroundSwatchesEl.addEventListener("click", (e) => {
   if (btn) saveSetting("background", btn.dataset.backgroundKey);
 });
 
+/* ---------- "Can't quite see it?": a loupe over the swatches ----------
+
+   A small window with one texture at twice its size, on the theme's own
+   color, with a paper card on it for scale. It opens on the one in use;
+   its chips flip between textures without saving, and "Use this one"
+   saves. It grows out of its button and zooms into the texture as it
+   opens (none of it with Reduce animations). */
+
+const loupeEl = document.getElementById("bg-loupe");
+const loupeOpenBtn = document.getElementById("bg-loupe-open");
+const loupeTextureEl = document.getElementById("bg-loupe-texture");
+const loupeChipsEl = document.getElementById("bg-loupe-chips");
+const loupeUseBtn = document.getElementById("bg-loupe-use");
+let loupeKey = null;
+
+// A spring that overshoots a touch and settles, where the browser can
+// ease that way; a plain overshooting curve where it can't.
+const LOUPE_SPRING = CSS.supports("transition-timing-function", "linear(0, 1)")
+  ? "linear(0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%, 1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%, 0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1)"
+  : "cubic-bezier(0.2, 1.3, 0.4, 1)";
+
+const loupeCalm = () =>
+  document.documentElement.dataset.reduceMotion === "true" || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function loupeAnimate(el, frames, options) {
+  if (loupeCalm() || typeof el.animate !== "function") return null;
+  return el.animate(frames, { fill: "backwards", ...options });
+}
+
+function showLoupeTexture(key, animate) {
+  loupeKey = key;
+  loupeTextureEl.dataset.texture = key;
+  paintNoiseTexture(loupeTextureEl, key, currentSettings.theme);
+  loupeChipsEl.innerHTML = BACKGROUNDS.map(
+    (k) => `<button type="button" class="bg-loupe-chip" data-loupe-key="${k}" aria-pressed="${k === key}">${BACKGROUND_LABELS[k]}</button>`
+  ).join("");
+  const inUse = key === currentSettings.background;
+  loupeUseBtn.disabled = inUse;
+  loupeUseBtn.textContent = inUse ? t("In use") : t("Use this one");
+  if (animate) {
+    loupeAnimate(loupeTextureEl, [{ opacity: 0.2, transform: "scale(2.3)" }, { opacity: 1, transform: "scale(2)" }], { duration: 320, easing: "cubic-bezier(0.16, 1, 0.3, 1)" });
+  }
+}
+
+function openLoupe() {
+  // Hangs just under its button, which sits wherever the hint wrapped to.
+  loupeEl.style.top = `${loupeOpenBtn.offsetTop + loupeOpenBtn.offsetHeight + 10}px`;
+  loupeEl.hidden = false;
+  loupeOpenBtn.setAttribute("aria-expanded", "true");
+  showLoupeTexture(currentSettings.background, false);
+  loupeAnimate(loupeEl, [{ transform: "translateY(-10px) scale(0.82)" }, { transform: "none" }], { duration: 620, easing: LOUPE_SPRING });
+  loupeAnimate(loupeEl, [{ opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0)" }], { duration: 220, easing: "ease-out" });
+  loupeAnimate(loupeTextureEl, [{ transform: "scale(1)" }, { transform: "scale(2)" }], { duration: 760, delay: 90, easing: "cubic-bezier(0.16, 1, 0.3, 1)" });
+  loupeAnimate(loupeEl.querySelector(".bg-loupe-card"), [{ opacity: 0, transform: "translateY(-18px) rotate(-14deg)" }, { opacity: 1, transform: "rotate(-4deg)" }], { duration: 640, delay: 220, easing: LOUPE_SPRING });
+  loupeChipsEl.querySelectorAll(".bg-loupe-chip").forEach((chip, i) => {
+    loupeAnimate(chip, [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 360, delay: 140 + i * 28, easing: "cubic-bezier(0.16, 1, 0.3, 1)" });
+  });
+  loupeEl.querySelector(".bg-loupe-close").focus({ preventScroll: true });
+  // It hangs over whatever is below, maybe past the bottom of the screen.
+  loupeEl.scrollIntoView({ block: "nearest", behavior: loupeCalm() ? "auto" : "smooth" });
+}
+
+function closeLoupe({ animate = true, refocus = false } = {}) {
+  if (loupeEl.hidden) return;
+  loupeOpenBtn.setAttribute("aria-expanded", "false");
+  const done = () => {
+    // Opened again while closing: that one wins.
+    if (loupeOpenBtn.getAttribute("aria-expanded") === "true") return;
+    loupeEl.hidden = true;
+  };
+  const out = animate
+    ? loupeAnimate(loupeEl, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-6px) scale(0.92)", filter: "blur(4px)" }], { duration: 170, easing: "ease-in", fill: "forwards" })
+    : null;
+  if (out) {
+    out.onfinish = () => {
+      done();
+      out.cancel();
+    };
+  } else done();
+  if (refocus) loupeOpenBtn.focus({ preventScroll: true });
+}
+
+loupeOpenBtn.addEventListener("click", () => {
+  if (loupeEl.hidden || loupeOpenBtn.getAttribute("aria-expanded") === "false") openLoupe();
+  else closeLoupe();
+});
+document.getElementById("bg-loupe-close").addEventListener("click", () => closeLoupe({ refocus: true }));
+loupeChipsEl.addEventListener("click", (e) => {
+  const chip = e.target.closest("[data-loupe-key]");
+  if (chip && chip.dataset.loupeKey !== loupeKey) showLoupeTexture(chip.dataset.loupeKey, true);
+});
+loupeUseBtn.addEventListener("click", () => {
+  saveSetting("background", loupeKey);
+  showLoupeTexture(loupeKey, false);
+});
+// On the document: "Use this one" goes disabled once used, and a disabled
+// button drops the focus out of the loupe.
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !loupeEl.hidden && loupeOpenBtn.getAttribute("aria-expanded") === "true") {
+    closeLoupe({ refocus: true });
+  }
+});
+document.addEventListener("pointerdown", (e) => {
+  if (!loupeEl.hidden && !loupeEl.contains(e.target) && !loupeOpenBtn.contains(e.target)) closeLoupe();
+});
+
 densityControl.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-density-value]");
   if (btn) saveSetting("density", btn.dataset.densityValue);
@@ -382,6 +488,7 @@ function showSettingsPage(name) {
     else item.removeAttribute("aria-current");
   });
   settingsLayout.classList.remove("at-menu");
+  closeLoupe({ animate: false });
   if (name === "look") renderBackgroundSwatches();
 }
 

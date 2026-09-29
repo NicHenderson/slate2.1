@@ -696,6 +696,10 @@ directly.
   ink). Line and dot patterns are CSS (css/base.css, `data-background`);
   felt, linen and grain are drawn on a canvas from a fixed seed
   (js/backgrounds.js), redrawn when the theme flips dark / light.
+  The owner's addition: "Can't quite see it?" under the hint opens a
+  small animated window (a spring, zooming into the texture) with the
+  texture at twice its size and a pinned card for scale; its chips
+  preview without saving, "Use this one" saves.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - large-grid performance.
