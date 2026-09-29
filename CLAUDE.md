@@ -529,8 +529,7 @@ directly.
   merged into `claude/funny-pascal-bk99gr`, tested there by the owner,
   and merged into `main` on their "súbelo a main" (PR #21, CI green on
   its exact head).
-  **Pending, raised by the owner (not built, waiting for their
-  answers):** a finished show that gets a new season. Today a finished
+  **Next, raised by the owner (not built yet):** a finished show that gets a new season. Today a finished
   show's list shows every episode out as watched (the new season too),
   and the only way back to Watching is Edit → clearing "Finished on",
   which also empties the rating and review. Claude's proposal: an
@@ -539,11 +538,15 @@ directly.
   the finished show's window says "New since you finished: season 4"
   with "Keep watching" (back to Watching, rating and review kept,
   everything aired by the finished date ticked, so "Up next" is S4 ·
-  E1); its list shows the new ones unticked, flagged "New". Open
-  questions: keep the original started date or a new one; finishing
-  again replaces the finished date (the old one isn't kept: that's show
-  rewatches, planned apart); whether cards in Shows get a "New season"
-  sticker (needs TMDB lookups in the background, a few per visit).
+  E1); its list shows the new ones unticked, flagged "New". The
+  owner's answers: keep the original started date; the old finished
+  date goes; finishing again sets the new one (the old isn't kept:
+  that's show rewatches, planned apart); yes to a "New season!"
+  sticker on cards in Shows; and when finishing again, a small note in
+  the finish window says the rating and review are from before the new
+  episodes, and can stay as they are. Work on
+  `claude/episode-tracking-shows-s9gixh`, then funny-pascal, then
+  `main`, as before. Stages proposed, not started yet.
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
