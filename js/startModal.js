@@ -27,7 +27,8 @@ function syncStartExtra() {
 // A show kept watching after something new came out (js/episodes.js) is
 // still rated and reviewed from before: finishing it again says so, and
 // that they can stay (the owner's pick, mockup 1d). No other show being
-// watched has a rating or review: they're only saved with a finished date.
+// watched has a rating or review: they're only saved with a finished date,
+// and emptied when it's cleared by hand.
 function syncRefinishNote() {
   const reopened = !startRow.finished_watching_date && (startRow.rating != null || Boolean(startRow.review));
   document.getElementById("start-refinish-note").classList.toggle("hidden", !reopened);
@@ -61,9 +62,12 @@ function openStartWatchingModal(row, isNewInsert = false) {
   syncRefinishNote();
   syncFutureNote(startDate);
   syncFutureNote(startFinishDate);
+  // Named for what it does: a show already started is being edited.
   document.getElementById("start-title").textContent = isNewInsert
     ? t("Add TV Show")
-    : t("Start watching");
+    : row.started_watching_date
+      ? t("Edit")
+      : t("Start watching");
   document.getElementById("start-show-title").textContent = row.title ?? t("Untitled");
   document.getElementById("start-show-meta").textContent =
     `${row.release_year ?? "—"} · ${detailDurationLine("shows", row)}`;
@@ -114,12 +118,16 @@ startForm.addEventListener("submit", async (e) => {
   };
 
   // The rating and review are optional, as for a movie, and only asked
-  // with a finished date. Without one they're left as they are: a show
-  // kept watching after a new season keeps its own (js/episodes.js).
+  // with a finished date. A finished date cleared by hand takes them with
+  // it (Slate's rule, the owner's); a show being watched keeps what it
+  // has: one kept watching after a new season keeps its own (js/episodes.js).
   if (finished) {
     const rating = startHeartsInput.get();
     payload.rating = rating > 0 ? rating : null;
     payload.review = startReview.value.trim() || null;
+  } else if (startRow.finished_watching_date) {
+    payload.rating = null;
+    payload.review = null;
   }
 
   startSave.disabled = true;

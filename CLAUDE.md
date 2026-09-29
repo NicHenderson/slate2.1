@@ -571,8 +571,11 @@ directly.
   js/confirmModal.js: what stays, what goes, a button in the theme's
   color), then ticks what was out by the finished date, unticks anything
   after it, and clears only the finished date ("Up next" = the first
-  new one). Edit saved without a finished date leaves rating and review
-  as they are (it used to empty them). Finishing again: a Watching show
+  new one). A finished date cleared by hand still empties rating and
+  review (Slate's rule, the owner's; a first version kept them, and the
+  owner caught it); only a show already Watching keeps its own when
+  edited. The dates window says "Edit" for a show already started (it
+  said "Start watching"; the owner asked). Finishing again: a Watching show
   with a rating or review (only a kept-watching one has them) shows the
   pencil note with its two arrows in the finish window; the new date
   replaces the old and the new episodes get ticked. 2 the list and the

@@ -348,6 +348,26 @@ test("keep watching a finished show with a new season, then finish it again: rat
   await expect(page.locator("#start-refinish-note")).toBeHidden();
 });
 
+test("a finished date cleared by hand takes the rating and review with it, and finishing again says nothing about new episodes", async ({ page, backend }) => {
+  const dark = backend.db.shows.find((s) => s.tmdb_id === 70523);
+  dark.review = "Loved it.";
+  await logIn(page);
+  await page.click('.nav-btn[data-section="shows-watched"]');
+  await page.locator("#grid-shows-watched .card", { hasText: "Dark" }).click();
+  await page.locator('#detail-modal [data-action="edit"]').click();
+  await expect(page.locator("#start-title")).toHaveText("Edit");
+  await page.fill("#start-finish-date", "");
+  await page.click("#start-save");
+  await expect.poll(() => dark.finished_watching_date).toBe(null);
+  expect(dark).toMatchObject({ rating: null, review: null });
+
+  await openWatching(page, "Dark");
+  await page.locator('#detail-modal [data-action="edit"]').click();
+  await page.fill("#start-finish-date", "2026-09-20");
+  await expect(page.locator("#start-extra")).toBeVisible();
+  await expect(page.locator("#start-refinish-note")).toBeHidden();
+});
+
 test("the card says where you are, and the saved episode count catches up with TMDB", async ({ page, backend }) => {
   const dark = watchingDark(backend);
   dark.total_episodes = 20; // saved when it was added; TMDB has 26 now
