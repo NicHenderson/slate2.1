@@ -724,8 +724,12 @@ directly.
   transfer rests on Supabase's DPA (standard contractual clauses);
   art. 14 sexies: report breaches to the Agency and keep a register.
   The owl recommender will need the policy's "no automated
-  decisions" line revisited (art. 8 bis, 14 ter l). Waiting for the
-  owner's review of v1.2 and their design pick.
+  decisions" line revisited (art. 8 bis, 14 ter l). The owner approved
+  v1.2 word for word (use it exactly) and picked mockup A (the pinned
+  sheet with an index), asking for friendly touches that say "this is
+  the legal part"; Claude's A v2 adds a file tab, a stamp, typed
+  document details, the article citations as pencil tags, and a signed
+  seal at the end.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - large-grid performance.
