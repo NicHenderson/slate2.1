@@ -694,6 +694,18 @@ directly.
   an index, B notes on the board, C a ruled letter signed by the owner),
   waiting for their pick. 3 `privacy.html`, English + Spanish, linked
   from the landing footer, Request access and Settings → Account.
+  Then the owner brought a (non-professional) Ley 21.719 checklist; what
+  Claude checked and proposed: the policy must also state the legal
+  basis, the rights by name (access, rectification, deletion,
+  opposition, portability, blocking), a 30-calendar-day answer (+30 once,
+  told in time) and the right to complain to the Agencia de Protección
+  de Datos Personales (30 business days); an unticked "I accept the
+  privacy policy and I'm 14 or older" box on Request access and on the
+  first-login password card, existing users asked once at their next
+  login (kept in user metadata, like `password_chosen`: no migration);
+  slateappmail@gmail.com as the formal channel (a @myslate.pages.dev
+  address can't exist); and two internal guides for the owner (answering
+  requests, and a security incident protocol). Waiting for the owner.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - large-grid performance.
