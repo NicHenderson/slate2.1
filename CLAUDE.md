@@ -680,6 +680,22 @@ directly.
   previews likely lack it), a 1200×630 share image, `robots.txt` +
   noindex for `tests/`, `tools/`, `supabase/`, docs, a `sitemap.xml`;
   the owner registers Google Search Console.
+- **Background textures, a setting** (the owner's request, Sept. 2026) —
+  built, waiting for the owner's check on
+  `claude/episode-tracking-shows-s9gixh` (restarted from `main` after
+  PR #22, so it doesn't wait on the privacy work in
+  `claude/funny-pascal-bk99gr`, whose CLAUDE.md has the notes on it).
+  Never use the photo of a cork board they once sent, only patterns
+  drawn by code (they said so). Of the gallery mockup
+  (https://claude.ai/artifact/9qvFwgMLmMBFVQmC1WKcDQ) they picked Felt,
+  Linen, Film grain, Grid, Dot grid, Pegboard, Stripes and None, as a
+  choice in Settings → Appearance ("Background", saved in the account's
+  settings as `background`, no migration). The old three-dot speckle is
+  gone; Dot grid is the default (Claude's pick, closest to it; the
+  landing page and the login screen always show it, in the brand's
+  ink). Line and dot patterns are CSS (css/base.css, `data-background`);
+  felt, linen and grain are drawn on a canvas from a fixed seed
+  (js/backgrounds.js), redrawn when the theme flips dark / light.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - large-grid performance.

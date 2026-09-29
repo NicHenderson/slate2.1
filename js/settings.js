@@ -11,6 +11,7 @@ const DEFAULT_SETTINGS = {
   theme: "midnight",
   reduceMotion: false,
   density: "comfortable",
+  background: "dots",
   openTo: "last",
   defaultSort: "recent",
   confirmDeletes: true,
@@ -51,6 +52,7 @@ const START_SECTIONS = ["movies-watched", "shows-watched", "movies-towatch", "sh
 const SETTING_CHOICES = {
   theme: Object.keys(THEME_META),
   density: ["comfortable", "compact"],
+  background: BACKGROUNDS,
   openTo: ["last", ...START_SECTIONS],
   defaultSort: ["recent", "oldest", "alpha-asc", "alpha-desc"],
 };
@@ -94,6 +96,7 @@ const appRootEl = document.getElementById("app");
 const themeSwatchesEl = document.getElementById("theme-swatches");
 const reduceMotionToggle = document.getElementById("reduce-motion-toggle");
 const densityControl = document.getElementById("density-control");
+const backgroundSwatchesEl = document.getElementById("background-swatches");
 const openToSelect = document.getElementById("setting-open-to");
 const defaultSortSelect = document.getElementById("setting-default-sort");
 const confirmDeletesToggle = document.getElementById("confirm-deletes-toggle");
@@ -157,6 +160,7 @@ function applySettings() {
   applyTheme(currentSettings.theme);
   applyReduceMotion(currentSettings.reduceMotion);
   applyDensity(currentSettings.density);
+  applyBackground(currentSettings.background, currentSettings.theme);
   applyDefaultSort();
   applyStartSection();
   renderSettingsPage();
@@ -169,6 +173,31 @@ function cacheSettings() {
 }
 
 /* ---------- the Settings page ---------- */
+
+// Each swatch shows its texture on the current theme's page color. The
+// noise ones are drawn only once Appearance is open: drawing all three
+// costs a moment nobody should wait for at startup.
+function renderBackgroundSwatches() {
+  backgroundSwatchesEl.innerHTML = BACKGROUNDS.map((key) => {
+    const active = key === currentSettings.background;
+    return `
+      <button
+        class="background-swatch${active ? " is-active" : ""}"
+        type="button"
+        data-background-key="${key}"
+        aria-pressed="${active}"
+      >
+        <span class="background-swatch-preview" data-texture="${key}" aria-hidden="true">
+          <span class="theme-swatch-check">✓</span>
+        </span>
+        <span class="background-swatch-label">${BACKGROUND_LABELS[key]}</span>
+      </button>`;
+  }).join("");
+  if (backgroundSwatchesEl.closest(".settings-page")?.hidden) return;
+  backgroundSwatchesEl.querySelectorAll("[data-texture]").forEach((el) => {
+    paintNoiseTexture(el, el.dataset.texture, currentSettings.theme);
+  });
+}
 
 function renderSettingsPage() {
   themeSwatchesEl.innerHTML = Object.keys(THEME_META)
@@ -215,6 +244,8 @@ function renderSettingsPage() {
   reduceMotionToggle.classList.toggle("is-on", currentSettings.reduceMotion);
   reduceMotionToggle.setAttribute("aria-pressed", String(currentSettings.reduceMotion));
 
+  renderBackgroundSwatches();
+
   densityControl.querySelectorAll("[data-density-value]").forEach((btn) => {
     const on = btn.dataset.densityValue === currentSettings.density;
     btn.classList.toggle("is-active", on);
@@ -235,6 +266,11 @@ themeSwatchesEl.addEventListener("click", (e) => {
 
 reduceMotionToggle.addEventListener("click", () => {
   saveSetting("reduceMotion", !currentSettings.reduceMotion);
+});
+
+backgroundSwatchesEl.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-background-key]");
+  if (btn) saveSetting("background", btn.dataset.backgroundKey);
 });
 
 densityControl.addEventListener("click", (e) => {
@@ -277,6 +313,8 @@ document.querySelectorAll(".nav-btn").forEach((btn) =>
 async function saveSetting(key, value) {
   currentSettings = normalizeSettings({ ...currentSettings, [key]: value });
   if (key === "theme") applyTheme(currentSettings.theme);
+  // Noise textures are drawn in the theme's colors, so a new theme redraws them.
+  if (key === "theme" || key === "background") applyBackground(currentSettings.background, currentSettings.theme);
   if (key === "reduceMotion") applyReduceMotion(currentSettings.reduceMotion);
   if (key === "density") applyDensity(currentSettings.density);
   if (key === "defaultSort") applyDefaultSort();
@@ -344,6 +382,7 @@ function showSettingsPage(name) {
     else item.removeAttribute("aria-current");
   });
   settingsLayout.classList.remove("at-menu");
+  if (name === "look") renderBackgroundSwatches();
 }
 
 settingsLayout.querySelector(".settings-menu").addEventListener("click", (e) => {
