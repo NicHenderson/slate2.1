@@ -205,3 +205,18 @@ test.describe("in Spanish", () => {
     expect((await value.boundingBox()).y).toBe(before.value.y);
   });
 });
+
+test("a movie added from Movies opens its form, with no word of a change elsewhere", async ({ page }) => {
+  await logIn(page);
+  await page.click('.nav-btn[data-section="movies-watched"]');
+  await page.click("#movies-watched .add-btn");
+  await page.click("#library-search-hint");
+  await page.fill("#modal-input", "inception");
+  await page.press("#modal-input", "Enter");
+  await page.locator("#modal-results .tmdb-hit-main").first().click();
+  await page.locator("#modal-preview .tmdb-preview-action:not([disabled])").click();
+  await expect(page.locator("#update-modal")).toBeVisible();
+  // The realtime echo of the add itself comes back a moment later.
+  await page.waitForTimeout(500);
+  await expect(page.locator("#update-modal .form-stale")).toHaveCount(0);
+});

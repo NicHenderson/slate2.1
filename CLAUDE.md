@@ -133,9 +133,10 @@ directly.
 
 ## The live Supabase project
 
-- Migrations `0001`–`0008` in `supabase/migrations/` have all been applied
+- Migrations `0001`–`0009` in `supabase/migrations/` have all been applied
   to the live project (0008 by the owner before testing stage 3's preview,
-  where Replace worked). **Never re-run `0006_invite_only.sql`**: it would
+  where Replace worked; 0009, episode tracking, by the owner in Sept. 2026,
+  checked: the table empty and in `supabase_realtime`). **Never re-run `0006_invite_only.sql`**: it would
   mark accounts made by hand as already having their own password.
 - Test a new migration on a throwaway local Postgres before the owner runs
   it in the SQL Editor. Supabase warns about any `delete`/`update` without
@@ -365,7 +366,8 @@ directly.
   and the profile card's numbers read (contrast ≥ 3), and some pops made
   darker, as they carry white text.
 - **Next: episode tracking for shows being watched** (the owner's idea;
-  nothing built yet, each stage with their go-ahead). An older Slate had
+  all nine stages built, in `claude/funny-pascal-bk99gr`, waiting for
+  the owner's final test before `main`). An older Slate had
   a "favorite episode" picker so close to a streaming app's episode list
   that the owner had to change it: it looked like it would play the
   episode. Avoid that here: no ▶, no "Watch now"; Slate's paper look.
@@ -387,11 +389,163 @@ directly.
   by one (a new table), so it needs: a migration (tested on a local
   Postgres first), `.slate` export / import and `replace_my_library()`
   carrying them, and the `tmdb` function allowing
-  `tv/<id>/season/<n>` (the owner redeploys it). Open questions, answered
-  in the mockups: episodes shown for finished shows too? finishing a
-  show ticks all its episodes (Claude: yes)? dropping one keeps where it
-  stopped (Claude: yes)? Stages: mockups → database + function →
-  "Up next" → the episodes window → the card, backups and import.
+  `tv/<id>/season/<n>` (the owner redeploys it). The owner's answers
+  (Sept. 2026), before the mockups:
+  - nothing ticked yet: the block asks "Where are you?" instead of
+    assuming S1 · E1 (shows already being watched start that way);
+  - a finished show has all its episodes ticked, stored as rows.
+    Finishing it the usual way ticks the ones missing; ticking the
+    finale of an ended / canceled show opens the usual finish window
+    (TMDB's status tells; a show still airing says "You're up to
+    date!" instead). Closing that window without saving unticks the
+    finale again;
+  - specials (season 0) are left out entirely;
+  - "up to date" says when the next episode airs, if TMDB knows;
+    episodes not aired yet can't be ticked;
+  - dropping a show keeps where it stopped ("Stopped at S2 · E5"; no
+    "Up next" or "Finished it?"). A dropped show is never picked up
+    again: in Slate you start it over, so "Back to To Watch" clears
+    its dates, rating and review, and now its ticked episodes too;
+  - no date per episode: only the show's started / finished dates, as
+    now;
+  - the new table is realtime, like movies and shows;
+  - `shows.total_episodes` (saved when the show was added) is refreshed
+    whenever its details are loaded, so the card's bar stays right.
+  Mockup 1a (https://claude.ai/artifact/6Xf5LBNaB1X5YapV5gMTUA): of a
+  taped photo, a sticky note and a to-do list, the owner picked the
+  sticky note, a touch smaller: a note in the theme's color under the
+  started date, the episode's image clipped to it, "Up next S1 · E4",
+  name, description, a hand-drawn box "Watched it" and "See all
+  episodes →". "Where are you?" picks season + episode ("Tick them")
+  or, just starting, offers E1.
+  Mockup 1b (https://claude.ai/artifact/MnAXSybJVDrwEppQU2UnSD): of
+  season tabs, folded seasons and numbered boxes, the owner picked the
+  season tabs (like To Watch / Watching / Dropped, each with "4/8"),
+  one season at a time: each row a hand-drawn box, "E4", the name, a
+  small description (up to three lines) and the image; "Up next"
+  marked; "Tick up to here" on hover (always, on a phone); it opens on
+  the next episode. The window shows for finished and dropped shows
+  too, **only to look** (nothing can be ticked there). Spanish says
+  "episodio", as the app already does, and the generic line is
+  "Episode 5 of season 2 of Dark." (Claude's defaults; the owner
+  didn't object).
+  Mockup 1c (https://claude.ai/artifact/Pt2SXRQBGSLFNcpzoTJVFg): of a
+  line and bar, a sticker on the poster and this season's boxes, the
+  owner picked the line and bar: under the card's title, the **last
+  episode ticked** in handwriting ("S2 · E5", not the next one) with
+  "14/26", a hand-drawn bar of the whole show, and the "Started 27d
+  ago" line as today. Nothing ticked: "Where are you?"; all aired
+  ticked: "Up to date"; dropped: "Stopped at S2 · E5" and the bar.
+  Stage 2 — done, applied live by the owner: `0009_watched_episodes.sql`
+  (the table, one row per ticked episode, unique per show + season +
+  episode, seasons from 1; row-level security like viewings, no
+  update; realtime; "back to To Watch" clears a show's episodes in the
+  database itself; `replace_my_library()` takes an optional
+  `episodes` list). Tested on a local Postgres with 0001–0008 first:
+  every rule, the published app's calls unchanged, a second run fails
+  harmlessly, and a Replace of 2,000 movies + 300 shows + 15,000
+  episodes in half a second.
+  Stage 3 — done, redeployed live by the owner: the `tmdb` function
+  allows `tv/<id>/season/<n>` (n from 1), with Deno tests.
+  Stage 4 — done, checked by the owner on the preview:
+  `js/episodes.js` + `css/episodes.css`. Episodes load with the library
+  (`STORE.episodes`), follow realtime, and are dropped locally when a
+  show is deleted or sent back to To Watch (as the database does). TMDB
+  season / details lookups are cached 30 minutes. The note: "Where are
+  you?" (season + aired episode picker, "Tick them", or "Watched it" on
+  E1), "Up next S1 · E4" with "Watched it", and a plain "You're up to
+  date!" (stage 5 adds the next air date and the finale).
+  `tests/episodes.spec.js` covers it (plus Spanish's generic line).
+  The owner's one note: the note jumped from a thin strip when it
+  loaded. Now it loads at about its final size (150px, 250px on a
+  phone, with an empty photo frame) and eases the rest, fading in.
+  Stage 5 — done: "You're
+  up to date!" adds "The next one, S3 · E1, airs on …" when TMDB knows
+  it (only for a show still going). For an ended / canceled show
+  (TMDB's status), ticking its last episode (from the note or "Tick
+  them") opens the usual finish window titled "Finished it?" with
+  today's date (`openFinishShowModal`, js/startModal.js); closing it
+  without saving deletes that tick again ("Not saved: S3 · E8 unticked
+  again."). If a finale is ticked but the show is still Watching, the
+  note says "Finished it?" with "Mark it as finished". Finishing a show
+  the usual way (newly finished) ticks every episode out
+  (`tickAllEpisodes`): earlier seasons by TMDB's counts, the latest
+  one episode by episode. A fake still-airing show (Severance, 95396)
+  is in tests/support/tmdbCatalog.js.
+  Checked by the owner (with The Simpsons' season 38, which premiered
+  on Sept. 27, 2026, for "up to date").
+  Fixed on the way (a bug in `main` too, found by the owner): adding a
+  movie from Movies opened its form with a false "This title just
+  changed in another window". The realtime echo lists a row's fields in
+  jsonb order (shortest key first), unlike the REST answer, and
+  `sameRow` compared them as text; it now compares field by field. The
+  fake backend sends realtime rows in that order too.
+  Stage 6 — done: the
+  episodes window (`#episodes-modal` in index.html, z-index 110: above
+  the detail window, under the finish window). "See all episodes →" on
+  every state of the note opens it on the next episode's season,
+  scrolled to it (marked "Up next"); tabs per season with ticked/out;
+  "3 of 26 watched" and a bar; each row a hand-drawn box, "E4", name,
+  a small description (3 lines) or "Airs on …" for one not out (its box
+  dashed, disabled), and the image. Ticking the finale there opens the
+  finish window too; saving it closes the episodes window. It follows
+  realtime, closes with the detail window, and with a show deleted
+  elsewhere. Checked by the owner.
+  Stage 7 — done: "Tick
+  up to here" on each row (on hover, always on a phone) ticks it and
+  every episode out before it, earlier seasons included (by TMDB's
+  counts), and finishes a show whose finale it reaches, as ticking does.
+  A finished show's detail window has "See all episodes →" (under the
+  dates); its list shows every episode out as watched, whatever's
+  stored (shows finished before episodes were tracked have no rows),
+  and nothing can be ticked. A dropped show's window has a "Stopped at
+  S1 · E3" note (the furthest ticked; none if nothing is) and a list
+  only to look at, that episode flagged "Stopped here". The episodes
+  window redraws when its show is finished or dropped elsewhere.
+  Stage 8 — done: the
+  card (`episodeProgressHtml`, from STORE only, no lookup): Watching
+  shows "S2 · E5" (the last ticked) + "14/26" + a hand-drawn bar, then
+  "Started 27d ago"; with nothing ticked, an empty bar that looks it
+  (dashed, hatched) and "0/9" (the owner found "Where are you?" on the
+  card ugly; the window's note still asks); "Up to date"
+  when everything out is ticked; Dropped shows "Stopped at S2 · E5" +
+  the bar. **`shows.total_episodes` now means episodes out**, not
+  TMDB's `number_of_episodes` (which counts announced ones, so a show
+  still airing never read as up to date): counted up to TMDB's
+  `last_episode_to_air` (`episodesOut`), saved that way when a show is
+  added and refreshed, with `total_seasons`, whenever its window opens
+  (`refreshShowCounts`: one update, only when they differ).
+  Stage 9 — done, checked by the owner:
+  `.slate` goes to **version 3**: each show lists its ticked episodes
+  (`"episodes": [{ season, episode }]`, in order) and `counts.episodes`.
+  Import reads them (only for a show that was started; capped, checked,
+  each once), the summary counts "N episodes ticked"; Add brings a new
+  show's episodes (a show already in the account keeps its own); Replace
+  sends them to `replace_my_library()` (0009's `episodes`). Versions 1
+  and 2 still import, their shows with nothing ticked; the published
+  app, on version 2, says a version 3 file is from a newer Slate.
+  With the owner's first go-ahead (Sept. 29, 2026), all of it was
+  merged into `claude/funny-pascal-bk99gr` (nothing new had landed there
+  or in `main`, so it only moved forward). Now: the owner tests it all
+  again on claude-funny-pascal-bk99gr.myslate.pages.dev; `main` only
+  on their second go-ahead ("súbelo a main"). No migration or redeploy
+  is left: 0009 and the `tmdb` function are already live.
+  Stages, each checked by the owner on the branch's preview: 1 mockups
+  (1a "Up next" and its states, 1b the episodes window, 1c the card);
+  2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
+  it" and "Where are you?" (its own quick pick, the window comes later);
+  5 up to date / the finale / finishing ticks all; 6 the window,
+  ticking one by one; 7 "Up to here", finished and dropped shows; 8 the
+  card and the refreshed episode count; 9 `.slate` and Replace.
+  The owner's flow for it: all stages on their own branch,
+  `claude/episode-tracking-shows-s9gixh` (made from
+  `claude/funny-pascal-bk99gr`; preview at
+  claude-episode-tracking-show.myslate.pages.dev, Cloudflare cuts the
+  name at 28 characters). When done, it's merged into
+  `claude/funny-pascal-bk99gr` (bring in whatever landed there or in
+  `main` meanwhile), tested again there, and goes to `main` only with
+  the owner's second go-ahead. `claude/funny-pascal-bk99gr` stays for
+  small fixes meanwhile.
   Then the phone project below, on `claude/mobile-app` brought up to date
   with `main`.
   The owner's decisions from that pass:

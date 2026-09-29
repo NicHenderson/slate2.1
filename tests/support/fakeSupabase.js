@@ -26,7 +26,7 @@
 
 const fs = require("fs");
 const crypto = require("crypto");
-const { TMDB_CATALOG, TMDB_WATCH_PROVIDERS, TMDB_WATCH_REGIONS, inLanguage } = require("./tmdbCatalog");
+const { TMDB_CATALOG, TMDB_WATCH_PROVIDERS, TMDB_WATCH_REGIONS, inLanguage, tmdbSeason } = require("./tmdbCatalog");
 
 const SUPABASE_JS = fs.readFileSync(require.resolve("@supabase/supabase-js/dist/umd/supabase.js"), "utf8");
 // Supabase's default cap on the rows one request returns.
@@ -48,6 +48,7 @@ const TABLES = {
   user_settings: { owner: "user_id", key: "user_id", required: [], defaults: () => ({ settings: {} }) },
   profiles: { owner: "user_id", key: "user_id", required: [], defaults: () => ({}) },
   viewings: { owner: "user_id", required: ["movie_id", "watched_on"], defaults: () => ({ note: null }) },
+  watched_episodes: { owner: "user_id", required: ["show_id", "season", "episode"], defaults: () => ({}) },
 };
 
 // Migration 0007's rules, as the database enforces them (a refusal is
@@ -177,6 +178,13 @@ function createBackend() {
     return db.collections.find((c) => c.id === row.collection_id)?.user_id ?? null;
   }
 
+  // The realtime server builds each row as jsonb, which orders its keys
+  // shortest first, then alphabetically: not in the table's column order,
+  // as the REST answers are. (Comparing the two as text once made a title
+  // just added look changed in another window.)
+  const jsonbOrder = (row) =>
+    Object.fromEntries(Object.entries(row).sort(([a], [b]) => a.length - b.length || (a < b ? -1 : a > b ? 1 : 0)));
+
   // What the realtime server does after a committed write: tell every
   // channel of the row's owner that listens to this table. A beat later,
   // as over a real network — and after the write's own response.
@@ -188,7 +196,7 @@ function createBackend() {
       commit_timestamp: new Date().toISOString(),
       type,
       columns: [],
-      record: type === "DELETE" ? {} : { ...row },
+      record: type === "DELETE" ? {} : jsonbOrder(row),
       old_record: type === "INSERT" ? {} : { id: (before ?? row).id },
       errors: null,
     };
@@ -255,6 +263,25 @@ function createBackend() {
     const gone = db.viewings.filter((v) => movieIds.includes(v.movie_id));
     db.viewings = db.viewings.filter((v) => !gone.includes(v));
     gone.forEach((v) => pushChange("viewings", "DELETE", null, v));
+  }
+
+  /* ---------- watched episodes (migration 0009) ---------- */
+
+  function checkEpisode(row, userId) {
+    const show = db.shows.find((s) => s.id === row.show_id);
+    if (!show || show.user_id !== userId) refuse('new row violates row-level security policy for table "watched_episodes"', "42501", 403);
+    if (!(row.season >= 1 && row.season <= 999)) refuse('new row for relation "watched_episodes" violates check constraint "watched_episodes_season_check"', "23514");
+    if (db.watched_episodes.some((e) => e.show_id === row.show_id && e.season === row.season && e.episode === row.episode)) {
+      refuse('duplicate key value violates unique constraint "watched_episodes_show_id_season_episode_key"', "23505", 409);
+    }
+  }
+
+  // A show's episodes go with it (on delete cascade), and when it's sent
+  // back to To Watch (the migration's rule).
+  function dropEpisodesOf(showIds) {
+    const gone = db.watched_episodes.filter((e) => showIds.includes(e.show_id));
+    db.watched_episodes = db.watched_episodes.filter((e) => !gone.includes(e));
+    gone.forEach((e) => pushChange("watched_episodes", "DELETE", null, e));
   }
 
   /* ---------- database (PostgREST) ---------- */
@@ -326,7 +353,7 @@ function createBackend() {
     users.delete(userId);
     for (const [token, id] of sessions) if (id === userId) sessions.delete(token);
     for (const [token, id] of refreshTokens) if (id === userId) refreshTokens.delete(token);
-    for (const table of ["movies", "shows", "collections", "user_settings", "profiles", "viewings"]) {
+    for (const table of ["movies", "shows", "collections", "user_settings", "profiles", "viewings", "watched_episodes"]) {
       db[table] = db[table].filter((row) => row.user_id !== userId);
     }
     const colIds = new Set(db.collections.map((c) => c.id));
@@ -369,6 +396,12 @@ function createBackend() {
       if (!v.watched_on) refuse('null value in column "watched_on" of relation "viewings" violates not-null constraint', "23502");
       return { id: crypto.randomUUID(), user_id: userId, note: null, movie_id: v.movie_id, watched_on: v.watched_on, created_at: v.created_at ?? new Date().toISOString() };
     });
+    const showIds = new Set(rows.shows.map((row) => row.id));
+    const episodes = list("episodes").map((e) => {
+      if (!showIds.has(e.show_id)) refuse('new row violates row-level security policy for table "watched_episodes"', "42501", 403);
+      if (!(e.season >= 1)) refuse('new row for relation "watched_episodes" violates check constraint "watched_episodes_season_check"', "23514");
+      return { id: crypto.randomUUID(), user_id: userId, show_id: e.show_id, season: e.season, episode: e.episode, created_at: e.created_at ?? new Date().toISOString() };
+    });
     const items = list("items").map((item) => {
       if (!collectionIds.has(item.collection_id)) refuse('new row violates row-level security policy for table "collection_items"', "42501", 403);
       return { id: crypto.randomUUID(), created_at: new Date().toISOString(), ...Object.fromEntries(Object.entries(item).filter(([, v]) => v != null)) };
@@ -378,13 +411,13 @@ function createBackend() {
     const removed = ["movies", "shows"].reduce((n, table) => n + mine(table).filter((row) => !kept[table].has(row.tmdb_id)).length, 0);
 
     // Out with the old (items, viewings by cascade)…
-    for (const table of ["collection_items", "viewings", "collections", "movies", "shows"]) {
+    for (const table of ["collection_items", "viewings", "watched_episodes", "collections", "movies", "shows"]) {
       const gone = mine(table);
       db[table] = db[table].filter((row) => !gone.includes(row));
       gone.forEach((row) => pushChange(table, "DELETE", null, row));
     }
     // …and in with the file's. Movies go in undated; their viewings date them.
-    for (const [table, list] of [["movies", rows.movies], ["shows", rows.shows], ["viewings", viewings], ["collections", rows.collections], ["collection_items", items]]) {
+    for (const [table, list] of [["movies", rows.movies], ["shows", rows.shows], ["viewings", viewings], ["watched_episodes", episodes], ["collections", rows.collections], ["collection_items", items]]) {
       list.forEach((row) => {
         if (table === "movies") row.watched_date = null;
         db[table].push(row);
@@ -528,6 +561,7 @@ function createBackend() {
         if (!canSee(table, row, userId)) return fail(403, "42501", `new row violates row-level security policy for table "${table}"`);
         try {
           if (table === "viewings") checkViewing(row, userId);
+          if (table === "watched_episodes") checkEpisode(row, userId);
         } catch (e) {
           return fail(e.status, e.code, e.message);
         }
@@ -543,6 +577,7 @@ function createBackend() {
 
     if (method === "PATCH") {
       const changes = req.postDataJSON();
+      if (table === "watched_episodes") return fail(403, "42501", "permission denied for table watched_episodes");
       const rows = db[table].filter((row) => canSee(table, row, userId)).filter(rowFilter(url));
       // All or nothing, as one statement: every row checked first.
       try {
@@ -562,6 +597,7 @@ function createBackend() {
           if (before.movie_id !== row.movie_id) syncWatchedDate(before.movie_id);
         }
         if (table === "movies" && "watched_date" in changes) movieDateWritten(row, before.watched_date);
+        if (table === "shows" && before.started_watching_date != null && row.started_watching_date == null) dropEpisodesOf([row.id]);
       });
       log.push(`UPDATE ${table} ${rows.length}`);
       return answer(rows);
@@ -578,6 +614,7 @@ function createBackend() {
       db[table] = db[table].filter((row) => !gone.includes(row));
       gone.forEach((row) => pushChange(table, "DELETE", null, row));
       if (table === "movies") dropViewingsOf(gone.map((m) => m.id));
+      if (table === "shows") dropEpisodesOf(gone.map((s) => s.id));
       if (table === "viewings") new Set(gone.map((v) => v.movie_id)).forEach(syncWatchedDate);
       log.push(`DELETE ${table} ${gone.length}`);
       return answer(gone);
@@ -607,6 +644,11 @@ function createBackend() {
     if (path === "watch/providers/regions") return reply(200, { results: TMDB_WATCH_REGIONS });
     if ((m = /^(movie|tv)\/(\d+)\/watch\/providers$/.exec(path))) {
       return reply(200, { id: Number(m[2]), results: TMDB_WATCH_PROVIDERS[`${m[1]}/${m[2]}`] ?? {} });
+    }
+    if ((m = /^tv\/(\d+)\/season\/([1-9]\d*)$/.exec(path))) {
+      const season = tmdbSeason(Number(m[1]), Number(m[2]), language);
+      if (!season) return reply(404, { success: false, status_code: 34, status_message: "The resource you requested could not be found." });
+      return reply(200, season);
     }
     if ((m = /^(movie|tv)\/(\d+)(\/videos)?$/.exec(path))) {
       const title = TMDB_CATALOG[m[1]].find((t) => t.id === Number(m[2]));

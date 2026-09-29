@@ -15,6 +15,9 @@ const startHeartsInput = createHeartsInput(
 );
 
 let startRow = null;
+// Told whether the window was saved when it closes: set by
+// openFinishShowModal (ticking a show's last episode, js/episodes.js).
+let startAfterClose = null;
 
 function syncStartExtra() {
   const finished = Boolean(startFinishDate.value);
@@ -39,6 +42,7 @@ startDate.addEventListener("input", syncDatesError);
 
 function openStartWatchingModal(row, isNewInsert = false) {
   startRow = row;
+  startAfterClose = null;
   clearStaleNote(startForm);
   startHeartsInput.set(row.rating ?? 0);
   startDate.value = row.started_watching_date || localToday();
@@ -63,8 +67,22 @@ function openStartWatchingModal(row, isNewInsert = false) {
   startModal.classList.remove("hidden");
 }
 
-function closeStartModal() {
+// The same window, to finish a Watching show: today's date already in
+// "Finished on", so the rating and review show at once.
+function openFinishShowModal(row, afterClose = null) {
+  openStartWatchingModal(row);
+  startAfterClose = afterClose;
+  document.getElementById("start-title").textContent = t("Finished it?");
+  startFinishDate.value = localToday();
+  syncStartExtra();
+  syncFutureNote(startFinishDate);
+}
+
+function closeStartModal(saved = false) {
   startModal.classList.add("hidden");
+  const after = startAfterClose;
+  startAfterClose = null;
+  after?.(saved);
 }
 
 startForm.addEventListener("submit", async (e) => {
@@ -79,6 +97,7 @@ startForm.addEventListener("submit", async (e) => {
   }
 
   const finished = startFinishDate.value || null;
+  const newlyFinished = Boolean(finished) && !startRow.finished_watching_date;
   const payload = {
     started_watching_date: startDate.value || null,
     finished_watching_date: finished,
@@ -108,14 +127,16 @@ startForm.addEventListener("submit", async (e) => {
     return;
   }
 
-  closeStartModal();
+  closeStartModal(true);
   closeDetailModal();
   applyLocalChange("shows", "UPDATE", data);
   showToast(finished ? t("Marked as watched.") : t("Started watching."));
+  // A finished show has every episode ticked (js/episodes.js).
+  if (newlyFinished) tickAllEpisodes(data);
 });
 
-startCancel.addEventListener("click", closeStartModal);
-startClose.addEventListener("click", closeStartModal);
+startCancel.addEventListener("click", () => closeStartModal());
+startClose.addEventListener("click", () => closeStartModal());
 
 document.getElementById("start-delete").addEventListener("click", () => {
   if (startRow) openDeleteConfirm("shows", startRow);

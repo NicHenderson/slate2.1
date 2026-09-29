@@ -183,12 +183,14 @@ function renderDetail(cfg, row) {
   }
 
   if (cfg.state === "dropped") {
+    // Under the date: where it stopped (js/episodes.js).
     detailBody.innerHTML = `
       ${head}
       <div class="detail-section">
         <p class="detail-label">${t("Started on")}</p>
         <p class="detail-date-value">${formatDate(row.started_watching_date)}</p>
       </div>
+      ${upNextSlotHtml(row)}
       <div class="detail-actions detail-actions-start">
         <button class="complete-btn" type="button" data-action="send-to-watchlist">${t('↩ Back to "To Watch"')}</button>
         ${addToColHtml}
@@ -199,12 +201,14 @@ function renderDetail(cfg, row) {
   }
 
   if (cfg.state === "watching") {
+    // Under the date: where you are in it (js/episodes.js).
     detailBody.innerHTML = `
       ${head}
       <div class="detail-section">
         <p class="detail-label">${t("Started on")}</p>
         <p class="detail-date-value">${formatDate(row.started_watching_date)}</p>
       </div>
+      ${upNextSlotHtml(row)}
       <div class="detail-actions detail-actions-start">
         <button class="edit-btn" type="button" data-action="edit">${t("✎ Edit")}</button>
         ${addToColHtml}
@@ -237,6 +241,7 @@ function renderDetail(cfg, row) {
       </div>
     </div>
     ${cfg.table === "movies" ? viewingsListHtml(row) : ""}
+    ${cfg.table === "shows" && row.tmdb_id ? `<div class="detail-section">${SEE_ALL_HTML}</div>` : ""}
     <div class="detail-section">
       <p class="detail-label">${t("Personal review")}</p>
       ${review}
@@ -297,6 +302,8 @@ function showDetailMain() {
   renderDetail(cfg, row);
   loadDetailTrailer(cfg.table, row);
   loadDetailWhereToWatch(cfg.table, row);
+  loadUpNext(row);
+  if (cfg.table === "shows") refreshShowCounts(row);
   updateDetailNav();
 }
 
@@ -326,6 +333,8 @@ function loadDetailWhereToWatch(table, row) {
 
 function closeDetailModal() {
   detailModal.classList.add("hidden");
+  // A show's episodes window goes with it (js/episodes.js).
+  closeEpisodesWindow();
   // A hidden modal still plays audio, so an open trailer has to go with it.
   const trailerBtn = detailBody.querySelector('[data-action="toggle-trailer"]');
   if (trailerBtn && detailBody.querySelector(".detail-trailer-frame")) toggleTrailer(trailerBtn);
@@ -430,7 +439,14 @@ function toggleTrailer(btn) {
    opened after another tab had changed the review brought the old text
    back, and saving would have put it back in place of the new one. */
 
-const sameRow = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+// Field by field: a realtime echo lists a row's fields in another order
+// than the save's own answer (the server builds it as jsonb), so comparing
+// the two as text once warned of a change elsewhere right after adding a
+// movie from Movies, whose form opens at once.
+const sameRow = (a, b) => {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  return [...keys].every((key) => JSON.stringify(a[key]) === JSON.stringify(b[key]));
+};
 
 // Called by js/realtime.js after STORE has taken the change. `before` is the
 // title as STORE held it until now.
@@ -471,6 +487,7 @@ function closeWindowsOf(table, id) {
     closeStartModal();
     closed = true;
   }
+  if (table === "shows" && closeEpisodesWindowOf(id)) closed = true;
   if (open(confirmModal) && pendingDelete?.table === table && pendingDelete.row?.id === id) {
     closeConfirmModal();
     closed = true;
@@ -530,6 +547,7 @@ detailClose.addEventListener("click", closeDetailModal);
 
 document.addEventListener("keydown", (e) => {
   if (detailModal.classList.contains("hidden")) return;
+  if (!document.getElementById("episodes-modal").classList.contains("hidden")) return;
   if (!document.getElementById("update-modal").classList.contains("hidden")) return;
   if (!document.getElementById("start-modal").classList.contains("hidden")) return;
 
@@ -595,7 +613,7 @@ async function dropSeries(row, btn) {
 
 async function sendToWatchlist(row, btn) {
   btn.disabled = true;
-  const { error } = await db
+  const { data, error } = await db
     .from("shows")
     .update({
       started_watching_date: null,

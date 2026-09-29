@@ -76,6 +76,11 @@ Deno.test("only the requests Slate makes", async () => {
     "movie/1/credits",
     "movie/1/watch/providers/extra",
     "watch/providers/movie",
+    "tv/1399/season/0",
+    "tv/1399/season/01",
+    "tv/1399/season/1/episode/2",
+    "tv/1399/season/abc",
+    "movie/348/season/1",
     "movie/1/../../account",
     "movie/1?api_key=other",
     "/movie/1",
@@ -135,6 +140,14 @@ Deno.test("where to watch a title, and the countries that covers", async () => {
     "/3/tv/1399/watch/providers",
     "/3/watch/providers/regions",
   ]);
+});
+
+Deno.test("a show's season, for its episodes", async () => {
+  const { deps, calls } = setup();
+  assertEquals((await handle(post({ path: "tv/1399/season/1", language: "es-MX" }), deps)).status, 200);
+  assertEquals((await handle(post({ path: "tv/1399/season/12" }), deps)).status, 200);
+  assertEquals(calls.map((c) => new URL(c).pathname), ["/3/tv/1399/season/1", "/3/tv/1399/season/12"]);
+  assertEquals(calls.map((c) => new URL(c).searchParams.get("language")), ["es-MX", "en-US"]);
 });
 
 Deno.test("TMDB's own errors come back as they are", async () => {

@@ -10,6 +10,8 @@ function rerenderGrids(gridIds) {
 function handleChange(storeKey, gridIds, payload) {
   const id = payload.eventType === "DELETE" ? payload.old.id : payload.new.id;
   const before = STORE[storeKey].get(id);
+  // A show deleted or started over takes its ticked episodes (js/episodes.js).
+  if (storeKey === "shows") episodesFollowShow(payload, before);
   switch (payload.eventType) {
     case "INSERT":
     case "UPDATE":
@@ -78,6 +80,11 @@ function subscribeRealtime() {
       "postgres_changes",
       { event: "*", schema: "public", table: "viewings" },
       handleViewingChange
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "watched_episodes" },
+      handleEpisodeChange
     )
     .subscribe((status, err) => {
       if (status === "SUBSCRIBED") console.log("Realtime connected");

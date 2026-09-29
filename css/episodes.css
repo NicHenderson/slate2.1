@@ -1,0 +1,712 @@
+/* ---------- Episodes (js/episodes.js) ----------
+
+   "Up next", in a Watching show's detail window: a sticky note in the
+   theme's color, taped under the date it was started, with the episode's
+   image clipped to it (the owner's pick of three mockups, a touch
+   smaller than drawn). Ticking is a box drawn by hand, not a play
+   button: an older Slate's episode picker looked so much like a
+   streaming app's that it seemed to play the episode. */
+
+.up-next {
+  position: relative;
+  max-width: 600px;
+  margin: 24px 8px 4px 0;
+  padding: 17px 18px 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 158px;
+  gap: 16px;
+  align-items: start;
+  background: color-mix(in srgb, var(--accent-strong) 18%, var(--paper));
+  box-shadow: 2px 6px 14px rgba(0, 0, 0, 0.18);
+  transform: rotate(-0.8deg);
+}
+
+/* The tape holding it. */
+.up-next::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 38%;
+  width: 74px;
+  height: 19px;
+  background: color-mix(in srgb, var(--paper) 60%, transparent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transform: rotate(-3deg);
+}
+
+.up-next-text:only-child {
+  grid-column: 1 / -1;
+}
+
+/* Loading: about the note's usual height, with an empty photo frame. */
+.up-next.is-loading {
+  min-height: 150px;
+}
+
+.up-next.is-loading .up-next-still {
+  opacity: 0.35;
+}
+
+.up-next-loading {
+  font-size: 13.5px;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.up-next-text {
+  min-width: 0;
+}
+
+.up-next-head {
+  font-family: var(--font-hand);
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+.up-next-code {
+  color: var(--accent-deep);
+}
+
+.up-next-name {
+  margin-top: 2px;
+  font-family: var(--font-hand);
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.up-next-desc {
+  margin-top: 6px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.up-next-desc.is-generic {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.up-next-hint {
+  margin-top: 6px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.up-next-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin-top: 10px;
+}
+
+/* The episode's image, clipped on with a paperclip. */
+.up-next-photo {
+  position: relative;
+  margin: 0;
+  padding: 5px;
+  background: #fff;
+  box-shadow: 1px 3px 8px rgba(0, 0, 0, 0.25);
+  transform: rotate(3deg);
+}
+
+.up-next-clip {
+  position: absolute;
+  top: -16px;
+  left: 18px;
+  width: 16px;
+  height: 40px;
+  border: 2.5px solid #8b8f96;
+  border-bottom-color: transparent;
+  border-radius: 9px;
+}
+
+.up-next-still {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--surface);
+}
+
+/* No image of the episode: the show's poster, whole, on a dark ground. */
+.up-next-still.is-poster {
+  object-fit: contain;
+  background: #1a1a1a;
+}
+
+/* "Watched it": a box drawn by hand; ticking it draws the tick. */
+.up-next-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font-family: var(--font-hand);
+  font-size: 19px;
+  cursor: pointer;
+}
+
+.up-next-box {
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border: 2.5px solid var(--text);
+  border-radius: 3px 5px 4px 6px;
+  background: var(--paper);
+  transform: rotate(-3deg);
+  transition: background var(--transition);
+}
+
+.up-next-box svg {
+  position: absolute;
+  inset: -6px -8px -2px -2px;
+  width: 35px;
+  height: 31px;
+  overflow: visible;
+}
+
+.up-next-box path {
+  fill: none;
+  stroke: var(--accent-deep);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  transition: stroke-dashoffset 0.35s ease;
+}
+
+.up-next-check.is-checked .up-next-box path {
+  stroke-dashoffset: 0;
+}
+
+.up-next-check:hover:not(:disabled) .up-next-box,
+.up-next-check:focus-visible .up-next-box {
+  background: color-mix(in srgb, var(--accent-strong) 18%, var(--paper));
+}
+
+.up-next-check:disabled {
+  cursor: default;
+}
+
+/* "Where are you?": up to which episode, or the first one. */
+.up-next-pick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.up-next-pick label {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.up-next-select {
+  max-width: 100%;
+  padding: 6px 8px;
+  border: 1.5px solid color-mix(in srgb, var(--text) 30%, transparent);
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+}
+
+.up-next-pick-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  box-shadow: 3px 4px 0 var(--accent-deep);
+  transform: rotate(-1deg);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.up-next-pick-btn:hover:not(:disabled) {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 6px 0 var(--accent-deep);
+}
+
+.up-next-pick-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.up-next-or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  font-family: var(--font-hand);
+  font-size: 17px;
+  color: var(--text-muted);
+}
+
+.up-next-or::before,
+.up-next-or::after {
+  content: "";
+  flex: 1;
+  border-top: 1.5px dashed color-mix(in srgb, var(--text) 25%, transparent);
+}
+
+/* A phone: the image above the text, not beside it. */
+@media (max-width: 600px) {
+  .up-next {
+    grid-template-columns: minmax(0, 1fr);
+    margin-right: 0;
+  }
+
+  .up-next-photo {
+    order: -1;
+    max-width: 190px;
+    margin-top: 8px;
+  }
+
+  /* The image sits above the text here, so the note is taller. */
+  .up-next.is-loading {
+    min-height: 250px;
+  }
+}
+
+/* "See all episodes →": a hand-written link on the note. */
+.up-next-all {
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--accent-deep);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  text-decoration: underline wavy;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.up-next-all:hover,
+.up-next-all:focus-visible {
+  text-decoration-style: solid;
+}
+
+/* ---------- the episodes window ----------
+   Above the detail window, under the finish window (120) that ticking a
+   show's last episode opens over it. */
+
+.episodes-backdrop {
+  z-index: 110;
+}
+
+.episodes-modal {
+  position: relative;
+  width: min(780px, calc(100vw - 32px));
+  max-height: min(760px, calc(100vh - 48px));
+  padding: 22px 24px 16px;
+}
+
+.episodes-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
+.episodes-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.ep-loading {
+  padding: 18px 4px;
+  font-size: 13.5px;
+  font-style: italic;
+  color: var(--text-muted);
+  list-style: none;
+}
+
+.ep-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px 24px;
+  padding-right: 36px;
+}
+
+.ep-head-text {
+  min-width: 0;
+}
+
+.ep-title {
+  font-family: var(--font-hand);
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.ep-sub {
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.ep-progress {
+  flex: 0 1 240px;
+  min-width: 180px;
+}
+
+.ep-progress-text {
+  font-family: var(--font-hand);
+  font-size: 18px;
+  color: var(--accent-deep);
+  text-align: right;
+}
+
+.ep-bar {
+  position: relative;
+  height: 10px;
+  margin-top: 4px;
+  border: 2px solid var(--text);
+  border-radius: 6px 4px 7px 5px;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.ep-bar span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--accent-strong);
+  transition: width 0.3s ease;
+}
+
+/* The seasons, as tabs like To Watch / Watching / Dropped. */
+.ep-tabs {
+  display: flex;
+  flex: none;
+  overflow-x: auto;
+  margin-top: 14px;
+  padding: 2px 2px 8px;
+}
+
+.ep-tab {
+  flex: none;
+  margin-right: -1.5px;
+  padding: 7px 14px;
+  border: 1.5px dashed color-mix(in srgb, var(--text) 28%, transparent);
+  background: var(--paper);
+  color: var(--text);
+  font-family: var(--font-hand);
+  font-size: 18px;
+  line-height: 1.1;
+  cursor: pointer;
+}
+
+.ep-tab small {
+  margin-left: 5px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.ep-tab[aria-selected="true"] {
+  border-style: solid;
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
+  color: #fff;
+}
+
+.ep-tab[aria-selected="true"] small {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.ep-list {
+  flex: 1;
+  min-height: 0;
+  margin: 4px 0 0;
+  padding: 0 6px 0 0;
+  list-style: none;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.ep-row {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 128px;
+  gap: 12px;
+  align-items: start;
+  padding: 12px 4px;
+  border-top: 1.5px dashed color-mix(in srgb, var(--text) 16%, transparent);
+}
+
+.ep-row:first-child {
+  border-top: 0;
+}
+
+.ep-row.is-next {
+  background: color-mix(in srgb, var(--accent-strong) 10%, var(--paper));
+}
+
+.ep-box-btn {
+  padding: 2px 0 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.ep-box-btn:disabled {
+  cursor: default;
+}
+
+.ep-row.is-done .up-next-box path,
+.ep-box-btn.is-checked .up-next-box path {
+  stroke-dashoffset: 0;
+}
+
+.ep-box-btn:hover:not(:disabled) .up-next-box,
+.ep-box-btn:focus-visible .up-next-box {
+  background: color-mix(in srgb, var(--accent-strong) 18%, var(--paper));
+}
+
+.ep-row.is-unaired .up-next-box {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--text) 35%, transparent);
+}
+
+.ep-main {
+  min-width: 0;
+}
+
+.ep-line {
+  line-height: 1.2;
+}
+
+.ep-num {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent-deep);
+}
+
+.ep-name {
+  font-family: var(--font-hand);
+  font-size: 19px;
+}
+
+.ep-row.is-done .ep-name,
+.ep-row.is-unaired .ep-name {
+  color: var(--text-muted);
+}
+
+.ep-flag {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 8px;
+  background: var(--accent-strong);
+  color: #fff;
+  font-family: var(--font-hand);
+  font-size: 14px;
+  vertical-align: 2px;
+  transform: rotate(-2deg);
+}
+
+.ep-desc {
+  display: -webkit-box;
+  margin-top: 3px;
+  overflow: hidden;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-muted);
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.ep-row.is-next .ep-desc {
+  color: var(--text);
+}
+
+.ep-desc.is-generic {
+  font-style: italic;
+}
+
+/* "Tick up to here": shown on the row pointed at (always, on a phone). */
+.ep-upto {
+  display: inline-flex;
+  margin-top: 6px;
+  padding: 3px 9px;
+  border: 1.5px dashed color-mix(in srgb, var(--accent-deep) 45%, transparent);
+  border-radius: 2px;
+  background: none;
+  color: var(--accent-deep);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  visibility: hidden;
+}
+
+.ep-row:hover .ep-upto,
+.ep-row:focus-within .ep-upto {
+  visibility: visible;
+}
+
+.ep-upto:hover,
+.ep-upto:focus-visible {
+  border-style: solid;
+  border-color: var(--accent-deep);
+  background: color-mix(in srgb, var(--accent-strong) 10%, transparent);
+}
+
+/* A finished or dropped show's list: only to look at. */
+.ep-read-only {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--accent-strong) 14%, var(--paper));
+  font-family: var(--font-hand);
+  font-size: 16px;
+  line-height: 1.3;
+  transform: rotate(-0.4deg);
+}
+
+.ep-air {
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.ep-photo {
+  margin: 0;
+  padding: 4px;
+  background: #fff;
+  box-shadow: 1px 3px 7px rgba(0, 0, 0, 0.22);
+  transform: rotate(1.5deg);
+}
+
+.ep-photo img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--surface);
+}
+
+.ep-photo img.is-poster {
+  object-fit: contain;
+  background: #1a1a1a;
+}
+
+@media (max-width: 600px) {
+  .episodes-modal {
+    padding: 18px 14px 12px;
+  }
+
+  .ep-title {
+    font-size: 24px;
+  }
+
+  .ep-progress {
+    flex-basis: 100%;
+  }
+
+  .ep-progress-text {
+    text-align: left;
+  }
+
+  .ep-row {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  /* No pointing on a touch screen. */
+  .ep-upto {
+    visibility: visible;
+  }
+
+  .ep-photo {
+    grid-column: 2;
+    max-width: 180px;
+  }
+}
+
+/* ---------- the card (Watching and Dropped) ----------
+   Under the title: the last episode ticked in handwriting, "14/26", and
+   a hand-drawn bar of the whole show. */
+
+.card-episode {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 3px;
+}
+
+.card-episode-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 6px;
+}
+
+.card-episode-code {
+  font-family: var(--font-hand);
+  font-size: 18px;
+  line-height: 1;
+  color: var(--accent-deep);
+}
+
+.card-episode-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.card-episode-bar {
+  position: relative;
+  display: block;
+  height: 8px;
+  border: 1.8px solid var(--text);
+  border-radius: 5px 3px 6px 4px;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.card-episode-bar span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--accent-strong);
+}
+
+/* Nothing ticked yet: a dashed, hatched, empty bar, the count after it. */
+.card-episode.is-empty .card-episode-line {
+  justify-content: flex-end;
+}
+
+.card-episode.is-empty .card-episode-bar {
+  border: 2px dashed color-mix(in srgb, var(--text) 70%, transparent);
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 3px,
+    color-mix(in srgb, var(--accent-strong) 35%, transparent) 3px 5px
+  );
+}
+
+.card-episode.is-empty .card-episode-count {
+  font-weight: 700;
+  color: var(--accent-deep);
+}
+
+[data-density="compact"] .card-episode-code {
+  font-size: 15px;
+}
