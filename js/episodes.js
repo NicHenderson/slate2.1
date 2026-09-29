@@ -786,12 +786,15 @@ function afterEpisodesChanged(showId) {
 function episodeProgressHtml(row) {
   if (!row.tmdb_id) return "";
   const ticked = tickedEpisodes(row.id);
+  const total = row.total_episodes > 0 ? row.total_episodes : 0;
+  // Nothing ticked yet: an empty bar that looks it (the owner found a
+  // "Where are you?" on the card ugly; the window still asks).
   if (!ticked.length) {
-    return row.is_dropped ? "" : `<div class="card-episode"><p class="card-episode-line"><span class="card-episode-code">${t("Where are you?")}</span></p></div>`;
+    if (row.is_dropped) return "";
+    return `<div class="card-episode is-empty"><p class="card-episode-line">${total ? `<span class="card-episode-count">0/${total}</span>` : ""}</p><span class="card-episode-bar" aria-hidden="true"></span></div>`;
   }
   const last = ticked[ticked.length - 1];
   const code = episodeCode(last.season, last.episode);
-  const total = row.total_episodes > 0 ? row.total_episodes : 0;
   const count = ticked.length;
   const label = row.is_dropped ? t("Stopped at {code}", { code }) : total && count >= total ? t("Up to date") : code;
   const countHtml = row.is_dropped || !total ? "" : `<span class="card-episode-count">${count}/${total}</span>`;

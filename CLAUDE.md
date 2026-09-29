@@ -505,7 +505,9 @@ directly.
   Stage 8 — built, waiting for the owner's check on the preview: the
   card (`episodeProgressHtml`, from STORE only, no lookup): Watching
   shows "S2 · E5" (the last ticked) + "14/26" + a hand-drawn bar, then
-  "Started 27d ago"; "Where are you?" with nothing ticked; "Up to date"
+  "Started 27d ago"; with nothing ticked, an empty bar that looks it
+  (dashed, hatched) and "0/9" (the owner found "Where are you?" on the
+  card ugly; the window's note still asks); "Up to date"
   when everything out is ticked; Dropped shows "Stopped at S2 · E5" +
   the bar. **`shows.total_episodes` now means episodes out**, not
   TMDB's `number_of_episodes` (which counts announced ones, so a show

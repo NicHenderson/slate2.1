@@ -688,6 +688,25 @@
   background: var(--accent-strong);
 }
 
+/* Nothing ticked yet: a dashed, hatched, empty bar, the count after it. */
+.card-episode.is-empty .card-episode-line {
+  justify-content: flex-end;
+}
+
+.card-episode.is-empty .card-episode-bar {
+  border: 2px dashed color-mix(in srgb, var(--text) 70%, transparent);
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 3px,
+    color-mix(in srgb, var(--accent-strong) 35%, transparent) 3px 5px
+  );
+}
+
+.card-episode.is-empty .card-episode-count {
+  font-weight: 700;
+  color: var(--accent-deep);
+}
+
 [data-density="compact"] .card-episode-code {
   font-size: 15px;
 }
