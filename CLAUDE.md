@@ -161,8 +161,10 @@ directly.
   search + filters, where to watch, rewatches of movies (all three
   stages), English + Spanish (the app and TMDB's data), genres and
   posters escaped as text, the search's info window in the detail
-  window's design (with its trailer), and episode tracking for shows
-  (all nine stages, below).
+  window's design (with its trailer), episode tracking for shows (all
+  nine stages, below), and a new season after finishing (PR #22, Sept.
+  29, 2026: the note and stamp, Keep watching, finishing again, the
+  card's starburst).
 - Search and filters (`js/librarySearch.js`) cover Movies, Shows, Movies To
   Watch and the Shows Queue; the owner chose to leave collections for later.
   Their decisions:
@@ -529,7 +531,9 @@ directly.
   merged into `claude/funny-pascal-bk99gr`, tested there by the owner,
   and merged into `main` on their "súbelo a main" (PR #21, CI green on
   its exact head).
-  **Next, raised by the owner (not built yet):** a finished show that gets a new season. Today a finished
+  **A finished show that gets a new season — done, in `main` since
+  Sept. 29, 2026 (PR #22, CI green on its exact head), after the owner
+  checked every stage.** What was there before: Today a finished
   show's list shows every episode out as watched (the new season too),
   and the only way back to Watching is Edit → clearing "Finished on",
   which also empties the rating and review. Claude's proposal: an
@@ -594,7 +598,7 @@ directly.
   month; TMDB allows about 50 requests a second. The headline is the
   same on the card and the note: "New season!" / "N new seasons!"
   (seasons begun after the finished date), else "New episodes!".
-  Left: 6 funny-pascal, then `main`.
+  Stage 6: merged into funny-pascal, then `main` on "súbelo a main".
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
