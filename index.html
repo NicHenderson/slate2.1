@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="css/searchModal.css?v=e99bf1ca" />
   <link rel="stylesheet" href="css/hearts.css?v=a68715f0" />
   <link rel="stylesheet" href="css/viewings.css?v=0cd9462b" />
-  <link rel="stylesheet" href="css/episodes.css?v=af2c41b1" />
+  <link rel="stylesheet" href="css/episodes.css?v=ce4fa5e3" />
   <link rel="stylesheet" href="css/whereToWatch.css?v=7528c42f" />
   <link rel="stylesheet" href="css/librarySearch.css?v=cce1cb12" />
   <link rel="stylesheet" href="css/responsive.css?v=dd07ab14" />
@@ -1071,6 +1071,14 @@
     </div>
   </div>
 
+  <!-- Every episode of a show, by season (js/episodes.js). -->
+  <div class="modal-backdrop episodes-backdrop hidden" id="episodes-modal">
+    <div class="modal episodes-modal" role="dialog" aria-modal="true" aria-labelledby="episodes-title">
+      <button class="modal-close episodes-close" id="episodes-close" type="button" aria-label="Close">✕</button>
+      <div class="episodes-body" id="episodes-body"></div>
+    </div>
+  </div>
+
   <div class="modal-backdrop update-backdrop hidden" id="update-modal">
     <div class="update-layout">
       <div class="update-poster-box" id="update-poster"></div>
@@ -1190,7 +1198,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-  <script src="js/lang/es.js?v=6062d0c3"></script>
+  <script src="js/lang/es.js?v=62a9ea65"></script>
   <script src="js/i18n.js?v=dde7afb9"></script>
   <script src="js/escapeHtml.js?v=28c1feb8"></script>
   <script src="js/viewTransitions.js?v=d587d807"></script>
@@ -1209,13 +1217,13 @@
   <script src="js/icons.js?v=3a450da2"></script>
   <script src="js/iconPicker.js?v=60949f19"></script>
   <script src="js/collections.js?v=a2da4383"></script>
-  <script src="js/detailModal.js?v=d96e573c"></script>
+  <script src="js/detailModal.js?v=f1a9226d"></script>
   <script src="js/heartsInput.js?v=75776d63"></script>
   <script src="js/updateModal.js?v=462c7f71"></script>
   <script src="js/startModal.js?v=7ac0135c"></script>
   <script src="js/confirmModal.js?v=ed034088"></script>
   <script src="js/viewings.js?v=a3e4287a"></script>
-  <script src="js/episodes.js?v=c204d135"></script>
+  <script src="js/episodes.js?v=5447ae76"></script>
   <script src="js/settings.js?v=f3ce4ee6"></script>
   <script src="js/whereToWatch.js?v=60bb1455"></script>
   <script src="js/profile.js?v=4f320145"></script>

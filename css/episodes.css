@@ -150,6 +150,8 @@
 }
 
 .up-next-box {
+  display: inline-block;
+  vertical-align: middle;
   position: relative;
   width: 24px;
   height: 24px;
@@ -277,5 +279,319 @@
   /* The image sits above the text here, so the note is taller. */
   .up-next.is-loading {
     min-height: 250px;
+  }
+}
+
+/* "See all episodes →": a hand-written link on the note. */
+.up-next-all {
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--accent-deep);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  text-decoration: underline wavy;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.up-next-all:hover,
+.up-next-all:focus-visible {
+  text-decoration-style: solid;
+}
+
+/* ---------- the episodes window ----------
+   Above the detail window, under the finish window (120) that ticking a
+   show's last episode opens over it. */
+
+.episodes-backdrop {
+  z-index: 110;
+}
+
+.episodes-modal {
+  position: relative;
+  width: min(780px, calc(100vw - 32px));
+  max-height: min(760px, calc(100vh - 48px));
+  padding: 22px 24px 16px;
+}
+
+.episodes-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
+.episodes-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.ep-loading {
+  padding: 18px 4px;
+  font-size: 13.5px;
+  font-style: italic;
+  color: var(--text-muted);
+  list-style: none;
+}
+
+.ep-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px 24px;
+  padding-right: 36px;
+}
+
+.ep-head-text {
+  min-width: 0;
+}
+
+.ep-title {
+  font-family: var(--font-hand);
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.ep-sub {
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.ep-progress {
+  flex: 0 1 240px;
+  min-width: 180px;
+}
+
+.ep-progress-text {
+  font-family: var(--font-hand);
+  font-size: 18px;
+  color: var(--accent-deep);
+  text-align: right;
+}
+
+.ep-bar {
+  position: relative;
+  height: 10px;
+  margin-top: 4px;
+  border: 2px solid var(--text);
+  border-radius: 6px 4px 7px 5px;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.ep-bar span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--accent-strong);
+  transition: width 0.3s ease;
+}
+
+/* The seasons, as tabs like To Watch / Watching / Dropped. */
+.ep-tabs {
+  display: flex;
+  flex: none;
+  overflow-x: auto;
+  margin-top: 14px;
+  padding: 2px 2px 8px;
+}
+
+.ep-tab {
+  flex: none;
+  margin-right: -1.5px;
+  padding: 7px 14px;
+  border: 1.5px dashed color-mix(in srgb, var(--text) 28%, transparent);
+  background: var(--paper);
+  color: var(--text);
+  font-family: var(--font-hand);
+  font-size: 18px;
+  line-height: 1.1;
+  cursor: pointer;
+}
+
+.ep-tab small {
+  margin-left: 5px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.ep-tab[aria-selected="true"] {
+  border-style: solid;
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
+  color: #fff;
+}
+
+.ep-tab[aria-selected="true"] small {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.ep-list {
+  flex: 1;
+  min-height: 0;
+  margin: 4px 0 0;
+  padding: 0 6px 0 0;
+  list-style: none;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.ep-row {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 128px;
+  gap: 12px;
+  align-items: start;
+  padding: 12px 4px;
+  border-top: 1.5px dashed color-mix(in srgb, var(--text) 16%, transparent);
+}
+
+.ep-row:first-child {
+  border-top: 0;
+}
+
+.ep-row.is-next {
+  background: color-mix(in srgb, var(--accent-strong) 10%, var(--paper));
+}
+
+.ep-box-btn {
+  padding: 2px 0 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.ep-box-btn:disabled {
+  cursor: default;
+}
+
+.ep-row.is-done .up-next-box path,
+.ep-box-btn.is-checked .up-next-box path {
+  stroke-dashoffset: 0;
+}
+
+.ep-box-btn:hover:not(:disabled) .up-next-box,
+.ep-box-btn:focus-visible .up-next-box {
+  background: color-mix(in srgb, var(--accent-strong) 18%, var(--paper));
+}
+
+.ep-row.is-unaired .up-next-box {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--text) 35%, transparent);
+}
+
+.ep-main {
+  min-width: 0;
+}
+
+.ep-line {
+  line-height: 1.2;
+}
+
+.ep-num {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent-deep);
+}
+
+.ep-name {
+  font-family: var(--font-hand);
+  font-size: 19px;
+}
+
+.ep-row.is-done .ep-name,
+.ep-row.is-unaired .ep-name {
+  color: var(--text-muted);
+}
+
+.ep-flag {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 8px;
+  background: var(--accent-strong);
+  color: #fff;
+  font-family: var(--font-hand);
+  font-size: 14px;
+  vertical-align: 2px;
+  transform: rotate(-2deg);
+}
+
+.ep-desc {
+  display: -webkit-box;
+  margin-top: 3px;
+  overflow: hidden;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-muted);
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.ep-row.is-next .ep-desc {
+  color: var(--text);
+}
+
+.ep-desc.is-generic {
+  font-style: italic;
+}
+
+.ep-air {
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.ep-photo {
+  margin: 0;
+  padding: 4px;
+  background: #fff;
+  box-shadow: 1px 3px 7px rgba(0, 0, 0, 0.22);
+  transform: rotate(1.5deg);
+}
+
+.ep-photo img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--surface);
+}
+
+.ep-photo img.is-poster {
+  object-fit: contain;
+  background: #1a1a1a;
+}
+
+@media (max-width: 600px) {
+  .episodes-modal {
+    padding: 18px 14px 12px;
+  }
+
+  .ep-title {
+    font-size: 24px;
+  }
+
+  .ep-progress {
+    flex-basis: 100%;
+  }
+
+  .ep-progress-text {
+    text-align: left;
+  }
+
+  .ep-row {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .ep-photo {
+    grid-column: 2;
+    max-width: 180px;
   }
 }

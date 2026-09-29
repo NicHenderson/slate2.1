@@ -329,6 +329,8 @@ function loadDetailWhereToWatch(table, row) {
 
 function closeDetailModal() {
   detailModal.classList.add("hidden");
+  // A show's episodes window goes with it (js/episodes.js).
+  closeEpisodesWindow();
   // A hidden modal still plays audio, so an open trailer has to go with it.
   const trailerBtn = detailBody.querySelector('[data-action="toggle-trailer"]');
   if (trailerBtn && detailBody.querySelector(".detail-trailer-frame")) toggleTrailer(trailerBtn);
@@ -481,6 +483,7 @@ function closeWindowsOf(table, id) {
     closeStartModal();
     closed = true;
   }
+  if (table === "shows" && closeEpisodesWindowOf(id)) closed = true;
   if (open(confirmModal) && pendingDelete?.table === table && pendingDelete.row?.id === id) {
     closeConfirmModal();
     closed = true;
@@ -540,6 +543,7 @@ detailClose.addEventListener("click", closeDetailModal);
 
 document.addEventListener("keydown", (e) => {
   if (detailModal.classList.contains("hidden")) return;
+  if (!document.getElementById("episodes-modal").classList.contains("hidden")) return;
   if (!document.getElementById("update-modal").classList.contains("hidden")) return;
   if (!document.getElementById("start-modal").classList.contains("hidden")) return;
 

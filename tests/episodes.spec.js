@@ -142,3 +142,35 @@ test("up to date with a show still airing: when the next one airs", async ({ pag
   await expect(note.locator(".up-next-hint").last()).toHaveText("The next one, S3 · E1, airs on Jan 15, 2099.");
   await expect(note.locator('[data-action="tick-episode"]')).toHaveCount(0);
 });
+
+test("the episodes window: each episode ticked or unticked on its own, and saved", async ({ page, backend }) => {
+  const dark = watchingDark(backend);
+  backend.seed("watched_episodes", [1, 2, 3].map((episode) => ({ show_id: dark.id, season: 1, episode })), backend.user.id);
+  await logIn(page);
+  await openWatching(page, "Dark");
+  await page.locator("#detail-modal .up-next-all").click();
+
+  // It opens on the next episode's season, which it marks.
+  const win = page.locator("#episodes-modal");
+  await expect(win.locator('.ep-tab[aria-selected="true"]')).toHaveText("Season 13/10");
+  await expect(win.locator(".ep-row.is-next .ep-name")).toHaveText("Double Lives");
+  await expect(win.locator(".ep-progress-text")).toHaveText("3 of 26 watched");
+
+  // Skipping one ahead, and unticking one behind.
+  await win.locator('.ep-row[data-episode="6"] .ep-box-btn').click();
+  await expect(win.locator(".ep-progress-text")).toHaveText("4 of 26 watched");
+  await win.locator('.ep-row[data-episode="2"] .ep-box-btn').click();
+  await expect(win.locator(".ep-progress-text")).toHaveText("3 of 26 watched");
+  expect(ticked(backend, dark)).toEqual(["1x1", "1x3", "1x6"]);
+
+  // Another season.
+  await win.locator('.ep-tab[data-season="2"]').click();
+  await win.locator('.ep-row[data-episode="1"] .ep-box-btn').click();
+  await expect(win.locator('.ep-tab[data-season="2"]')).toHaveText("Season 21/8");
+  expect(ticked(backend, dark)).toEqual(["1x1", "1x3", "1x6", "2x1"]);
+
+  // Closed, the note is where the window left it: after the furthest one.
+  await page.keyboard.press("Escape");
+  await expect(win).toBeHidden();
+  await expect(page.locator("#detail-modal .up-next-head")).toHaveText("Up next S2 · E2");
+});

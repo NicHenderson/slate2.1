@@ -83,7 +83,7 @@ function handleEpisodeChange(payload) {
     showId = payload.new.show_id;
     storeEpisode(payload.new);
   }
-  refreshUpNext(showId);
+  afterEpisodesChanged(showId);
 }
 
 /* ---------- TMDB ---------- */
@@ -208,6 +208,8 @@ function episodePhotoHtml(row, ep) {
 
 const CHECK_SVG = `<svg viewBox="0 0 40 36" aria-hidden="true"><path d="M6 19 L15 28 L35 5" /></svg>`;
 
+const SEE_ALL_HTML = `<button class="up-next-all" type="button" data-action="open-episodes">${t("See all episodes →")}</button>`;
+
 function watchedItHtml(ep) {
   return `<button class="up-next-check" type="button" data-action="tick-episode" data-season="${ep.season}" data-episode="${ep.number}"><span class="up-next-box">${CHECK_SVG}</span>${t("Watched it")}</button>`;
 }
@@ -220,7 +222,7 @@ function upNextHtml(row, state) {
         <p class="up-next-head">${t("Up next {code}", { code: `<span class="up-next-code">${episodeCode(ep.season, ep.number)}</span>` })}</p>
         <p class="up-next-name">${escapeHtml(episodeName(ep))}</p>
         ${episodeDescriptionHtml(row, ep)}
-        <div class="up-next-row">${watchedItHtml(ep)}</div>
+        <div class="up-next-row">${watchedItHtml(ep)}${SEE_ALL_HTML}</div>
       </div>
       ${episodePhotoHtml(row, ep)}`;
   }
@@ -235,6 +237,7 @@ function upNextHtml(row, state) {
             ? `<p class="up-next-hint">${t("The next one, {code}, airs on {date}.", { code: episodeCode(state.next.season, state.next.number), date: formatDate(state.next.airDate) })}</p>`
             : ""
         }
+        <div class="up-next-row">${SEE_ALL_HTML}</div>
       </div>
       ${episodePhotoHtml(row, ep)}`;
   }
@@ -244,7 +247,7 @@ function upNextHtml(row, state) {
       <div class="up-next-text">
         <p class="up-next-head">${t("Finished it?")}</p>
         <p class="up-next-hint">${t("You've ticked the last episode of {title}.", { title: escapeHtml(row.title ?? t("Untitled")) })}</p>
-        <div class="up-next-row"><button class="up-next-pick-btn" type="button" data-action="finish-show">${t("Mark it as finished")}</button></div>
+        <div class="up-next-row"><button class="up-next-pick-btn" type="button" data-action="finish-show">${t("Mark it as finished")}</button>${SEE_ALL_HTML}</div>
       </div>
       ${episodePhotoHtml(row, ep)}`;
   }
@@ -273,6 +276,7 @@ function upNextHtml(row, state) {
              <div class="up-next-row">${watchedItHtml(first)}</div>`
           : ""
       }
+      <div class="up-next-row">${SEE_ALL_HTML}</div>
     </div>
     ${first ? episodePhotoHtml(row, first) : ""}`;
 }
@@ -411,7 +415,10 @@ async function saveFromNote(row, list, button, message) {
 // episode: closed without saving, that episode goes back to unticked.
 function openFinishFromFinale(row, finale) {
   openFinishShowModal(STORE.shows.get(row.id) ?? row, async (saved) => {
-    if (saved) return;
+    if (saved) {
+      closeEpisodesWindow();
+      return;
+    }
     // Closed because the show was just deleted from it: nothing to undo.
     await null;
     if (!STORE.shows.has(row.id)) return;
@@ -423,7 +430,7 @@ function openFinishFromFinale(row, finale) {
       return;
     }
     forgetEpisode(ep.id);
-    refreshUpNext(row.id);
+    afterEpisodesChanged(row.id);
     showToast(t("Not saved: {code} unticked again.", { code: episodeCode(finale.season, finale.episode) }));
   });
 }
@@ -481,9 +488,200 @@ detailBody.addEventListener("click", (e) => {
     saveFromNote(currentDetail.row, [{ season, episode }], button, t("{code} ticked.", { code: episodeCode(season, episode) }));
   }
   if (action === "tick-up-to") tickUpTo(currentDetail.row, button);
+  if (action === "open-episodes") openEpisodesWindow(currentDetail.row);
   if (action === "finish-show") openFinishShowModal(STORE.shows.get(currentDetail.row.id) ?? currentDetail.row);
 });
 
 detailBody.addEventListener("change", (e) => {
   if (e.target.id === "up-next-season" && currentDetail) fillEpisodePicker(currentDetail.row);
+});
+
+/* ---------- the episodes window ----------
+
+   "See all episodes →": every episode of the show, one season at a time
+   under tabs like To Watch / Watching / Dropped (the owner's pick of
+   three mockups), each with a hand-drawn box to tick or untick it on
+   its own. It opens on the season of the next episode, scrolled to it. */
+
+const episodesModal = document.getElementById("episodes-modal");
+const episodesBody = document.getElementById("episodes-body");
+
+// The show it's open on and the season shown.
+let episodesWindow = null;
+
+const episodesWindowOpen = () => !episodesModal.classList.contains("hidden");
+
+async function openEpisodesWindow(row) {
+  episodesWindow = { showId: row.id, season: null };
+  episodesBody.innerHTML = `<p class="ep-loading">${t("Loading episodes…")}</p>`;
+  episodesModal.classList.remove("hidden");
+  try {
+    const { seasons } = await showOutline(row.tmdb_id);
+    if (episodesWindow?.showId !== row.id) return;
+    // The season of the next episode, else of the last one ticked, else the first.
+    const state = await upNextState(row).catch(() => null);
+    const at = state?.next?.season ?? state?.last?.season ?? seasons[0]?.number ?? 1;
+    episodesWindow.season = at;
+    await renderEpisodesWindow({ scrollToNext: true });
+  } catch (err) {
+    console.error("Episodes error:", err.message);
+    if (episodesWindow?.showId === row.id) {
+      episodesBody.innerHTML = `<p class="ep-loading">${t("Couldn't load the episodes. Please try again later.")}</p>`;
+    }
+  }
+}
+
+function closeEpisodesWindow() {
+  episodesModal.classList.add("hidden");
+  episodesWindow = null;
+}
+
+// Closed along with a show deleted elsewhere (js/detailModal.js). Says
+// whether it was open on it.
+function closeEpisodesWindowOf(showId) {
+  if (!episodesWindowOpen() || episodesWindow?.showId !== showId) return false;
+  closeEpisodesWindow();
+  return true;
+}
+
+function episodeRowHtml(row, ep, next) {
+  const done = isTicked(row.id, ep.season, ep.number);
+  const out = hasAired(ep.airDate);
+  const isNext = next && next.season === ep.season && next.number === ep.number;
+  const cls = [done ? "is-done" : "", out ? "" : "is-unaired", isNext ? "is-next" : ""].join(" ").trim();
+  const label = `${episodeCode(ep.season, ep.number)} · ${escapeHtml(episodeName(ep))}`;
+  const about = out
+    ? ep.overview
+      ? `<p class="ep-desc">${escapeHtml(ep.overview)}</p>`
+      : `<p class="ep-desc is-generic">${t("Episode {e} of season {s} of {title}.", { e: ep.number, s: ep.season, title: escapeHtml(row.title ?? t("Untitled")) })}</p>`
+    : `<p class="ep-air">${ep.airDate ? t("Airs on {date}", { date: formatDate(ep.airDate) }) : t("Not out yet")}</p>`;
+  const src = ep.still ? TMDB_STILL + ep.still : row.poster;
+  return `
+    <li class="ep-row ${cls}" data-season="${ep.season}" data-episode="${ep.number}">
+      <button class="ep-box-btn" type="button" data-action="toggle-episode" data-season="${ep.season}" data-episode="${ep.number}" aria-pressed="${done}" aria-label="${label}"${out ? "" : " disabled"}>
+        <span class="up-next-box">${CHECK_SVG}</span>
+      </button>
+      <div class="ep-main">
+        <p class="ep-line"><span class="ep-num">${t("E{n}", { n: ep.number })}</span> <span class="ep-name">${escapeHtml(episodeName(ep))}</span>${isNext ? ` <span class="ep-flag">${t("Up next")}</span>` : ""}</p>
+        ${about}
+      </div>
+      ${src ? `<figure class="ep-photo"><img class="${ep.still ? "" : "is-poster"}" src="${escapeHtml(src)}" alt="" loading="lazy" /></figure>` : ""}
+    </li>`;
+}
+
+// Draws the window from what's known now: the show's seasons, the season
+// shown (looked up if it isn't yet) and what's ticked.
+async function renderEpisodesWindow({ scrollToNext = false } = {}) {
+  const win = episodesWindow;
+  const row = win && STORE.shows.get(win.showId);
+  if (!row) return;
+  const { seasons } = await showOutline(row.tmdb_id);
+  const shown = await seasonEpisodes(row.tmdb_id, win.season).catch(() => null);
+  const state = await upNextState(row).catch(() => null);
+  if (episodesWindow !== win) return; // closed, or opened on another show meanwhile
+
+  // Counted from TMDB's seasons: what's out, and how much of it is ticked.
+  const outIn = (s) => (hasAired(s.airDate) ? s.count : 0);
+  const out = seasons.reduce((n, s) => n + outIn(s), 0);
+  const tickedCount = (s) => tickedEpisodes(row.id).filter((e) => e.season === s.number).length;
+  const watched = Math.min(out, seasons.reduce((n, s) => n + tickedCount(s), 0));
+  const pct = out ? Math.round((watched / out) * 100) : 0;
+  const tabs = seasons
+    .map(
+      (s) => `<button class="ep-tab" type="button" role="tab" data-action="episodes-season" data-season="${s.number}" aria-selected="${s.number === win.season}">${t("Season {n}", { n: s.number })}<small>${outIn(s) ? `${tickedCount(s)}/${outIn(s)}` : "—"}</small></button>`
+    )
+    .join("");
+  const next = state?.kind === "next" ? state.next : null;
+  const list = shown
+    ? shown.map((ep) => episodeRowHtml(row, ep, next)).join("")
+    : `<li class="ep-loading">${t("Couldn't load the episodes. Please try again later.")}</li>`;
+
+  const listEl = episodesBody.querySelector(".ep-list");
+  const keepScroll = listEl && !scrollToNext ? listEl.scrollTop : 0;
+  episodesBody.innerHTML = `
+    <div class="ep-head">
+      <div class="ep-head-text">
+        <h2 class="ep-title" id="episodes-title">${t("{title} · Episodes", { title: escapeHtml(row.title ?? t("Untitled")) })}</h2>
+        <p class="ep-sub">${tn(seasons.length, "{n} season", "{n} seasons")} · ${tn(out, "{n} episode out", "{n} episodes out")}</p>
+      </div>
+      <div class="ep-progress">
+        <p class="ep-progress-text">${t("{a} of {b} watched", { a: watched, b: out })}</p>
+        <div class="ep-bar" aria-hidden="true"><span style="width: ${pct}%"></span></div>
+      </div>
+    </div>
+    <div class="ep-tabs" role="tablist">${tabs}</div>
+    <ul class="ep-list">${list}</ul>`;
+  const newList = episodesBody.querySelector(".ep-list");
+  if (scrollToNext) {
+    const at = newList.querySelector(".is-next");
+    if (at) newList.scrollTop = at.offsetTop - newList.offsetTop - 12;
+  } else {
+    newList.scrollTop = keepScroll;
+  }
+}
+
+// Ticks or unticks one episode from the window.
+async function toggleEpisodeInWindow(button) {
+  const row = STORE.shows.get(episodesWindow?.showId);
+  if (!row) return;
+  const season = Number(button.dataset.season);
+  const episode = Number(button.dataset.episode);
+  const code = episodeCode(season, episode);
+  const ticked = tickedEpisodes(row.id).find((e) => e.season === season && e.episode === episode);
+  button.disabled = true;
+  if (ticked) {
+    const { error } = await db.from("watched_episodes").delete().eq("id", ticked.id);
+    if (error) {
+      console.error("Episode untick error:", error.message);
+      showToast(t("Couldn't save that. Please try again."), true);
+      button.disabled = false;
+      return;
+    }
+    forgetEpisode(ticked.id);
+    showToast(t("{code} unticked.", { code }));
+  } else {
+    button.querySelector(".up-next-box")?.parentElement.classList.add("is-checked");
+    if (!(await tickEpisodes(row, [{ season, episode }]))) {
+      showToast(t("Couldn't save that. Please try again."), true);
+      button.disabled = false;
+      return;
+    }
+    const finale = await finaleOf(row).catch(() => null);
+    if (finale && finale.season === season && finale.episode === episode) {
+      afterEpisodesChanged(row.id);
+      openFinishFromFinale(row, finale);
+      return;
+    }
+    showToast(t("{code} ticked.", { code }));
+  }
+  afterEpisodesChanged(row.id);
+}
+
+// The window and the note, after a show's episodes changed.
+function afterEpisodesChanged(showId) {
+  if (episodesWindowOpen() && episodesWindow?.showId === showId && episodesWindow.season) renderEpisodesWindow();
+  refreshUpNext(showId);
+}
+
+episodesBody.addEventListener("click", (e) => {
+  const button = e.target.closest("[data-action]");
+  if (!button || button.disabled) return;
+  if (button.dataset.action === "episodes-season" && episodesWindow) {
+    episodesWindow.season = Number(button.dataset.season);
+    renderEpisodesWindow({ scrollToNext: true });
+  }
+  if (button.dataset.action === "toggle-episode") toggleEpisodeInWindow(button);
+});
+
+document.getElementById("episodes-close").addEventListener("click", closeEpisodesWindow);
+
+episodesModal.addEventListener("click", (e) => {
+  if (e.target === episodesModal) closeEpisodesWindow();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || !episodesWindowOpen()) return;
+  // The finish window or a confirmation above it takes Escape itself.
+  if (!startModal.classList.contains("hidden") || !confirmModal.classList.contains("hidden")) return;
+  closeEpisodesWindow();
 });

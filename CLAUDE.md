@@ -480,6 +480,17 @@ directly.
   jsonb order (shortest key first), unlike the REST answer, and
   `sameRow` compared them as text; it now compares field by field. The
   fake backend sends realtime rows in that order too.
+  Stage 6 — built, waiting for the owner's check on the preview: the
+  episodes window (`#episodes-modal` in index.html, z-index 110: above
+  the detail window, under the finish window). "See all episodes →" on
+  every state of the note opens it on the next episode's season,
+  scrolled to it (marked "Up next"); tabs per season with ticked/out;
+  "3 of 26 watched" and a bar; each row a hand-drawn box, "E4", name,
+  a small description (3 lines) or "Airs on …" for one not out (its box
+  dashed, disabled), and the image. Ticking the finale there opens the
+  finish window too; saving it closes the episodes window. It follows
+  realtime, closes with the detail window, and with a show deleted
+  elsewhere. Next, stage 7: "Tick up to here", finished and dropped.
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
