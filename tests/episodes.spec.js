@@ -78,3 +78,67 @@ test.describe("in Spanish", () => {
     await expect(note.locator(".up-next-desc")).toHaveText("Episodio 4 de la temporada 1 de Dark.");
   });
 });
+
+test("the last episode of a show that has ended finishes it; closing that window unticks it", async ({ page, backend }) => {
+  const dark = watchingDark(backend);
+  const seasons = [10, 8, 8];
+  const upTo = [];
+  seasons.forEach((count, i) => {
+    for (let e = 1; e <= count; e++) if (!(i === 2 && e === 8)) upTo.push({ show_id: dark.id, season: i + 1, episode: e });
+  });
+  backend.seed("watched_episodes", upTo, backend.user.id);
+  await logIn(page);
+  await openWatching(page, "Dark");
+  const note = page.locator("#detail-modal .up-next");
+  await expect(note.locator(".up-next-head")).toHaveText("Up next S3 · E8");
+
+  // Ticked: the usual finish window asks. Closed without saving: unticked.
+  await note.locator('[data-action="tick-episode"]').click();
+  await expect(page.locator("#start-modal")).toBeVisible();
+  await expect(page.locator("#start-title")).toHaveText("Finished it?");
+  await page.click("#start-cancel");
+  await expect(page.locator(".toast").last()).toHaveText("Not saved: S3 · E8 unticked again.");
+  expect(ticked(backend, dark)).toHaveLength(25);
+  await expect(note.locator(".up-next-head")).toHaveText("Up next S3 · E8");
+
+  // Saved: finished, with every episode ticked.
+  await note.locator('[data-action="tick-episode"]').click();
+  await page.click("#start-save");
+  await expect(page.locator("#start-modal")).toBeHidden();
+  await expect.poll(() => dark.finished_watching_date).not.toBeNull();
+  expect(ticked(backend, dark)).toHaveLength(26);
+});
+
+test("a show finished the usual way gets every episode ticked", async ({ page, backend }) => {
+  const [got] = backend.seed(
+    "shows",
+    [{ tmdb_id: 1399, title: "Game of Thrones", total_seasons: 8, total_episodes: 73, started_watching_date: "2026-08-01", finished_watching_date: null }],
+    backend.user.id
+  );
+  backend.seed("watched_episodes", [{ show_id: got.id, season: 1, episode: 1 }], backend.user.id);
+  await logIn(page);
+  await openWatching(page, "Game of Thrones");
+  await page.locator('#detail-modal [data-action="edit"]').click();
+  await page.fill("#start-finish-date", "2026-09-20");
+  await page.click("#start-save");
+  await expect.poll(() => ticked(backend, got).length).toBe(73);
+});
+
+test("up to date with a show still airing: when the next one airs", async ({ page, backend }) => {
+  const [sev] = backend.seed(
+    "shows",
+    [{ tmdb_id: 95396, title: "Severance", total_seasons: 3, total_episodes: 29, started_watching_date: "2026-08-01", finished_watching_date: null }],
+    backend.user.id
+  );
+  const out = [];
+  [9, 10].forEach((count, i) => {
+    for (let e = 1; e <= count; e++) out.push({ show_id: sev.id, season: i + 1, episode: e });
+  });
+  backend.seed("watched_episodes", out, backend.user.id);
+  await logIn(page);
+  await openWatching(page, "Severance");
+  const note = page.locator("#detail-modal .up-next");
+  await expect(note.locator(".up-next-head")).toHaveText("You're up to date!");
+  await expect(note.locator(".up-next-hint").last()).toHaveText("The next one, S3 · E1, airs on Jan 15, 2099.");
+  await expect(note.locator('[data-action="tick-episode"]')).toHaveCount(0);
+});

@@ -459,6 +459,19 @@ directly.
   The owner's one note: the note jumped from a thin strip when it
   loaded. Now it loads at about its final size (150px, 250px on a
   phone, with an empty photo frame) and eases the rest, fading in.
+  Stage 5 — built, waiting for the owner's check on the preview: "You're
+  up to date!" adds "The next one, S3 · E1, airs on …" when TMDB knows
+  it (only for a show still going). For an ended / canceled show
+  (TMDB's status), ticking its last episode (from the note or "Tick
+  them") opens the usual finish window titled "Finished it?" with
+  today's date (`openFinishShowModal`, js/startModal.js); closing it
+  without saving deletes that tick again ("Not saved: S3 · E8 unticked
+  again."). If a finale is ticked but the show is still Watching, the
+  note says "Finished it?" with "Mark it as finished". Finishing a show
+  the usual way (newly finished) ticks every episode out
+  (`tickAllEpisodes`): earlier seasons by TMDB's counts, the latest
+  one episode by episode. A fake still-airing show (Severance, 95396)
+  is in tests/support/tmdbCatalog.js.
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched

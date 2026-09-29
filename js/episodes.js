@@ -16,7 +16,11 @@
    In a Watching show's detail window, "Up next": a note with the episode
    after the furthest one ticked (one skipped doesn't hold it back), and
    "Watched it" to tick it and move on. With nothing ticked yet it asks
-   where you are instead. */
+   where you are instead. Past the last episode out: up to date, with the
+   next one's date when TMDB knows it. A show that has ended is finished
+   by ticking its last episode: the usual finish window opens, and closing
+   it without saving unticks that episode again (the owner's call). A
+   show finished in the usual way gets every episode out ticked. */
 
 // Show id → its ticked episodes, in order. Rebuilt on the next read after
 // any change to STORE.episodes.
@@ -102,14 +106,22 @@ function cachedLookup(key, request) {
   return promise;
 }
 
-// A show's seasons (specials left out), from its details.
-function showSeasons(tmdbId) {
+// A show's outline, from its details: its seasons (specials left out),
+// whether it has ended (TMDB says so, or that it was canceled), and its
+// next episode, when TMDB knows one.
+function showOutline(tmdbId) {
   return cachedLookup(`tv:${tmdbId}:${TMDB_LANGUAGE}`, async () => {
     const details = await tmdbRequest(`tv/${tmdbId}`, undefined, TMDB_LANGUAGE);
-    return (details.seasons ?? [])
+    const seasons = (details.seasons ?? [])
       .filter((s) => s.season_number >= 1 && s.episode_count > 0)
       .map((s) => ({ number: s.season_number, count: s.episode_count, airDate: s.air_date || null }))
       .sort((a, b) => a.number - b.number);
+    const next = details.next_episode_to_air;
+    return {
+      seasons,
+      ended: details.status === "Ended" || details.status === "Canceled",
+      next: next?.season_number >= 1 ? { season: next.season_number, number: next.episode_number, airDate: next.air_date || null } : null,
+    };
   });
 }
 
@@ -139,7 +151,8 @@ const hasAired = (airDate) => Boolean(airDate) && airDate <= localToday();
 // ticked, or, with nothing ticked, the question (and the first episode,
 // for someone just starting). With nothing after it out yet: up to date.
 async function upNextState(row) {
-  const seasons = await showSeasons(row.tmdb_id);
+  const outline = await showOutline(row.tmdb_id);
+  const seasons = outline.seasons;
   const ticked = tickedEpisodes(row.id);
   if (!ticked.length) {
     const first = seasons[0] ? (await seasonEpisodes(row.tmdb_id, seasons[0].number)).find((ep) => hasAired(ep.airDate)) : null;
@@ -154,9 +167,24 @@ async function upNextState(row) {
   }
   if (!next || !hasAired(next.airDate)) {
     const lastEp = lastSeason.find((ep) => ep.number === last.episode) ?? { season: last.season, number: last.episode, name: "" };
-    return { kind: "uptodate", last: lastEp };
+    // An ended show with its last episode ticked, still on Watching (its
+    // finish window was left for later): it asks.
+    const finale = await finaleOf(row);
+    if (finale && isTicked(row.id, finale.season, finale.episode)) return { kind: "finished", last: lastEp };
+    return { kind: "uptodate", last: lastEp, next: outline.ended ? null : outline.next };
   }
   return { kind: "next", next };
+}
+
+// An ended show's last episode ({ season, episode }), or null for a show
+// that's still going.
+async function finaleOf(row) {
+  const outline = await showOutline(row.tmdb_id);
+  const lastSeason = outline.seasons[outline.seasons.length - 1];
+  if (!outline.ended || !lastSeason) return null;
+  const episodes = await seasonEpisodes(row.tmdb_id, lastSeason.number);
+  const last = episodes[episodes.length - 1];
+  return last ? { season: lastSeason.number, episode: last.number } : null;
 }
 
 /* ---------- the note ---------- */
@@ -202,6 +230,21 @@ function upNextHtml(row, state) {
       <div class="up-next-text">
         <p class="up-next-head">${t("You're up to date!")}</p>
         <p class="up-next-hint">${t("You've watched up to {code}, {name}.", { code: episodeCode(ep.season, ep.number), name: escapeHtml(episodeName(ep)) })}</p>
+        ${
+          state.next?.airDate
+            ? `<p class="up-next-hint">${t("The next one, {code}, airs on {date}.", { code: episodeCode(state.next.season, state.next.number), date: formatDate(state.next.airDate) })}</p>`
+            : ""
+        }
+      </div>
+      ${episodePhotoHtml(row, ep)}`;
+  }
+  if (state.kind === "finished") {
+    const ep = state.last;
+    return `
+      <div class="up-next-text">
+        <p class="up-next-head">${t("Finished it?")}</p>
+        <p class="up-next-hint">${t("You've ticked the last episode of {title}.", { title: escapeHtml(row.title ?? t("Untitled")) })}</p>
+        <div class="up-next-row"><button class="up-next-pick-btn" type="button" data-action="finish-show">${t("Mark it as finished")}</button></div>
       </div>
       ${episodePhotoHtml(row, ep)}`;
   }
@@ -352,9 +395,61 @@ async function saveFromNote(row, list, button, message) {
   if (!ok) {
     showToast(t("Couldn't save that. Please try again."), true);
   } else {
+    // An ended show's last episode: time to finish it.
+    const finale = await finaleOf(row).catch(() => null);
+    if (finale && list.some((ep) => ep.season === finale.season && ep.episode === finale.episode)) {
+      if (currentDetail?.row.id === row.id) loadUpNext(row);
+      openFinishFromFinale(row, finale);
+      return;
+    }
     showToast(message);
   }
   if (currentDetail?.row.id === row.id) loadUpNext(row);
+}
+
+// The usual finish window (js/startModal.js), opened by ticking the last
+// episode: closed without saving, that episode goes back to unticked.
+function openFinishFromFinale(row, finale) {
+  openFinishShowModal(STORE.shows.get(row.id) ?? row, async (saved) => {
+    if (saved) return;
+    // Closed because the show was just deleted from it: nothing to undo.
+    await null;
+    if (!STORE.shows.has(row.id)) return;
+    const ep = tickedEpisodes(row.id).find((e) => e.season === finale.season && e.episode === finale.episode);
+    if (!ep) return;
+    const { error } = await db.from("watched_episodes").delete().eq("id", ep.id);
+    if (error) {
+      console.error("Episode untick error:", error.message);
+      return;
+    }
+    forgetEpisode(ep.id);
+    refreshUpNext(row.id);
+    showToast(t("Not saved: {code} unticked again.", { code: episodeCode(finale.season, finale.episode) }));
+  });
+}
+
+// A show just finished (js/startModal.js): every episode out gets ticked.
+// The seasons before the latest one out are taken whole, as TMDB counts
+// them; the latest one, episode by episode (its last ones may not be out).
+async function tickAllEpisodes(row) {
+  if (!row.tmdb_id) return;
+  try {
+    const aired = (await showOutline(row.tmdb_id)).seasons.filter((s) => hasAired(s.airDate));
+    const latest = aired.pop();
+    const list = [];
+    aired.forEach((s) => {
+      for (let e = 1; e <= s.count; e++) list.push({ season: s.number, episode: e });
+    });
+    if (latest) {
+      (await seasonEpisodes(row.tmdb_id, latest.number))
+        .filter((ep) => hasAired(ep.airDate))
+        .forEach((ep) => list.push({ season: latest.number, episode: ep.number }));
+    }
+    if (!(await tickEpisodes(row, list))) throw new Error("the episodes weren't saved");
+  } catch (err) {
+    console.error("Tick all episodes error:", err.message);
+    showToast(t("Couldn't tick all of its episodes."), true);
+  }
 }
 
 async function tickUpTo(row, button) {
@@ -363,7 +458,7 @@ async function tickUpTo(row, button) {
   if (!season || !episode) return;
   // Every episode of the seasons before it (as TMDB counts them) and this
   // season's up to the one picked.
-  const seasons = await showSeasons(row.tmdb_id);
+  const { seasons } = await showOutline(row.tmdb_id);
   const list = [];
   seasons
     .filter((s) => s.number < season)
@@ -386,6 +481,7 @@ detailBody.addEventListener("click", (e) => {
     saveFromNote(currentDetail.row, [{ season, episode }], button, t("{code} ticked.", { code: episodeCode(season, episode) }));
   }
   if (action === "tick-up-to") tickUpTo(currentDetail.row, button);
+  if (action === "finish-show") openFinishShowModal(STORE.shows.get(currentDetail.row.id) ?? currentDetail.row);
 });
 
 detailBody.addEventListener("change", (e) => {

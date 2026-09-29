@@ -57,6 +57,12 @@ const TMDB_CATALOG = {
       seasons: seasonsOf([[0, 1, "2017-11-20"], [1, 10, "2017-12-01"], [2, 8, "2019-06-21"], [3, 8, "2020-06-27"]]),
       next_episode_to_air: null,
     }),
+    // Still airing: its third season is announced, not out.
+    show(95396, "Severance", "2022-02-18", 3, 29, ["Drama", "Mystery"], "Office workers whose memories are split between work and home.", "en", {
+      status: "Returning Series",
+      seasons: seasonsOf([[1, 9, "2022-02-18"], [2, 10, "2025-01-17"], [3, 10, "2099-01-15"]]),
+      next_episode_to_air: { season_number: 3, episode_number: 1, air_date: "2099-01-15" },
+    }),
   ],
 };
 
