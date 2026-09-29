@@ -529,6 +529,21 @@ directly.
   merged into `claude/funny-pascal-bk99gr`, tested there by the owner,
   and merged into `main` on their "súbelo a main" (PR #21, CI green on
   its exact head).
+  **Pending, raised by the owner (not built, waiting for their
+  answers):** a finished show that gets a new season. Today a finished
+  show's list shows every episode out as watched (the new season too),
+  and the only way back to Watching is Edit → clearing "Finished on",
+  which also empties the rating and review. Claude's proposal: an
+  episode that aired after the show's finished date counts as new
+  (true whether it came out before or after episode tracking existed);
+  the finished show's window says "New since you finished: season 4"
+  with "Keep watching" (back to Watching, rating and review kept,
+  everything aired by the finished date ticked, so "Up next" is S4 ·
+  E1); its list shows the new ones unticked, flagged "New". Open
+  questions: keep the original started date or a new one; finishing
+  again replaces the finished date (the old one isn't kept: that's show
+  rewatches, planned apart); whether cards in Shows get a "New season"
+  sticker (needs TMDB lookups in the background, a few per visit).
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
