@@ -11,12 +11,11 @@ test("the privacy policy opens from the landing page, in the language picked for
   await expect(page.locator("#s1")).toContainText("Manuel Pinto Devia");
   await expect(page.locator("#s1 .mail")).toHaveText("slateappmail@gmail.com");
 
-  // Spanish, picked here, is kept for Slate too.
-  await page.locator('#seg-lang [data-v="es"]').click();
-  await expect(page.locator("h1")).toContainText("Tu privacidad");
-  await page.reload();
-  await expect(page.locator("h1")).toContainText("Tu privacidad");
+  // It has no picker of its own: Spanish, picked in Slate, carries over.
   await page.locator("#back").click();
+  await page.locator(".lp-footer [data-language-picker]").selectOption("es");
   await expect(page.locator(".lp-footer a[href='privacy.html']")).toHaveText("Privacidad");
+  await page.locator('.lp-footer a[href="privacy.html"]').click();
+  await expect(page.locator("h1")).toContainText("Tu privacidad");
   expect(backend.blocked).toEqual([]);
 });

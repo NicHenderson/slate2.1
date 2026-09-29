@@ -735,8 +735,8 @@ directly.
   por la Ley N° 21.719)". Stage 3 — done, waiting for the owner's
   check: `privacy.html` at the repo root, self-contained (its own
   styles and script, no Supabase), v1.2 in Spanish and its English
-  translation, the language picked there saved like the app's
-  (`slate_language`); linked from the landing footer, under the login
+  translation, shown in the language picked in the app
+  (`slate_language`; no picker of its own, the owner's call); linked from the landing footer, under the login
   card and Settings → Account ("Privacy policy", "Read it");
   `tests/privacy.spec.js`. Its text is the owner's: change a word only
   with their approval, and bump the version and date if it changes.

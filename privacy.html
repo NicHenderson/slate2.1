@@ -41,9 +41,6 @@ a { color: inherit; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 /* ---------- the language switch ---------- */
-.seg { display: flex; }
-.seg button { padding: 6px 12px; margin-right: -1.5px; border: 1.5px dashed color-mix(in srgb, var(--text) 30%, transparent); font-family: var(--font-hand); font-size: 16px; line-height: 1.1; }
-.seg button[aria-pressed="true"] { background: var(--accent-strong); border-style: solid; border-color: var(--accent-strong); color: #fff; }
 .nav-right { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px 18px; }
 
 /* ---------- the page's top and bottom (the landing's) ---------- */
@@ -148,7 +145,6 @@ th { font-family: var(--font-type); font-weight: 400; font-size: 12.5px; letter-
 <header class="nav">
   <a class="brand" href="./"><img src="img/Slate-logo.png" alt="" /><span translate="no">Slate</span></a>
   <div class="nav-right">
-    <div class="seg" role="group" id="seg-lang"></div>
     <a class="btn" href="./" id="back"></a>
   </div>
 </header>
@@ -178,7 +174,7 @@ th { font-family: var(--font-type); font-weight: 400; font-size: 12.5px; letter-
   const A = (s) => `<span class="art">${s}</span>`;
   const TEXT = {
     es: {
-      docTitle: "Privacidad · Slate", langLabel: "Idioma", back: "← Volver a Slate", sticker: "La parte legal, sin letra chica ♥",
+      docTitle: "Privacidad · Slate", back: "← Volver a Slate", sticker: "La parte legal, sin letra chica ♥",
       h1: "Tu privacidad <span>en Slate</span>",
       lede: "Sí, esta es la parte legal. La escribimos para que se entienda a la primera, y para que sepas exactamente qué pasa con tus datos.",
       tab: "Legal · Privacidad", indexTitle: "En esta página",
@@ -209,7 +205,7 @@ th { font-family: var(--font-type); font-weight: 400; font-size: 12.5px; letter-
       rights: [["Acceso", "Confirmar si tratamos tus datos y consultar toda la información de tu cuenta."], ["Rectificación", "Modificar o actualizar datos inexactos o incompletos, directamente desde la app."], ["Supresión", "Eliminar títulos, o borrar tu cuenta completa de forma irreversible."], ["Oposición", "Pedir que cese un tratamiento específico, según las causales que establece la ley."], ["Portabilidad", "Descargar toda tu biblioteca en un archivo estructurado (.slate) cuando quieras."], ["Bloqueo temporal", "Pedir que se suspenda el tratamiento de tus datos mientras se resuelve una solicitud de rectificación, supresión u oposición."]],
     },
     en: {
-      docTitle: "Privacy · Slate", langLabel: "Language", back: "← Back to Slate", sticker: "The legal part, no fine print ♥",
+      docTitle: "Privacy · Slate", back: "← Back to Slate", sticker: "The legal part, no fine print ♥",
       h1: "Your privacy <span>on Slate</span>",
       lede: "Yes, this is the legal part. We wrote it to make sense on the first read, so you know exactly what happens with your data.",
       tab: "Legal · Privacy", indexTitle: "On this page",
@@ -240,8 +236,9 @@ th { font-family: var(--font-type); font-weight: 400; font-size: 12.5px; letter-
       rights: [["Access", "Confirm whether we process your data, and see all the information in your account."], ["Rectification", "Change or update inaccurate or incomplete data, right in the app."], ["Deletion", "Delete titles, or delete your whole account for good."], ["Objection", "Ask for a specific processing activity to stop, on the grounds the law sets."], ["Portability", "Download your whole library in a structured file (.slate) whenever you want."], ["Temporary blocking", "Ask for the processing of your data to be suspended while a rectification, deletion or objection request is resolved."]],
     },
   };
-  // As js/i18n.js picks it: the one chosen on this device, else the
-  // browser's, else English. Picking one here is kept for the app too.
+  // In Slate's language, picked as js/i18n.js picks it: the one chosen on
+  // this device (in the app), else the browser's, else English. There's
+  // no picker here: the app's is the one.
   const LANGUAGE_KEY = "slate_language";
   function pickLanguage() {
     try {
@@ -260,8 +257,6 @@ th { font-family: var(--font-type); font-weight: 400; font-size: 12.5px; letter-
 
   function render() {
     const T = TEXT[state.lang];
-    $("seg-lang").setAttribute("aria-label", T.langLabel);
-    $("seg-lang").innerHTML = [["es", "Español"], ["en", "English"]].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${v === state.lang}">${l}</button>`).join("");
     document.documentElement.lang = state.lang;
     document.title = T.docTitle;
     $("back").textContent = T.back;
@@ -287,13 +282,12 @@ th { font-family: var(--font-type); font-weight: 400; font-size: 12.5px; letter-
     $("foot-nav").innerHTML = T.foot.map((f, i) => `<a href="${FOOT_LINKS[i]}"${i === 2 ? ' aria-current="page"' : ""}>${f}</a>`).join("");
     $("foot-fine").textContent = T.fine;
   }
-  $("seg-lang").addEventListener("click", (e) => {
-    const b = e.target.closest("button");
-    if (!b) return;
-    state.lang = b.dataset.v;
-    try {
-      localStorage.setItem(LANGUAGE_KEY, state.lang);
-    } catch {}
+  // Follows a language changed in a Slate tab left open beside this one.
+  window.addEventListener("storage", (e) => {
+    if (e.key !== LANGUAGE_KEY && e.key !== null) return;
+    const lang = pickLanguage();
+    if (lang === state.lang) return;
+    state.lang = lang;
     render();
   });
   render();
