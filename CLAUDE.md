@@ -732,7 +732,18 @@ directly.
   seal at the end. The owner approved A v2 as is, with one fix of theirs:
   §1 names the law by its new title (21.719, art. primero n° 1),
   "Ley N° 19.628 sobre protección de los datos personales (modificada
-  por la Ley N° 21.719)". Next: build `privacy.html` on funny-pascal.
+  por la Ley N° 21.719)". Stage 3 — done, waiting for the owner's
+  check: `privacy.html` at the repo root, self-contained (its own
+  styles and script, no Supabase), v1.2 in Spanish and its English
+  translation, the language picked there saved like the app's
+  (`slate_language`); linked from the landing footer, under the login
+  card and Settings → Account ("Privacy policy", "Read it");
+  `tests/privacy.spec.js`. Its text is the owner's: change a word only
+  with their approval, and bump the version and date if it changes.
+  **Before `main`:** the policy says a box is ticked on Request access
+  and at the first login ("I've read the Privacy Policy and I'm 14 or
+  older", existing users asked once, kept in user metadata like
+  `password_chosen`), so that stage ships with it.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - large-grid performance.

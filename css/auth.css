@@ -480,3 +480,18 @@
   width: 15px;
   height: 15px;
 }
+
+/* Under the language picker: the privacy policy, for anyone about to
+   request access or sign in. */
+.auth-privacy-link {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.auth-privacy-link:hover {
+  color: var(--text);
+}

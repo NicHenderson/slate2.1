@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy · Slate</title>
+  <meta name="description" content="Slate's privacy policy: what data Slate keeps, what for, where, and your rights over it." />
+  <link rel="icon" type="image/png" href="img/Slate-logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Patrick+Hand&family=Libre+Franklin:wght@400;500;600;700&family=Special+Elite&display=swap">
+  <style>
+/* Slate's privacy policy (the owner's text, v1.2, approved word for word,
+   and the owner's pick of three designs: A, one sheet pinned to the board
+   with an index beside it, dressed as a legal file). Its own page, so it
+   can be linked and read signed in or not. Always Slate's own purple, like
+   the landing page, whatever theme an account uses. Both languages are
+   here; the one shown is picked like the app's (js/i18n.js). */
+:root {
+  --bg: #0d0c15; --bg-elevated: #17131f; --border: #2a2338;
+  --accent: #a78bfa; --accent-strong: #8b5cf6; --accent-deep: #6d28d9;
+  --text: #ece8f5; --text-muted: #9d94b3;
+  --paper: #ece8f5; --ink: #0d0c15; --ink-muted: #5c5470;
+  --stamp: #b3261e; --folder: #d9c38f;
+  --font-display: "Oswald", "Arial Narrow", sans-serif;
+  --font-body: "Libre Franklin", -apple-system, "Segoe UI", sans-serif;
+  --font-hand: "Patrick Hand", "Comic Sans MS", cursive;
+  --font-type: "Special Elite", "Courier New", monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px;
+  background-image:
+    radial-gradient(70% 900px at 85% 0%, color-mix(in srgb, var(--accent-strong) 20%, transparent), transparent 70%),
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.04) 0 2px, transparent 3px);
+  background-size: 100% 1800px, 70px 70px;
+  background-repeat: no-repeat, repeat;
+}
+button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* ---------- the language switch ---------- */
+.seg { display: flex; }
+.seg button { padding: 6px 12px; margin-right: -1.5px; border: 1.5px dashed color-mix(in srgb, var(--text) 30%, transparent); font-family: var(--font-hand); font-size: 16px; line-height: 1.1; }
+.seg button[aria-pressed="true"] { background: var(--accent-strong); border-style: solid; border-color: var(--accent-strong); color: #fff; }
+.nav-right { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px 18px; }
+
+/* ---------- the page's top and bottom (the landing's) ---------- */
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: min(1100px, calc(100% - 32px)); margin: 26px auto 0; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 24px; font-weight: 700; letter-spacing: .02em; text-decoration: none; }
+.brand img { width: 34px; height: 34px; object-fit: contain; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--paper); color: var(--ink); font-family: var(--font-display); font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; text-decoration: none; box-shadow: 3px 4px 0 var(--accent-deep); transform: rotate(-1deg); white-space: nowrap; }
+.btn:hover { transform: rotate(0) translateY(-2px); }
+.footer { margin-top: 90px; padding: 30px 16px 40px; border-top: 1px solid var(--border); background: color-mix(in srgb, var(--bg-elevated) 70%, transparent); }
+.footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 14px 28px; width: min(1100px, 100%); margin: 0 auto; font-size: 13px; color: var(--text-muted); }
+.footer-inner nav { display: flex; gap: 22px; font-weight: 600; }
+.footer-inner nav a { text-decoration: none; }
+.footer-inner nav a[aria-current] { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
+
+.hero { width: min(1100px, calc(100% - 32px)); margin: 50px auto 0; }
+.sticker { display: inline-block; padding: 4px 14px 3px 12px; background: var(--accent); color: var(--ink); font-family: var(--font-hand); font-size: 18px; transform: rotate(-2deg); box-shadow: 1px 2px 5px rgba(0,0,0,.35); }
+h1 { margin: 16px 0 8px; font-family: var(--font-display); font-size: clamp(38px, 6vw, 70px); font-weight: 700; line-height: .95; text-transform: uppercase; text-wrap: balance; }
+h1 span { color: var(--accent); }
+.lede { max-width: 60ch; margin: 0; color: var(--text-muted); line-height: 1.6; font-size: 16px; }
+
+/* ---------- the sheet ---------- */
+.wrap { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 40px; width: min(1100px, calc(100% - 32px)); margin: 56px auto 0; align-items: start; }
+.index { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 1px; padding-left: 12px; border-left: 2px dashed var(--border); }
+.index p { margin: 0 0 6px; font-family: var(--font-type); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+.index a { padding: 5px 0; font-size: 13.5px; color: var(--text-muted); text-decoration: none; line-height: 1.3; }
+.index a span { font-family: var(--font-type); margin-right: 6px; color: var(--accent); }
+.index a:hover { color: var(--text); }
+
+.file { position: relative; }
+/* A manila folder tab sticking out above the sheet: "we're in the legal part". */
+.file-tab {
+  position: absolute; top: -30px; left: 26px; z-index: 0; padding: 7px 22px 12px; border-radius: 8px 8px 0 0;
+  background: var(--folder); color: #3b2f12; font-family: var(--font-type); font-size: 13px; letter-spacing: .12em; text-transform: uppercase;
+  box-shadow: 0 -2px 6px rgba(0,0,0,.25);
+}
+.sheet { position: relative; z-index: 1; padding: 44px 52px 40px; background: var(--paper); color: var(--ink); box-shadow: 4px 14px 34px rgba(0,0,0,.45); }
+.sheet::before { content: ""; position: absolute; top: -9px; left: calc(50% - 7px); width: 14px; height: 14px; border-radius: 50%; background: var(--accent-strong); box-shadow: 0 2px 3px rgba(0,0,0,.4), inset -2px -2px 3px rgba(0,0,0,.3), inset 2px 2px 2px rgba(255,255,255,.5); }
+/* A paper clip holding the sheet together. */
+.clip { position: absolute; top: -22px; right: 64px; z-index: 2; width: 18px; height: 58px; border: 3px solid #8b8f96; border-radius: 10px; border-bottom-color: transparent; transform: rotate(8deg); }
+.clip::after { content: ""; position: absolute; left: 3px; top: 8px; width: 6px; height: 36px; border: 3px solid #8b8f96; border-top: 0; border-radius: 0 0 6px 6px; }
+
+.doc-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: start; padding-bottom: 20px; border-bottom: 2px solid var(--ink); }
+.doc-kind { margin: 0; font-family: var(--font-type); font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-muted); }
+.doc-title { margin: 6px 0 8px; font-family: var(--font-display); font-size: 25px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; line-height: 1.15; }
+.doc-meta { margin: 0; font-family: var(--font-type); font-size: 13px; line-height: 1.7; color: var(--ink-muted); }
+/* The rubber stamp: inked, a touch tilted, like the new-season one. */
+.stamp {
+  align-self: center; padding: 7px 12px 6px; border: 3px double var(--stamp); color: var(--stamp); background: rgba(255,255,255,.35);
+  font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: .1em; text-transform: uppercase; line-height: 1.1; text-align: center;
+  transform: rotate(-9deg); mix-blend-mode: multiply; opacity: .9;
+}
+.stamp small { display: block; font-size: 10.5px; letter-spacing: .14em; }
+
+.short { position: relative; margin: 26px 0 8px; padding: 18px 20px 14px; background: color-mix(in srgb, var(--accent) 38%, var(--paper)); transform: rotate(-.6deg); box-shadow: 2px 6px 14px rgba(0,0,0,.18); }
+.short::before { content: ""; position: absolute; top: -9px; left: 42%; width: 70px; height: 18px; background: color-mix(in srgb, var(--paper) 65%, transparent); transform: rotate(-3deg); }
+.short h2 { margin: 0 0 6px; font-family: var(--font-hand); font-size: 24px; font-weight: 400; }
+.short ul { margin: 0; padding-left: 20px; font-size: 15.5px; line-height: 1.55; }
+
+.sec { scroll-margin-top: 24px; margin-top: 28px; padding-top: 24px; border-top: 1px dashed rgba(13,12,21,.22); }
+.sec h2 { display: flex; align-items: baseline; gap: 10px; margin: 0 0 12px; font-family: var(--font-display); font-size: 20px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; }
+.sec h2 .n { font-family: var(--font-type); font-size: 17px; font-weight: 400; color: var(--accent-deep); letter-spacing: 0; }
+.sec p { margin: 0 0 10px; line-height: 1.65; }
+.sec ul { margin: 0 0 10px; padding-left: 20px; line-height: 1.6; }
+.sec li + li { margin-top: 6px; }
+.sec li ul { margin: 6px 0 0; }
+.sec strong { font-weight: 700; }
+.mail { font-weight: 700; color: var(--accent-deep); overflow-wrap: anywhere; }
+/* The law's articles, as pencil notes in the text. */
+.art { display: inline-block; padding: 0 6px; border: 1.5px solid color-mix(in srgb, var(--ink) 35%, transparent); border-radius: 3px; font-family: var(--font-type); font-size: 12px; line-height: 1.5; color: var(--ink-muted); white-space: nowrap; transform: rotate(-1deg); }
+.tip { margin-top: 12px; padding: 10px 14px; border-left: 3px solid var(--accent-strong); background: color-mix(in srgb, var(--accent) 14%, var(--paper)); font-size: 14.5px; line-height: 1.55; }
+.table-wrap { overflow-x: auto; margin: 4px 0 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; line-height: 1.5; }
+th, td { padding: 9px 10px; text-align: left; vertical-align: top; border-bottom: 1px solid rgba(13,12,21,.15); }
+th { font-family: var(--font-type); font-weight: 400; font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); border-bottom: 2px solid var(--ink); }
+
+/* The end: a signature line and a wax seal with Slate's mark. */
+.sign { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; margin-top: 36px; padding-top: 22px; border-top: 2px solid var(--ink); }
+.sign-name { margin: 0; font-family: var(--font-hand); font-size: 26px; line-height: 1.1; color: var(--accent-deep); }
+.sign-line { margin: 4px 0 0; padding-top: 4px; border-top: 1px solid var(--ink); font-family: var(--font-type); font-size: 12px; letter-spacing: .06em; color: var(--ink-muted); }
+.seal {
+  display: grid; place-items: center; width: 78px; aspect-ratio: 1; border-radius: 47% 53% 50% 50% / 52% 48% 52% 48%;
+  background: radial-gradient(circle at 35% 30%, #9c7cf8, var(--accent-deep) 60%, #4a1a9e);
+  color: #f3eaff; font-family: var(--font-display); font-weight: 700; font-size: 28px; box-shadow: 0 3px 6px rgba(0,0,0,.35), inset 0 0 0 5px rgba(255,255,255,.12);
+  transform: rotate(-8deg);
+}
+.thanks { margin: 22px 0 0; font-family: var(--font-hand); font-size: 20px; line-height: 1.3; color: var(--ink-muted); text-align: center; }
+
+@media (max-width: 760px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 42px; }
+  .index { position: static; display: grid; grid-template-columns: 1fr 1fr; gap: 2px 14px; border-left: 0; padding-left: 0; }
+  .index p { grid-column: 1 / -1; }
+  .sheet { padding: 34px 20px 28px; }
+  .doc-head { grid-template-columns: minmax(0, 1fr); }
+  .stamp { justify-self: start; }
+  .clip { right: 24px; }
+  .nav .btn { padding: 8px 12px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+<header class="nav">
+  <a class="brand" href="./"><img src="img/Slate-logo.png" alt="" /><span translate="no">Slate</span></a>
+  <div class="nav-right">
+    <div class="seg" role="group" id="seg-lang"></div>
+    <a class="btn" href="./" id="back"></a>
+  </div>
+</header>
+<section class="hero" id="top">
+  <span class="sticker" id="sticker"></span>
+  <h1 id="h1"></h1>
+  <p class="lede" id="lede"></p>
+</section>
+<div class="wrap">
+  <nav class="index" aria-label="Index" id="index"></nav>
+  <div class="file">
+    <span class="file-tab" id="tab"></span>
+    <span class="clip" aria-hidden="true"></span>
+    <article class="sheet" id="sheet"></article>
+  </div>
+</div>
+<footer class="footer">
+  <div class="footer-inner">
+    <nav id="foot-nav"></nav>
+    <span id="foot-fine"></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  const MAIL = `<span class="mail">slateappmail@gmail.com</span>`;
+  const A = (s) => `<span class="art">${s}</span>`;
+  const TEXT = {
+    es: {
+      docTitle: "Privacidad · Slate", langLabel: "Idioma", back: "← Volver a Slate", sticker: "La parte legal, sin letra chica ♥",
+      h1: "Tu privacidad <span>en Slate</span>",
+      lede: "Sí, esta es la parte legal. La escribimos para que se entienda a la primera, y para que sepas exactamente qué pasa con tus datos.",
+      tab: "Legal · Privacidad", indexTitle: "En esta página",
+      kind: "Documento oficial", title: "Política de Privacidad y Protección de Datos",
+      meta: "Ley N° 19.628, modificada por la Ley N° 21.719 · Chile<br>Vigencia: septiembre de 2026 · Versión: 1.2",
+      stamp: "Sin letra chica<small>Versión 1.2</small>",
+      shortT: "Declaración fundamental de privacidad de Slate",
+      shortP: `<p style="margin:0 0 8px;line-height:1.55">Slate es un tablero de corcho digital para registrar las películas y series que ves. La privacidad de los usuarios es un pilar central del proyecto:</p><ul><li>Slate es gratuito, no tiene publicidad, no usa rastreadores ni herramientas de analítica, y no usa cookies.</li><li>Tu historial de entretenimiento es tuyo: Slate no lo vende, no lo comparte y no lo muestra a nadie.</li></ul>`,
+      signName: "Manuel Pinto Devia", signLine: "Responsable del tratamiento · Slate",
+      thanks: "Gracias por leer hasta aquí. Ahora sí: ¡a ver películas! 🍿",
+      foot: ["Iniciar sesión", "Pedir acceso", "Privacidad"], fine: "© 2026 Slate · Hecho con ♥ para las noches de película.",
+      th: ["Derecho", "Qué significa"], th2: ["Tratamiento", "Base de licitud"],
+      secs: [
+        ["Responsable del tratamiento y contacto", `<p>El responsable del tratamiento de los datos personales recopilados a través de Slate es <strong>Manuel Pinto Devia</strong> (conocido como Nicholas Henderson), persona natural, con domicilio en Chile. El tratamiento se realiza conforme a la Ley N° 19.628 sobre protección de los datos personales (modificada por la Ley N° 21.719).</p><ul><li><strong>Plataforma digital:</strong> https://myslate.pages.dev</li><li><strong>Canal de privacidad y de solicitudes:</strong> ${MAIL}</li></ul>`],
+        ["A quiénes se refiere esta política y de dónde vienen los datos", `<ul><li><strong>A quiénes se refiere:</strong> a las personas que solicitan acceso a Slate y a quienes tienen una cuenta.</li><li><strong>De dónde vienen los datos:</strong> los entregas tú directamente al usar Slate. Slate no obtiene datos personales de terceros ni de fuentes de acceso público.</li></ul>`],
+        ["Datos personales tratados y sus finalidades", `<p>En aplicación del principio de proporcionalidad ${A("Art. 3° letra c")}, Slate solo trata la información necesaria para prestar el servicio.</p><ul><li><strong>Solicitud de acceso:</strong> tu nombre, tu correo electrónico y un mensaje opcional (hasta 500 caracteres). Llegan por correo electrónico al responsable, a través de Web3Forms, y se usan exclusivamente para gestionar tu invitación y crear tu cuenta.</li><li><strong>Datos de cuenta:</strong> tu correo electrónico y tu contraseña. La contraseña se almacena cifrada: nadie puede verla, ni siquiera el responsable.</li><li><strong>Registro de seguridad:</strong> el proveedor de la base de datos registra cuándo inicias sesión y desde qué dirección IP.</li><li><strong>Datos de biblioteca y registro de uso:</strong><ul><li>Qué se guarda: listas de películas y series (vistas, por ver, viendo o abandonadas), calificaciones en corazones, reseñas, fechas de visualización, historial de revisionados, episodios marcados, colecciones y orden personalizado.</li><li>Para qué: operar las funciones del tablero y sincronizar tu registro entre tus dispositivos.</li></ul></li><li><strong>Datos de perfil y preferencias:</strong><ul><li>Perfil: nombre de usuario, biografía opcional (hasta 160 caracteres), y película y serie favoritas.</li><li>Preferencias: tema visual, densidad de tarjetas, orden por defecto y país para "Dónde ver".</li><li>Tu perfil es privado: solo tú puedes verlo.</li></ul></li><li><strong>Datos guardados en tu dispositivo:</strong><ul><li>Slate no usa cookies.</li><li>Tu navegador guarda tu sesión abierta y algunas preferencias (idioma, orden, la última sección visitada, información sobre temporadas nuevas), para que la app funcione más rápido.</li><li>Se borran si limpias los datos de tu navegador.</li></ul></li></ul><p class="tip"><strong>Recomendación:</strong> tus reseñas son texto libre. Te recomendamos no incluir en ellas datos sensibles, como datos de salud, creencias u opiniones políticas.</p>`],
+        ["Bases de licitud del tratamiento", `<p>Cada tratamiento que realiza Slate tiene su fundamento en la ley ${A("Arts. 12 y 13")}:</p>__TABLE_BASES__<p>Al solicitar acceso o ingresar por primera vez, marcas una casilla con la que declaras haber leído esta política y tener 14 años o más.</p>`],
+        ["Destinatarios: servicios e infraestructura de terceros", `<p>Slate no cede ni vende tus datos. Para funcionar, usa los siguientes proveedores, que tratan datos por encargo del responsable ${A("Art. 15 bis")} o entregan contenido al sitio:</p><ul><li><strong>Supabase:</strong> base de datos, inicio de sesión y servidor.</li><li><strong>Cloudflare:</strong> publicación del sitio web.</li><li><strong>TMDB (The Movie Database):</strong> catálogo de películas y series (pósters, sinopsis, géneros, duraciones y episodios).<ul><li>Las consultas pasan por el servidor de Slate, donde se resguarda la clave de acceso, y no incluyen datos personales.</li><li>Los pósters e imágenes se cargan directamente desde los servidores de TMDB.</li></ul></li><li><strong>JustWatch</strong> (a través de TMDB): disponibilidad en plataformas de streaming, según el país elegido en Ajustes.</li><li><strong>YouTube:</strong> tráilers mediante el reproductor incrustado, en su modo de privacidad mejorada. Solo se cargan si decides reproducir uno.</li><li><strong>Google Fonts:</strong> tipografías del sitio.</li><li><strong>Web3Forms y Gmail:</strong> envío y recepción de las solicitudes de acceso y de los correos de bienvenida.</li></ul><p>Como ocurre con cualquier sitio web, estos proveedores pueden ver la dirección IP de tu dispositivo cuando cargan su contenido.</p>`],
+        ["Transferencia internacional de datos", `<ul><li><strong>Dónde se guardan:</strong> los datos de tu cuenta, biblioteca y perfil se almacenan en Supabase, en servidores de Amazon Web Services ubicados en <strong>Ohio, Estados Unidos</strong>. Es decir, se transfieren fuera de Chile.</li><li><strong>Nivel de protección de Estados Unidos:</strong> la Agencia de Protección de Datos Personales aún no ha publicado el listado de países con un nivel adecuado de protección ${A("Art. 28")}, así que no puede afirmarse que Estados Unidos lo tenga.</li><li><strong>Garantías de la transferencia:</strong> está amparada por el acuerdo de tratamiento de datos (Data Processing Addendum) de Supabase, que incluye cláusulas contractuales tipo con garantías de protección para las transferencias internacionales ${A("Art. 27 letra b")}.</li></ul>`],
+        ["Seguridad y privacidad desde el diseño", `<p>Slate aplica medidas técnicas y organizativas para proteger tu información ${A("Arts. 14 quáter y 14 quinquies")}:</p><ul><li><strong>Aislamiento de datos:</strong> reglas de control de acceso en la base de datos hacen que cada usuario solo pueda acceder a los datos de su propia cuenta y modificarlos.</li><li><strong>Contraseñas cifradas</strong> y <strong>conexiones cifradas (HTTPS)</strong> en todo el sitio.</li><li><strong>Saneamiento de contenido:</strong> los textos ingresados por los usuarios se tratan como texto plano, para evitar vulnerabilidades informáticas.</li><li><strong>Resguardo de credenciales:</strong> las claves de los proveedores externos se usan exclusivamente en el servidor.</li><li><strong>Incidentes de seguridad:</strong> si ocurre una vulneración que ponga en riesgo razonable tus derechos, Slate la reportará sin dilaciones indebidas a la Agencia de Protección de Datos Personales y la dejará registrada ${A("Art. 14 sexies")}. También te avisaremos si tus datos resultaron afectados.</li></ul>`],
+        ["Decisiones automatizadas", `<p>Slate no toma decisiones automatizadas sobre ti ni elabora perfiles con tus datos.</p>`],
+        ["Tus derechos sobre tus datos", `<p>Como titular de tus datos, tienes los siguientes derechos ${A("Arts. 4° a 9°")}.</p>__TABLE_RIGHTS__<p><strong>Cómo ejercerlos</strong> ${A("Arts. 10 y 11")}</p><ul><li><strong>Portabilidad:</strong> Ajustes → Tus datos → Exportar, de forma directa e inmediata.</li><li><strong>Supresión de la cuenta:</strong> Ajustes → Cuenta → Eliminar cuenta, de forma directa e inmediata.</li><li><strong>Cualquier otra solicitud:</strong> escribe a ${MAIL} indicando:<ul><li>quién eres y el correo de tu cuenta;</li><li>qué derecho quieres ejercer;</li><li>sobre qué datos.</li></ul></li><li><strong>Qué haremos:</strong><ul><li>Acusaremos recibo de tu solicitud y la responderemos por escrito en un plazo máximo de <strong>30 días corridos</strong>. Ese plazo se puede prorrogar una sola vez por otros 30 días, y te avisaremos antes de que venza.</li><li>Las solicitudes de bloqueo temporal se responden dentro de <strong>2 días hábiles</strong>.</li><li>Ejercer tus derechos es gratuito.</li></ul></li><li><strong>Si rechazamos tu solicitud, en todo o en parte, o no te respondemos a tiempo,</strong> puedes reclamar ante la <strong>Agencia de Protección de Datos Personales</strong> dentro de <strong>30 días hábiles</strong>.</li></ul>`],
+        ["Conservación y eliminación de datos", `<ul><li><strong>Mientras tengas tu cuenta:</strong> tus datos se conservan mientras tu cuenta esté activa.</li><li><strong>Al eliminar tu cuenta:</strong> si eliges <strong>Ajustes → Cuenta → Eliminar cuenta</strong>, se borran de manera inmediata, definitiva e irreversible tu cuenta, perfil, biblioteca, reseñas y ajustes. Slate no guarda copias de respaldo.</li><li><strong>Solicitudes de acceso:</strong> una vez resuelta tu solicitud (creada tu cuenta, o rechazada), el correo con tu solicitud se elimina ${A("Art. 14 letra d")}.</li></ul>`],
+        ["Edad mínima de uso", `<ul><li><strong>Edad mínima:</strong> Slate está destinado exclusivamente a personas de <strong>14 años o más</strong>. La ley considera niños o niñas a los menores de 14 años, cuyos datos solo pueden tratarse con el consentimiento de sus padres o representantes legales ${A("Art. 16 quáter")}.</li><li><strong>Confirmación:</strong> al solicitar acceso o ingresar por primera vez, confirmas que tienes 14 años o más.</li><li><strong>Cuentas de menores:</strong> si sabemos que una cuenta pertenece a una persona menor de 14 años, la eliminaremos.</li></ul>`],
+        ["Cambios a esta política", `<p>Si esta política cambia en algo importante, publicaremos aquí la nueva versión, con su fecha y número de versión, y te avisaremos dentro de Slate.</p>`],
+      ],
+      bases: [["Solicitud de acceso", `Medidas precontractuales adoptadas a tu solicitud ${A("Art. 13 letra c")}`], ["Cuenta, biblioteca, perfil y preferencias", `Ejecución del servicio que solicitaste ${A("Art. 13 letra c")}`], ["Registro de inicios de sesión", `Interés legítimo del responsable en proteger tu cuenta y el servicio contra accesos no autorizados ${A("Art. 13 letra d")}`]],
+      rights: [["Acceso", "Confirmar si tratamos tus datos y consultar toda la información de tu cuenta."], ["Rectificación", "Modificar o actualizar datos inexactos o incompletos, directamente desde la app."], ["Supresión", "Eliminar títulos, o borrar tu cuenta completa de forma irreversible."], ["Oposición", "Pedir que cese un tratamiento específico, según las causales que establece la ley."], ["Portabilidad", "Descargar toda tu biblioteca en un archivo estructurado (.slate) cuando quieras."], ["Bloqueo temporal", "Pedir que se suspenda el tratamiento de tus datos mientras se resuelve una solicitud de rectificación, supresión u oposición."]],
+    },
+    en: {
+      docTitle: "Privacy · Slate", langLabel: "Language", back: "← Back to Slate", sticker: "The legal part, no fine print ♥",
+      h1: "Your privacy <span>on Slate</span>",
+      lede: "Yes, this is the legal part. We wrote it to make sense on the first read, so you know exactly what happens with your data.",
+      tab: "Legal · Privacy", indexTitle: "On this page",
+      kind: "Official document", title: "Privacy and Data Protection Policy",
+      meta: "Law No. 19,628, as amended by Law No. 21,719 · Chile<br>In effect: September 2026 · Version: 1.2",
+      stamp: "No fine print<small>Version 1.2</small>",
+      shortT: "Slate's fundamental privacy statement",
+      shortP: `<p style="margin:0 0 8px;line-height:1.55">Slate is a digital corkboard for keeping track of the movies and shows you watch. Its users' privacy is a central pillar of the project:</p><ul><li>Slate is free, has no ads, uses no trackers or analytics tools, and uses no cookies.</li><li>Your viewing history is yours: Slate doesn't sell it, share it or show it to anyone.</li></ul>`,
+      signName: "Manuel Pinto Devia", signLine: "Data controller · Slate",
+      thanks: "Thanks for reading this far. Now, on to the movies! 🍿",
+      foot: ["Log in", "Request access", "Privacy"], fine: "© 2026 Slate · Made with ♥ for movie nights.",
+      th: ["Right", "What it means"], th2: ["Processing", "Legal basis"],
+      secs: [
+        ["Data controller and contact", `<p>The data controller for the personal data collected through Slate is <strong>Manuel Pinto Devia</strong> (known as Nicholas Henderson), a natural person domiciled in Chile. Processing is carried out in accordance with Law No. 19,628 on the protection of personal data (as amended by Law No. 21,719).</p><ul><li><strong>Digital platform:</strong> https://myslate.pages.dev</li><li><strong>Privacy and requests channel:</strong> ${MAIL}</li></ul>`],
+        ["Who this policy covers and where the data comes from", `<ul><li><strong>Who it covers:</strong> people who request access to Slate and people who have an account.</li><li><strong>Where the data comes from:</strong> you provide it directly when you use Slate. Slate doesn't obtain personal data from third parties or from publicly accessible sources.</li></ul>`],
+        ["Personal data processed and its purposes", `<p>Under the principle of proportionality ${A("Art. 3 letter c")}, Slate only processes the information needed to provide the service.</p><ul><li><strong>Access request:</strong> your name, your email address and an optional message (up to 500 characters). They reach the data controller by email, through Web3Forms, and are used only to handle your invitation and create your account.</li><li><strong>Account data:</strong> your email address and your password. The password is stored encrypted: no one can see it, not even the data controller.</li><li><strong>Security log:</strong> the database provider records when you sign in and from which IP address.</li><li><strong>Library and usage data:</strong><ul><li>What's kept: lists of movies and shows (watched, to watch, watching or dropped), heart ratings, reviews, viewing dates, rewatch history, ticked episodes, collections and custom order.</li><li>What for: running the board's features and syncing your record across your devices.</li></ul></li><li><strong>Profile and preferences:</strong><ul><li>Profile: username, optional bio (up to 160 characters), and favorite movie and show.</li><li>Preferences: theme, card density, default sort and country for "Where to watch".</li><li>Your profile is private: only you can see it.</li></ul></li><li><strong>Data kept on your device:</strong><ul><li>Slate uses no cookies.</li><li>Your browser keeps your signed-in session and some preferences (language, sort order, the last section you visited, new-season info), so the app runs faster.</li><li>They're deleted if you clear your browser's data.</li></ul></li></ul><p class="tip"><strong>A suggestion:</strong> your reviews are free text. We suggest you don't include sensitive data in them, such as health data, beliefs or political opinions.</p>`],
+        ["Legal bases for processing", `<p>Each processing activity Slate carries out has its basis in the law ${A("Arts. 12 and 13")}:</p>__TABLE_BASES__<p>When you request access or sign in for the first time, you tick a box declaring that you've read this policy and that you're 14 or older.</p>`],
+        ["Recipients: third-party services and infrastructure", `<p>Slate doesn't transfer or sell your data. To work, it uses the following providers, which process data on the data controller's behalf ${A("Art. 15 bis")} or serve content to the site:</p><ul><li><strong>Supabase:</strong> database, sign-in and server.</li><li><strong>Cloudflare:</strong> publishing the website.</li><li><strong>TMDB (The Movie Database):</strong> the movie and show catalog (posters, synopses, genres, runtimes and episodes).<ul><li>Queries go through Slate's server, where the access key is kept, and include no personal data.</li><li>Posters and images load directly from TMDB's servers.</li></ul></li><li><strong>JustWatch</strong> (through TMDB): availability on streaming services, for the country chosen in Settings.</li><li><strong>YouTube:</strong> trailers through the embedded player, in its privacy-enhanced mode. They only load if you choose to play one.</li><li><strong>Google Fonts:</strong> the site's typefaces.</li><li><strong>Web3Forms and Gmail:</strong> sending and receiving access requests and welcome emails.</li></ul><p>As with any website, these providers can see your device's IP address when they load their content.</p>`],
+        ["International data transfer", `<ul><li><strong>Where it's kept:</strong> your account, library and profile data are stored in Supabase, on Amazon Web Services servers in <strong>Ohio, United States</strong>. That is, they're transferred outside Chile.</li><li><strong>The United States' level of protection:</strong> the Personal Data Protection Agency (Agencia de Protección de Datos Personales) hasn't yet published its list of countries with an adequate level of protection ${A("Art. 28")}, so it can't be stated that the United States has one.</li><li><strong>Safeguards for the transfer:</strong> it's covered by Supabase's Data Processing Addendum, which includes standard contractual clauses with protection safeguards for international transfers ${A("Art. 27 letter b")}.</li></ul>`],
+        ["Security and privacy by design", `<p>Slate applies technical and organizational measures to protect your information ${A("Arts. 14 quáter and 14 quinquies")}:</p><ul><li><strong>Data isolation:</strong> access-control rules in the database make sure each user can only access and change the data in their own account.</li><li><strong>Encrypted passwords</strong> and <strong>encrypted connections (HTTPS)</strong> across the site.</li><li><strong>Content sanitization:</strong> text entered by users is treated as plain text, to prevent security vulnerabilities.</li><li><strong>Credential safekeeping:</strong> external providers' keys are used only on the server.</li><li><strong>Security incidents:</strong> if a breach puts your rights at reasonable risk, Slate will report it without undue delay to the Personal Data Protection Agency and record it ${A("Art. 14 sexies")}. We'll also let you know if your data was affected.</li></ul>`],
+        ["Automated decisions", `<p>Slate doesn't make automated decisions about you or build profiles from your data.</p>`],
+        ["Your rights over your data", `<p>As the owner of your data, you have the following rights ${A("Arts. 4 to 9")}.</p>__TABLE_RIGHTS__<p><strong>How to exercise them</strong> ${A("Arts. 10 and 11")}</p><ul><li><strong>Portability:</strong> Settings → Your Data → Export, directly and right away.</li><li><strong>Deleting your account:</strong> Settings → Account → Delete account, directly and right away.</li><li><strong>Any other request:</strong> write to ${MAIL} saying:<ul><li>who you are and your account's email;</li><li>which right you want to exercise;</li><li>which data it's about.</li></ul></li><li><strong>What we'll do:</strong><ul><li>We'll acknowledge your request and answer it in writing within <strong>30 calendar days</strong> at most. That period can be extended once, by another 30 days, and we'll tell you before it runs out.</li><li>Temporary blocking requests are answered within <strong>2 business days</strong>.</li><li>Exercising your rights is free.</li></ul></li><li><strong>If we turn down your request, in whole or in part, or don't answer in time,</strong> you can file a complaint with the <strong>Personal Data Protection Agency</strong> within <strong>30 business days</strong>.</li></ul>`],
+        ["Retention and deletion of data", `<ul><li><strong>While you have your account:</strong> your data is kept for as long as your account is active.</li><li><strong>When you delete your account:</strong> if you choose <strong>Settings → Account → Delete account</strong>, your account, profile, library, reviews and settings are deleted immediately, permanently and irreversibly. Slate keeps no backups.</li><li><strong>Access requests:</strong> once your request is resolved (your account created, or the request turned down), the email with your request is deleted ${A("Art. 14 letter d")}.</li></ul>`],
+        ["Minimum age", `<ul><li><strong>Minimum age:</strong> Slate is meant only for people <strong>14 or older</strong>. The law considers children to be those under 14, whose data may only be processed with the consent of their parents or legal representatives ${A("Art. 16 quáter")}.</li><li><strong>Confirmation:</strong> when you request access or sign in for the first time, you confirm that you're 14 or older.</li><li><strong>Accounts of minors:</strong> if we learn that an account belongs to someone under 14, we'll delete it.</li></ul>`],
+        ["Changes to this policy", `<p>If this policy changes in anything important, we'll publish the new version here, with its date and version number, and let you know inside Slate.</p>`],
+      ],
+      bases: [["Access request", `Pre-contractual steps taken at your request ${A("Art. 13 letter c")}`], ["Account, library, profile and preferences", `Providing the service you requested ${A("Art. 13 letter c")}`], ["Sign-in log", `The data controller's legitimate interest in protecting your account and the service against unauthorized access ${A("Art. 13 letter d")}`]],
+      rights: [["Access", "Confirm whether we process your data, and see all the information in your account."], ["Rectification", "Change or update inaccurate or incomplete data, right in the app."], ["Deletion", "Delete titles, or delete your whole account for good."], ["Objection", "Ask for a specific processing activity to stop, on the grounds the law sets."], ["Portability", "Download your whole library in a structured file (.slate) whenever you want."], ["Temporary blocking", "Ask for the processing of your data to be suspended while a rectification, deletion or objection request is resolved."]],
+    },
+  };
+  // As js/i18n.js picks it: the one chosen on this device, else the
+  // browser's, else English. Picking one here is kept for the app too.
+  const LANGUAGE_KEY = "slate_language";
+  function pickLanguage() {
+    try {
+      const saved = localStorage.getItem(LANGUAGE_KEY);
+      if (TEXT[saved]) return saved;
+    } catch {}
+    for (const tag of navigator.languages ?? [navigator.language]) {
+      const code = String(tag ?? "").toLowerCase().split("-")[0];
+      if (TEXT[code]) return code;
+    }
+    return "en";
+  }
+  const state = { lang: pickLanguage() };
+  const $ = (id) => document.getElementById(id);
+  const table = (head, rows) => `<div class="table-wrap"><table><thead><tr><th>${head[0]}</th><th>${head[1]}</th></tr></thead><tbody>${rows.map(([a, b]) => `<tr><td><strong>${a}</strong></td><td>${b}</td></tr>`).join("")}</tbody></table></div>`;
+
+  function render() {
+    const T = TEXT[state.lang];
+    $("seg-lang").setAttribute("aria-label", T.langLabel);
+    $("seg-lang").innerHTML = [["es", "Español"], ["en", "English"]].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${v === state.lang}">${l}</button>`).join("");
+    document.documentElement.lang = state.lang;
+    document.title = T.docTitle;
+    $("back").textContent = T.back;
+    $("sticker").textContent = T.sticker;
+    $("h1").innerHTML = T.h1;
+    $("lede").textContent = T.lede;
+    $("tab").textContent = T.tab;
+    $("index").innerHTML = `<p>${T.indexTitle}</p>` + T.secs.map(([t], i) => `<a href="#s${i + 1}"><span>§${i + 1}</span>${t}</a>`).join("");
+    const secs = T.secs.map(([t, html], i) => `<section class="sec" id="s${i + 1}"><h2><span class="n">§${i + 1}</span>${t}</h2>${html.replace("__TABLE_BASES__", table(T.th2, T.bases)).replace("__TABLE_RIGHTS__", table(T.th, T.rights))}</section>`).join("");
+    $("sheet").innerHTML = `
+      <header class="doc-head">
+        <div><p class="doc-kind">${T.kind}</p><h2 class="doc-title">${T.title}</h2><p class="doc-meta">${T.meta}</p></div>
+        <div class="stamp">${T.stamp}</div>
+      </header>
+      <aside class="short"><h2>${T.shortT}</h2>${T.shortP}</aside>
+      ${secs}
+      <footer class="sign">
+        <div><p class="sign-name">${T.signName}</p><p class="sign-line">${T.signLine}</p></div>
+        <div class="seal" aria-hidden="true">S</div>
+      </footer>
+      <p class="thanks">${T.thanks}</p>`;
+    const FOOT_LINKS = ["./#login", "./#request-access", "privacy.html"];
+    $("foot-nav").innerHTML = T.foot.map((f, i) => `<a href="${FOOT_LINKS[i]}"${i === 2 ? ' aria-current="page"' : ""}>${f}</a>`).join("");
+    $("foot-fine").textContent = T.fine;
+  }
+  $("seg-lang").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    state.lang = b.dataset.v;
+    try {
+      localStorage.setItem(LANGUAGE_KEY, state.lang);
+    } catch {}
+    render();
+  });
+  render();
+})();
+</script>
+</body>
+</html>

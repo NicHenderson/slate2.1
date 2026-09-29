@@ -996,6 +996,14 @@
   min-width: 150px;
 }
 
+/* A link dressed as the buttons beside it (Account → Privacy policy). */
+.data-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
 /* Delete account: set apart in red, so it's never mistaken for the tiles
    above it. */
 .tile-danger {
