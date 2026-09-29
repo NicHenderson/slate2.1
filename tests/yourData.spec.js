@@ -37,7 +37,7 @@ test("export downloads everything in the library as a .slate file", async ({ pag
   expect(download.suggestedFilename()).toMatch(/^slate-backup-\d{4}-\d{2}-\d{2}\.slate$/);
 
   const file = await readDownload(download);
-  expect(file).toMatchObject({ slate: "backup", version: 2, counts: { movies: 2, shows: 1, collections: 1, collection_items: 2, viewings: 1 } });
+  expect(file).toMatchObject({ slate: "backup", version: 3, counts: { movies: 2, shows: 1, collections: 1, collection_items: 2, viewings: 1, episodes: 0 } });
   expect(file.movies.map((m) => m.title).sort()).toEqual(["Alien", "The Matrix"]);
   expect(file.movies.find((m) => m.title === "Alien")).toMatchObject({ rating: 9, review: "Still terrifying.", watched_date: "2026-08-01" });
   expect(file.movies.find((m) => m.title === "Alien").viewings.map((v) => v.watched_on)).toEqual(["2026-08-01"]);
@@ -219,7 +219,7 @@ test("Replace: locked for 3 seconds, needs “Delete Data”, backs up first, th
   const [backup] = await Promise.all([page.waitForEvent("download"), go.click()]);
   expect(backup.suggestedFilename()).toMatch(/^slate-backup-before-import-\d{4}-\d{2}-\d{2}\.slate$/);
   const saved = await readDownload(backup);
-  expect(saved.counts).toEqual({ movies: 2, shows: 1, collections: 1, collection_items: 2, viewings: 1 });
+  expect(saved.counts).toEqual({ movies: 2, shows: 1, collections: 1, collection_items: 2, viewings: 1, episodes: 0 });
 
   await expect(page.locator("#import-title")).toHaveText("Library replaced", { timeout: 10000 });
   expect(backend.log.length).toBeGreaterThan(writesBefore);
@@ -261,4 +261,43 @@ test("Replace: when the answer never comes back, it says the library is one or t
   await expect(page.locator("#import-title")).toHaveText("The import didn't finish", { timeout: 10000 });
   await expect(page.locator("#import-body")).toContainText("either exactly as it was or exactly this file");
   expect(backend.db.movies.map((m) => m.title)).toEqual(["Inception"]);
+});
+
+// Version 3: each show's ticked episodes (js/episodes.js). Where you are in
+// a show is lost if a backup forgets it.
+test("a version 3 file carries ticked episodes, and Replace and Add bring them back", async ({ page, backend }) => {
+  const dark = backend.db.shows.find((s) => s.tmdb_id === 70523);
+  backend.seed("watched_episodes", [[1, 1], [1, 2], [2, 1]].map(([season, episode]) => ({ show_id: dark.id, season, episode })), backend.user.id);
+  const ticked = () =>
+    backend.db.watched_episodes
+      .map((e) => `${backend.db.shows.find((s) => s.id === e.show_id)?.tmdb_id}:${e.season}x${e.episode}`)
+      .sort();
+  await openYourData(page);
+  const [download] = await Promise.all([page.waitForEvent("download"), page.click("#data-export-btn")]);
+  const file = await readDownload(download);
+  expect(file.version).toBe(3);
+  expect(file.counts.episodes).toBe(3);
+  expect(file.shows[0].episodes).toEqual([{ season: 1, episode: 1 }, { season: 1, episode: 2 }, { season: 2, episode: 1 }]);
+
+  // Replace: the account's episodes give way to the file's, on its shows.
+  backend.seed("watched_episodes", [{ show_id: dark.id, season: 3, episode: 1 }], backend.user.id);
+  await confirmReplace(page, file);
+  await expect(page.locator("#import-title")).toHaveText("Library replaced", { timeout: 10000 });
+  expect(ticked()).toEqual(["70523:1x1", "70523:1x2", "70523:2x1"]);
+  await page.click('[data-import-action="close"]');
+
+  // Add, into an account without the show: it comes with its episodes.
+  backend.db.shows = [];
+  backend.db.watched_episodes = [];
+  backend.db.collection_items = [];
+  await page.reload();
+  await page.click('.nav-btn[data-section="settings"]');
+  await page.click('[data-settings-page="data"]');
+  await pickFile(page, { name: "back.slate", mimeType: "application/octet-stream", buffer: Buffer.from(JSON.stringify(file)) });
+  await expect(page.locator("#import-body")).toContainText("3 episodes ticked");
+  await page.click('[data-import-action="continue"]');
+  await page.click('[data-import-mode="add"]');
+  await page.click('[data-import-action="run"]');
+  await expect(page.locator("#import-title")).toHaveText("Import complete", { timeout: 10000 });
+  expect(ticked()).toEqual(["70523:1x1", "70523:1x2", "70523:2x1"]);
 });

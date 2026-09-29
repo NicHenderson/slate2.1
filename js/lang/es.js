@@ -701,6 +701,7 @@ window.SLATE_LANGUAGES = {
       "{n} season|{n} seasons": { one: "{n} temporada", other: "{n} temporadas" },
       "{n} episode|{n} episodes": { one: "{n} episodio", other: "{n} episodios" },
       "{n} episode out|{n} episodes out": { one: "{n} episodio estrenado", other: "{n} episodios estrenados" },
+      "{n} episode ticked|{n} episodes ticked": { one: "{n} episodio marcado", other: "{n} episodios marcados" },
       "{n} selected|{n} selected": { one: "{n} seleccionado", other: "{n} seleccionados" },
       "{n} result|{n} results": { one: "{n} resultado", other: "{n} resultados" },
       "Add {n} movie|Add {n} movies": { one: "Agregar {n} película", other: "Agregar {n} películas" },

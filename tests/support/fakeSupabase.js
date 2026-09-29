@@ -396,6 +396,12 @@ function createBackend() {
       if (!v.watched_on) refuse('null value in column "watched_on" of relation "viewings" violates not-null constraint', "23502");
       return { id: crypto.randomUUID(), user_id: userId, note: null, movie_id: v.movie_id, watched_on: v.watched_on, created_at: v.created_at ?? new Date().toISOString() };
     });
+    const showIds = new Set(rows.shows.map((row) => row.id));
+    const episodes = list("episodes").map((e) => {
+      if (!showIds.has(e.show_id)) refuse('new row violates row-level security policy for table "watched_episodes"', "42501", 403);
+      if (!(e.season >= 1)) refuse('new row for relation "watched_episodes" violates check constraint "watched_episodes_season_check"', "23514");
+      return { id: crypto.randomUUID(), user_id: userId, show_id: e.show_id, season: e.season, episode: e.episode, created_at: e.created_at ?? new Date().toISOString() };
+    });
     const items = list("items").map((item) => {
       if (!collectionIds.has(item.collection_id)) refuse('new row violates row-level security policy for table "collection_items"', "42501", 403);
       return { id: crypto.randomUUID(), created_at: new Date().toISOString(), ...Object.fromEntries(Object.entries(item).filter(([, v]) => v != null)) };
@@ -405,13 +411,13 @@ function createBackend() {
     const removed = ["movies", "shows"].reduce((n, table) => n + mine(table).filter((row) => !kept[table].has(row.tmdb_id)).length, 0);
 
     // Out with the old (items, viewings by cascade)…
-    for (const table of ["collection_items", "viewings", "collections", "movies", "shows"]) {
+    for (const table of ["collection_items", "viewings", "watched_episodes", "collections", "movies", "shows"]) {
       const gone = mine(table);
       db[table] = db[table].filter((row) => !gone.includes(row));
       gone.forEach((row) => pushChange(table, "DELETE", null, row));
     }
     // …and in with the file's. Movies go in undated; their viewings date them.
-    for (const [table, list] of [["movies", rows.movies], ["shows", rows.shows], ["viewings", viewings], ["collections", rows.collections], ["collection_items", items]]) {
+    for (const [table, list] of [["movies", rows.movies], ["shows", rows.shows], ["viewings", viewings], ["watched_episodes", episodes], ["collections", rows.collections], ["collection_items", items]]) {
       list.forEach((row) => {
         if (table === "movies") row.watched_date = null;
         db[table].push(row);

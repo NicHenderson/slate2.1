@@ -366,7 +366,7 @@ directly.
   and the profile card's numbers read (contrast ≥ 3), and some pops made
   darker, as they carry white text.
 - **Next: episode tracking for shows being watched** (the owner's idea;
-  nothing built yet, each stage with their go-ahead). An older Slate had
+  all nine stages built on its branch, each with their go-ahead). An older Slate had
   a "favorite episode" picker so close to a streaming app's episode list
   that the owner had to change it: it looked like it would play the
   episode. Avoid that here: no ▶, no "Watch now"; Slate's paper look.
@@ -453,8 +453,7 @@ directly.
   season / details lookups are cached 30 minutes. The note: "Where are
   you?" (season + aired episode picker, "Tick them", or "Watched it" on
   E1), "Up next S1 · E4" with "Watched it", and a plain "You're up to
-  date!" (stage 5 adds the next air date and the finale). Until stage 9,
-  a `.slate` backup doesn't carry episodes, and Replace loses them.
+  date!" (stage 5 adds the next air date and the finale).
   `tests/episodes.spec.js` covers it (plus Spanish's generic line).
   The owner's one note: the note jumped from a thin strip when it
   loaded. Now it loads at about its final size (150px, 250px on a
@@ -502,7 +501,7 @@ directly.
   S1 · E3" note (the furthest ticked; none if nothing is) and a list
   only to look at, that episode flagged "Stopped here". The episodes
   window redraws when its show is finished or dropped elsewhere.
-  Stage 8 — built, waiting for the owner's check on the preview: the
+  Stage 8 — done: the
   card (`episodeProgressHtml`, from STORE only, no lookup): Watching
   shows "S2 · E5" (the last ticked) + "14/26" + a hand-drawn bar, then
   "Started 27d ago"; with nothing ticked, an empty bar that looks it
@@ -515,6 +514,17 @@ directly.
   `last_episode_to_air` (`episodesOut`), saved that way when a show is
   added and refreshed, with `total_seasons`, whenever its window opens
   (`refreshShowCounts`: one update, only when they differ).
+  Stage 9 — built, waiting for the owner's check on the preview:
+  `.slate` goes to **version 3**: each show lists its ticked episodes
+  (`"episodes": [{ season, episode }]`, in order) and `counts.episodes`.
+  Import reads them (only for a show that was started; capped, checked,
+  each once), the summary counts "N episodes ticked"; Add brings a new
+  show's episodes (a show already in the account keeps its own); Replace
+  sends them to `replace_my_library()` (0009's `episodes`). Versions 1
+  and 2 still import, their shows with nothing ticked; the published
+  app, on version 2, says a version 3 file is from a newer Slate.
+  After the owner's check: merge into `claude/funny-pascal-bk99gr`, test
+  there, then `main` only on their second go-ahead.
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched

@@ -8,11 +8,12 @@
    A .slate file is readable JSON:
 
      {
-       "slate": "backup", "version": 2, "exported_at": "…", "about": "…",
-       "counts": { "movies": 29, "shows": 20, "collections": 4, "collection_items": 17, "viewings": 23 },
+       "slate": "backup", "version": 3, "exported_at": "…", "about": "…",
+       "counts": { "movies": 29, "shows": 20, "collections": 4, "collection_items": 17, "viewings": 23, "episodes": 140 },
        "movies": [ { "id": "…", "tmdb_id": 76341, "title": "…", "rating": 8, …,
                      "viewings": [ { "watched_on": "2024-10-31", "created_at": "…" }, … ] } ],
-       "shows":  [ … ],
+       "shows":  [ { "id": "…", "tmdb_id": 70523, "title": "…", …,
+                     "episodes": [ { "season": 1, "episode": 1 }, … ] } ],
        "collections": [ { "id": "…", "name": "…", "icon": "👻", "position": 1,
                           "items": [ { "item_type": "movie", "item_id": "…", "position": 1 } ] } ]
      }
@@ -22,10 +23,15 @@
    A movie's viewings (js/viewings.js) are listed oldest first; its
    watched_date is still there, the latest of them.
 
-   Version 1 (before viewings) had no "viewings": each watched movie of a
-   version 1 file comes in with one viewing, on its watched_date. */
+   A show's ticked episodes (js/episodes.js) are listed in order, by season
+   and episode number.
 
-const SLATE_FILE_VERSION = 2;
+   Version 1 (before viewings) had no "viewings": each watched movie of a
+   version 1 file comes in with one viewing, on its watched_date. Versions
+   1 and 2 (before episodes) have no "episodes": their shows come in with
+   none ticked. */
+
+const SLATE_FILE_VERSION = 3;
 
 const dataExportBtn = document.getElementById("data-export-btn");
 const dataExportSummary = document.getElementById("data-export-summary");
@@ -62,9 +68,18 @@ function todayStamp() {
 // short or a realtime echo behind) and builds the file. All or nothing: any
 // failed read throws, so a partial backup is never produced.
 async function buildSlateBackup() {
-  const [movies, shows, collections, items, viewings] = await Promise.all(
-    ["movies", "shows", "collections", "collection_items", "viewings"].map(fetchAllRows)
+  const [movies, shows, collections, items, viewings, episodes] = await Promise.all(
+    ["movies", "shows", "collections", "collection_items", "viewings", "watched_episodes"].map(fetchAllRows)
   );
+
+  // Only which episode: the rest means nothing outside this account.
+  const episodesByShow = new Map();
+  episodes.forEach((e) => {
+    const list = episodesByShow.get(e.show_id) ?? [];
+    list.push({ season: e.season, episode: e.episode });
+    episodesByShow.set(e.show_id, list);
+  });
+  episodesByShow.forEach((list) => list.sort(byEpisode));
 
   // Only the date and when it was logged: the id and movie_id mean nothing
   // outside this account (and the note column is unused).
@@ -104,9 +119,10 @@ async function buildSlateBackup() {
       collections: fileCollections.length,
       collection_items: fileCollections.reduce((n, col) => n + col.items.length, 0),
       viewings: movies.reduce((n, row) => n + (viewingsByMovie.get(row.id)?.length ?? 0), 0),
+      episodes: shows.reduce((n, row) => n + (episodesByShow.get(row.id)?.length ?? 0), 0),
     },
     movies: movies.map((row) => ({ ...withoutKeys(row, ["user_id"]), viewings: viewingsByMovie.get(row.id) ?? [] })),
-    shows: shows.map((row) => withoutKeys(row, ["user_id"])),
+    shows: shows.map((row) => ({ ...withoutKeys(row, ["user_id"]), episodes: episodesByShow.get(row.id) ?? [] })),
     collections: fileCollections,
   };
 
@@ -208,6 +224,29 @@ function readViewings(row) {
   return date ? [{ watched_on: date, created_at: null }] : [];
 }
 
+// More episodes than any show has: a cap on what a file can make the
+// import write.
+const IMPORT_MAX_EPISODES = 20000;
+
+// A show's ticked episodes, in order and each once (versions 1 and 2 list
+// none). Only a show that was started has any: one on To Watch would be
+// started over anyway.
+function readEpisodes(row) {
+  if (!optDate(row.started_watching_date) || !Array.isArray(row.episodes)) return [];
+  const seen = new Set();
+  return row.episodes
+    .slice(0, IMPORT_MAX_EPISODES)
+    .map((e) => (e && typeof e === "object" ? { season: optInt(e.season, 1), episode: optInt(e.episode, 0) } : null))
+    .filter((e) => {
+      if (!e?.season || e.season > 999 || e.episode == null || e.episode > 99999) return false;
+      const key = `${e.season}:${e.episode}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort(byEpisode);
+}
+
 // A title as the import will write it, or null when it can't be (no TMDB id
 // or no title). Unknown columns are dropped; a bad optional value is emptied.
 function readTitleRow(row, type) {
@@ -240,6 +279,7 @@ function readTitleRow(row, type) {
     started_watching_date: optDate(row.started_watching_date),
     finished_watching_date: optDate(row.finished_watching_date),
     is_dropped: row.is_dropped === true,
+    episodes: readEpisodes(row),
   };
 }
 
@@ -420,6 +460,7 @@ function showImportSummary(fileName, parsed) {
   const [watchedMovies, towatchMovies] = [count(movies, "grid-movies-watched"), count(movies, "grid-movies-towatch")];
   const [finishedShows, watchingShows, towatchShows, droppedShows] = ["grid-shows-watched", "grid-shows-watching", "grid-shows-towatch", "grid-shows-dropped"].map((gridId) => count(shows, gridId));
   const itemCount = collections.reduce((n, col) => n + col.items.length, 0);
+  const episodeCount = shows.reduce((n, row) => n + row.episodes.length, 0);
 
   // A fan of the most recently added posters: proof at a glance that this
   // is the right file.
@@ -458,6 +499,7 @@ function showImportSummary(fileName, parsed) {
         [watchingShows, tn(watchingShows, "{n} watching", "{n} watching")],
         [towatchShows, tn(towatchShows, "{n} to watch", "{n} to watch")],
         [droppedShows, tn(droppedShows, "{n} dropped", "{n} dropped")],
+        [episodeCount, tn(episodeCount, "{n} episode ticked", "{n} episodes ticked")],
       ]))}
       ${stat(collections.length, tn(collections.length, "Collection", "Collections"), itemCount ? tn(itemCount, "{n} title inside", "{n} titles inside") : "")}
     </div>
@@ -667,7 +709,7 @@ function titleRowsToInsert(fileRows, accountRows) {
   const rank = new Map(ranked.map((row, i) => [row, i]));
   const start = nextPos(accountRows);
   return fileRows.map((row) => {
-    const { ref, viewings, ...rest } = row;
+    const { ref, viewings, episodes, ...rest } = row;
     rest.position = accountOrdered && rank.has(row) ? start + rank.get(row) : null;
     return withoutNulls(rest, ["created_at"]);
   });
@@ -682,7 +724,7 @@ const collectionKey = (name) => name.trim().toLowerCase();
 // collection items. If anything fails, whatever this import created is
 // deleted again.
 async function importAdd(parsed, onProgress) {
-  const created = { movies: [], shows: [], collections: [], collection_items: [], viewings: [] };
+  const created = { movies: [], shows: [], collections: [], collection_items: [], viewings: [], watched_episodes: [] };
   onProgress(t("Checking your library…"), 0);
   const [accMovies, accShows, accCols, accItems] = await Promise.all(
     ["movies", "shows", "collections", "collection_items"].map(fetchAllRows)
@@ -721,14 +763,15 @@ async function importAdd(parsed, onProgress) {
 
   const itemTotal = parsed.collections.reduce((n, col) => n + col.items.length, 0);
   const earlierTotal = newMovies.reduce((n, row) => n + Math.max(0, row.viewings.length - 1), 0);
-  const total = Math.max(1, newMovies.length + earlierTotal + newShows.length + colsToCreate.length + itemTotal);
+  const episodeTotal = newShows.reduce((n, row) => n + row.episodes.length, 0);
+  const total = Math.max(1, newMovies.length + earlierTotal + newShows.length + episodeTotal + colsToCreate.length + itemTotal);
   let done = 0;
   const tick = (label) => (n) => {
     done += n;
     onProgress(label, done / total);
   };
 
-  const written = { movies: [], shows: [], collections: [], collectionItems: [] };
+  const written = { movies: [], shows: [], episodes: [], collections: [], collectionItems: [] };
   try {
     onProgress(t("Adding movies…"), 0);
     written.movies = await insertRows("movies", titleRowsToInsert(newMovies, accMovies), created, tick(t("Adding movies…")));
@@ -739,6 +782,13 @@ async function importAdd(parsed, onProgress) {
     await insertRows("viewings", earlier, created, tick(t("Adding movies…")));
     onProgress(t("Adding shows…"), done / total);
     written.shows = await insertRows("shows", titleRowsToInsert(newShows, accShows), created, tick(t("Adding shows…")));
+    // Each new show's ticked episodes. They go with their show if the
+    // import is undone. (A show already in the account keeps its own.)
+    const showIdByTmdb = new Map(written.shows.map((row) => [row.tmdb_id, row.id]));
+    const episodeRows = newShows.flatMap((row) =>
+      row.episodes.map((e) => ({ show_id: showIdByTmdb.get(row.tmdb_id), season: e.season, episode: e.episode }))
+    );
+    written.episodes = await insertRows("watched_episodes", episodeRows, created, tick(t("Adding shows…")));
     written.movies.forEach((row) => idByTmdb.movie.set(row.tmdb_id, row.id));
     written.shows.forEach((row) => idByTmdb.show.set(row.tmdb_id, row.id));
 
@@ -808,6 +858,7 @@ function applyImported(written) {
     resetViewings();
     written.viewings.forEach(storeViewing);
   }
+  written.episodes.forEach(storeEpisode);
   rerenderGrids(Object.keys(GRID_CONFIG));
   renderCollections();
   refreshOpenCollection();
@@ -1073,21 +1124,21 @@ function showReplaceDanger() {
 
 // Fresh copies of every row, keyed by table.
 async function snapshotAccount() {
-  const [movies, shows, collections, collectionItems, viewings] = await Promise.all(
-    ["movies", "shows", "collections", "collection_items", "viewings"].map(fetchAllRows)
+  const [movies, shows, collections, collectionItems, viewings, episodes] = await Promise.all(
+    ["movies", "shows", "collections", "collection_items", "viewings", "watched_episodes"].map(fetchAllRows)
   );
-  return { movies, shows, collections, collectionItems, viewings };
+  return { movies, shows, collections, collectionItems, viewings, episodes };
 }
 
-// The file as replace_my_library() (migration 0008) takes it. Every row
-// gets its id here, so the viewings and the collection items can point at
-// their titles within the one call.
+// The file as replace_my_library() (migrations 0008, 0009) takes it. Every
+// row gets its id here, so the viewings, the episodes and the collection
+// items can point at their titles within the one call.
 function replacementLibrary(parsed) {
   const idByRef = { movie: new Map(), show: new Map() };
   const titleRows = (rows, type) =>
     rows.map((row) => {
       // No watched_date: a movie's viewings set it (rule 1 of migration 0007).
-      const { ref, viewings, watched_date, ...fields } = row;
+      const { ref, viewings, episodes, watched_date, ...fields } = row;
       const id = crypto.randomUUID();
       if (ref && !idByRef[type].has(ref)) idByRef[type].set(ref, id);
       return { ...fields, id };
@@ -1096,6 +1147,9 @@ function replacementLibrary(parsed) {
   const shows = titleRows(parsed.shows, "show");
   const viewings = parsed.movies.flatMap((row, i) =>
     row.viewings.map((v) => ({ movie_id: movies[i].id, watched_on: v.watched_on, created_at: v.created_at }))
+  );
+  const episodes = parsed.shows.flatMap((row, i) =>
+    row.episodes.map((e) => ({ show_id: shows[i].id, season: e.season, episode: e.episode }))
   );
   const collections = [];
   const items = [];
@@ -1112,7 +1166,7 @@ function replacementLibrary(parsed) {
       items.push({ collection_id: id, item_type: item.item_type, item_id: itemId, position: item.position, created_at: item.created_at });
     });
   });
-  return { movies, shows, viewings, collections, items };
+  return { movies, shows, viewings, episodes, collections, items };
 }
 
 // Replace mode: the backup first, if asked for (if it can't be made,
@@ -1168,6 +1222,8 @@ async function reloadLibrary() {
     STORE.collectionItems.clear();
     resetViewings();
     snap.viewings.forEach(storeViewing);
+    resetEpisodes();
+    snap.episodes.forEach(storeEpisode);
     snap.movies.forEach((row) => STORE.movies.set(row.id, row));
     snap.shows.forEach((row) => STORE.shows.set(row.id, row));
     snap.collections.forEach((row) => STORE.collections.set(row.id, row));
