@@ -24,6 +24,36 @@ function syncStartExtra() {
   startExtra.classList.toggle("hidden", !finished);
 }
 
+// A show kept watching after something new came out (js/episodes.js) is
+// still rated and reviewed from before: finishing it again says so, and
+// that they can stay (the owner's pick, mockup 1d). No other show being
+// watched has a rating or review: they're only saved with a finished date,
+// and emptied when it's cleared by hand.
+//
+// A finished show with something new since (edited rather than kept
+// watching) gets the same note, saying so and offering to keep watching
+// it (the owner's idea), once TMDB has said so.
+function syncRefinishNote() {
+  const row = startRow;
+  const rated = row.rating != null || Boolean(row.review);
+  const reopened = !row.finished_watching_date && rated;
+  showRefinishNote(reopened ? "before" : null);
+  if (!row.finished_watching_date || !rated || row.is_dropped) return;
+  newSinceFinished(row)
+    .then((news) => {
+      if (news && startRow === row && !startModal.classList.contains("hidden")) showRefinishNote("news");
+    })
+    .catch(() => {}); // nothing said: the form works as before
+}
+
+// Which note shows: "before" (kept watching), "news" (not yet), or none.
+function showRefinishNote(kind) {
+  document.getElementById("start-refinish-note").classList.toggle("hidden", !kind);
+  document.getElementById("start-refinish-before").classList.toggle("hidden", kind !== "before");
+  document.getElementById("start-refinish-news").classList.toggle("hidden", kind !== "news");
+  document.getElementById("start-refinish-keep").classList.toggle("hidden", kind !== "news");
+}
+
 // A show can't be finished before it was started: unlike a date in the
 // future, that one is refused, as it would give "Avg time to finish" a
 // negative number of days.
@@ -49,11 +79,15 @@ function openStartWatchingModal(row, isNewInsert = false) {
   startFinishDate.value = row.finished_watching_date || "";
   startReview.value = row.review || "";
   startDatesError.classList.add("hidden");
+  syncRefinishNote();
   syncFutureNote(startDate);
   syncFutureNote(startFinishDate);
+  // Named for what it does: a show already started is being edited.
   document.getElementById("start-title").textContent = isNewInsert
     ? t("Add TV Show")
-    : t("Start watching");
+    : row.started_watching_date
+      ? t("Edit")
+      : t("Start watching");
   document.getElementById("start-show-title").textContent = row.title ?? t("Untitled");
   document.getElementById("start-show-meta").textContent =
     `${row.release_year ?? "—"} · ${detailDurationLine("shows", row)}`;
@@ -103,12 +137,15 @@ startForm.addEventListener("submit", async (e) => {
     finished_watching_date: finished,
   };
 
-  // The rating and review are optional, as for a movie.
+  // The rating and review are optional, as for a movie, and only asked
+  // with a finished date. A finished date cleared by hand takes them with
+  // it (Slate's rule, the owner's); a show being watched keeps what it
+  // has: one kept watching after a new season keeps its own (js/episodes.js).
   if (finished) {
     const rating = startHeartsInput.get();
     payload.rating = rating > 0 ? rating : null;
     payload.review = startReview.value.trim() || null;
-  } else {
+  } else if (startRow.finished_watching_date) {
     payload.rating = null;
     payload.review = null;
   }
@@ -136,6 +173,13 @@ startForm.addEventListener("submit", async (e) => {
 });
 
 startCancel.addEventListener("click", () => closeStartModal());
+
+// From the note: out of Edit, and asked as the detail window's button asks.
+document.getElementById("start-refinish-keep").addEventListener("click", () => {
+  const row = STORE.shows.get(startRow.id) ?? startRow;
+  closeStartModal();
+  confirmKeepWatching(row);
+});
 startClose.addEventListener("click", () => closeStartModal());
 
 document.getElementById("start-delete").addEventListener("click", () => {

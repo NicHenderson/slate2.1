@@ -160,8 +160,9 @@ directly.
   tool, the review note redesign, the trailer button that waits, disabled,
   search + filters, where to watch, rewatches of movies (all three
   stages), English + Spanish (the app and TMDB's data), genres and
-  posters escaped as text, and the search's info window in the detail
-  window's design (with its trailer).
+  posters escaped as text, the search's info window in the detail
+  window's design (with its trailer), and episode tracking for shows
+  (all nine stages, below).
 - Search and filters (`js/librarySearch.js`) cover Movies, Shows, Movies To
   Watch and the Shows Queue; the owner chose to leave collections for later.
   Their decisions:
@@ -365,9 +366,9 @@ directly.
   Peach's and Sun's accents were nudged from the mockup so the header tag
   and the profile card's numbers read (contrast ≥ 3), and some pops made
   darker, as they carry white text.
-- **Next: episode tracking for shows being watched** (the owner's idea;
-  all nine stages built, in `claude/funny-pascal-bk99gr`, waiting for
-  the owner's final test before `main`). An older Slate had
+- **Episode tracking for shows being watched** (the owner's idea) —
+  done, in `main` since Sept. 29, 2026 (PR #21, with the two fixes
+  found on the way). An older Slate had
   a "favorite episode" picker so close to a streaming app's episode list
   that the owner had to change it: it looked like it would play the
   episode. Avoid that here: no ▶, no "Watch now"; Slate's paper look.
@@ -525,11 +526,75 @@ directly.
   and 2 still import, their shows with nothing ticked; the published
   app, on version 2, says a version 3 file is from a newer Slate.
   With the owner's first go-ahead (Sept. 29, 2026), all of it was
-  merged into `claude/funny-pascal-bk99gr` (nothing new had landed there
-  or in `main`, so it only moved forward). Now: the owner tests it all
-  again on claude-funny-pascal-bk99gr.myslate.pages.dev; `main` only
-  on their second go-ahead ("súbelo a main"). No migration or redeploy
-  is left: 0009 and the `tmdb` function are already live.
+  merged into `claude/funny-pascal-bk99gr`, tested there by the owner,
+  and merged into `main` on their "súbelo a main" (PR #21, CI green on
+  its exact head).
+  **Next, raised by the owner (not built yet):** a finished show that gets a new season. Today a finished
+  show's list shows every episode out as watched (the new season too),
+  and the only way back to Watching is Edit → clearing "Finished on",
+  which also empties the rating and review. Claude's proposal: an
+  episode that aired after the show's finished date counts as new
+  (true whether it came out before or after episode tracking existed);
+  the finished show's window says "New since you finished: season 4"
+  with "Keep watching" (back to Watching, rating and review kept,
+  everything aired by the finished date ticked, so "Up next" is S4 ·
+  E1); its list shows the new ones unticked, flagged "New". The
+  owner's answers: keep the original started date; the old finished
+  date goes; finishing again sets the new one (the old isn't kept:
+  that's show rewatches, planned apart); yes to a "New season!"
+  sticker on cards in Shows; and when finishing again, a small note in
+  the finish window says the rating and review are from before the new
+  episodes, and can stay as they are. Work on
+  `claude/episode-tracking-shows-s9gixh`, then funny-pascal, then
+  `main`, as before. Stages: 1 mockups (1a the notice + "Keep
+  watching", 1b the list's new episodes, 1c the card sticker, 1d the
+  finish window's note; https://claude.ai/artifact/6nr6xj9CiFH68y1Y9Kzf65).
+  The owner's picks: 1a the sticky note ("New season!", what came out,
+  the button) plus 1b's rubber stamp on the poster, nothing else of B;
+  1b a "New" flag on each new episode and on its season's tab; 1c the
+  starburst sticker; 1d the pencil note with arrows, pointing at both
+  the hearts and the review. Stage 2 — done, waiting for the owner's
+  check: `newSinceFinished` (js/episodes.js) counts an episode new when
+  it came out after the finished date, whatever is ticked (the owner's
+  test found Severance, finished on 2022-05-01, with season 2 ticked:
+  `main`'s finish ticks everything out that day, even for a past
+  date; so only the date counts for a finished show) (a finished date
+  before the show first aired counts as none: everything seen, as
+  before); the finished window's note and stamp (no button yet); the
+  list shows the new ones unticked and flagged, opens on the first
+  season with news, and a season still airing now counts only what's
+  out (TMDB's `last_episode_to_air`). Finishing a show now ticks only
+  what was out by its finished date (a past date had ticked episodes
+  that came out after it). Stages 3 and 4 (done together, the owner's
+  call) — done, waiting for the owner's check: "↻ Keep watching" on the
+  note and in the list's header asks first (`openActionConfirm`,
+  js/confirmModal.js: what stays, what goes, a button in the theme's
+  color), then ticks what was out by the finished date, unticks anything
+  after it, and clears only the finished date ("Up next" = the first
+  new one). A finished date cleared by hand still empties rating and
+  review (Slate's rule, the owner's; a first version kept them, and the
+  owner caught it); only a show already Watching keeps its own when
+  edited. The dates window says "Edit" for a show already started (it
+  said "Start watching"; the owner asked). Finishing again: a Watching show
+  with a rating or review (only a kept-watching one has them) shows the
+  pencil note with its two arrows in the finish window; the new date
+  replaces the old and the new episodes get ticked. The owner's addition,
+  checked after stage 5: Edit on a finished show with something new (and
+  a rating or review) shows the same arrows with "This rating and review
+  are from when you finished it, before the new episodes came out. Why
+  not keep watching it?" and a "↻ Keep watching" button (leaves Edit
+  for the usual question). Stage 5 — done,
+  waiting for the owner's check: the starburst on finished shows' cards
+  in Shows (`newSeasonStickerHtml`), drawn from what TMDB said kept in
+  localStorage (`slate_show_airings`: season premieres and the last
+  episode out, per TMDB id), looked up in the background one show every
+  1.2 s, again after 3 days (30 for ended shows), at most 200 a visit;
+  any lookup of a show's details (its window) refreshes it too. Checked
+  in Sept. 2026: Supabase's free plan has 500,000 Edge Function calls a
+  month; TMDB allows about 50 requests a second. The headline is the
+  same on the card and the note: "New season!" / "N new seasons!"
+  (seasons begun after the finished date), else "New episodes!".
+  Left: 6 funny-pascal, then `main`.
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
@@ -574,15 +639,49 @@ directly.
   every screen at phone size and proposed stages (installable app, bottom
   tab bar and compact headers, windows as bottom sheets, full-screen
   search and touch polish); none is built until the owner says so.
+  Talked over in Sept. 2026: the owner wants it polished until it feels
+  like a real phone app, and it's the next project (native Android / iOS
+  ports are out for now: Play's $25 and 12-tester closed test, Apple's
+  $99 a year and a Mac; a store port would wrap this same web app later).
+  Add to the stages: gestures, loading without a connection, performance,
+  and, early, **back navigation through history** (`pushState` for
+  sections and windows): an installed iOS web app does have the edge
+  swipe back (since iOS 12.2), but Slate pushes no history, so today it
+  does nothing (and leaves Slate in Safari; Android's back button too).
+  iOS's own back animation may clash with Slate's: tune on a real phone.
+  The owner tests on an iPhone 15, and has an Android for tests.
 - **The test scenario** the owner follows to hunt bugs (PC first, then
   the phone): https://claude.ai/artifact/WV8WgTtnTG5LsviRT4amDm. It runs
   with a throwaway account (`+slate1` / `+slate2` Gmail aliases), never a
   real one. Each step is marked ok / bug / odd with a note, saved in the
   page's database: read them with ArtifactData, collection `results`,
   documents `<pc|phone>__<step id>`.
+- **Later, a big one: an owl assistant for recommendations** (the
+  owner's idea; they'll draw the owl and name it). Not planned yet.
+  Claude's advice, which the owner took as realistic: no AI training;
+  an algorithm of its own, prototyped in Python on the owner's `.slate`
+  export, then ported to JavaScript to run in the browser (Slate has no
+  server; Supabase functions aren't Python). Signals: hearts, reviews,
+  dropped shows, rewatches, where you stopped, To Watch, where to watch
+  in your country, TMDB's keywords / people / similar titles; always
+  saying why. "People like you" doesn't work with an invite-only
+  crowd; free-text surveys are hard without an LLM (a keyword map
+  first). Stages: "Because you loved X", context filters, feedback
+  buttons, its own scoring, the survey.
+- **Next small project, before the phone one (proposed, waiting for the
+  owner's go-ahead): SEO basics and a privacy page.** Slate is run from
+  Chile; the Supabase project is in AWS us-east-2 (Ohio, USA), so data
+  lives abroad and the policy must say so. Chile's Ley 21.719 takes
+  effect Dec. 1, 2026 (a postponement was being discussed; check), GDPR
+  if Europeans use it. Claude isn't a lawyer: a plain, honest policy,
+  every sentence approved by the owner. SEO: a realistic goal (found by
+  name, nice link previews, internals hidden), not ranking against
+  Letterboxd while invite-only: absolute `og:image` (today relative, so
+  previews likely lack it), a 1200×630 share image, `robots.txt` +
+  noindex for `tests/`, `tools/`, `supabase/`, docs, a `sitemap.xml`;
+  the owner registers Google Search Console.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
-  - a privacy policy page;
   - large-grid performance.
 - The owner can't pay for services right now; keep everything on free
   tiers. On the free Supabase plan, projects pause after about a week with

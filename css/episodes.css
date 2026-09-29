@@ -34,6 +34,158 @@
   transform: rotate(-3deg);
 }
 
+/* A finished show with something new since (mockup 1a, the owner's
+   pick): the same note, with only words and a link, plus a rubber stamp
+   on the poster. */
+.new-season {
+  position: relative;
+  max-width: 560px;
+  margin: 24px 8px 4px 0;
+  padding: 17px 18px 14px;
+  background: color-mix(in srgb, var(--accent-strong) 18%, var(--paper));
+  box-shadow: 2px 6px 14px rgba(0, 0, 0, 0.18);
+  transform: rotate(-0.8deg);
+}
+
+.new-season::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 38%;
+  width: 74px;
+  height: 19px;
+  background: color-mix(in srgb, var(--paper) 60%, transparent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transform: rotate(-3deg);
+}
+
+.new-season-head {
+  font-size: 25px;
+  color: var(--accent-deep);
+}
+
+.new-season .up-next-hint {
+  color: var(--text);
+}
+
+/* "Keep watching": the note's one action, in the theme's color. */
+.up-next-pick-btn[data-action="keep-watching"] {
+  background: var(--accent-strong);
+  color: #fff;
+}
+
+/* Its confirmation (js/confirmModal.js's openActionConfirm): what stays
+   and what goes, a line each, and a button that isn't a delete's red. */
+.confirm-keeps {
+  display: block;
+  margin-top: 10px;
+}
+
+.confirm-keep {
+  display: block;
+  margin-top: 4px;
+}
+
+.confirm-keep.is-gone {
+  color: #dc2626;
+}
+
+.confirm-modal.confirm-action .confirm-actions .delete-btn {
+  background: var(--accent-strong);
+  box-shadow: 3px 4px 0 var(--accent-deep);
+}
+
+.confirm-modal.confirm-action .confirm-actions .delete-btn:hover {
+  background: var(--accent-strong);
+  box-shadow: 4px 6px 0 var(--accent-deep);
+}
+
+/* Finishing it again: a pencil note between the hearts and the review,
+   an arrow up to each (the owner's pick, mockup 1d). */
+.refinish-note {
+  position: relative;
+  min-height: 46px;
+  margin: 8px 0 6px 66px;
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.2;
+  color: var(--accent-deep);
+  transform: rotate(-1.5deg);
+}
+
+.refinish-arrow {
+  position: absolute;
+  left: -62px;
+  width: 56px;
+  height: 32px;
+}
+
+.refinish-arrow.is-up {
+  top: -14px;
+}
+
+.refinish-arrow.is-down {
+  top: 18px;
+}
+
+/* "Why not keep watching it?": its answer, a small dashed button. */
+.refinish-keep {
+  display: block;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border: 1.5px dashed color-mix(in srgb, var(--accent-deep) 45%, transparent);
+  border-radius: 2px;
+  background: none;
+  color: var(--accent-deep);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.refinish-keep:hover {
+  border-style: solid;
+  background: color-mix(in srgb, var(--accent-strong) 10%, transparent);
+}
+
+.refinish-arrow path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* Inked like a rubber stamp, whatever the theme: it sits on the poster. */
+.new-season-stamp {
+  position: absolute;
+  top: 26%;
+  left: 50%;
+  z-index: 1;
+  width: max-content;
+  max-width: 88%;
+  padding: 6px 12px;
+  border: 3px double #c2261b;
+  background: rgba(255, 255, 255, 0.72);
+  color: #c2261b;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  transform: translateX(-50%) rotate(-12deg);
+  pointer-events: none;
+  animation: new-season-stamp 0.35s cubic-bezier(0.3, 1.6, 0.6, 1);
+}
+
+@keyframes new-season-stamp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) rotate(-12deg) scale(1.6);
+  }
+}
+
 .up-next-text:only-child {
   grid-column: 1 / -1;
 }
@@ -428,6 +580,22 @@
   color: #fff;
 }
 
+/* A season with something new since a show was finished. */
+.ep-tab-new {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  background: var(--accent-strong);
+  color: #fff;
+  font-size: 13px;
+  transform: rotate(4deg);
+}
+
+.ep-tab[aria-selected="true"] .ep-tab-new {
+  background: #fff;
+  color: var(--accent-deep);
+}
+
 .ep-tab[aria-selected="true"] small {
   color: rgba(255, 255, 255, 0.85);
 }
@@ -570,6 +738,10 @@
 
 /* A finished or dropped show's list: only to look at. */
 .ep-read-only {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
   margin-top: 12px;
   padding: 8px 12px;
   background: color-mix(in srgb, var(--accent-strong) 14%, var(--paper));
@@ -577,6 +749,11 @@
   font-size: 16px;
   line-height: 1.3;
   transform: rotate(-0.4deg);
+}
+
+.ep-read-only p {
+  flex: 1 1 260px;
+  min-width: 0;
 }
 
 .ep-air {
@@ -709,4 +886,35 @@
 
 [data-density="compact"] .card-episode-code {
   font-size: 15px;
+}
+
+/* "New season!" on a finished show's card: a starburst stuck on the
+   poster's corner (the owner's pick of three, mockup 1c). Inside the card,
+   which clips what pokes out. */
+.card-new-season {
+  position: absolute;
+  top: 12px;
+  right: 4px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 96px;
+  aspect-ratio: 1;
+  padding: 12px 10px;
+  background: var(--accent-strong);
+  color: #fff;
+  font-family: var(--font-hand);
+  font-size: 14px;
+  line-height: 1;
+  text-align: center;
+  clip-path: polygon(50% 0%, 61% 12%, 77% 6%, 80% 22%, 96% 25%, 90% 40%, 100% 52%, 88% 62%, 93% 78%, 77% 80%, 72% 96%, 58% 88%, 45% 100%, 36% 87%, 20% 94%, 17% 78%, 2% 72%, 10% 58%, 0% 45%, 11% 34%, 5% 18%, 22% 16%, 26% 2%, 40% 10%);
+  filter: drop-shadow(2px 3px 0 var(--accent-deep));
+  transform: rotate(12deg);
+  pointer-events: none;
+}
+
+[data-density="compact"] .card-new-season {
+  width: 82px;
+  padding: 10px 8px;
+  font-size: 12px;
 }
