@@ -555,7 +555,10 @@ directly.
   starburst sticker; 1d the pencil note with arrows, pointing at both
   the hearts and the review. Stage 2 — done, waiting for the owner's
   check: `newSinceFinished` (js/episodes.js) counts an episode new when
-  it came out after the finished date and isn't ticked (a finished date
+  it came out after the finished date, whatever is ticked (the owner's
+  test found Severance, finished on 2022-05-01, with season 2 ticked:
+  `main`'s finish ticks everything out that day, even for a past
+  date; so only the date counts for a finished show) (a finished date
   before the show first aired counts as none: everything seen, as
   before); the finished window's note and stamp (no button yet); the
   list shows the new ones unticked and flagged, opens on the first

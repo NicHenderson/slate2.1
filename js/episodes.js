@@ -185,9 +185,10 @@ function outInSeason(outline, s) {
 
    A finished show gets new episodes when a season (or episodes) comes out
    after its finished date: those count as new, whatever came out by then
-   as watched. That holds for a show finished before episodes were tracked
-   too (no rows stored): only the dates are needed. An episode ticked
-   counts as watched whatever its date. */
+   as watched. Only the date says so, not what's ticked: a show finished
+   before episodes were tracked has nothing stored, and an earlier Slate
+   ticked everything out on the day a show was marked as finished, even
+   with a finished date in the past. */
 
 // The date a finished show's episodes are measured against: none (all out
 // counts as watched, as before) when it's before the show even started
@@ -198,14 +199,12 @@ function finishedCutoff(row, outline) {
   return finished && first && finished >= first ? finished : null;
 }
 
-// As the finished show's list shows it: watched if out by its finished
-// date (or ticked).
-const seenWhenFinished = (row, cutoff, ep) =>
-  hasAired(ep.airDate) && (!cutoff || ep.airDate <= cutoff || isTicked(row.id, ep.season, ep.number));
+// As the finished show's list shows it: watched if out by its finished date.
+const seenWhenFinished = (cutoff, ep) => hasAired(ep.airDate) && (!cutoff || ep.airDate <= cutoff);
 
 // Each season of a finished show, as { number, out, seen }: the ones before
-// the season airing on its finished date seen whole, the ones after it new
-// (but for what's ticked), and that one looked up episode by episode.
+// the season airing on its finished date seen whole, the ones after it new,
+// and that one looked up episode by episode.
 async function finishedSeasons(row) {
   const outline = await showOutline(row.tmdb_id);
   const cutoff = finishedCutoff(row, outline);
@@ -215,19 +214,19 @@ async function finishedSeasons(row) {
   if (current) {
     const episodes = await seasonEpisodes(row.tmdb_id, current.number);
     currentOut = episodes.filter((ep) => hasAired(ep.airDate)).length;
-    currentSeen = episodes.filter((ep) => seenWhenFinished(row, cutoff, ep)).length;
+    currentSeen = episodes.filter((ep) => seenWhenFinished(cutoff, ep)).length;
   }
-  const tickedIn = (n) => tickedEpisodes(row.id).filter((e) => e.season === n).length;
   return outline.seasons.map((s) => {
     const out = outInSeason(outline, s);
     if (!current || s.number < current.number) return { number: s.number, out, seen: out };
     if (s.number === current.number) return { number: s.number, out: currentOut, seen: currentSeen };
-    return { number: s.number, out, seen: Math.min(out, tickedIn(s.number)) };
+    return { number: s.number, out, seen: 0 };
   });
 }
 
 // What's new in a finished show, or null: { count, seasons (the numbers
-// with something new), whole (how many of them are new from the start) }.
+// with something new), whole (how many of them are new from the start,
+// or 0 when some are new only in part) }.
 async function newSinceFinished(row) {
   if (!isFinishedShow(row) || !row.tmdb_id) return null;
   const seasons = (await finishedSeasons(row)).filter((s) => s.seen < s.out);
@@ -721,7 +720,7 @@ const isReadOnlyShow = (row) => isFinishedShow(row) || row.is_dropped === true;
 // As the window shows it: a finished show has watched everything out by
 // its finished date (`cutoff`, finishedCutoff).
 const shownAsTicked = (row, ep, cutoff) =>
-  isFinishedShow(row) ? seenWhenFinished(row, cutoff, ep) : isTicked(row.id, ep.season, ep.number);
+  isFinishedShow(row) ? seenWhenFinished(cutoff, ep) : isTicked(row.id, ep.season, ep.number);
 
 function closeEpisodesWindow() {
   episodesModal.classList.add("hidden");

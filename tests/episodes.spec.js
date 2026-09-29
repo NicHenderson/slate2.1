@@ -246,13 +246,20 @@ test("a finished or dropped show's episodes are only to look at", async ({ page,
 });
 
 test("a finished show with a season out since: the new episodes aren't counted as watched", async ({ page, backend }) => {
-  // Finished in 2022, after season 1; season 2 came out in 2025. Finished
-  // before episodes were tracked: nothing stored, only the dates.
-  backend.seed(
+  // Finished in 2022, after season 1; season 2 came out in 2025.
+  const [sev] = backend.seed(
     "shows",
     [{ tmdb_id: 95396, title: "Severance", total_seasons: 3, total_episodes: 19, started_watching_date: "2022-02-20", finished_watching_date: "2022-05-01", rating: 8 }],
     backend.user.id
   );
+  // Ticked the day it was marked as finished, by an older Slate that
+  // ticked everything out that day, season 2 included: only the finished
+  // date says what was seen.
+  const all = [];
+  [9, 10].forEach((count, i) => {
+    for (let e = 1; e <= count; e++) all.push({ show_id: sev.id, season: i + 1, episode: e });
+  });
+  backend.seed("watched_episodes", all, backend.user.id);
   await logIn(page);
   await page.click('.nav-btn[data-section="shows-watched"]');
 
