@@ -705,7 +705,27 @@ directly.
   login (kept in user metadata, like `password_chosen`: no migration);
   slateappmail@gmail.com as the formal channel (a @myslate.pages.dev
   address can't exist); and two internal guides for the owner (answering
-  requests, and a security incident protocol). Waiting for the owner.
+  requests, and a security incident protocol). The owner then wrote
+  their own policy (PDF, v1.0); Claude's v1.1 fixed it (their real name,
+  the contact address, the profile is private, Settings paths, the US
+  transfer, missing processors) and v1.2 checked it against the official
+  text they sent (Ley 21.719 as consolidated by the BCN, Sept. 2026).
+  From the law itself: in force Dec. 1, 2026 (transitory art. 1);
+  art. 14 ter lists what the policy must say (also: who the data is
+  about, where it comes from, recipients, the US transfer and its
+  guarantees, no automated decisions); bases are art. 13 c (the
+  service, and the access request as a pre-contractual step) and 13 d
+  (sign-in logs), not consent, so the box records "I've read it and
+  I'm 14 or older"; art. 11: acknowledge receipt, answer in 30
+  calendar days (+30 once), blocking in 2 business days, keep proof of
+  answers; art. 14 letter d: delete access-request emails once
+  resolved (and, Claude's advice, welcome emails, which carry the
+  temporary password); art. 27-28: no adequacy list yet, so the US
+  transfer rests on Supabase's DPA (standard contractual clauses);
+  art. 14 sexies: report breaches to the Agency and keep a register.
+  The owl recommender will need the policy's "no automated
+  decisions" line revisited (art. 8 bis, 14 ter l). Waiting for the
+  owner's review of v1.2 and their design pick.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - large-grid performance.
