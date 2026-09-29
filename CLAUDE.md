@@ -744,16 +744,12 @@ directly.
   and at the first login ("I've read the Privacy Policy and I'm 14 or
   older", existing users asked once, kept in user metadata like
   `password_chosen`), so that stage ships with it.
-- **A new background pattern** (the owner's request, Sept. 2026): today's
-  body speckle (three tiled dots, also in css/landing.css and
-  css/auth.css) replaced by a richer texture. They sent a photo of a real
-  cork board; never use their photo itself (they said so), only
-  patterns drawn by code. A first mockup of cork only was replaced by a
-  gallery of eleven, all tinted by each theme, same URL:
-  https://claude.ai/artifact/9qvFwgMLmMBFVQmC1WKcDQ (cork, felt, kraft,
-  linen, chalkboard, film grain, crumpled paper, grid, dot grid,
-  pegboard, stripes); waiting for the owner's pick. Cards, notes and
-  windows stay as they are.
+- **Background textures, a setting** (the owner's request, Sept. 2026):
+  of the gallery mockup (https://claude.ai/artifact/9qvFwgMLmMBFVQmC1WKcDQ)
+  they picked Felt, Linen, Film grain, Grid, Dot grid, Pegboard, Stripes
+  and None, as a choice in Settings → Appearance. Built on
+  `claude/episode-tracking-shows-s9gixh` (restarted from `main`), whose
+  CLAUDE.md has the details; never use the cork photo they once sent.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - large-grid performance.
