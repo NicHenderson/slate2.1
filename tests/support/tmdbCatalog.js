@@ -62,6 +62,7 @@ const TMDB_CATALOG = {
       status: "Returning Series",
       seasons: seasonsOf([[1, 9, "2022-02-18"], [2, 10, "2025-01-17"], [3, 10, "2099-01-15"]]),
       next_episode_to_air: { season_number: 3, episode_number: 1, air_date: "2099-01-15" },
+      last_episode_to_air: { season_number: 2, episode_number: 10, air_date: "2025-03-21" },
     }),
   ],
 };

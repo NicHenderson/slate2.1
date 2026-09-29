@@ -112,6 +112,21 @@ function cachedLookup(key, request) {
   return promise;
 }
 
+// How many of a show's episodes are out, from its details: TMDB's own
+// count includes episodes announced but not out yet, and a show still
+// airing would never read as up to date against it. Counted up to the
+// last episode out (specials left out); TMDB's count when it names none.
+function episodesOut(details) {
+  const total = details.number_of_episodes > 0 ? details.number_of_episodes : null;
+  const last = details.last_episode_to_air;
+  if (!(last?.season_number >= 1 && last.episode_number >= 1)) return total;
+  const before = (details.seasons ?? [])
+    .filter((s) => s.season_number >= 1 && s.season_number < last.season_number)
+    .reduce((n, s) => n + (s.episode_count || 0), 0);
+  const out = before + last.episode_number;
+  return total ? Math.min(out, total) : out;
+}
+
 // A show's outline, from its details: its seasons (specials left out),
 // whether it has ended (TMDB says so, or that it was canceled), and its
 // next episode, when TMDB knows one.
@@ -125,6 +140,9 @@ function showOutline(tmdbId) {
     const next = details.next_episode_to_air;
     return {
       seasons,
+      // TMDB's own counts, for the show's saved ones (refreshShowCounts).
+      totalEpisodes: episodesOut(details),
+      totalSeasons: details.number_of_seasons > 0 ? details.number_of_seasons : null,
       ended: details.status === "Ended" || details.status === "Canceled",
       next: next?.season_number >= 1 ? { season: next.season_number, number: next.episode_number, airDate: next.air_date || null } : null,
     };
@@ -434,13 +452,13 @@ async function saveFromNote(row, list, button, message) {
     // An ended show's last episode: time to finish it.
     const finale = await finaleOf(row).catch(() => null);
     if (finale && list.some((ep) => ep.season === finale.season && ep.episode === finale.episode)) {
-      if (currentDetail?.row.id === row.id) loadUpNext(row);
+      afterEpisodesChanged(row.id);
       openFinishFromFinale(row, finale);
       return;
     }
     showToast(message);
   }
-  if (currentDetail?.row.id === row.id) loadUpNext(row);
+  afterEpisodesChanged(row.id);
 }
 
 // The usual finish window (js/startModal.js), opened by ticking the last
@@ -749,10 +767,63 @@ async function tickUpToHereInWindow(button) {
   afterEpisodesChanged(row.id);
 }
 
-// The window and the note, after a show's episodes changed.
+// The window, the note and the cards, after a show's episodes changed.
 function afterEpisodesChanged(showId) {
   if (episodesWindowOpen() && episodesWindow?.showId === showId && episodesWindow.season) renderEpisodesWindow();
   refreshUpNext(showId);
+  SHOW_GRIDS.forEach((gridId) => renderGrid(gridId, [...STORE.shows.values()]));
+}
+
+/* ---------- the card ----------
+
+   On a Watching show's card, under its title: the last episode ticked in
+   handwriting ("S2 · E5", not the next one), how many of all, and a bar
+   of the whole show (the owner's pick of three mockups). On a dropped
+   one's, where it stopped. Cards are drawn from what's stored, with no
+   lookup: the total is the show's saved count of episodes out, which its
+   window keeps up to date (refreshShowCounts). */
+
+function episodeProgressHtml(row) {
+  if (!row.tmdb_id) return "";
+  const ticked = tickedEpisodes(row.id);
+  if (!ticked.length) {
+    return row.is_dropped ? "" : `<div class="card-episode"><p class="card-episode-line"><span class="card-episode-code">${t("Where are you?")}</span></p></div>`;
+  }
+  const last = ticked[ticked.length - 1];
+  const code = episodeCode(last.season, last.episode);
+  const total = row.total_episodes > 0 ? row.total_episodes : 0;
+  const count = ticked.length;
+  const label = row.is_dropped ? t("Stopped at {code}", { code }) : total && count >= total ? t("Up to date") : code;
+  const countHtml = row.is_dropped || !total ? "" : `<span class="card-episode-count">${count}/${total}</span>`;
+  const bar = total
+    ? `<span class="card-episode-bar" aria-hidden="true"><span style="width: ${Math.min(100, Math.round((count / total) * 100))}%"></span></span>`
+    : "";
+  return `<div class="card-episode"><p class="card-episode-line"><span class="card-episode-code">${label}</span>${countHtml}</p>${bar}</div>`;
+}
+
+// A show's saved episode and season counts, brought up to date with
+// TMDB's whenever its window opens: they're saved when the show is added,
+// and a show still airing grows (the card's bar would pass 100%).
+async function refreshShowCounts(row) {
+  if (!row.tmdb_id) return;
+  let outline;
+  try {
+    outline = await showOutline(row.tmdb_id);
+  } catch {
+    return; // the window says so where it needs to
+  }
+  const current = STORE.shows.get(row.id);
+  if (!current) return;
+  const changes = {};
+  if (outline.totalEpisodes && outline.totalEpisodes !== current.total_episodes) changes.total_episodes = outline.totalEpisodes;
+  if (outline.totalSeasons && outline.totalSeasons !== current.total_seasons) changes.total_seasons = outline.totalSeasons;
+  if (!Object.keys(changes).length) return;
+  const { data, error } = await db.from("shows").update(changes).eq("id", row.id).select().single();
+  if (error) {
+    console.error("Show counts error:", error.message);
+    return;
+  }
+  applyLocalChange("shows", "UPDATE", data);
 }
 
 episodesBody.addEventListener("click", (e) => {

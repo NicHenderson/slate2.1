@@ -96,7 +96,8 @@ function buildRecord(type, details) {
   return {
     ...base,
     total_seasons: details.number_of_seasons ?? null,
-    total_episodes: details.number_of_episodes ?? null,
+    // Those out, not TMDB's count with the announced ones (js/episodes.js).
+    total_episodes: episodesOut(details),
     started_watching_date: null,
     finished_watching_date: null,
   };

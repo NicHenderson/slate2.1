@@ -437,6 +437,7 @@ window.SLATE_LANGUAGES = {
       "Tick up to here": "Marcar hasta aquí",
       "Stopped at {code}": "Quedaste en {code}",
       "Stopped here": "Aquí quedaste",
+      "Up to date": "Al día",
       "You finished it: every episode counts as watched. This list is just to look at.": "La terminaste: todos sus episodios cuentan como vistos. Esta lista es solo para mirar.",
       "You dropped it. This list is just to look at: to start it over, move it back to To Watch.": "La abandonaste. Esta lista es solo para mirar: para empezarla de nuevo, muévela a Por ver.",
       "Stream": "Streaming",

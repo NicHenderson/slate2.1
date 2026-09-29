@@ -281,8 +281,15 @@ function gridHtml(gridId, rows) {
     visible = [...visible].sort(sortCfg.options[effectiveSort(gridId)].cmp);
   }
   const showRating = cfg.state === "watched";
+  // A show being watched or dropped: where you are in it (js/episodes.js).
   const extra =
-    cfg.state === "watching" ? startedAgoHtml : gridId === "grid-movies-watched" ? rewatchBadgeHtml : () => "";
+    cfg.state === "watching"
+      ? (row) => episodeProgressHtml(row) + startedAgoHtml(row)
+      : cfg.state === "dropped"
+        ? episodeProgressHtml
+        : gridId === "grid-movies-watched"
+          ? rewatchBadgeHtml
+          : () => "";
   // Searched: only what matches — no "+ Add" card among the results.
   if (isLibraryFiltered(gridId)) {
     return visible.length ? visible.map((row) => cardHtml(row, showRating, extra(row))).join("") : libraryEmptyHtml(gridId);

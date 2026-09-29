@@ -303,6 +303,7 @@ function showDetailMain() {
   loadDetailTrailer(cfg.table, row);
   loadDetailWhereToWatch(cfg.table, row);
   loadUpNext(row);
+  if (cfg.table === "shows") refreshShowCounts(row);
   updateDetailNav();
 }
 

@@ -638,3 +638,56 @@
     max-width: 180px;
   }
 }
+
+/* ---------- the card (Watching and Dropped) ----------
+   Under the title: the last episode ticked in handwriting, "14/26", and
+   a hand-drawn bar of the whole show. */
+
+.card-episode {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 3px;
+}
+
+.card-episode-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 6px;
+}
+
+.card-episode-code {
+  font-family: var(--font-hand);
+  font-size: 18px;
+  line-height: 1;
+  color: var(--accent-deep);
+}
+
+.card-episode-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.card-episode-bar {
+  position: relative;
+  display: block;
+  height: 8px;
+  border: 1.8px solid var(--text);
+  border-radius: 5px 3px 6px 4px;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.card-episode-bar span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--accent-strong);
+}
+
+[data-density="compact"] .card-episode-code {
+  font-size: 15px;
+}

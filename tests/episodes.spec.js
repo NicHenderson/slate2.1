@@ -141,6 +141,11 @@ test("up to date with a show still airing: when the next one airs", async ({ pag
   await expect(note.locator(".up-next-head")).toHaveText("You're up to date!");
   await expect(note.locator(".up-next-hint").last()).toHaveText("The next one, S3 · E1, airs on Jan 15, 2099.");
   await expect(note.locator('[data-action="tick-episode"]')).toHaveCount(0);
+
+  // The card too: TMDB counts 29 with the season announced, 19 are out.
+  await expect.poll(() => sev.total_episodes).toBe(19);
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#grid-shows-watching .card", { hasText: "Severance" }).locator(".card-episode-code")).toHaveText("Up to date");
 });
 
 test("the episodes window: each episode ticked or unticked on its own, and saved", async ({ page, backend }) => {
@@ -222,4 +227,23 @@ test("a finished or dropped show's episodes are only to look at", async ({ page,
   await expect(win.locator(".ep-row.is-next .ep-flag")).toHaveText("Stopped here");
   await expect(win.locator(".ep-box-btn:not([disabled])")).toHaveCount(0);
   expect(backend.db.watched_episodes.filter((e) => e.show_id === got.id)).toHaveLength(3);
+});
+
+test("the card says where you are, and the saved episode count catches up with TMDB", async ({ page, backend }) => {
+  const dark = watchingDark(backend);
+  dark.total_episodes = 20; // saved when it was added; TMDB has 26 now
+  backend.seed("watched_episodes", [1, 2, 3].map((episode) => ({ show_id: dark.id, season: 1, episode })), backend.user.id);
+  await logIn(page);
+  await page.click('.nav-btn[data-section="shows-towatch"]');
+  await page.click('[data-subtab="grid-shows-watching"]');
+  const card = page.locator("#grid-shows-watching .card", { hasText: "Dark" });
+  await expect(card.locator(".card-episode-code")).toHaveText("S1 · E3");
+  await expect(card.locator(".card-episode-count")).toHaveText("3/20");
+
+  // Its window brings the count up to date; ticking moves the card on.
+  await card.click();
+  await expect.poll(() => dark.total_episodes).toBe(26);
+  await page.locator('#detail-modal [data-action="tick-episode"]').click();
+  await expect(card.locator(".card-episode-code")).toHaveText("S1 · E4");
+  await expect(card.locator(".card-episode-count")).toHaveText("4/26");
 });

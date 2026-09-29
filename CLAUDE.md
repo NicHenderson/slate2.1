@@ -491,7 +491,7 @@ directly.
   finish window too; saving it closes the episodes window. It follows
   realtime, closes with the detail window, and with a show deleted
   elsewhere. Checked by the owner.
-  Stage 7 — built, waiting for the owner's check on the preview: "Tick
+  Stage 7 — done: "Tick
   up to here" on each row (on hover, always on a phone) ticks it and
   every episode out before it, earlier seasons included (by TMDB's
   counts), and finishes a show whose finale it reaches, as ticking does.
@@ -502,6 +502,17 @@ directly.
   S1 · E3" note (the furthest ticked; none if nothing is) and a list
   only to look at, that episode flagged "Stopped here". The episodes
   window redraws when its show is finished or dropped elsewhere.
+  Stage 8 — built, waiting for the owner's check on the preview: the
+  card (`episodeProgressHtml`, from STORE only, no lookup): Watching
+  shows "S2 · E5" (the last ticked) + "14/26" + a hand-drawn bar, then
+  "Started 27d ago"; "Where are you?" with nothing ticked; "Up to date"
+  when everything out is ticked; Dropped shows "Stopped at S2 · E5" +
+  the bar. **`shows.total_episodes` now means episodes out**, not
+  TMDB's `number_of_episodes` (which counts announced ones, so a show
+  still airing never read as up to date): counted up to TMDB's
+  `last_episode_to_air` (`episodesOut`), saved that way when a show is
+  added and refreshed, with `total_seasons`, whenever its window opens
+  (`refreshShowCounts`: one update, only when they differ).
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
