@@ -241,7 +241,8 @@ function renderDetail(cfg, row) {
       </div>
     </div>
     ${cfg.table === "movies" ? viewingsListHtml(row) : ""}
-    ${cfg.table === "shows" && row.tmdb_id ? `<div class="detail-section">${SEE_ALL_HTML}</div>` : ""}
+    ${cfg.table === "shows" ? newSeasonSlotHtml(row) : ""}
+    ${cfg.table === "shows" && row.tmdb_id ? `<div class="detail-section detail-see-all">${SEE_ALL_HTML}</div>` : ""}
     <div class="detail-section">
       <p class="detail-label">${t("Personal review")}</p>
       ${review}
@@ -303,6 +304,7 @@ function showDetailMain() {
   loadDetailTrailer(cfg.table, row);
   loadDetailWhereToWatch(cfg.table, row);
   loadUpNext(row);
+  loadNewSeason(row);
   if (cfg.table === "shows") refreshShowCounts(row);
   updateDetailNav();
 }

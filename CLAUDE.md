@@ -548,8 +548,19 @@ directly.
   `claude/episode-tracking-shows-s9gixh`, then funny-pascal, then
   `main`, as before. Stages: 1 mockups (1a the notice + "Keep
   watching", 1b the list's new episodes, 1c the card sticker, 1d the
-  finish window's note; https://claude.ai/artifact/6nr6xj9CiFH68y1Y9Kzf65,
-  waiting for the owner's picks); 2 the list and the notice; 3 "Keep
+  finish window's note; https://claude.ai/artifact/6nr6xj9CiFH68y1Y9Kzf65).
+  The owner's picks: 1a the sticky note ("New season!", what came out,
+  the button) plus 1b's rubber stamp on the poster, nothing else of B;
+  1b a "New" flag on each new episode and on its season's tab; 1c the
+  starburst sticker; 1d the pencil note with arrows, pointing at both
+  the hearts and the review. Stage 2 — done, waiting for the owner's
+  check: `newSinceFinished` (js/episodes.js) counts an episode new when
+  it came out after the finished date and isn't ticked (a finished date
+  before the show first aired counts as none: everything seen, as
+  before); the finished window's note and stamp (no button yet); the
+  list shows the new ones unticked and flagged, opens on the first
+  season with news, and a season still airing now counts only what's
+  out (TMDB's `last_episode_to_air`). 2 the list and the notice; 3 "Keep
   watching" (and Edit without a finished date no longer wiping rating /
   review); 4 finishing again, with the note; 5 the card sticker
   (background TMDB checks, cached per device); 6 funny-pascal, then

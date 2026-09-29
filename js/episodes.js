@@ -138,8 +138,10 @@ function showOutline(tmdbId) {
       .map((s) => ({ number: s.season_number, count: s.episode_count, airDate: s.air_date || null }))
       .sort((a, b) => a.number - b.number);
     const next = details.next_episode_to_air;
+    const last = details.last_episode_to_air;
     return {
       seasons,
+      lastOut: last?.season_number >= 1 && last.episode_number >= 1 ? { season: last.season_number, number: last.episode_number } : null,
       // TMDB's own counts, for the show's saved ones (refreshShowCounts).
       totalEpisodes: episodesOut(details),
       totalSeasons: details.number_of_seasons > 0 ? details.number_of_seasons : null,
@@ -168,6 +170,122 @@ function seasonEpisodes(tmdbId, season) {
 
 // Out already: an episode with no air date yet hasn't been.
 const hasAired = (airDate) => Boolean(airDate) && airDate <= localToday();
+
+// How many of a season's episodes are out: up to TMDB's last episode out
+// (a season still airing has only some); by its first air date when TMDB
+// names none.
+function outInSeason(outline, s) {
+  const last = outline.lastOut;
+  if (!last) return hasAired(s.airDate) ? s.count : 0;
+  if (s.number < last.season) return s.count;
+  return s.number === last.season ? Math.min(s.count, last.number) : 0;
+}
+
+/* ---------- new since it was finished ----------
+
+   A finished show gets new episodes when a season (or episodes) comes out
+   after its finished date: those count as new, whatever came out by then
+   as watched. That holds for a show finished before episodes were tracked
+   too (no rows stored): only the dates are needed. An episode ticked
+   counts as watched whatever its date. */
+
+// The date a finished show's episodes are measured against: none (all out
+// counts as watched, as before) when it's before the show even started
+// airing, a date that can't be right.
+function finishedCutoff(row, outline) {
+  const finished = row.finished_watching_date;
+  const first = outline.seasons.find((s) => s.airDate)?.airDate;
+  return finished && first && finished >= first ? finished : null;
+}
+
+// As the finished show's list shows it: watched if out by its finished
+// date (or ticked).
+const seenWhenFinished = (row, cutoff, ep) =>
+  hasAired(ep.airDate) && (!cutoff || ep.airDate <= cutoff || isTicked(row.id, ep.season, ep.number));
+
+// Each season of a finished show, as { number, out, seen }: the ones before
+// the season airing on its finished date seen whole, the ones after it new
+// (but for what's ticked), and that one looked up episode by episode.
+async function finishedSeasons(row) {
+  const outline = await showOutline(row.tmdb_id);
+  const cutoff = finishedCutoff(row, outline);
+  const current = cutoff && [...outline.seasons].reverse().find((s) => s.airDate && s.airDate <= cutoff);
+  let currentSeen = 0;
+  let currentOut = 0;
+  if (current) {
+    const episodes = await seasonEpisodes(row.tmdb_id, current.number);
+    currentOut = episodes.filter((ep) => hasAired(ep.airDate)).length;
+    currentSeen = episodes.filter((ep) => seenWhenFinished(row, cutoff, ep)).length;
+  }
+  const tickedIn = (n) => tickedEpisodes(row.id).filter((e) => e.season === n).length;
+  return outline.seasons.map((s) => {
+    const out = outInSeason(outline, s);
+    if (!current || s.number < current.number) return { number: s.number, out, seen: out };
+    if (s.number === current.number) return { number: s.number, out: currentOut, seen: currentSeen };
+    return { number: s.number, out, seen: Math.min(out, tickedIn(s.number)) };
+  });
+}
+
+// What's new in a finished show, or null: { count, seasons (the numbers
+// with something new), whole (how many of them are new from the start) }.
+async function newSinceFinished(row) {
+  if (!isFinishedShow(row) || !row.tmdb_id) return null;
+  const seasons = (await finishedSeasons(row)).filter((s) => s.seen < s.out);
+  if (!seasons.length) return null;
+  return {
+    count: seasons.reduce((n, s) => n + s.out - s.seen, 0),
+    seasons: seasons.map((s) => s.number),
+    whole: seasons.every((s) => s.seen === 0) ? seasons.length : 0,
+  };
+}
+
+// Its headline: "New season!", "2 new seasons!", or "New episodes!" when
+// some of it is in a season already seen in part.
+function newSinceHeadline(news) {
+  if (news.whole === 1) return t("New season!");
+  if (news.whole > 1) return t("{n} new seasons!", { n: news.whole });
+  return t("New episodes!");
+}
+
+function newSinceText(news) {
+  if (news.seasons.length === 1) {
+    return tn(news.count, "Since you finished it, {n} episode of season {s} came out.", "Since you finished it, {n} episodes of season {s} came out.", { s: news.seasons[0] });
+  }
+  const list = new Intl.ListFormat(LOCALE, { type: "conjunction" }).format(news.seasons.map(String));
+  return tn(news.count, "Since you finished it, {n} episode came out, in seasons {list}.", "Since you finished it, {n} episodes came out, in seasons {list}.", { list });
+}
+
+// renderDetail's slot for it, in a finished show's window: empty (and
+// taking no room) until TMDB says there's something new.
+function newSeasonSlotHtml(row) {
+  return row.tmdb_id ? `<div class="new-season hidden" data-show-id="${row.id}" aria-live="polite"></div>` : "";
+}
+
+// Fills the slot, if renderDetail left one: the note, and the stamp on
+// the poster (the owner's pick: mockup 1a's note with 1b's stamp).
+async function loadNewSeason(row) {
+  const slot = detailBody.querySelector(".new-season");
+  if (!slot || slot.dataset.showId !== row.id) return;
+  let news;
+  try {
+    news = await newSinceFinished(row);
+  } catch (err) {
+    console.error("Episodes error:", err.message);
+    return; // nothing to say: the window stays as it was
+  }
+  if (!news || !slot.isConnected || currentDetail?.row.id !== row.id) return;
+  const headline = newSinceHeadline(news);
+  slot.innerHTML = `
+    <p class="up-next-head new-season-head">${headline}</p>
+    <p class="up-next-hint">${newSinceText(news)}</p>
+    <div class="up-next-row">${SEE_ALL_HTML}</div>`;
+  slot.classList.remove("hidden");
+  // The note has its own "See all episodes →".
+  detailBody.querySelector(".detail-see-all")?.classList.add("hidden");
+  detailPoster.querySelector(".new-season-stamp")?.remove();
+  detailPoster.insertAdjacentHTML("beforeend", `<span class="new-season-stamp" aria-hidden="true">${headline}</span>`);
+  easeNoteHeight(slot, 0);
+}
 
 /* ---------- where you are ---------- */
 
@@ -577,9 +695,11 @@ async function openEpisodesWindow(row) {
   try {
     const { seasons } = await showOutline(row.tmdb_id);
     if (episodesWindow?.showId !== row.id) return;
-    // The season of the next episode, else of the last one ticked, else the first.
+    // The season of the next episode, else of the last one ticked, else the
+    // first; a finished show's first with something new, else its first.
     const state = isFinishedShow(row) ? null : await upNextState(row).catch(() => null);
-    const at = state?.next?.season ?? state?.last?.season ?? seasons[0]?.number ?? 1;
+    const news = isFinishedShow(row) ? await newSinceFinished(row).catch(() => null) : null;
+    const at = news?.seasons[0] ?? state?.next?.season ?? state?.last?.season ?? seasons[0]?.number ?? 1;
     episodesWindow.season = at;
     await renderEpisodesWindow({ scrollToNext: true });
   } catch (err) {
@@ -593,8 +713,10 @@ async function openEpisodesWindow(row) {
 const isFinishedShow = (row) => Boolean(row.finished_watching_date) && !row.is_dropped;
 const isReadOnlyShow = (row) => isFinishedShow(row) || row.is_dropped === true;
 
-// As the window shows it: a finished show has watched everything out.
-const shownAsTicked = (row, ep) => (isFinishedShow(row) ? hasAired(ep.airDate) : isTicked(row.id, ep.season, ep.number));
+// As the window shows it: a finished show has watched everything out by
+// its finished date (`cutoff`, finishedCutoff).
+const shownAsTicked = (row, ep, cutoff) =>
+  isFinishedShow(row) ? seenWhenFinished(row, cutoff, ep) : isTicked(row.id, ep.season, ep.number);
 
 function closeEpisodesWindow() {
   episodesModal.classList.add("hidden");
@@ -610,13 +732,16 @@ function closeEpisodesWindowOf(showId) {
 }
 
 // `mark`: the episode flagged, as { season, number, label }: the next one,
-// or where a dropped show stopped.
-function episodeRowHtml(row, ep, mark) {
-  const done = shownAsTicked(row, ep);
+// or where a dropped show stopped. A finished show's new ones (out since
+// it was finished) are flagged "New".
+function episodeRowHtml(row, ep, mark, cutoff) {
+  const done = shownAsTicked(row, ep, cutoff);
   const out = hasAired(ep.airDate);
   const readOnly = isReadOnlyShow(row);
+  const isNew = isFinishedShow(row) && out && !done;
+  if (isNew) mark = { season: ep.season, number: ep.number, label: t("New") };
   const isMarked = mark && mark.season === ep.season && mark.number === ep.number;
-  const cls = [done ? "is-done" : "", out ? "" : "is-unaired", isMarked ? "is-next" : ""].join(" ").trim();
+  const cls = [done ? "is-done" : "", out ? "" : "is-unaired", isMarked ? "is-next" : "", isNew ? "is-new" : ""].join(" ").trim();
   const label = `${episodeCode(ep.season, ep.number)} · ${escapeHtml(episodeName(ep))}`;
   const about = out
     ? ep.overview
@@ -644,21 +769,27 @@ async function renderEpisodesWindow({ scrollToNext = false } = {}) {
   const win = episodesWindow;
   const row = win && STORE.shows.get(win.showId);
   if (!row) return;
-  const { seasons } = await showOutline(row.tmdb_id);
+  const outline = await showOutline(row.tmdb_id);
+  const { seasons } = outline;
   const shown = await seasonEpisodes(row.tmdb_id, win.season).catch(() => null);
   const state = isFinishedShow(row) ? null : await upNextState(row).catch(() => null);
+  const finished = isFinishedShow(row) ? await finishedSeasons(row) : null;
   if (episodesWindow !== win) return; // closed, or opened on another show meanwhile
 
-  // Counted from TMDB's seasons: what's out, and how much of it is ticked.
-  const outIn = (s) => (hasAired(s.airDate) ? s.count : 0);
-  const out = seasons.reduce((n, s) => n + outIn(s), 0);
-  const tickedCount = (s) =>
-    isFinishedShow(row) ? outIn(s) : tickedEpisodes(row.id).filter((e) => e.season === s.number).length;
-  const watched = Math.min(out, seasons.reduce((n, s) => n + tickedCount(s), 0));
+  // Counted from TMDB's seasons: what's out, and how much of it is ticked
+  // (a finished show's, what was out by its finished date).
+  const counts = seasons.map((s) =>
+    finished
+      ? finished.find((f) => f.number === s.number)
+      : { number: s.number, out: outInSeason(outline, s), seen: tickedEpisodes(row.id).filter((e) => e.season === s.number).length }
+  );
+  const out = counts.reduce((n, c) => n + c.out, 0);
+  const watched = Math.min(out, counts.reduce((n, c) => n + Math.min(c.seen, c.out), 0));
+  const hasNews = Boolean(finished) && watched < out;
   const pct = out ? Math.round((watched / out) * 100) : 0;
-  const tabs = seasons
+  const tabs = counts
     .map(
-      (s) => `<button class="ep-tab" type="button" role="tab" data-action="episodes-season" data-season="${s.number}" aria-selected="${s.number === win.season}">${t("Season {n}", { n: s.number })}<small>${outIn(s) ? `${tickedCount(s)}/${outIn(s)}` : "—"}</small></button>`
+      (c) => `<button class="ep-tab" type="button" role="tab" data-action="episodes-season" data-season="${c.number}" aria-selected="${c.number === win.season}">${t("Season {n}", { n: c.number })}<small>${c.out ? `${Math.min(c.seen, c.out)}/${c.out}` : "—"}</small>${finished && c.seen < c.out ? `<span class="ep-tab-new">${t("new")}</span>` : ""}</button>`
     )
     .join("");
   const mark =
@@ -667,13 +798,15 @@ async function renderEpisodesWindow({ scrollToNext = false } = {}) {
       : state?.kind === "stopped"
         ? { season: state.last.season, number: state.last.number, label: t("Stopped here") }
         : null;
-  const note = isFinishedShow(row)
-    ? t("You finished it: every episode counts as watched. This list is just to look at.")
-    : row.is_dropped
-      ? t("You dropped it. This list is just to look at: to start it over, move it back to To Watch.")
-      : "";
+  const note = hasNews
+    ? t("You finished it on {date}: everything out by then counts as watched. What came out later doesn't.", { date: formatDate(row.finished_watching_date) })
+    : isFinishedShow(row)
+      ? t("You finished it: every episode counts as watched. This list is just to look at.")
+      : row.is_dropped
+        ? t("You dropped it. This list is just to look at: to start it over, move it back to To Watch.")
+        : "";
   const list = shown
-    ? shown.map((ep) => episodeRowHtml(row, ep, mark)).join("")
+    ? shown.map((ep) => episodeRowHtml(row, ep, mark, finished && finishedCutoff(row, outline))).join("")
     : `<li class="ep-loading">${t("Couldn't load the episodes. Please try again later.")}</li>`;
 
   const listEl = episodesBody.querySelector(".ep-list");
@@ -694,7 +827,7 @@ async function renderEpisodesWindow({ scrollToNext = false } = {}) {
     <ul class="ep-list">${list}</ul>`;
   const newList = episodesBody.querySelector(".ep-list");
   if (scrollToNext) {
-    const at = newList.querySelector(".is-next");
+    const at = newList.querySelector(".is-next, .is-new");
     if (at) newList.scrollTop = at.offsetTop - newList.offsetTop - 12;
   } else {
     newList.scrollTop = keepScroll;

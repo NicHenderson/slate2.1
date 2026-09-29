@@ -229,6 +229,44 @@ test("a finished or dropped show's episodes are only to look at", async ({ page,
   expect(backend.db.watched_episodes.filter((e) => e.show_id === got.id)).toHaveLength(3);
 });
 
+test("a finished show with a season out since: the new episodes aren't counted as watched", async ({ page, backend }) => {
+  // Finished in 2022, after season 1; season 2 came out in 2025. Finished
+  // before episodes were tracked: nothing stored, only the dates.
+  backend.seed(
+    "shows",
+    [{ tmdb_id: 95396, title: "Severance", total_seasons: 3, total_episodes: 19, started_watching_date: "2022-02-20", finished_watching_date: "2022-05-01", rating: 8 }],
+    backend.user.id
+  );
+  await logIn(page);
+  await page.click('.nav-btn[data-section="shows-watched"]');
+
+  // A show finished after everything out has nothing new to say.
+  await page.locator("#grid-shows-watched .card", { hasText: "Dark" }).click();
+  await expect(page.locator("#detail-modal .detail-see-all")).toBeVisible();
+  await expect(page.locator("#detail-modal .new-season")).toBeHidden();
+  await page.keyboard.press("Escape");
+
+  await page.locator("#grid-shows-watched .card", { hasText: "Severance" }).click();
+  const note = page.locator("#detail-modal .new-season");
+  await expect(note.locator(".new-season-head")).toHaveText("New season!");
+  await expect(note.locator(".up-next-hint")).toHaveText("Since you finished it, 10 episodes of season 2 came out.");
+  await expect(page.locator("#detail-poster .new-season-stamp")).toHaveText("New season!");
+  await expect(page.locator("#detail-modal .detail-see-all")).toBeHidden();
+
+  // The list opens on the new season: nothing of it watched, each one "New".
+  await note.locator(".up-next-all").click();
+  const win = page.locator("#episodes-modal");
+  await expect(win.locator(".ep-progress-text")).toHaveText("9 of 19 watched");
+  await expect(win.locator('.ep-tab[aria-selected="true"]')).toHaveText("Season 20/10new");
+  await expect(win.locator(".ep-row.is-new")).toHaveCount(10);
+  await expect(win.locator(".ep-row.is-done")).toHaveCount(0);
+  await expect(win.locator(".ep-row.is-new .ep-flag").first()).toHaveText("New");
+  await expect(win.locator(".ep-box-btn:not([disabled])")).toHaveCount(0);
+  await win.locator('.ep-tab[data-season="1"]').click();
+  await expect(win.locator(".ep-row.is-done")).toHaveCount(9);
+  await expect(win.locator(".ep-row.is-new")).toHaveCount(0);
+});
+
 test("the card says where you are, and the saved episode count catches up with TMDB", async ({ page, backend }) => {
   const dark = watchingDark(backend);
   dark.total_episodes = 20; // saved when it was added; TMDB has 26 now
