@@ -34,9 +34,17 @@
   transform: rotate(-3deg);
 }
 
-.up-next-loading,
 .up-next-text:only-child {
   grid-column: 1 / -1;
+}
+
+/* Loading: about the note's usual height, with an empty photo frame. */
+.up-next.is-loading {
+  min-height: 150px;
+}
+
+.up-next.is-loading .up-next-still {
+  opacity: 0.35;
 }
 
 .up-next-loading {
@@ -264,5 +272,10 @@
     order: -1;
     max-width: 190px;
     margin-top: 8px;
+  }
+
+  /* The image sits above the text here, so the note is taller. */
+  .up-next.is-loading {
+    min-height: 250px;
   }
 }

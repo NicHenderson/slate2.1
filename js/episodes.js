@@ -234,10 +234,28 @@ function upNextHtml(row, state) {
     ${first ? episodePhotoHtml(row, first) : ""}`;
 }
 
-// renderDetail's slot for the note: a Watching show from TMDB only.
+// renderDetail's slot for the note: a Watching show from TMDB only. While
+// it loads, it's already about the note's size, its photo frame included,
+// so the window barely moves when the episode arrives (the owner noticed
+// the jump from a thin strip).
 function upNextSlotHtml(row) {
   if (!row.tmdb_id) return "";
-  return `<div class="up-next" data-show-id="${row.id}" aria-live="polite"><p class="up-next-loading">${t("Loading episodes…")}</p></div>`;
+  return `
+    <div class="up-next is-loading" data-show-id="${row.id}" aria-live="polite">
+      <div class="up-next-text"><p class="up-next-loading">${t("Loading episodes…")}</p></div>
+      <figure class="up-next-photo"><span class="up-next-clip" aria-hidden="true"></span><span class="up-next-still"></span></figure>
+    </div>`;
+}
+
+// What's left of the change in height, eased rather than jumped, with the
+// new content fading in over it.
+function easeNoteHeight(slot, from) {
+  const to = slot.offsetHeight;
+  if (motionReduced() || !slot.animate) return;
+  if (Math.abs(to - from) > 2) {
+    slot.animate([{ height: `${from}px` }, { height: `${to}px` }], { duration: 260, easing: "ease-out" });
+  }
+  [...slot.children].forEach((child) => child.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: "ease-out" }));
 }
 
 // Fills the slot, if renderDetail left one. The note keeps what it shows
@@ -255,7 +273,13 @@ async function loadUpNext(row) {
   }
   // By the time TMDB answers, the window may be showing something else.
   if (!slot.isConnected || currentDetail?.row.id !== row.id) return;
+  const from = slot.offsetHeight;
+  const firstFill = slot.classList.contains("is-loading");
+  slot.classList.remove("is-loading");
   slot.innerHTML = html;
+  // Moving on to the next episode redraws it too: only the first fill, or
+  // a change of size, is eased.
+  if (firstFill || slot.offsetHeight !== from) easeNoteHeight(slot, from);
   fillEpisodePicker(row);
 }
 

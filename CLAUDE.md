@@ -446,7 +446,7 @@ directly.
   episodes in half a second.
   Stage 3 — done, redeployed live by the owner: the `tmdb` function
   allows `tv/<id>/season/<n>` (n from 1), with Deno tests.
-  Stage 4 — built, waiting for the owner's check on the preview:
+  Stage 4 — done, checked by the owner on the preview:
   `js/episodes.js` + `css/episodes.css`. Episodes load with the library
   (`STORE.episodes`), follow realtime, and are dropped locally when a
   show is deleted or sent back to To Watch (as the database does). TMDB
@@ -456,6 +456,9 @@ directly.
   date!" (stage 5 adds the next air date and the finale). Until stage 9,
   a `.slate` backup doesn't carry episodes, and Replace loses them.
   `tests/episodes.spec.js` covers it (plus Spanish's generic line).
+  The owner's one note: the note jumped from a thin strip when it
+  loaded. Now it loads at about its final size (150px, 250px on a
+  phone, with an empty photo frame) and eases the rest, fading in.
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
