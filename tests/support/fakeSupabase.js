@@ -178,6 +178,13 @@ function createBackend() {
     return db.collections.find((c) => c.id === row.collection_id)?.user_id ?? null;
   }
 
+  // The realtime server builds each row as jsonb, which orders its keys
+  // shortest first, then alphabetically: not in the table's column order,
+  // as the REST answers are. (Comparing the two as text once made a title
+  // just added look changed in another window.)
+  const jsonbOrder = (row) =>
+    Object.fromEntries(Object.entries(row).sort(([a], [b]) => a.length - b.length || (a < b ? -1 : a > b ? 1 : 0)));
+
   // What the realtime server does after a committed write: tell every
   // channel of the row's owner that listens to this table. A beat later,
   // as over a real network — and after the write's own response.
@@ -189,7 +196,7 @@ function createBackend() {
       commit_timestamp: new Date().toISOString(),
       type,
       columns: [],
-      record: type === "DELETE" ? {} : { ...row },
+      record: type === "DELETE" ? {} : jsonbOrder(row),
       old_record: type === "INSERT" ? {} : { id: (before ?? row).id },
       errors: null,
     };

@@ -433,7 +433,14 @@ function toggleTrailer(btn) {
    opened after another tab had changed the review brought the old text
    back, and saving would have put it back in place of the new one. */
 
-const sameRow = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+// Field by field: a realtime echo lists a row's fields in another order
+// than the save's own answer (the server builds it as jsonb), so comparing
+// the two as text once warned of a change elsewhere right after adding a
+// movie from Movies, whose form opens at once.
+const sameRow = (a, b) => {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  return [...keys].every((key) => JSON.stringify(a[key]) === JSON.stringify(b[key]));
+};
 
 // Called by js/realtime.js after STORE has taken the change. `before` is the
 // title as STORE held it until now.

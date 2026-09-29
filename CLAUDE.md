@@ -459,7 +459,7 @@ directly.
   The owner's one note: the note jumped from a thin strip when it
   loaded. Now it loads at about its final size (150px, 250px on a
   phone, with an empty photo frame) and eases the rest, fading in.
-  Stage 5 — built, waiting for the owner's check on the preview: "You're
+  Stage 5 — done: "You're
   up to date!" adds "The next one, S3 · E1, airs on …" when TMDB knows
   it (only for a show still going). For an ended / canceled show
   (TMDB's status), ticking its last episode (from the note or "Tick
@@ -472,6 +472,14 @@ directly.
   (`tickAllEpisodes`): earlier seasons by TMDB's counts, the latest
   one episode by episode. A fake still-airing show (Severance, 95396)
   is in tests/support/tmdbCatalog.js.
+  Checked by the owner (with The Simpsons' season 38, which premiered
+  on Sept. 27, 2026, for "up to date").
+  Fixed on the way (a bug in `main` too, found by the owner): adding a
+  movie from Movies opened its form with a false "This title just
+  changed in another window". The realtime echo lists a row's fields in
+  jsonb order (shortest key first), unlike the REST answer, and
+  `sameRow` compared them as text; it now compares field by field. The
+  fake backend sends realtime rows in that order too.
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
