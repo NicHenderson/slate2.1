@@ -480,7 +480,7 @@ directly.
   jsonb order (shortest key first), unlike the REST answer, and
   `sameRow` compared them as text; it now compares field by field. The
   fake backend sends realtime rows in that order too.
-  Stage 6 — built, waiting for the owner's check on the preview: the
+  Stage 6 — done: the
   episodes window (`#episodes-modal` in index.html, z-index 110: above
   the detail window, under the finish window). "See all episodes →" on
   every state of the note opens it on the next episode's season,
@@ -490,7 +490,18 @@ directly.
   dashed, disabled), and the image. Ticking the finale there opens the
   finish window too; saving it closes the episodes window. It follows
   realtime, closes with the detail window, and with a show deleted
-  elsewhere. Next, stage 7: "Tick up to here", finished and dropped.
+  elsewhere. Checked by the owner.
+  Stage 7 — built, waiting for the owner's check on the preview: "Tick
+  up to here" on each row (on hover, always on a phone) ticks it and
+  every episode out before it, earlier seasons included (by TMDB's
+  counts), and finishes a show whose finale it reaches, as ticking does.
+  A finished show's detail window has "See all episodes →" (under the
+  dates); its list shows every episode out as watched, whatever's
+  stored (shows finished before episodes were tracked have no rows),
+  and nothing can be ticked. A dropped show's window has a "Stopped at
+  S1 · E3" note (the furthest ticked; none if nothing is) and a list
+  only to look at, that episode flagged "Stopped here". The episodes
+  window redraws when its show is finished or dropped elsewhere.
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched

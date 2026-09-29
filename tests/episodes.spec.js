@@ -174,3 +174,52 @@ test("the episodes window: each episode ticked or unticked on its own, and saved
   await expect(win).toBeHidden();
   await expect(page.locator("#detail-modal .up-next-head")).toHaveText("Up next S2 · E2");
 });
+
+test("Tick up to here: that episode and every one before it, earlier seasons too", async ({ page, backend }) => {
+  const dark = watchingDark(backend);
+  backend.seed("watched_episodes", [{ show_id: dark.id, season: 1, episode: 2 }], backend.user.id);
+  await logIn(page);
+  await openWatching(page, "Dark");
+  await page.locator("#detail-modal .up-next-all").click();
+  const win = page.locator("#episodes-modal");
+  await win.locator('.ep-tab[data-season="2"]').click();
+  const row = win.locator('.ep-row[data-episode="3"]');
+  await row.hover();
+  await row.locator('[data-action="tick-up-to-here"]').click();
+  await expect(win.locator(".ep-progress-text")).toHaveText("13 of 26 watched");
+  expect(ticked(backend, dark)).toHaveLength(13); // season 1's ten and season 2's first three
+  await expect(page.locator(".toast").last()).toHaveText("Ticked up to S2 · E3.");
+});
+
+test("a finished or dropped show's episodes are only to look at", async ({ page, backend }) => {
+  // The seeded Dark is finished, from before episodes were tracked: none stored.
+  const [got] = backend.seed(
+    "shows",
+    [{ tmdb_id: 1399, title: "Game of Thrones", total_seasons: 8, total_episodes: 73, started_watching_date: "2026-03-01", is_dropped: true }],
+    backend.user.id
+  );
+  backend.seed("watched_episodes", [1, 2, 3].map((episode) => ({ show_id: got.id, season: 1, episode })), backend.user.id);
+  await logIn(page);
+
+  // Finished: every episode shown as watched, nothing to tick.
+  await page.click('.nav-btn[data-section="shows-watched"]');
+  await page.locator("#grid-shows-watched .card", { hasText: "Dark" }).click();
+  await page.locator("#detail-modal .up-next-all").click();
+  const win = page.locator("#episodes-modal");
+  await expect(win.locator(".ep-progress-text")).toHaveText("26 of 26 watched");
+  await expect(win.locator(".ep-box-btn:not([disabled])")).toHaveCount(0);
+  await expect(win.locator('[data-action="tick-up-to-here"]')).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Escape");
+
+  // Dropped: where it stopped, on the note and in the list.
+  await page.click('.nav-btn[data-section="shows-towatch"]');
+  await page.click('[data-subtab="grid-shows-dropped"]');
+  await page.locator("#grid-shows-dropped .card", { hasText: "Game of Thrones" }).click();
+  await expect(page.locator("#detail-modal .up-next-head")).toHaveText("Stopped at S1 · E3");
+  await expect(page.locator('#detail-modal [data-action="tick-episode"]')).toHaveCount(0);
+  await page.locator("#detail-modal .up-next-all").click();
+  await expect(win.locator(".ep-row.is-next .ep-flag")).toHaveText("Stopped here");
+  await expect(win.locator(".ep-box-btn:not([disabled])")).toHaveCount(0);
+  expect(backend.db.watched_episodes.filter((e) => e.show_id === got.id)).toHaveLength(3);
+});

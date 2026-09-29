@@ -183,12 +183,14 @@ function renderDetail(cfg, row) {
   }
 
   if (cfg.state === "dropped") {
+    // Under the date: where it stopped (js/episodes.js).
     detailBody.innerHTML = `
       ${head}
       <div class="detail-section">
         <p class="detail-label">${t("Started on")}</p>
         <p class="detail-date-value">${formatDate(row.started_watching_date)}</p>
       </div>
+      ${upNextSlotHtml(row)}
       <div class="detail-actions detail-actions-start">
         <button class="complete-btn" type="button" data-action="send-to-watchlist">${t('↩ Back to "To Watch"')}</button>
         ${addToColHtml}
@@ -239,6 +241,7 @@ function renderDetail(cfg, row) {
       </div>
     </div>
     ${cfg.table === "movies" ? viewingsListHtml(row) : ""}
+    ${cfg.table === "shows" && row.tmdb_id ? `<div class="detail-section">${SEE_ALL_HTML}</div>` : ""}
     <div class="detail-section">
       <p class="detail-label">${t("Personal review")}</p>
       ${review}

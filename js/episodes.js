@@ -62,6 +62,12 @@ function resetEpisodes() {
 // back to To Watch, has no episodes left. Called for every change to a
 // show (js/realtime.js), with the show as it was before it.
 function episodesFollowShow(payload, before) {
+  // The episodes window follows the show too: finished or dropped
+  // elsewhere, it becomes only to look at (drawn once STORE has it).
+  const id = payload.eventType === "DELETE" ? payload.old.id : payload.new.id;
+  if (payload.eventType === "UPDATE" && episodesWindowOpen() && episodesWindow?.showId === id) {
+    setTimeout(() => renderEpisodesWindow(), 0);
+  }
   const gone =
     payload.eventType === "DELETE" ||
     (payload.eventType === "UPDATE" && before?.started_watching_date && !payload.new.started_watching_date);
@@ -154,6 +160,14 @@ async function upNextState(row) {
   const outline = await showOutline(row.tmdb_id);
   const seasons = outline.seasons;
   const ticked = tickedEpisodes(row.id);
+  // Dropped: where it stopped, nothing more (a dropped show isn't picked
+  // up again: it's started over from To Watch).
+  if (row.is_dropped) {
+    const last = ticked[ticked.length - 1];
+    if (!last) return { kind: "none" };
+    const ep = (await seasonEpisodes(row.tmdb_id, last.season)).find((e) => e.number === last.episode);
+    return { kind: "stopped", last: ep ?? { season: last.season, number: last.episode, name: "", overview: "" } };
+  }
   if (!ticked.length) {
     const first = seasons[0] ? (await seasonEpisodes(row.tmdb_id, seasons[0].number)).find((ep) => hasAired(ep.airDate)) : null;
     return { kind: "where", seasons, first: first ?? null };
@@ -215,6 +229,18 @@ function watchedItHtml(ep) {
 }
 
 function upNextHtml(row, state) {
+  if (state.kind === "none") return "";
+  if (state.kind === "stopped") {
+    const ep = state.last;
+    return `
+      <div class="up-next-text">
+        <p class="up-next-head">${t("Stopped at {code}", { code: `<span class="up-next-code">${episodeCode(ep.season, ep.number)}</span>` })}</p>
+        <p class="up-next-name">${escapeHtml(episodeName(ep))}</p>
+        ${episodeDescriptionHtml(row, ep)}
+        <div class="up-next-row">${SEE_ALL_HTML}</div>
+      </div>
+      ${episodePhotoHtml(row, ep)}`;
+  }
   if (state.kind === "next") {
     const ep = state.next;
     return `
@@ -287,6 +313,7 @@ function upNextHtml(row, state) {
 // the jump from a thin strip).
 function upNextSlotHtml(row) {
   if (!row.tmdb_id) return "";
+  if (row.is_dropped && !tickedEpisodes(row.id).length) return "";
   return `
     <div class="up-next is-loading" data-show-id="${row.id}" aria-live="polite">
       <div class="up-next-text"><p class="up-next-loading">${t("Loading episodes…")}</p></div>
@@ -320,6 +347,11 @@ async function loadUpNext(row) {
   }
   // By the time TMDB answers, the window may be showing something else.
   if (!slot.isConnected || currentDetail?.row.id !== row.id) return;
+  // A dropped show with nothing ticked (any more) has no note.
+  if (!html) {
+    slot.remove();
+    return;
+  }
   const from = slot.offsetHeight;
   const firstFill = slot.classList.contains("is-loading");
   slot.classList.remove("is-loading");
@@ -459,22 +491,27 @@ async function tickAllEpisodes(row) {
   }
 }
 
-async function tickUpTo(row, button) {
-  const season = Number(detailBody.querySelector("#up-next-season")?.value);
-  const episode = Number(detailBody.querySelector("#up-next-episode")?.value);
-  if (!season || !episode) return;
-  // Every episode of the seasons before it (as TMDB counts them) and this
-  // season's up to the one picked.
+// "Up to here": every episode of the seasons before it (as TMDB counts
+// them, those that are out) and this season's up to it.
+async function episodesUpTo(row, season, episode) {
   const { seasons } = await showOutline(row.tmdb_id);
   const list = [];
   seasons
-    .filter((s) => s.number < season)
+    .filter((s) => s.number < season && hasAired(s.airDate))
     .forEach((s) => {
       for (let e = 1; e <= s.count; e++) list.push({ season: s.number, episode: e });
     });
   (await seasonEpisodes(row.tmdb_id, season))
-    .filter((ep) => ep.number <= episode)
+    .filter((ep) => ep.number <= episode && hasAired(ep.airDate))
     .forEach((ep) => list.push({ season, episode: ep.number }));
+  return list;
+}
+
+async function tickUpTo(row, button) {
+  const season = Number(detailBody.querySelector("#up-next-season")?.value);
+  const episode = Number(detailBody.querySelector("#up-next-episode")?.value);
+  if (!season || !episode) return;
+  const list = await episodesUpTo(row, season, episode);
   saveFromNote(row, list, button, t("Ticked up to {code}.", { code: episodeCode(season, episode) }));
 }
 
@@ -501,7 +538,11 @@ detailBody.addEventListener("change", (e) => {
    "See all episodes →": every episode of the show, one season at a time
    under tabs like To Watch / Watching / Dropped (the owner's pick of
    three mockups), each with a hand-drawn box to tick or untick it on
-   its own. It opens on the season of the next episode, scrolled to it. */
+   its own, or "Tick up to here" for it and every one before. It opens on
+   the season of the next episode, scrolled to it. A finished or dropped
+   show's list is only to look at (the owner's call): a finished one shows
+   every episode out as watched (shows finished before episodes were
+   tracked have none stored), a dropped one where it stopped. */
 
 const episodesModal = document.getElementById("episodes-modal");
 const episodesBody = document.getElementById("episodes-body");
@@ -519,7 +560,7 @@ async function openEpisodesWindow(row) {
     const { seasons } = await showOutline(row.tmdb_id);
     if (episodesWindow?.showId !== row.id) return;
     // The season of the next episode, else of the last one ticked, else the first.
-    const state = await upNextState(row).catch(() => null);
+    const state = isFinishedShow(row) ? null : await upNextState(row).catch(() => null);
     const at = state?.next?.season ?? state?.last?.season ?? seasons[0]?.number ?? 1;
     episodesWindow.season = at;
     await renderEpisodesWindow({ scrollToNext: true });
@@ -530,6 +571,12 @@ async function openEpisodesWindow(row) {
     }
   }
 }
+
+const isFinishedShow = (row) => Boolean(row.finished_watching_date) && !row.is_dropped;
+const isReadOnlyShow = (row) => isFinishedShow(row) || row.is_dropped === true;
+
+// As the window shows it: a finished show has watched everything out.
+const shownAsTicked = (row, ep) => (isFinishedShow(row) ? hasAired(ep.airDate) : isTicked(row.id, ep.season, ep.number));
 
 function closeEpisodesWindow() {
   episodesModal.classList.add("hidden");
@@ -544,11 +591,14 @@ function closeEpisodesWindowOf(showId) {
   return true;
 }
 
-function episodeRowHtml(row, ep, next) {
-  const done = isTicked(row.id, ep.season, ep.number);
+// `mark`: the episode flagged, as { season, number, label }: the next one,
+// or where a dropped show stopped.
+function episodeRowHtml(row, ep, mark) {
+  const done = shownAsTicked(row, ep);
   const out = hasAired(ep.airDate);
-  const isNext = next && next.season === ep.season && next.number === ep.number;
-  const cls = [done ? "is-done" : "", out ? "" : "is-unaired", isNext ? "is-next" : ""].join(" ").trim();
+  const readOnly = isReadOnlyShow(row);
+  const isMarked = mark && mark.season === ep.season && mark.number === ep.number;
+  const cls = [done ? "is-done" : "", out ? "" : "is-unaired", isMarked ? "is-next" : ""].join(" ").trim();
   const label = `${episodeCode(ep.season, ep.number)} · ${escapeHtml(episodeName(ep))}`;
   const about = out
     ? ep.overview
@@ -558,12 +608,13 @@ function episodeRowHtml(row, ep, next) {
   const src = ep.still ? TMDB_STILL + ep.still : row.poster;
   return `
     <li class="ep-row ${cls}" data-season="${ep.season}" data-episode="${ep.number}">
-      <button class="ep-box-btn" type="button" data-action="toggle-episode" data-season="${ep.season}" data-episode="${ep.number}" aria-pressed="${done}" aria-label="${label}"${out ? "" : " disabled"}>
+      <button class="ep-box-btn" type="button" data-action="toggle-episode" data-season="${ep.season}" data-episode="${ep.number}" aria-pressed="${done}" aria-label="${label}"${out && !readOnly ? "" : " disabled"}>
         <span class="up-next-box">${CHECK_SVG}</span>
       </button>
       <div class="ep-main">
-        <p class="ep-line"><span class="ep-num">${t("E{n}", { n: ep.number })}</span> <span class="ep-name">${escapeHtml(episodeName(ep))}</span>${isNext ? ` <span class="ep-flag">${t("Up next")}</span>` : ""}</p>
+        <p class="ep-line"><span class="ep-num">${t("E{n}", { n: ep.number })}</span> <span class="ep-name">${escapeHtml(episodeName(ep))}</span>${isMarked ? ` <span class="ep-flag">${mark.label}</span>` : ""}</p>
         ${about}
+        ${out && !readOnly ? `<button class="ep-upto" type="button" data-action="tick-up-to-here" data-season="${ep.season}" data-episode="${ep.number}">${t("Tick up to here")}</button>` : ""}
       </div>
       ${src ? `<figure class="ep-photo"><img class="${ep.still ? "" : "is-poster"}" src="${escapeHtml(src)}" alt="" loading="lazy" /></figure>` : ""}
     </li>`;
@@ -577,13 +628,14 @@ async function renderEpisodesWindow({ scrollToNext = false } = {}) {
   if (!row) return;
   const { seasons } = await showOutline(row.tmdb_id);
   const shown = await seasonEpisodes(row.tmdb_id, win.season).catch(() => null);
-  const state = await upNextState(row).catch(() => null);
+  const state = isFinishedShow(row) ? null : await upNextState(row).catch(() => null);
   if (episodesWindow !== win) return; // closed, or opened on another show meanwhile
 
   // Counted from TMDB's seasons: what's out, and how much of it is ticked.
   const outIn = (s) => (hasAired(s.airDate) ? s.count : 0);
   const out = seasons.reduce((n, s) => n + outIn(s), 0);
-  const tickedCount = (s) => tickedEpisodes(row.id).filter((e) => e.season === s.number).length;
+  const tickedCount = (s) =>
+    isFinishedShow(row) ? outIn(s) : tickedEpisodes(row.id).filter((e) => e.season === s.number).length;
   const watched = Math.min(out, seasons.reduce((n, s) => n + tickedCount(s), 0));
   const pct = out ? Math.round((watched / out) * 100) : 0;
   const tabs = seasons
@@ -591,9 +643,19 @@ async function renderEpisodesWindow({ scrollToNext = false } = {}) {
       (s) => `<button class="ep-tab" type="button" role="tab" data-action="episodes-season" data-season="${s.number}" aria-selected="${s.number === win.season}">${t("Season {n}", { n: s.number })}<small>${outIn(s) ? `${tickedCount(s)}/${outIn(s)}` : "—"}</small></button>`
     )
     .join("");
-  const next = state?.kind === "next" ? state.next : null;
+  const mark =
+    state?.kind === "next"
+      ? { season: state.next.season, number: state.next.number, label: t("Up next") }
+      : state?.kind === "stopped"
+        ? { season: state.last.season, number: state.last.number, label: t("Stopped here") }
+        : null;
+  const note = isFinishedShow(row)
+    ? t("You finished it: every episode counts as watched. This list is just to look at.")
+    : row.is_dropped
+      ? t("You dropped it. This list is just to look at: to start it over, move it back to To Watch.")
+      : "";
   const list = shown
-    ? shown.map((ep) => episodeRowHtml(row, ep, next)).join("")
+    ? shown.map((ep) => episodeRowHtml(row, ep, mark)).join("")
     : `<li class="ep-loading">${t("Couldn't load the episodes. Please try again later.")}</li>`;
 
   const listEl = episodesBody.querySelector(".ep-list");
@@ -609,6 +671,7 @@ async function renderEpisodesWindow({ scrollToNext = false } = {}) {
         <div class="ep-bar" aria-hidden="true"><span style="width: ${pct}%"></span></div>
       </div>
     </div>
+    ${note ? `<p class="ep-read-only">${note}</p>` : ""}
     <div class="ep-tabs" role="tablist">${tabs}</div>
     <ul class="ep-list">${list}</ul>`;
   const newList = episodesBody.querySelector(".ep-list");
@@ -623,7 +686,7 @@ async function renderEpisodesWindow({ scrollToNext = false } = {}) {
 // Ticks or unticks one episode from the window.
 async function toggleEpisodeInWindow(button) {
   const row = STORE.shows.get(episodesWindow?.showId);
-  if (!row) return;
+  if (!row || isReadOnlyShow(row)) return;
   const season = Number(button.dataset.season);
   const episode = Number(button.dataset.episode);
   const code = episodeCode(season, episode);
@@ -657,6 +720,35 @@ async function toggleEpisodeInWindow(button) {
   afterEpisodesChanged(row.id);
 }
 
+// "Tick up to here": this episode and every one before it.
+async function tickUpToHereInWindow(button) {
+  const row = STORE.shows.get(episodesWindow?.showId);
+  if (!row || isReadOnlyShow(row)) return;
+  const season = Number(button.dataset.season);
+  const episode = Number(button.dataset.episode);
+  button.disabled = true;
+  let list;
+  try {
+    list = await episodesUpTo(row, season, episode);
+  } catch (err) {
+    console.error("Episodes error:", err.message);
+    list = null;
+  }
+  if (!list || !(await tickEpisodes(row, list))) {
+    showToast(t("Couldn't save that. Please try again."), true);
+    button.disabled = false;
+    return;
+  }
+  const finale = await finaleOf(row).catch(() => null);
+  if (finale && list.some((ep) => ep.season === finale.season && ep.episode === finale.episode)) {
+    afterEpisodesChanged(row.id);
+    openFinishFromFinale(row, finale);
+    return;
+  }
+  showToast(t("Ticked up to {code}.", { code: episodeCode(season, episode) }));
+  afterEpisodesChanged(row.id);
+}
+
 // The window and the note, after a show's episodes changed.
 function afterEpisodesChanged(showId) {
   if (episodesWindowOpen() && episodesWindow?.showId === showId && episodesWindow.season) renderEpisodesWindow();
@@ -671,6 +763,7 @@ episodesBody.addEventListener("click", (e) => {
     renderEpisodesWindow({ scrollToNext: true });
   }
   if (button.dataset.action === "toggle-episode") toggleEpisodeInWindow(button);
+  if (button.dataset.action === "tick-up-to-here") tickUpToHereInWindow(button);
 });
 
 document.getElementById("episodes-close").addEventListener("click", closeEpisodesWindow);
