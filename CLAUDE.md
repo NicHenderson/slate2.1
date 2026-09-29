@@ -684,6 +684,16 @@ directly.
   previews likely lack it), a 1200×630 share image, `robots.txt` +
   noindex for `tests/`, `tools/`, `supabase/`, docs, a `sitemap.xml`;
   the owner registers Google Search Console.
+  **Privacy page first, on `claude/funny-pascal-bk99gr`** (the owner's
+  call). Stages: 1 the text (Claude's draft, in chat) — the owner answered:
+  the page names who's responsible by their real name, Manuel Pinto Devia,
+  with their artist name Nicholas Henderson (the law asks for it; they
+  agreed); minimum age 14 ("almost" fine: ask what they'd change);
+  contact slateappmail@gmail.com. 2 mockups:
+  https://claude.ai/artifact/6Ut8VxYrCY8TePJ8itztGW (A pinned sheet with
+  an index, B notes on the board, C a ruled letter signed by the owner),
+  waiting for their pick. 3 `privacy.html`, English + Spanish, linked
+  from the landing footer, Request access and Settings → Account.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - large-grid performance.
