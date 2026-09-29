@@ -368,6 +368,39 @@ test("a finished date cleared by hand takes the rating and review with it, and f
   await expect(page.locator("#start-refinish-note")).toBeHidden();
 });
 
+test("editing a finished show with something new says the rating and review are from before, and offers to keep watching", async ({ page, backend }) => {
+  const [sev] = backend.seed(
+    "shows",
+    [{ tmdb_id: 95396, title: "Severance", total_seasons: 3, total_episodes: 19, started_watching_date: "2022-02-20", finished_watching_date: "2022-05-01", rating: 8, review: "Strange and very good." }],
+    backend.user.id
+  );
+  await logIn(page);
+  await page.click('.nav-btn[data-section="shows-watched"]');
+  const note = page.locator("#start-refinish-note");
+
+  // Dark has nothing new: no note.
+  await page.locator("#grid-shows-watched .card", { hasText: "Dark" }).click();
+  await page.locator('#detail-modal [data-action="edit"]').click();
+  await expect(page.locator("#start-extra")).toBeVisible();
+  await expect(note).toBeHidden();
+  await page.click("#start-cancel");
+  await page.keyboard.press("Escape");
+
+  await page.locator("#grid-shows-watched .card", { hasText: "Severance" }).click();
+  await page.locator('#detail-modal [data-action="edit"]').click();
+  await expect(note.locator("#start-refinish-news")).toHaveText(
+    "This rating and review are from when you finished it, before the new episodes came out. Why not keep watching it?"
+  );
+  await expect(note.locator("#start-refinish-before")).toBeHidden();
+
+  // Its button leaves Edit for the usual question.
+  await note.locator("#start-refinish-keep").click();
+  await expect(page.locator("#start-modal")).toBeHidden();
+  await page.locator("#confirm-yes").click();
+  await expect.poll(() => sev.finished_watching_date).toBe(null);
+  expect(sev).toMatchObject({ rating: 8, review: "Strange and very good." });
+});
+
 test("a finished show's card says when a new season came out, looked up once and kept", async ({ page, backend }) => {
   backend.seed(
     "shows",

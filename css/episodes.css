@@ -128,6 +128,26 @@
   top: 18px;
 }
 
+/* "Why not keep watching it?": its answer, a small dashed button. */
+.refinish-keep {
+  display: block;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border: 1.5px dashed color-mix(in srgb, var(--accent-deep) 45%, transparent);
+  border-radius: 2px;
+  background: none;
+  color: var(--accent-deep);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.refinish-keep:hover {
+  border-style: solid;
+  background: color-mix(in srgb, var(--accent-strong) 10%, transparent);
+}
+
 .refinish-arrow path {
   fill: none;
   stroke: currentColor;

@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="css/searchModal.css?v=e99bf1ca" />
   <link rel="stylesheet" href="css/hearts.css?v=a68715f0" />
   <link rel="stylesheet" href="css/viewings.css?v=0cd9462b" />
-  <link rel="stylesheet" href="css/episodes.css?v=5b884721" />
+  <link rel="stylesheet" href="css/episodes.css?v=b28051e2" />
   <link rel="stylesheet" href="css/whereToWatch.css?v=7528c42f" />
   <link rel="stylesheet" href="css/librarySearch.css?v=cce1cb12" />
   <link rel="stylesheet" href="css/responsive.css?v=dd07ab14" />
@@ -1147,7 +1147,9 @@
             <p class="refinish-note hidden" id="start-refinish-note">
               <svg class="refinish-arrow is-up" viewBox="0 0 58 34" aria-hidden="true"><path d="M56 26 C 40 30, 18 26, 8 8" /><path d="M8 8 L 7 18 M8 8 L 17 12" /></svg>
               <svg class="refinish-arrow is-down" viewBox="0 0 58 34" aria-hidden="true"><path d="M56 8 C 40 8, 18 12, 10 30" /><path d="M10 30 L 8 20 M10 30 L 18 25" /></svg>
-              <span>The rating and review are from before the new episodes… you can leave them as they are!</span>
+              <span id="start-refinish-before">The rating and review are from before the new episodes… you can leave them as they are!</span>
+              <span id="start-refinish-news">This rating and review are from when you finished it, before the new episodes came out. Why not keep watching it?</span>
+              <button type="button" class="refinish-keep" id="start-refinish-keep">↻ Keep watching</button>
             </p>
 
             <label class="field-label" for="start-review">Review</label>
@@ -1203,7 +1205,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-  <script src="js/lang/es.js?v=a8d4dab9"></script>
+  <script src="js/lang/es.js?v=f25019de"></script>
   <script src="js/i18n.js?v=dde7afb9"></script>
   <script src="js/escapeHtml.js?v=28c1feb8"></script>
   <script src="js/viewTransitions.js?v=d587d807"></script>
@@ -1225,7 +1227,7 @@
   <script src="js/detailModal.js?v=19841e57"></script>
   <script src="js/heartsInput.js?v=75776d63"></script>
   <script src="js/updateModal.js?v=462c7f71"></script>
-  <script src="js/startModal.js?v=45103cf3"></script>
+  <script src="js/startModal.js?v=0bc9ea79"></script>
   <script src="js/confirmModal.js?v=09cd2e80"></script>
   <script src="js/viewings.js?v=a3e4287a"></script>
   <script src="js/episodes.js?v=ffe15719"></script>

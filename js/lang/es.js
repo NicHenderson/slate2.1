@@ -437,6 +437,7 @@ window.SLATE_LANGUAGES = {
       "Tick up to here": "Marcar hasta aquí",
       "Stopped at {code}": "Quedaste en {code}",
       "Stopped here": "Aquí quedaste",
+      "This rating and review are from when you finished it, before the new episodes came out. Why not keep watching it?": "Esta calificación y reseña son de cuando la terminaste, antes de que salieran episodios nuevos. ¿Y si sigues viéndola?",
       "↻ Keep watching": "↻ Seguir viéndola",
       "Keep watching {title}?": "¿Seguir viendo {title}?",
       "It goes back to Watching, with what you'd seen ticked, so you're up next on the first new episode.": "Vuelve a Viendo con lo que ya habías visto marcado, así que sigues con el primer episodio nuevo.",

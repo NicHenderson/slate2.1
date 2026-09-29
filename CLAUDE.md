@@ -578,7 +578,12 @@ directly.
   said "Start watching"; the owner asked). Finishing again: a Watching show
   with a rating or review (only a kept-watching one has them) shows the
   pencil note with its two arrows in the finish window; the new date
-  replaces the old and the new episodes get ticked. Stage 5 — done,
+  replaces the old and the new episodes get ticked. The owner's addition,
+  checked after stage 5: Edit on a finished show with something new (and
+  a rating or review) shows the same arrows with "This rating and review
+  are from when you finished it, before the new episodes came out. Why
+  not keep watching it?" and a "↻ Keep watching" button (leaves Edit
+  for the usual question). Stage 5 — done,
   waiting for the owner's check: the starburst on finished shows' cards
   in Shows (`newSeasonStickerHtml`), drawn from what TMDB said kept in
   localStorage (`slate_show_airings`: season premieres and the last

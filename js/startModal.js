@@ -29,9 +29,29 @@ function syncStartExtra() {
 // that they can stay (the owner's pick, mockup 1d). No other show being
 // watched has a rating or review: they're only saved with a finished date,
 // and emptied when it's cleared by hand.
+//
+// A finished show with something new since (edited rather than kept
+// watching) gets the same note, saying so and offering to keep watching
+// it (the owner's idea), once TMDB has said so.
 function syncRefinishNote() {
-  const reopened = !startRow.finished_watching_date && (startRow.rating != null || Boolean(startRow.review));
-  document.getElementById("start-refinish-note").classList.toggle("hidden", !reopened);
+  const row = startRow;
+  const rated = row.rating != null || Boolean(row.review);
+  const reopened = !row.finished_watching_date && rated;
+  showRefinishNote(reopened ? "before" : null);
+  if (!row.finished_watching_date || !rated || row.is_dropped) return;
+  newSinceFinished(row)
+    .then((news) => {
+      if (news && startRow === row && !startModal.classList.contains("hidden")) showRefinishNote("news");
+    })
+    .catch(() => {}); // nothing said: the form works as before
+}
+
+// Which note shows: "before" (kept watching), "news" (not yet), or none.
+function showRefinishNote(kind) {
+  document.getElementById("start-refinish-note").classList.toggle("hidden", !kind);
+  document.getElementById("start-refinish-before").classList.toggle("hidden", kind !== "before");
+  document.getElementById("start-refinish-news").classList.toggle("hidden", kind !== "news");
+  document.getElementById("start-refinish-keep").classList.toggle("hidden", kind !== "news");
 }
 
 // A show can't be finished before it was started: unlike a date in the
@@ -153,6 +173,13 @@ startForm.addEventListener("submit", async (e) => {
 });
 
 startCancel.addEventListener("click", () => closeStartModal());
+
+// From the note: out of Edit, and asked as the detail window's button asks.
+document.getElementById("start-refinish-keep").addEventListener("click", () => {
+  const row = STORE.shows.get(startRow.id) ?? startRow;
+  closeStartModal();
+  confirmKeepWatching(row);
+});
 startClose.addEventListener("click", () => closeStartModal());
 
 document.getElementById("start-delete").addEventListener("click", () => {
