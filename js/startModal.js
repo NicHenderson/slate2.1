@@ -24,6 +24,15 @@ function syncStartExtra() {
   startExtra.classList.toggle("hidden", !finished);
 }
 
+// A show kept watching after something new came out (js/episodes.js) is
+// still rated and reviewed from before: finishing it again says so, and
+// that they can stay (the owner's pick, mockup 1d). No other show being
+// watched has a rating or review: they're only saved with a finished date.
+function syncRefinishNote() {
+  const reopened = !startRow.finished_watching_date && (startRow.rating != null || Boolean(startRow.review));
+  document.getElementById("start-refinish-note").classList.toggle("hidden", !reopened);
+}
+
 // A show can't be finished before it was started: unlike a date in the
 // future, that one is refused, as it would give "Avg time to finish" a
 // negative number of days.
@@ -49,6 +58,7 @@ function openStartWatchingModal(row, isNewInsert = false) {
   startFinishDate.value = row.finished_watching_date || "";
   startReview.value = row.review || "";
   startDatesError.classList.add("hidden");
+  syncRefinishNote();
   syncFutureNote(startDate);
   syncFutureNote(startFinishDate);
   document.getElementById("start-title").textContent = isNewInsert
@@ -103,14 +113,13 @@ startForm.addEventListener("submit", async (e) => {
     finished_watching_date: finished,
   };
 
-  // The rating and review are optional, as for a movie.
+  // The rating and review are optional, as for a movie, and only asked
+  // with a finished date. Without one they're left as they are: a show
+  // kept watching after a new season keeps its own (js/episodes.js).
   if (finished) {
     const rating = startHeartsInput.get();
     payload.rating = rating > 0 ? rating : null;
     payload.review = startReview.value.trim() || null;
-  } else {
-    payload.rating = null;
-    payload.review = null;
   }
 
   startSave.disabled = true;

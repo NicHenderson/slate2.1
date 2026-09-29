@@ -290,6 +290,64 @@ test("a finished show with a season out since: the new episodes aren't counted a
   await expect(win.locator(".ep-row.is-new")).toHaveCount(0);
 });
 
+test("keep watching a finished show with a new season, then finish it again: rating and review kept", async ({ page, backend }) => {
+  const [sev] = backend.seed(
+    "shows",
+    [{ tmdb_id: 95396, title: "Severance", total_seasons: 3, total_episodes: 19, started_watching_date: "2022-02-20", finished_watching_date: "2022-05-01", rating: 8, review: "Strange and very good." }],
+    backend.user.id
+  );
+  // Season 2 ticked by an older Slate on the day it was marked as finished.
+  backend.seed("watched_episodes", [{ show_id: sev.id, season: 1, episode: 1 }, { show_id: sev.id, season: 2, episode: 3 }], backend.user.id);
+  watchingDark(backend);
+  await logIn(page);
+  await page.click('.nav-btn[data-section="shows-watched"]');
+  await page.locator("#grid-shows-watched .card", { hasText: "Severance" }).click();
+
+  // Asked first; cancelling changes nothing.
+  await page.locator('#detail-modal .new-season [data-action="keep-watching"]').click();
+  const confirm = page.locator("#confirm-modal");
+  await expect(confirm.locator("#confirm-heading")).toHaveText("Keep watching Severance?");
+  await expect(confirm.locator(".confirm-keep.is-gone")).toHaveText("✕ The finished date (May 1, 2022) is cleared.");
+  await confirm.locator("#confirm-cancel").click();
+  expect(sev.finished_watching_date).toBe("2022-05-01");
+
+  // Back to Watching: started date, rating and review kept; what was out by
+  // the finished date ticked, what came out after it not; up next, the first new one.
+  await page.locator('#detail-modal .new-season [data-action="keep-watching"]').click();
+  await confirm.locator("#confirm-yes").click();
+  await expect(page.locator("#detail-modal .up-next-head")).toHaveText("Up next S2 · E1");
+  expect(sev).toMatchObject({ started_watching_date: "2022-02-20", finished_watching_date: null, rating: 8, review: "Strange and very good." });
+  expect(ticked(backend, sev)).toEqual(["1x1", "1x2", "1x3", "1x4", "1x5", "1x6", "1x7", "1x8", "1x9"]);
+  await expect(page.locator("#detail-poster .new-season-stamp")).toHaveCount(0);
+
+  // Edited without a finished date: the rating and review stay.
+  await page.locator('#detail-modal [data-action="edit"]').click();
+  await expect(page.locator("#start-extra")).toBeHidden();
+  await page.fill("#start-date", "2022-02-21");
+  await page.click("#start-save");
+  await expect.poll(() => sev.started_watching_date).toBe("2022-02-21");
+  expect(sev).toMatchObject({ rating: 8, review: "Strange and very good." });
+
+  // Finished again: the note says the rating and review are from before;
+  // the new date replaces the old one, and the new episodes get ticked.
+  await openWatching(page, "Severance");
+  await page.locator('#detail-modal [data-action="edit"]').click();
+  await page.fill("#start-finish-date", "2026-09-20");
+  await expect(page.locator("#start-refinish-note")).toBeVisible();
+  await expect(page.locator("#start-review")).toHaveValue("Strange and very good.");
+  await page.click("#start-save");
+  await expect.poll(() => sev.finished_watching_date).toBe("2026-09-20");
+  expect(sev).toMatchObject({ rating: 8, review: "Strange and very good." });
+  await expect.poll(() => ticked(backend, sev).length).toBe(19);
+
+  // A show being watched for the first time has no such note.
+  await openWatching(page, "Dark");
+  await page.locator('#detail-modal [data-action="edit"]').click();
+  await page.fill("#start-finish-date", "2026-09-20");
+  await expect(page.locator("#start-extra")).toBeVisible();
+  await expect(page.locator("#start-refinish-note")).toBeHidden();
+});
+
 test("the card says where you are, and the saved episode count catches up with TMDB", async ({ page, backend }) => {
   const dark = watchingDark(backend);
   dark.total_episodes = 20; // saved when it was added; TMDB has 26 now

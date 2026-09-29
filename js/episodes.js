@@ -254,6 +254,8 @@ function newSinceText(news) {
   return tn(news.count, "Since you finished it, {n} episode came out, in seasons {list}.", "Since you finished it, {n} episodes came out, in seasons {list}.", { list });
 }
 
+const KEEP_WATCHING_HTML = `<button class="up-next-pick-btn" type="button" data-action="keep-watching">${t("↻ Keep watching")}</button>`;
+
 // renderDetail's slot for it, in a finished show's window: empty (and
 // taking no room) until TMDB says there's something new.
 function newSeasonSlotHtml(row) {
@@ -277,7 +279,7 @@ async function loadNewSeason(row) {
   slot.innerHTML = `
     <p class="up-next-head new-season-head">${headline}</p>
     <p class="up-next-hint">${newSinceText(news)}</p>
-    <div class="up-next-row">${SEE_ALL_HTML}</div>`;
+    <div class="up-next-row">${KEEP_WATCHING_HTML}${SEE_ALL_HTML}</div>`;
   slot.classList.remove("hidden");
   // The note has its own "See all episodes →".
   detailBody.querySelector(".detail-see-all")?.classList.add("hidden");
@@ -602,33 +604,93 @@ function openFinishFromFinale(row, finale) {
   });
 }
 
-// A show just finished (js/startModal.js): every episode out gets ticked.
-// The seasons before the latest one out are taken whole, as TMDB counts
-// them; the latest one, episode by episode (its last ones may not be out).
+// Every episode a finished show had out by its finished date (all out,
+// with none: finishedCutoff), as { season, episode }. The seasons before
+// the latest one out are taken whole, as TMDB counts them; the latest
+// one, episode by episode (its last ones may not be out).
+async function episodesSeenWhenFinished(row) {
+  const outline = await showOutline(row.tmdb_id);
+  const cutoff = finishedCutoff(row, outline);
+  const outBy = (date) => hasAired(date) && (!cutoff || date <= cutoff);
+  const aired = outline.seasons.filter((s) => outBy(s.airDate));
+  const latest = aired.pop();
+  const list = [];
+  aired.forEach((s) => {
+    for (let e = 1; e <= s.count; e++) list.push({ season: s.number, episode: e });
+  });
+  if (latest) {
+    (await seasonEpisodes(row.tmdb_id, latest.number))
+      .filter((ep) => outBy(ep.airDate))
+      .forEach((ep) => list.push({ season: latest.number, episode: ep.number }));
+  }
+  return list;
+}
+
+// A show just finished (js/startModal.js): every episode out by its
+// finished date gets ticked. One finished on a past date hadn't seen what
+// came out after (that's new, newSinceFinished).
 async function tickAllEpisodes(row) {
   if (!row.tmdb_id) return;
   try {
-    // What was out by the date it was finished: one finished in the past
-    // hadn't seen what came out after (that's new, newSinceFinished).
-    const outline = await showOutline(row.tmdb_id);
-    const cutoff = finishedCutoff(row, outline);
-    const outBy = (date) => hasAired(date) && (!cutoff || date <= cutoff);
-    const aired = outline.seasons.filter((s) => outBy(s.airDate));
-    const latest = aired.pop();
-    const list = [];
-    aired.forEach((s) => {
-      for (let e = 1; e <= s.count; e++) list.push({ season: s.number, episode: e });
-    });
-    if (latest) {
-      (await seasonEpisodes(row.tmdb_id, latest.number))
-        .filter((ep) => outBy(ep.airDate))
-        .forEach((ep) => list.push({ season: latest.number, episode: ep.number }));
-    }
+    const list = await episodesSeenWhenFinished(row);
     if (!(await tickEpisodes(row, list))) throw new Error("the episodes weren't saved");
   } catch (err) {
     console.error("Tick all episodes error:", err.message);
     showToast(t("Couldn't tick all of its episodes."), true);
   }
+}
+
+/* ---------- keep watching ----------
+
+   A finished show with something new goes back to Watching (the owner's
+   decisions): its started date, rating and review stay, its finished date
+   goes. What was out by that date is ticked, and anything ticked that
+   came out after it unticked (an earlier Slate ticked everything out on
+   the day it was marked as finished), so "Up next" is the first new one. */
+
+// Asked first: the finished date can't be brought back.
+function confirmKeepWatching(row) {
+  openActionConfirm({
+    heading: t("Keep watching {title}?", { title: row.title ?? t("Untitled") }),
+    html: `${t("It goes back to Watching, with what you'd seen ticked, so you're up next on the first new episode.")}
+      <span class="confirm-keeps">
+        <span class="confirm-keep">✓ ${t("The started date stays ({date}).", { date: formatDate(row.started_watching_date) })}</span>
+        <span class="confirm-keep">✓ ${t("The rating and review stay.")}</span>
+        <span class="confirm-keep is-gone">✕ ${t("The finished date ({date}) is cleared.", { date: formatDate(row.finished_watching_date) })}</span>
+      </span>`,
+    yes: t("Yes, keep watching"),
+    busy: t("Saving…"),
+    failed: t("Couldn't move it back to Watching. Please try again."),
+    run: () => keepWatching(STORE.shows.get(row.id) ?? row),
+  });
+}
+
+// Resolves to the error, or null once it's back on Watching.
+async function keepWatching(row) {
+  let seen;
+  try {
+    seen = await episodesSeenWhenFinished(row);
+  } catch (err) {
+    return err;
+  }
+  const wanted = new Set(seen.map((ep) => `${ep.season}x${ep.episode}`));
+  const extra = tickedEpisodes(row.id).filter((e) => !wanted.has(`${e.season}x${e.episode}`));
+  if (extra.length) {
+    const { error } = await db
+      .from("watched_episodes")
+      .delete()
+      .in("id", extra.map((e) => e.id));
+    if (error) return error;
+    extra.forEach((e) => forgetEpisode(e.id));
+  }
+  if (!(await tickEpisodes(row, seen))) return new Error("the episodes weren't saved");
+  const { data, error } = await db.from("shows").update({ finished_watching_date: null }).eq("id", row.id).select().single();
+  if (error) return error;
+  closeEpisodesWindow();
+  applyLocalChange("shows", "UPDATE", data);
+  afterEpisodesChanged(row.id);
+  showToast(t("{title} is back in Watching.", { title: row.title ?? t("Untitled") }));
+  return null;
 }
 
 // "Up to here": every episode of the seasons before it (as TMDB counts
@@ -667,6 +729,7 @@ detailBody.addEventListener("click", (e) => {
   if (action === "tick-up-to") tickUpTo(currentDetail.row, button);
   if (action === "open-episodes") openEpisodesWindow(currentDetail.row);
   if (action === "finish-show") openFinishShowModal(STORE.shows.get(currentDetail.row.id) ?? currentDetail.row);
+  if (action === "keep-watching") confirmKeepWatching(STORE.shows.get(currentDetail.row.id) ?? currentDetail.row);
 });
 
 detailBody.addEventListener("change", (e) => {
@@ -826,7 +889,7 @@ async function renderEpisodesWindow({ scrollToNext = false } = {}) {
         <div class="ep-bar" aria-hidden="true"><span style="width: ${pct}%"></span></div>
       </div>
     </div>
-    ${note ? `<p class="ep-read-only">${note}</p>` : ""}
+    ${note ? `<div class="ep-read-only"><p>${note}</p>${hasNews ? KEEP_WATCHING_HTML : ""}</div>` : ""}
     <div class="ep-tabs" role="tablist">${tabs}</div>
     <ul class="ep-list">${list}</ul>`;
   const newList = episodesBody.querySelector(".ep-list");
@@ -974,6 +1037,10 @@ episodesBody.addEventListener("click", (e) => {
     renderEpisodesWindow({ scrollToNext: true });
   }
   if (button.dataset.action === "toggle-episode") toggleEpisodeInWindow(button);
+  if (button.dataset.action === "keep-watching") {
+    const row = STORE.shows.get(episodesWindow?.showId);
+    if (row) confirmKeepWatching(row);
+  }
   if (button.dataset.action === "tick-up-to-here") tickUpToHereInWindow(button);
 });
 

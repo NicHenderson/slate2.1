@@ -43,6 +43,7 @@ function openDeleteConfirm(table, row) {
   pendingDelete = { table, row };
   const title = row.title ?? row.name;
   const watched = isAlreadyWatched(table, row);
+  asDeleteConfirm();
 
   confirmModalPanel.classList.toggle("confirm-danger", watched);
   confirmWarningIcon.classList.toggle("hidden", !watched);
@@ -78,6 +79,7 @@ function openViewingDeleteConfirm(movie, viewing, run) {
   const title = movie.title ?? t("Untitled");
   pendingDelete = { run };
   requiredTypedTitle = title;
+  asDeleteConfirm();
   confirmModalPanel.classList.add("confirm-danger");
   confirmWarningIcon.classList.remove("hidden");
   confirmTypedCheck.classList.remove("hidden");
@@ -92,6 +94,31 @@ function openViewingDeleteConfirm(movie, viewing, run) {
   confirmError.classList.add("hidden");
   confirmModal.classList.remove("hidden");
   confirmTypedInput.focus();
+}
+
+// Asked before something that isn't a delete (Keep watching, js/episodes.js):
+// the same window, its button in the theme's color. `run` does it and
+// resolves to the error, or null; `yes` / `busy` / `failed` are the
+// button's label, its label meanwhile and the error shown.
+function openActionConfirm({ heading, html, yes, busy, failed, run }) {
+  pendingDelete = { run, yes, busy, failed };
+  requiredTypedTitle = null;
+  confirmModalPanel.classList.remove("confirm-danger");
+  confirmModalPanel.classList.add("confirm-action");
+  confirmWarningIcon.classList.add("hidden");
+  confirmTypedCheck.classList.add("hidden");
+  confirmHeading.textContent = heading;
+  confirmText.innerHTML = html;
+  confirmYes.textContent = yes;
+  confirmYes.disabled = false;
+  confirmError.classList.add("hidden");
+  confirmModal.classList.remove("hidden");
+}
+
+// Back to a delete's look, after an action's.
+function asDeleteConfirm() {
+  confirmModalPanel.classList.remove("confirm-action");
+  confirmYes.textContent = t("Yes, delete");
 }
 
 function closeConfirmModal() {
@@ -111,8 +138,9 @@ confirmYes.addEventListener("click", async () => {
     return;
   }
 
+  const asked = pendingDelete;
   confirmYes.disabled = true;
-  confirmYes.textContent = t("Deleting…");
+  confirmYes.textContent = asked.busy ?? t("Deleting…");
 
   const error = pendingDelete.run
     ? await pendingDelete.run().then((err) => {
@@ -122,11 +150,11 @@ confirmYes.addEventListener("click", async () => {
     : await deleteRecord(pendingDelete.table, pendingDelete.row);
 
   confirmYes.disabled = false;
-  confirmYes.textContent = t("Yes, delete");
+  confirmYes.textContent = asked.yes ?? t("Yes, delete");
 
   if (error) {
     console.error("Delete error:", error.message);
-    confirmError.textContent = t("Could not delete — please try again.");
+    confirmError.textContent = asked.failed ?? t("Could not delete — please try again.");
     confirmError.classList.remove("hidden");
   }
 });

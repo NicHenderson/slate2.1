@@ -565,9 +565,18 @@ directly.
   season with news, and a season still airing now counts only what's
   out (TMDB's `last_episode_to_air`). Finishing a show now ticks only
   what was out by its finished date (a past date had ticked episodes
-  that came out after it). 2 the list and the notice; 3 "Keep
-  watching" (and Edit without a finished date no longer wiping rating /
-  review); 4 finishing again, with the note; 5 the card sticker
+  that came out after it). Stages 3 and 4 (done together, the owner's
+  call) — done, waiting for the owner's check: "↻ Keep watching" on the
+  note and in the list's header asks first (`openActionConfirm`,
+  js/confirmModal.js: what stays, what goes, a button in the theme's
+  color), then ticks what was out by the finished date, unticks anything
+  after it, and clears only the finished date ("Up next" = the first
+  new one). Edit saved without a finished date leaves rating and review
+  as they are (it used to empty them). Finishing again: a Watching show
+  with a rating or review (only a kept-watching one has them) shows the
+  pencil note with its two arrows in the finish window; the new date
+  replaces the old and the new episodes get ticked. 2 the list and the
+  notice; 3 "Keep watching"; 4 finishing again, with the note; 5 the card sticker
   (background TMDB checks, cached per device); 6 funny-pascal, then
   `main`.
   Stages, each checked by the owner on the branch's preview: 1 mockups
