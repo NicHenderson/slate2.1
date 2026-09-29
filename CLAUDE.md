@@ -668,9 +668,20 @@ directly.
   crowd; free-text surveys are hard without an LLM (a keyword map
   first). Stages: "Because you loved X", context filters, feedback
   buttons, its own scoring, the survey.
+- **Next small project, before the phone one (proposed, waiting for the
+  owner's go-ahead): SEO basics and a privacy page.** Slate is run from
+  Chile; the Supabase project is in AWS us-east-2 (Ohio, USA), so data
+  lives abroad and the policy must say so. Chile's Ley 21.719 takes
+  effect Dec. 1, 2026 (a postponement was being discussed; check), GDPR
+  if Europeans use it. Claude isn't a lawyer: a plain, honest policy,
+  every sentence approved by the owner. SEO: a realistic goal (found by
+  name, nice link previews, internals hidden), not ranking against
+  Letterboxd while invite-only: absolute `og:image` (today relative, so
+  previews likely lack it), a 1200×630 share image, `robots.txt` +
+  noindex for `tests/`, `tools/`, `supabase/`, docs, a `sitemap.xml`;
+  the owner registers Google Search Console.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
-  - a privacy policy page;
   - large-grid performance.
 - The owner can't pay for services right now; keep everything on free
   tiers. On the free Supabase plan, projects pause after about a week with
