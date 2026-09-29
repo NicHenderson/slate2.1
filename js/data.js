@@ -281,7 +281,8 @@ function gridHtml(gridId, rows) {
     visible = [...visible].sort(sortCfg.options[effectiveSort(gridId)].cmp);
   }
   const showRating = cfg.state === "watched";
-  // A show being watched or dropped: where you are in it (js/episodes.js).
+  // A show being watched or dropped: where you are in it; a finished one,
+  // whether a new season came out since (js/episodes.js).
   const extra =
     cfg.state === "watching"
       ? (row) => episodeProgressHtml(row) + startedAgoHtml(row)
@@ -289,7 +290,9 @@ function gridHtml(gridId, rows) {
         ? episodeProgressHtml
         : gridId === "grid-movies-watched"
           ? rewatchBadgeHtml
-          : () => "";
+          : gridId === "grid-shows-watched"
+            ? newSeasonStickerHtml
+            : () => "";
   // Searched: only what matches — no "+ Add" card among the results.
   if (isLibraryFiltered(gridId)) {
     return visible.length ? visible.map((row) => cardHtml(row, showRating, extra(row))).join("") : libraryEmptyHtml(gridId);
@@ -428,6 +431,7 @@ function clearAppData() {
   STORE.collectionItems.clear();
   resetViewings();
   resetEpisodes();
+  stopAiringsChecks();
   resetSettingsState();
   resetProfileState();
   resetLibrarySearch();

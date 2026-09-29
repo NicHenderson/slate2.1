@@ -139,15 +139,17 @@ function showOutline(tmdbId) {
       .sort((a, b) => a.number - b.number);
     const next = details.next_episode_to_air;
     const last = details.last_episode_to_air;
-    return {
+    const outline = {
       seasons,
-      lastOut: last?.season_number >= 1 && last.episode_number >= 1 ? { season: last.season_number, number: last.episode_number } : null,
+      lastOut: last?.season_number >= 1 && last.episode_number >= 1 ? { season: last.season_number, number: last.episode_number, airDate: last.air_date || null } : null,
       // TMDB's own counts, for the show's saved ones (refreshShowCounts).
       totalEpisodes: episodesOut(details),
       totalSeasons: details.number_of_seasons > 0 ? details.number_of_seasons : null,
       ended: details.status === "Ended" || details.status === "Canceled",
       next: next?.season_number >= 1 ? { season: next.season_number, number: next.episode_number, airDate: next.air_date || null } : null,
     };
+    rememberAirings(tmdbId, outline);
+    return outline;
   });
 }
 
@@ -225,8 +227,7 @@ async function finishedSeasons(row) {
 }
 
 // What's new in a finished show, or null: { count, seasons (the numbers
-// with something new), whole (how many of them are new from the start,
-// or 0 when some are new only in part) }.
+// with something new), whole (how many of them are new from the start) }.
 async function newSinceFinished(row) {
   if (!isFinishedShow(row) || !row.tmdb_id) return null;
   const seasons = (await finishedSeasons(row)).filter((s) => s.seen < s.out);
@@ -234,12 +235,13 @@ async function newSinceFinished(row) {
   return {
     count: seasons.reduce((n, s) => n + s.out - s.seen, 0),
     seasons: seasons.map((s) => s.number),
-    whole: seasons.every((s) => s.seen === 0) ? seasons.length : 0,
+    whole: seasons.filter((s) => s.seen === 0).length,
   };
 }
 
 // Its headline: "New season!", "2 new seasons!", or "New episodes!" when
-// some of it is in a season already seen in part.
+// all of it is in a season already seen in part. The card's sticker says
+// the same (newSeasonStickerHtml).
 function newSinceHeadline(news) {
   if (news.whole === 1) return t("New season!");
   if (news.whole > 1) return t("{n} new seasons!", { n: news.whole });
@@ -972,6 +974,123 @@ function afterEpisodesChanged(showId) {
   if (episodesWindowOpen() && episodesWindow?.showId === showId && episodesWindow.season) renderEpisodesWindow();
   refreshUpNext(showId);
   SHOW_GRIDS.forEach((gridId) => renderGrid(gridId, [...STORE.shows.values()]));
+}
+
+/* ---------- "New season!" on the Shows cards ----------
+
+   A finished show's card gets a starburst when something came out after
+   it was finished (the owner's pick of three, mockup 1c). Cards are drawn
+   with no lookup, so what TMDB said about each show (its seasons' first
+   air dates and its last episode out) is kept on this device, and looked
+   up again in the background, one show at a time, once it's a few days
+   old: a show still going gets a new season now and then, one that has
+   ended hardly ever. Each lookup is one call to the tmdb function (the
+   free plan has 500,000 a month). */
+
+const AIRINGS_KEY = "slate_show_airings";
+const AIRINGS_FRESH_MS = 3 * 24 * 60 * 60 * 1000;
+const AIRINGS_FRESH_ENDED_MS = 30 * 24 * 60 * 60 * 1000;
+const AIRINGS_GAP_MS = 1200;
+// A library of thousands gets through them over a few visits.
+const AIRINGS_PER_VISIT = 200;
+
+// TMDB id → { at, ended, premieres: [[season, date]], lastSeason, lastDate }.
+let airings = null;
+let airingsDue = [];
+let airingsTimer = null;
+let airingsLooked = 0;
+let airingsRedraw = null;
+
+function airingsOf(tmdbId) {
+  if (!airings) {
+    try {
+      airings = JSON.parse(localStorage.getItem(AIRINGS_KEY) || "{}") || {};
+    } catch {
+      airings = {}; // storage blocked: looked up again each visit
+    }
+  }
+  return airings[tmdbId] ?? null;
+}
+
+// Kept from every lookup of a show's details, the detail window's too.
+function rememberAirings(tmdbId, outline) {
+  const before = JSON.stringify(airingsOf(tmdbId)?.premieres ?? null) + (airings[tmdbId]?.lastDate ?? "");
+  airings[tmdbId] = {
+    at: Date.now(),
+    ended: outline.ended,
+    premieres: outline.seasons.filter((s) => s.airDate).map((s) => [s.number, s.airDate]),
+    lastSeason: outline.lastOut?.season ?? null,
+    lastDate: outline.lastOut?.airDate ?? null,
+  };
+  try {
+    localStorage.setItem(AIRINGS_KEY, JSON.stringify(airings));
+  } catch {
+    // storage full or blocked: kept for this visit only
+  }
+  const after = JSON.stringify(airings[tmdbId].premieres) + (airings[tmdbId].lastDate ?? "");
+  // Only what changes a sticker redraws the cards, once for a run of them.
+  if (after !== before && !airingsRedraw) {
+    airingsRedraw = setTimeout(() => {
+      airingsRedraw = null;
+      renderGrid("grid-shows-watched", [...STORE.shows.values()]);
+    }, 300);
+  }
+}
+
+// The same news as newSinceFinished, from what's kept: new if the last
+// episode out came after the finished date, and how many seasons began
+// after it.
+function newOnCard(row) {
+  const facts = airingsOf(row.tmdb_id);
+  const finished = row.finished_watching_date;
+  const first = facts?.premieres[0]?.[1];
+  if (!facts?.lastDate || !first || !finished || finished < first) return null;
+  if (facts.lastDate <= finished || !hasAired(facts.lastDate)) return null;
+  const whole = facts.premieres.filter(([n, date]) => date > finished && hasAired(date) && n <= facts.lastSeason).length;
+  return { whole };
+}
+
+// A finished show's card: the sticker, or nothing. Asks for a lookup when
+// what's kept is missing or old.
+function newSeasonStickerHtml(row) {
+  if (!row.tmdb_id || !isFinishedShow(row)) return "";
+  const facts = airingsOf(row.tmdb_id);
+  if (!facts || Date.now() - facts.at > (facts.ended ? AIRINGS_FRESH_ENDED_MS : AIRINGS_FRESH_MS)) lookUpAirings(row.tmdb_id, !facts);
+  const news = newOnCard(row);
+  return news ? `<span class="card-new-season">${newSinceHeadline(news)}</span>` : "";
+}
+
+// Queued, never looked up twice at once; the ones never looked up first.
+function lookUpAirings(tmdbId, first) {
+  if (airingsDue.includes(tmdbId) || airingsLooked >= AIRINGS_PER_VISIT) return;
+  if (first) airingsDue.unshift(tmdbId);
+  else airingsDue.push(tmdbId);
+  if (!airingsTimer) airingsTimer = setTimeout(nextAirings, 0);
+}
+
+async function nextAirings() {
+  const tmdbId = airingsDue.shift();
+  if (tmdbId === undefined || airingsLooked >= AIRINGS_PER_VISIT) {
+    airingsTimer = null;
+    return;
+  }
+  airingsLooked += 1;
+  try {
+    await showOutline(tmdbId); // remembered on the way (rememberAirings)
+  } catch (err) {
+    console.error("New season check error:", err.message);
+  }
+  // Signed out meanwhile: stopAiringsChecks emptied the queue.
+  if (airingsTimer === null) return;
+  airingsTimer = setTimeout(nextAirings, AIRINGS_GAP_MS);
+}
+
+// Signing out stops the lookups (what's kept stays: it's TMDB's, no one's).
+function stopAiringsChecks() {
+  clearTimeout(airingsTimer);
+  airingsTimer = null;
+  airingsDue = [];
+  airingsLooked = 0;
 }
 
 /* ---------- the card ----------

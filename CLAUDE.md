@@ -578,10 +578,18 @@ directly.
   said "Start watching"; the owner asked). Finishing again: a Watching show
   with a rating or review (only a kept-watching one has them) shows the
   pencil note with its two arrows in the finish window; the new date
-  replaces the old and the new episodes get ticked. 2 the list and the
-  notice; 3 "Keep watching"; 4 finishing again, with the note; 5 the card sticker
-  (background TMDB checks, cached per device); 6 funny-pascal, then
-  `main`.
+  replaces the old and the new episodes get ticked. Stage 5 — done,
+  waiting for the owner's check: the starburst on finished shows' cards
+  in Shows (`newSeasonStickerHtml`), drawn from what TMDB said kept in
+  localStorage (`slate_show_airings`: season premieres and the last
+  episode out, per TMDB id), looked up in the background one show every
+  1.2 s, again after 3 days (30 for ended shows), at most 200 a visit;
+  any lookup of a show's details (its window) refreshes it too. Checked
+  in Sept. 2026: Supabase's free plan has 500,000 Edge Function calls a
+  month; TMDB allows about 50 requests a second. The headline is the
+  same on the card and the note: "New season!" / "N new seasons!"
+  (seasons begun after the finished date), else "New episodes!".
+  Left: 6 funny-pascal, then `main`.
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched

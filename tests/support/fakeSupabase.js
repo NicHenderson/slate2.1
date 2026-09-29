@@ -69,6 +69,7 @@ function createBackend() {
   const log = []; // every write, as "INSERT movies 1", for assertions
   const emails = []; // reset emails "sent": { email, redirectTo }
   const blocked = []; // outside requests the app shouldn't have made
+  const tmdbPaths = []; // every path asked of the tmdb function, in order
   const accessRequests = []; // "Request access" forms sent: what Web3Forms got
   const channels = []; // joined realtime channels: { ws, topic, joinRef, userId, bindings }
   // Set by a test to make writes fail: (method, table) → an error message,
@@ -632,6 +633,7 @@ function createBackend() {
     if (url.pathname !== "/functions/v1/tmdb") return reply(404, { error: "no such function" });
     if (!userFromRequest(req)) return reply(401, { error: "Sign in to use TMDB." });
     const { path, query, language } = req.postDataJSON() ?? {};
+    tmdbPaths.push(path);
     let m;
     if ((m = /^search\/(movie|tv)$/.exec(path))) {
       // Like TMDB: found by any of its names, answered in the language asked.
@@ -782,7 +784,7 @@ function createBackend() {
     return JSON.parse(JSON.stringify(db));
   }
 
-  return { install, addUser, seed, recoveryLink, snapshot, hooks, releaseRealtime, heldPushes, db, users, log, emails, blocked, accessRequests };
+  return { install, addUser, seed, recoveryLink, snapshot, hooks, releaseRealtime, heldPushes, db, users, log, emails, blocked, tmdbPaths, accessRequests };
 }
 
 module.exports = { createBackend };

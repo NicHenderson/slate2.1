@@ -368,6 +368,41 @@ test("a finished date cleared by hand takes the rating and review with it, and f
   await expect(page.locator("#start-refinish-note")).toBeHidden();
 });
 
+test("a finished show's card says when a new season came out, looked up once and kept", async ({ page, backend }) => {
+  backend.seed(
+    "shows",
+    [{ tmdb_id: 95396, title: "Severance", total_seasons: 3, total_episodes: 19, started_watching_date: "2022-02-20", finished_watching_date: "2022-05-01", rating: 8 }],
+    backend.user.id
+  );
+  await logIn(page);
+  await page.click('.nav-btn[data-section="shows-watched"]');
+  const card = (title) => page.locator("#grid-shows-watched .card", { hasText: title });
+  await expect(card("Severance").locator(".card-new-season")).toHaveText("New season!");
+  // Dark was finished after everything it has.
+  await expect.poll(() => backend.tmdbPaths.filter((p) => p === "tv/70523").length).toBe(1);
+  await expect(card("Dark").locator(".card-new-season")).toHaveCount(0);
+
+  // Kept on this device: the next visit asks TMDB nothing.
+  const asked = backend.tmdbPaths.length;
+  await page.reload();
+  await expect(page.locator("#app")).toBeVisible();
+  await page.click('.nav-btn[data-section="shows-watched"]');
+  await expect(card("Severance").locator(".card-new-season")).toHaveText("New season!");
+  await page.waitForTimeout(1500);
+  expect(backend.tmdbPaths.length).toBe(asked);
+
+  // Kept watching, it's no longer there; finished again, it has nothing new.
+  await card("Severance").click();
+  await page.locator('#detail-modal .new-season [data-action="keep-watching"]').click();
+  await page.locator("#confirm-yes").click();
+  await expect(page.locator("#detail-modal .up-next-head")).toHaveText("Up next S2 · E1");
+  await page.locator('#detail-modal [data-action="edit"]').click();
+  await page.fill("#start-finish-date", "2026-09-20");
+  await page.click("#start-save");
+  await expect(card("Severance")).toBeVisible();
+  await expect(card("Severance").locator(".card-new-season")).toHaveCount(0);
+});
+
 test("the card says where you are, and the saved episode count catches up with TMDB", async ({ page, backend }) => {
   const dark = watchingDark(backend);
   dark.total_episodes = 20; // saved when it was added; TMDB has 26 now
