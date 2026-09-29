@@ -729,7 +729,10 @@ directly.
   sheet with an index), asking for friendly touches that say "this is
   the legal part"; Claude's A v2 adds a file tab, a stamp, typed
   document details, the article citations as pencil tags, and a signed
-  seal at the end.
+  seal at the end. The owner approved A v2 as is, with one fix of theirs:
+  §1 names the law by its new title (21.719, art. primero n° 1),
+  "Ley N° 19.628 sobre protección de los datos personales (modificada
+  por la Ley N° 21.719)". Next: build `privacy.html` on funny-pascal.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - large-grid performance.
