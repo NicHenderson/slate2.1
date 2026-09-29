@@ -160,8 +160,9 @@ directly.
   tool, the review note redesign, the trailer button that waits, disabled,
   search + filters, where to watch, rewatches of movies (all three
   stages), English + Spanish (the app and TMDB's data), genres and
-  posters escaped as text, and the search's info window in the detail
-  window's design (with its trailer).
+  posters escaped as text, the search's info window in the detail
+  window's design (with its trailer), and episode tracking for shows
+  (all nine stages, below).
 - Search and filters (`js/librarySearch.js`) cover Movies, Shows, Movies To
   Watch and the Shows Queue; the owner chose to leave collections for later.
   Their decisions:
@@ -365,9 +366,9 @@ directly.
   Peach's and Sun's accents were nudged from the mockup so the header tag
   and the profile card's numbers read (contrast ≥ 3), and some pops made
   darker, as they carry white text.
-- **Next: episode tracking for shows being watched** (the owner's idea;
-  all nine stages built, in `claude/funny-pascal-bk99gr`, waiting for
-  the owner's final test before `main`). An older Slate had
+- **Episode tracking for shows being watched** (the owner's idea) —
+  done, in `main` since Sept. 29, 2026 (PR #21, with the two fixes
+  found on the way). An older Slate had
   a "favorite episode" picker so close to a streaming app's episode list
   that the owner had to change it: it looked like it would play the
   episode. Avoid that here: no ▶, no "Watch now"; Slate's paper look.
@@ -525,11 +526,9 @@ directly.
   and 2 still import, their shows with nothing ticked; the published
   app, on version 2, says a version 3 file is from a newer Slate.
   With the owner's first go-ahead (Sept. 29, 2026), all of it was
-  merged into `claude/funny-pascal-bk99gr` (nothing new had landed there
-  or in `main`, so it only moved forward). Now: the owner tests it all
-  again on claude-funny-pascal-bk99gr.myslate.pages.dev; `main` only
-  on their second go-ahead ("súbelo a main"). No migration or redeploy
-  is left: 0009 and the `tmdb` function are already live.
+  merged into `claude/funny-pascal-bk99gr`, tested there by the owner,
+  and merged into `main` on their "súbelo a main" (PR #21, CI green on
+  its exact head).
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
