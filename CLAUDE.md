@@ -366,7 +366,8 @@ directly.
   and the profile card's numbers read (contrast ≥ 3), and some pops made
   darker, as they carry white text.
 - **Next: episode tracking for shows being watched** (the owner's idea;
-  all nine stages built on its branch, each with their go-ahead). An older Slate had
+  all nine stages built, in `claude/funny-pascal-bk99gr`, waiting for
+  the owner's final test before `main`). An older Slate had
   a "favorite episode" picker so close to a streaming app's episode list
   that the owner had to change it: it looked like it would play the
   episode. Avoid that here: no ▶, no "Watch now"; Slate's paper look.
@@ -514,7 +515,7 @@ directly.
   `last_episode_to_air` (`episodesOut`), saved that way when a show is
   added and refreshed, with `total_seasons`, whenever its window opens
   (`refreshShowCounts`: one update, only when they differ).
-  Stage 9 — built, waiting for the owner's check on the preview:
+  Stage 9 — done, checked by the owner:
   `.slate` goes to **version 3**: each show lists its ticked episodes
   (`"episodes": [{ season, episode }]`, in order) and `counts.episodes`.
   Import reads them (only for a show that was started; capped, checked,
@@ -523,8 +524,12 @@ directly.
   sends them to `replace_my_library()` (0009's `episodes`). Versions 1
   and 2 still import, their shows with nothing ticked; the published
   app, on version 2, says a version 3 file is from a newer Slate.
-  After the owner's check: merge into `claude/funny-pascal-bk99gr`, test
-  there, then `main` only on their second go-ahead.
+  With the owner's first go-ahead (Sept. 29, 2026), all of it was
+  merged into `claude/funny-pascal-bk99gr` (nothing new had landed there
+  or in `main`, so it only moved forward). Now: the owner tests it all
+  again on claude-funny-pascal-bk99gr.myslate.pages.dev; `main` only
+  on their second go-ahead ("súbelo a main"). No migration or redeploy
+  is left: 0009 and the `tmdb` function are already live.
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
