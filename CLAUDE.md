@@ -161,8 +161,10 @@ directly.
   search + filters, where to watch, rewatches of movies (all three
   stages), English + Spanish (the app and TMDB's data), genres and
   posters escaped as text, the search's info window in the detail
-  window's design (with its trailer), and episode tracking for shows
-  (all nine stages, below).
+  window's design (with its trailer), episode tracking for shows (all
+  nine stages, below), and a new season after finishing (PR #22, Sept.
+  29, 2026: the note and stamp, Keep watching, finishing again, the
+  card's starburst).
 - Search and filters (`js/librarySearch.js`) cover Movies, Shows, Movies To
   Watch and the Shows Queue; the owner chose to leave collections for later.
   Their decisions:
@@ -529,7 +531,9 @@ directly.
   merged into `claude/funny-pascal-bk99gr`, tested there by the owner,
   and merged into `main` on their "súbelo a main" (PR #21, CI green on
   its exact head).
-  **Next, raised by the owner (not built yet):** a finished show that gets a new season. Today a finished
+  **A finished show that gets a new season — done, in `main` since
+  Sept. 29, 2026 (PR #22, CI green on its exact head), after the owner
+  checked every stage.** What was there before: Today a finished
   show's list shows every episode out as watched (the new season too),
   and the only way back to Watching is Edit → clearing "Finished on",
   which also empties the rating and review. Claude's proposal: an
@@ -594,7 +598,7 @@ directly.
   month; TMDB allows about 50 requests a second. The headline is the
   same on the card and the note: "New season!" / "N new seasons!"
   (seasons begun after the finished date), else "New episodes!".
-  Left: 6 funny-pascal, then `main`.
+  Stage 6: merged into funny-pascal, then `main` on "súbelo a main".
   Stages, each checked by the owner on the branch's preview: 1 mockups
   (1a "Up next" and its states, 1b the episodes window, 1c the card);
   2 the migration; 3 the `tmdb` function; 4 "Up next" with "✓ Watched
@@ -680,6 +684,99 @@ directly.
   previews likely lack it), a 1200×630 share image, `robots.txt` +
   noindex for `tests/`, `tools/`, `supabase/`, docs, a `sitemap.xml`;
   the owner registers Google Search Console.
+  **Privacy page first, on `claude/funny-pascal-bk99gr`** (the owner's
+  call). Stages: 1 the text (Claude's draft, in chat) — the owner answered:
+  the page names who's responsible by their real name, Manuel Pinto Devia,
+  with their artist name Nicholas Henderson (the law asks for it; they
+  agreed); minimum age 14 ("almost" fine: ask what they'd change);
+  contact slateappmail@gmail.com. 2 mockups:
+  https://claude.ai/artifact/6Ut8VxYrCY8TePJ8itztGW (A pinned sheet with
+  an index, B notes on the board, C a ruled letter signed by the owner),
+  waiting for their pick. 3 `privacy.html`, English + Spanish, linked
+  from the landing footer, Request access and Settings → Account.
+  Then the owner brought a (non-professional) Ley 21.719 checklist; what
+  Claude checked and proposed: the policy must also state the legal
+  basis, the rights by name (access, rectification, deletion,
+  opposition, portability, blocking), a 30-calendar-day answer (+30 once,
+  told in time) and the right to complain to the Agencia de Protección
+  de Datos Personales (30 business days); an unticked "I accept the
+  privacy policy and I'm 14 or older" box on Request access and on the
+  first-login password card, existing users asked once at their next
+  login (kept in user metadata, like `password_chosen`: no migration);
+  slateappmail@gmail.com as the formal channel (a @myslate.pages.dev
+  address can't exist); and two internal guides for the owner (answering
+  requests, and a security incident protocol). The owner then wrote
+  their own policy (PDF, v1.0); Claude's v1.1 fixed it (their real name,
+  the contact address, the profile is private, Settings paths, the US
+  transfer, missing processors) and v1.2 checked it against the official
+  text they sent (Ley 21.719 as consolidated by the BCN, Sept. 2026).
+  From the law itself: in force Dec. 1, 2026 (transitory art. 1);
+  art. 14 ter lists what the policy must say (also: who the data is
+  about, where it comes from, recipients, the US transfer and its
+  guarantees, no automated decisions); bases are art. 13 c (the
+  service, and the access request as a pre-contractual step) and 13 d
+  (sign-in logs), not consent, so the box records "I've read it and
+  I'm 14 or older"; art. 11: acknowledge receipt, answer in 30
+  calendar days (+30 once), blocking in 2 business days, keep proof of
+  answers; art. 14 letter d: delete access-request emails once
+  resolved (and, Claude's advice, welcome emails, which carry the
+  temporary password); art. 27-28: no adequacy list yet, so the US
+  transfer rests on Supabase's DPA (standard contractual clauses);
+  art. 14 sexies: report breaches to the Agency and keep a register.
+  The owl recommender will need the policy's "no automated
+  decisions" line revisited (art. 8 bis, 14 ter l). The owner approved
+  v1.2 word for word (use it exactly) and picked mockup A (the pinned
+  sheet with an index), asking for friendly touches that say "this is
+  the legal part"; Claude's A v2 adds a file tab, a stamp, typed
+  document details, the article citations as pencil tags, and a signed
+  seal at the end. The owner approved A v2 as is, with one fix of theirs:
+  §1 names the law by its new title (21.719, art. primero n° 1),
+  "Ley N° 19.628 sobre protección de los datos personales (modificada
+  por la Ley N° 21.719)". Stage 3 — done, waiting for the owner's
+  check: `privacy.html` at the repo root, self-contained (its own
+  styles and script, no Supabase), v1.2 in Spanish and its English
+  translation, shown in the language picked in the app
+  (`slate_language`; no picker of its own, the owner's call); linked from the landing footer, under the login
+  card and Settings → Account ("Privacy policy", "Read it");
+  `tests/privacy.spec.js`. Its text is the owner's: change a word only
+  with their approval, and bump the version and date if it changes.
+  **Before `main`:** the policy says a box is ticked on Request access
+  and at the first login, so that stage ships with it. Stage 4 — done,
+  waiting for the owner's check: the unticked box "I've read the
+  Privacy Policy and I'm 14 or older" (linked, opens in a new tab) on
+  Request access (the Web3Forms email says it was ticked, and the
+  version), on the first-login password card, and on its own card
+  ("Our Privacy Policy", `privacy` mode in js/auth.js) for accounts
+  made before it, once, before the app opens. Kept in user metadata
+  (`privacy_version`, `privacy_accepted_at`; no migration). A new
+  policy version bumps `PRIVACY_VERSION` in js/auth.js and asks everyone
+  again. If Supabase can't be asked, the app opens (never locked out
+  over this). Left for the law: the two internal guides (where they
+  live is the owner's call, still open), the owner's own tasks (delete
+  resolved requests and sent welcome emails, check Supabase's DPA), and
+  all of it in `main` before Dec. 1, 2026. No filing with the Agency is
+  needed (art. 14 ter asks for the policy published on the site; only
+  breaches are reported, art. 14 sexies; the art. 49 compliance model
+  is voluntary).
+- **Background textures, a setting** (the owner's request, Sept. 2026) —
+  built on `claude/episode-tracking-shows-s9gixh` (restarted from
+  `main` after PR #22), then merged into `claude/funny-pascal-bk99gr`
+  on the owner's word (Sept. 30, 2026), with the privacy page.
+  Never use the photo of a cork board they once sent, only patterns
+  drawn by code (they said so). Of the gallery mockup
+  (https://claude.ai/artifact/9qvFwgMLmMBFVQmC1WKcDQ) they picked Felt,
+  Linen, Film grain, Grid, Dot grid, Pegboard, Stripes and None, as a
+  choice in Settings → Appearance ("Background", saved in the account's
+  settings as `background`, no migration). The old three-dot speckle is
+  gone; Dot grid is the default (Claude's pick, closest to it; the
+  landing page and the login screen always show it, in the brand's
+  ink). Line and dot patterns are CSS (css/base.css, `data-background`);
+  felt, linen and grain are drawn on a canvas from a fixed seed
+  (js/backgrounds.js), redrawn when the theme flips dark / light.
+  The owner's addition: "Can't quite see it?" under the hint opens a
+  small animated window (a spring, zooming into the texture) with the
+  texture at twice its size and a pinned card for scale; its chips
+  preview without saving, "Use this one" saves.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - large-grid performance.

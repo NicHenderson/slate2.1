@@ -18,6 +18,7 @@ test("settings are saved to the account and apply when Slate opens again", async
   await page.click('[data-theme-key="ocean"]');
   await page.click("#reduce-motion-toggle");
   await page.click('[data-density-value="compact"]');
+  await page.click('[data-background-key="felt"]');
   await page.click('[data-settings-page="lists"]');
   await page.selectOption("#setting-open-to", "movies-towatch");
   await page.click("#confirm-deletes-toggle");
@@ -25,7 +26,7 @@ test("settings are saved to the account and apply when Slate opens again", async
 
   await expect
     .poll(() => backend.db.user_settings[0]?.settings)
-    .toMatchObject({ theme: "ocean", reduceMotion: true, density: "compact", openTo: "movies-towatch", confirmDeletes: false });
+    .toMatchObject({ theme: "ocean", reduceMotion: true, density: "compact", background: "felt", openTo: "movies-towatch", confirmDeletes: false });
 
   // As on another device: nothing cached here, only the account's settings.
   await forgetThisDevice(page);
@@ -35,6 +36,9 @@ test("settings are saved to the account and apply when Slate opens again", async
   await expect(html).toHaveAttribute("data-theme", "ocean");
   await expect(html).toHaveAttribute("data-reduce-motion", "true");
   await expect(html).toHaveAttribute("data-density", "compact");
+  await expect(html).toHaveAttribute("data-background", "felt");
+  // Felt is drawn on a canvas, then handed to the page's background.
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundImage)).toContain("data:image/png");
   await expect(page.locator("#movies-towatch")).toHaveClass(/\bactive\b/);
 
   // Confirm before deleting: off, so a delete happens right away.

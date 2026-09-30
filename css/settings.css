@@ -249,6 +249,299 @@
   color: var(--ink-muted);
 }
 
+/* ---------- Background swatches ----------
+
+   Each preview is a square of the page's own color wearing its texture
+   (css/base.css keys it by data-texture; js/backgrounds.js paints the
+   noise ones), so the pick is judged as it will look behind the cards. */
+.background-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.background-swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.background-swatch:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+}
+
+.background-swatch.is-active {
+  border-color: transparent;
+  box-shadow: 0 0 0 3px var(--accent-strong);
+}
+
+.background-swatch-preview {
+  position: relative;
+  display: block;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg);
+  background-image: var(--board-texture);
+  background-size: var(--board-texture-size);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.background-swatch .theme-swatch-check {
+  background: var(--accent-strong);
+}
+
+.background-swatch.is-active .theme-swatch-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.background-swatch-label {
+  padding: 0 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.background-swatch.is-active .background-swatch-label {
+  font-weight: 700;
+}
+
+/* ---------- "Can't quite see it?" loupe ----------
+
+   A paper window hung under its button (js/settings.js places and
+   animates it), with the texture at twice its size inside: the layer is
+   the view's size, scaled 2× from its center, so it always fills it. */
+.tile-background {
+  position: relative;
+}
+
+.bg-loupe-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  align-self: flex-start;
+  margin-top: 10px;
+  padding: 5px 12px 5px 9px;
+  border: 1.5px dashed color-mix(in srgb, var(--ink) 35%, transparent);
+  border-radius: 999px;
+  font-family: var(--font-hand);
+  font-size: 16px;
+  line-height: 1.1;
+  color: var(--ink);
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.bg-loupe-open svg {
+  width: 17px;
+  height: 17px;
+  transition: transform 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.bg-loupe-open:hover,
+.bg-loupe-open[aria-expanded="true"] {
+  border-style: solid;
+  border-color: var(--accent-strong);
+  background: color-mix(in srgb, var(--accent-strong) 10%, transparent);
+}
+
+.bg-loupe-open:hover svg,
+.bg-loupe-open[aria-expanded="true"] svg {
+  transform: rotate(-14deg) scale(1.15);
+}
+
+.bg-loupe {
+  position: absolute;
+  z-index: 5;
+  left: 18px;
+  width: min(440px, calc(100% - 36px));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 14px 16px;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 5px 5px 0 var(--accent-strong), 0 18px 40px rgba(0, 0, 0, 0.28);
+  transform-origin: 40px -12px;
+}
+
+.bg-loupe[hidden] {
+  display: none;
+}
+
+/* The little tab pointing back up at the button. */
+.bg-loupe::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 30px;
+  width: 14px;
+  height: 14px;
+  border-top: 1.5px solid var(--ink);
+  border-left: 1.5px solid var(--ink);
+  background: var(--paper);
+  transform: rotate(45deg);
+}
+
+.bg-loupe-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bg-loupe-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.bg-loupe-hint {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-muted);
+}
+
+.bg-loupe-close {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink);
+  transition: background var(--transition), transform var(--transition);
+}
+
+.bg-loupe-close:hover {
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+  transform: rotate(90deg);
+}
+
+.bg-loupe-view {
+  position: relative;
+  height: 210px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+.bg-loupe-texture {
+  position: absolute;
+  inset: 0;
+  background-color: var(--bg);
+  background-image: var(--board-texture);
+  background-size: var(--board-texture-size);
+  transform: scale(2);
+}
+
+/* A card pinned on the board, so the texture is judged next to one. */
+.bg-loupe-card {
+  position: absolute;
+  right: 20px;
+  bottom: -22px;
+  width: 76px;
+  padding: 5px 5px 22px;
+  background: var(--paper);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+  transform: rotate(-4deg);
+}
+
+.bg-loupe-card::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.6) 0 2px, transparent 3px), var(--accent-strong);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
+}
+
+.bg-loupe-card-art {
+  display: block;
+  height: 84px;
+  background: linear-gradient(160deg, var(--accent-strong), var(--accent-deep));
+}
+
+.bg-loupe-card-line {
+  position: absolute;
+  left: 8px;
+  right: 30px;
+  bottom: 11px;
+  height: 5px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--ink) 30%, transparent);
+}
+
+.bg-loupe-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bg-loupe-chip {
+  padding: 4px 10px;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 25%, transparent);
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+  transition: background var(--transition), border-color var(--transition), color var(--transition), transform var(--transition);
+}
+
+.bg-loupe-chip:hover {
+  border-color: var(--accent-strong);
+  transform: translateY(-1px);
+}
+
+.bg-loupe-chip[aria-pressed="true"] {
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
+  color: #fff;
+}
+
+.bg-loupe-use {
+  align-self: flex-end;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-strong);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0 var(--accent-deep);
+  transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+}
+
+.bg-loupe-use:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--accent-deep);
+}
+
+.bg-loupe-use:disabled {
+  opacity: 0.55;
+  box-shadow: none;
+  cursor: default;
+}
+
 /* ---------- Theme swatches ---------- */
 
 /* Each swatch is a miniature Slate screen painted in its own theme's
@@ -994,6 +1287,14 @@
 .data-btn {
   flex-shrink: 0;
   min-width: 150px;
+}
+
+/* A link dressed as the buttons beside it (Account → Privacy policy). */
+.data-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 /* Delete account: set apart in red, so it's never mistaken for the tiles

@@ -16,6 +16,12 @@ test.describe("requesting access", () => {
     await page.fill("#auth-email", "ana@slate.test");
     await page.fill("#auth-note", "Friend of Nico's.");
     await expect(page.locator("#auth-note-count")).toHaveText("17/500");
+    // The Privacy Policy box starts unticked, and nothing goes without it.
+    await expect(page.locator("#auth-consent")).not.toBeChecked();
+    await page.click("#auth-submit");
+    await expect(page.locator("#auth-consent-error")).toHaveText("Tick the box to go on.");
+    expect(backend.accessRequests).toEqual([]);
+    await page.check("#auth-consent");
     await page.click("#auth-submit");
 
     // Not automatic, not instant — and it may land in spam.
@@ -30,6 +36,7 @@ test.describe("requesting access", () => {
       expect.objectContaining({ subject: "Slate access request: Ana", replyto: "ana@slate.test", name: "Ana", email: "ana@slate.test", message: "Friend of Nico's." }),
     ]);
     expect(backend.accessRequests[0]["Requested on"]).toMatch(/\d{4}/);
+    expect(backend.accessRequests[0]["Privacy Policy"]).toContain("I'm 14 or older\" (version 1.2)");
     expect(backend.accessRequests[0]["Next step"]).toContain("Add user");
     expect(backend.accessRequests[0].access_key).toMatch(/^[0-9a-f-]{36}$/);
     expect(backend.users.size).toBe(1); // only the seeded one
@@ -46,6 +53,7 @@ test.describe("requesting access", () => {
 
     await page.fill("#auth-name", "Bot");
     await page.fill("#auth-email", "bot@spam.test");
+    await page.check("#auth-consent");
     await page.locator("#auth-website").evaluate((el) => (el.value = "http://spam.test"));
     await page.click("#auth-submit");
     await expect(page.locator("#auth-message")).toContainText("Request sent!");
@@ -59,6 +67,7 @@ test.describe("requesting access", () => {
     await page.click("#auth-toggle-btn");
     await page.fill("#auth-name", "Ana");
     await page.fill("#auth-email", "ana@slate.test");
+    await page.check("#auth-consent");
     await page.click("#auth-submit");
     await expect(page.locator("#auth-message")).toHaveText("Couldn't send your request. Please try again in a moment.");
     await expect(page.locator("#auth-name")).toHaveValue("Ana");
@@ -173,7 +182,14 @@ test.describe("first login with a temporary password", () => {
     await expect(page.locator("#auth-title")).toHaveText("Choose Your Password");
     await expect(page.locator("#app")).toBeHidden();
 
-    // Not the temporary one again, and both boxes must match.
+    // Not the temporary one again, both boxes must match, and the Privacy
+    // Policy box is ticked here too.
+    await page.fill("#auth-password", "anas-own-password");
+    await page.fill("#auth-confirm", "anas-own-password");
+    await page.click("#auth-submit");
+    await expect(page.locator("#auth-consent-error")).toHaveText("Tick the box to go on.");
+    expect(ana.password).toBe(NEW.password);
+    await page.check("#auth-consent");
     await page.fill("#auth-password", NEW.password);
     await page.fill("#auth-confirm", "something-else-1");
     await page.click("#auth-submit");
@@ -188,7 +204,7 @@ test.describe("first login with a temporary password", () => {
     await expect(page.locator("#app")).toBeVisible();
     await expect(page.locator(".toast").last()).toHaveText("Password saved. Welcome to Slate!");
     expect(ana.password).toBe("anas-own-password");
-    expect(ana.metadata).toEqual({ password_chosen: true });
+    expect(ana.metadata).toEqual({ password_chosen: true, privacy_version: "1.2", privacy_accepted_at: expect.any(String) });
 
     // From now on, straight in with it.
     await page.click("#logout-btn");
@@ -213,9 +229,59 @@ test.describe("first login with a temporary password", () => {
     await logInWithTemporaryPassword(page);
     // Marked on the server meanwhile (as migration 0006 does); this tab's
     // saved session still has the old metadata.
-    ana.metadata = { password_chosen: true };
+    ana.metadata = { password_chosen: true, privacy_version: "1.2" };
     await page.reload();
     await expect(page.locator("#app")).toBeVisible();
     await expect(page.locator("#auth-screen")).toBeHidden();
+  });
+});
+
+// The Privacy Policy came after the first accounts: each is asked to
+// accept it once, at their next login, before the app opens.
+test.describe("an account from before the Privacy Policy", () => {
+  const OLD = { email: "leo@slate.test", password: "leos-own-password" };
+
+  async function logInAsLeo(page) {
+    await page.goto("/#login");
+    await page.fill("#auth-email", OLD.email);
+    await page.fill("#auth-password", OLD.password);
+    await page.click("#auth-submit");
+    await expect(page.locator("#auth-title")).toHaveText("Our Privacy Policy");
+  }
+
+  test("is asked once, with the box, and then goes straight in", async ({ page, backend }) => {
+    const leo = backend.addUser(OLD.email, OLD.password, { privacy: false });
+    await logInAsLeo(page);
+    await expect(page.locator("#app")).toBeHidden();
+    await expect(page.locator("#auth-back")).toBeHidden();
+    await expect(page.locator("#auth-email-field")).toBeHidden();
+    await expect(page.locator("#auth-password-field")).toBeHidden();
+    await expect(page.locator('#auth-consent-field a[href="privacy.html"]')).toBeVisible();
+
+    // A reload doesn't get around it, and neither does an unticked box.
+    await page.reload();
+    await expect(page.locator("#auth-title")).toHaveText("Our Privacy Policy");
+    await page.click("#auth-submit");
+    await expect(page.locator("#auth-consent-error")).toHaveText("Tick the box to go on.");
+    expect(leo.metadata.privacy_version).toBeUndefined();
+
+    await page.check("#auth-consent");
+    await page.click("#auth-submit");
+    await expect(page.locator("#app")).toBeVisible();
+    expect(leo.metadata).toEqual({ password_chosen: true, privacy_version: "1.2", privacy_accepted_at: expect.any(String) });
+
+    await page.click("#logout-btn");
+    await expect(page.locator("#landing-screen")).toBeVisible();
+    await logIn(page, OLD);
+    await expect(page.locator("#auth-screen")).toBeHidden();
+  });
+
+  test("“Log out” there leaves without accepting", async ({ page, backend }) => {
+    const leo = backend.addUser(OLD.email, OLD.password, { privacy: false });
+    await logInAsLeo(page);
+    await page.click("#auth-toggle-btn");
+    await expect(page.locator("#landing-screen")).toBeVisible();
+    await expect(page.locator("#auth-screen")).toBeHidden();
+    expect(leo.metadata).toEqual({ password_chosen: true });
   });
 });
