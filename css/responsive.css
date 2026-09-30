@@ -327,6 +327,17 @@
   }
 }
 
+/* What shows behind the landing page when a touch screen pulls it past
+   its edges or pinches it smaller: the page's own dark (.brand-theme's
+   --bg), not the theme a past account left cached on <html>, which on a
+   light theme was a white frame around it. */
+@media (max-width: 640px), (hover: none) and (pointer: coarse) {
+  html:has(#landing-screen:not(.hidden)),
+  html:has(#landing-screen:not(.hidden)) body {
+    background: #0d0c15;
+  }
+}
+
 /* ---------- The landing page on a phone: stories ----------
    Five screens, one idea each, stepped through like stories (the owner's
    pick of three mockups): bars on top with arrows under them, one screen
@@ -339,6 +350,34 @@
        screens keep clear of. */
     --lp-head: calc(var(--safe-top) + 100px);
     --lp-foot: calc(var(--safe-bottom) + 128px);
+  }
+
+  /* The page's backdrop is pinned to the screen rather than painted on
+     the page. An installed iPhone app with a see-through status bar
+     measures the screen short by the status bar's height, so the page
+     stopped that far above the bottom and left a band of whatever lay
+     behind it; something fixed covers the whole glass anyway. */
+  .landing-screen {
+    isolation: isolate;
+    background: none;
+  }
+
+  .landing-screen::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(90% 55% at 85% 0%, color-mix(in srgb, var(--accent-strong) 22%, transparent), transparent 70%),
+      radial-gradient(80% 50% at 0% 65%, color-mix(in srgb, var(--pop) 9%, transparent), transparent 70%),
+      radial-gradient(circle, rgba(255, 255, 255, 0.14) 0 1.4px, transparent 1.9px) 0 0 / 22px 22px,
+      var(--bg);
+  }
+
+  /* Nor does the page stretch past its ends when pulled: the stories
+     stay put, like an app's screens. */
+  html:has(#landing-screen:not(.hidden)) {
+    overscroll-behavior: none;
   }
 
   .lp-nav,

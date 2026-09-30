@@ -688,7 +688,14 @@ directly.
   top nav and film strip hidden, "Request access" + "Already have an
   account? Log in" fixed under screens 1–3, "A letter from Slate's
   creator ›" under the invite, tighter at ≤740px tall; computer sizes
-  checked pixel for pixel. Native store
+  checked pixel for pixel. The owner's iPhone showed two things Android
+  didn't: a pale band under screens 1–4 (an installed app with a
+  see-through status bar measures the screen short by the bar, so the
+  page ended above the bottom and the cached light theme on <html>
+  showed) and a pale frame when the page was pulled or pinched. Fixed:
+  the stories' backdrop is a fixed layer covering the whole screen, the
+  root doesn't bounce there, and on touch screens <html> is the brand's
+  dark while the landing page shows. Native store
   ports are out for now (Play's $25 and 12-tester closed test, Apple's
   $99 a year and a Mac; one would wrap this same web app). The owner
   tests on an iPhone 15 (an Android too, not at hand). Chromium here can
