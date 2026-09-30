@@ -723,7 +723,20 @@ directly.
   owner's note: the grip and the dimmed page promise ways out, so a tap
   above the sheet closes it, and so does dragging the grip down (the
   sheet's top 40px; a short drag springs back); only the grip drags, so
-  a form that must scroll still can.
+  a form that must scroll still can. The language picker is gone from
+  the sheet (the owner's call).
+  **Then the app inside** (the owner asked for thorough help): Claude's
+  screen-by-screen diagnosis at iPhone size, with screenshots, six bugs
+  that were already there (the Sort menu cut off on the left; Shows
+  Queue's and an open collection's header buttons running off the
+  right; the ☰ floating over content; the detail window's × stuck to
+  the runtime; hover effects stuck after a tap) and a plan in stages:
+  https://claude.ai/artifact/5Rqyw2faFYEXbcFybmVSW4. Proposed order:
+  bottom tab bar (6 sections into ~5 tabs, mockups), compact list
+  headers (stats folded, sort / filter as sheets, a floating +, status
+  tabs by the title), windows as sheets, full-screen search, cards /
+  collections / settings, touch; then "back" and offline. Waiting for
+  the owner's answers.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
