@@ -724,7 +724,10 @@ directly.
   the Search Console property is the owner's, registered with
   slateappmail@gmail.com (URL prefix https://myslate.pages.dev); its
   verification tag is in index.html's head (keep it), in `main` since
-  Sept. 30, 2026 (PR #25). Next, the owner: click Verify, submits sitemap.xml and asks to index the
+  Sept. 30, 2026 (PR #25). The owner verified it the same day; the
+  live URL test says the home page is available to Google and can be
+  indexed. "Request indexing" hit its daily quota (common on a new
+  property; the sitemap does the job anyway). Left to the owner: click Verify, submits sitemap.xml and asks to index the
   home page; then check the link card (opengraph.xyz, WhatsApp) and
   Google's Rich Results Test on the live site.
   The owner asked about one branch per screen (landing / login / app
