@@ -677,7 +677,18 @@ directly.
   polaroids, the hero text and lede), 2 "Sound familiar?" (the three
   notes), 3 "Slate keeps it for you" (three tickets like the sidebar's),
   4 the invite as an "Admit one" ticket, 5 the letter (scrolls) and the
-  footer. Same words as today's page, nothing added. Native store
+  footer. Same words as today's page, nothing added. The owner's calls
+  after: the bars mean stories, so they're stepped sideways, not by
+  scrolling up; first with ‹ › buttons under the bars (and the bars
+  themselves, a 44px tap area each), no swipe (Safari's edge swipe is
+  "back"); tapping the left / right side to step may come after. An
+  iPhone held sideways keeps the computer page. Built, waiting for the
+  owner's check: at ≤640px wide (responsive.css, "The landing page on a
+  phone: stories"; js/landing.js marks `[data-story].is-current`), the
+  top nav and film strip hidden, "Request access" + "Already have an
+  account? Log in" fixed under screens 1–3, "A letter from Slate's
+  creator ›" under the invite, tighter at ≤740px tall; computer sizes
+  checked pixel for pixel. Native store
   ports are out for now (Play's $25 and 12-tester closed test, Apple's
   $99 a year and a Mac; one would wrap this same web app). The owner
   tests on an iPhone 15 (an Android too, not at hand). Chromium here can

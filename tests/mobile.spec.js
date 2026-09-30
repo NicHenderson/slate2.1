@@ -84,6 +84,35 @@ test("on a phone: landing, login, the menu and adding a title all fit and work",
   await expectNoSidewaysScroll(page);
 });
 
+// The landing page on a phone: five screens, stepped like stories. Every
+// one of them, the letter and the way in must be reachable by tapping.
+test("on a phone the landing page is stories, stepped with the arrows and the bars", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator("#lp-top")).toBeVisible();
+  await expect(page.locator("#lp-problem")).toBeHidden();
+  await expect(page.locator("#lp-story-prev")).toBeDisabled();
+
+  await page.locator("#lp-story-next").tap();
+  await expect(page.locator("#lp-problem")).toBeVisible();
+  await expect(page.locator("#lp-top")).toBeHidden();
+
+  await page.locator('.lp-story-bar[data-story-go="5"]').tap();
+  await expect(page.locator(".lp-letter")).toBeVisible();
+  await expect(page.locator(".lp-footer")).toBeVisible();
+  await expect(page.locator("#lp-story-next")).toBeDisabled();
+  await expectNoSidewaysScroll(page);
+
+  await page.locator("#lp-story-prev").tap();
+  await expect(page.locator(".lp-final")).toBeVisible();
+  await page.locator(".lp-story-letter").tap();
+  await expect(page.locator(".lp-letter")).toBeVisible();
+
+  await page.locator('.lp-story-bar[data-story-go="1"]').tap();
+  await page.locator('.lp-story-cta a[href="#request-access"]').tap();
+  await expect(page).toHaveURL(/#request-access$/);
+  await expect(page.locator("#auth-screen")).toBeVisible();
+});
+
 test("installable: the manifest and every icon it names are there", async ({ page, request }) => {
   await page.goto("/");
   const href = await page.locator('link[rel="manifest"]').getAttribute("href");

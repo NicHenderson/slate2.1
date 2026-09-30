@@ -93,7 +93,7 @@
   <link rel="stylesheet" href="css/episodes.css?v=176d4679" />
   <link rel="stylesheet" href="css/whereToWatch.css?v=7528c42f" />
   <link rel="stylesheet" href="css/librarySearch.css?v=cce1cb12" />
-  <link rel="stylesheet" href="css/responsive.css?v=3e84690f" />
+  <link rel="stylesheet" href="css/responsive.css?v=1546fa67" />
   <script src="js/statusBar.js?v=b3d9396d"></script>
 </head>
 <body>
@@ -105,6 +105,23 @@
        stat strip, with CSS-drawn posters (css/landing.css).
        ============================================================ -->
   <div class="landing-screen brand-theme hidden" id="landing-screen">
+    <!-- On a phone the page is five screens, one idea each, stepped
+         through like stories: the bars (js/landing.js builds one per
+         screen) and the arrows under them. Every piece marked data-story
+         belongs to one screen. None of it shows on a computer
+         (responsive.css). -->
+    <nav class="lp-stories" id="lp-stories">
+      <div class="lp-story-bars" id="lp-story-bars"></div>
+      <div class="lp-story-row">
+        <button class="lp-story-step" id="lp-story-prev" type="button" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg></button>
+        <span class="lp-brand">
+          <img class="lp-brand-logo" src="img/logo.webp" alt="" />
+          <span class="lp-brand-name" translate="no">Slate</span>
+        </span>
+        <button class="lp-story-step" id="lp-story-next" type="button" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></button>
+      </div>
+    </nav>
+
     <header class="lp-nav" id="lp-nav">
       <div class="lp-nav-inner">
         <a class="lp-brand" href="#lp-top" data-lp-scroll>
@@ -120,7 +137,7 @@
 
     <main>
       <!-- ---------- hero ---------- -->
-      <section class="lp-hero" id="lp-top">
+      <section class="lp-hero" id="lp-top" data-story="1">
         <div class="lp-hero-copy">
           <p class="lp-sticker">Hi, movie lover ♥</p>
           <h1 class="lp-hero-title" data-i18n>Every movie.<br />Every show.<br /><span class="lp-hl">All saved in one place.</span></h1>
@@ -170,7 +187,7 @@
       </div>
 
       <!-- ---------- the problem ---------- -->
-      <section class="lp-section" id="lp-problem">
+      <section class="lp-section" id="lp-problem" data-story="2">
         <header class="lp-section-head reveal">
           <h2 class="lp-h2">Sound familiar?</h2>
         </header>
@@ -191,7 +208,7 @@
       </section>
 
       <!-- ---------- the answer ---------- -->
-      <section class="lp-section" id="lp-answer">
+      <section class="lp-section" id="lp-answer" data-story="3">
         <header class="lp-section-head reveal">
           <h2 class="lp-h2">Slate keeps it for you</h2>
         </header>
@@ -215,7 +232,7 @@
       </section>
 
       <!-- ---------- final call ---------- -->
-      <section class="lp-final reveal">
+      <section class="lp-final reveal" data-story="4">
         <div class="lp-final-stub" aria-hidden="true"><span>Admit one</span></div>
         <div class="lp-final-body lp-paper">
           <p class="lp-final-eyebrow">Now showing</p>
@@ -228,8 +245,10 @@
         </div>
       </section>
 
+      <button class="lp-story-letter" type="button" data-story="4" data-story-next>A letter from Slate's creator <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></button>
+
       <!-- ---------- love note: last, as the page's goodbye (the owner's call) ---------- -->
-      <section class="lp-section lp-section--note">
+      <section class="lp-section lp-section--note" data-story="5">
         <div class="lp-letter lp-paper reveal">
           <span class="lp-letter-tape lp-letter-tape--l" aria-hidden="true"></span>
           <span class="lp-letter-tape lp-letter-tape--r" aria-hidden="true"></span>
@@ -242,7 +261,7 @@
       </section>
     </main>
 
-    <footer class="lp-footer">
+    <footer class="lp-footer" data-story="5">
       <div class="lp-footer-inner">
         <a class="lp-brand" href="#lp-top" data-lp-scroll>
           <img class="lp-brand-logo" src="img/logo.webp" alt="" />
@@ -263,6 +282,11 @@
         <small>© <span id="lp-year">2026</span> Slate · Made with ♥ for movie nights.</small>
       </div>
     </footer>
+
+    <div class="lp-story-cta">
+      <a class="lp-btn lp-btn--solid lp-btn--lg" href="#request-access">Request access</a>
+      <p><span>Already have an account?</span> <a href="#login">Log in</a></p>
+    </div>
   </div>
 
   <script>
@@ -1300,7 +1324,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-  <script src="js/lang/es.js?v=7b01d796"></script>
+  <script src="js/lang/es.js?v=344865d0"></script>
   <script src="js/i18n.js?v=bffd9615"></script>
   <script src="js/escapeHtml.js?v=28c1feb8"></script>
   <script src="js/viewTransitions.js?v=963b44f2"></script>
@@ -1337,7 +1361,7 @@
   <script src="js/sectionHeaders.js?v=1ff2ab07"></script>
   <script src="js/yourData.js?v=cfae9ebf"></script>
   <script src="js/deleteAccount.js?v=bb8fa209"></script>
-  <script src="js/landing.js?v=69197ae5"></script>
+  <script src="js/landing.js?v=ecfc7b41"></script>
   <script src="js/auth.js?v=6028640d"></script>
 </body>
 </html>

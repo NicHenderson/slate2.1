@@ -120,10 +120,29 @@
   }
 }
 
-/* The mobile nav controls are hidden on desktop. */
+/* The mobile nav controls are hidden on desktop, and so are the landing
+   page's story controls (its phone tier, below). */
 .menu-toggle,
-.sidebar-backdrop {
+.sidebar-backdrop,
+.lp-stories,
+.lp-story-letter,
+.lp-story-cta {
   display: none;
+}
+
+/* A landing screen comes in from the side it was stepped to. */
+@keyframes lp-story-in-next {
+  from {
+    opacity: 0;
+    translate: 32px 0;
+  }
+}
+
+@keyframes lp-story-in-prev {
+  from {
+    opacity: 0;
+    translate: -32px 0;
+  }
 }
 
 /* =============================== LANDING PAGE =============================== */
@@ -305,6 +324,486 @@
 
   .lp-hero-ctas .lp-btn {
     width: 100%;
+  }
+}
+
+/* ---------- The landing page on a phone: stories ----------
+   Five screens, one idea each, stepped through like stories (the owner's
+   pick of three mockups): bars on top with arrows under them, one screen
+   at a time (js/landing.js marks the current one's pieces .is-current),
+   and "Request access" fixed at the bottom of the first three. The words
+   are the page's own; only the layout changes. */
+@media (max-width: 640px) {
+  .landing-screen {
+    /* The story bar on top and the call at the bottom, which the
+       screens keep clear of. */
+    --lp-head: calc(var(--safe-top) + 100px);
+    --lp-foot: calc(var(--safe-bottom) + 128px);
+  }
+
+  .lp-nav,
+  .lp-filmstrip {
+    display: none;
+  }
+
+  .landing-screen [data-story]:not(.is-current) {
+    display: none;
+  }
+
+  .landing-screen [data-story].is-entering {
+    animation: lp-story-in-next 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .landing-screen [data-story].is-entering[data-enter="prev"] {
+    animation-name: lp-story-in-prev;
+  }
+
+  /* ---------- the bars and the arrows ---------- */
+
+  .lp-stories {
+    display: block;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 50;
+    padding: calc(var(--safe-top) + 2px) calc(12px + var(--safe-right)) 4px calc(12px + var(--safe-left));
+    transition: background-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  /* Only the letter scrolls under it. */
+  .lp-stories.is-scrolled {
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 1px 0 var(--border);
+  }
+
+  .lp-story-bars {
+    display: flex;
+    gap: 6px;
+  }
+
+  /* A thin line to see, a finger's height to tap (44px). */
+  .lp-story-bar {
+    position: relative;
+    flex: 1;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .lp-story-bar::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    height: 4px;
+    margin-top: -2px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--text) 24%, transparent);
+    transition: background-color 0.3s ease;
+  }
+
+  .lp-story-bar.is-done::before {
+    background: var(--text);
+  }
+
+  .lp-story-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 50px;
+  }
+
+  .lp-stories .lp-brand-name {
+    display: inline;
+  }
+
+  .lp-story-step {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
+    color: var(--text);
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.12s ease;
+  }
+
+  .lp-story-step svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .lp-story-step:active {
+    transform: scale(0.92);
+  }
+
+  .lp-story-step:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ---------- the call at the bottom (screens 1–3) ---------- */
+
+  .lp-story-cta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    padding: 18px calc(20px + var(--safe-right)) calc(8px + var(--safe-bottom)) calc(20px + var(--safe-left));
+    background: linear-gradient(transparent, var(--bg) 26%);
+  }
+
+  .landing-screen[data-story-at="4"] .lp-story-cta,
+  .landing-screen[data-story-at="5"] .lp-story-cta {
+    display: none;
+  }
+
+  .landing-screen .lp-story-cta .lp-btn {
+    justify-self: auto;
+    width: 100%;
+    transform: none;
+  }
+
+  .lp-story-cta p {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 44px;
+    font-size: 15px;
+  }
+
+  .landing-screen .lp-story-cta p a {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  /* ---------- 1 · the cover ---------- */
+
+  .lp-hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 22px;
+    min-height: 100svh;
+    box-sizing: border-box;
+    padding: var(--lp-head) 0 var(--lp-foot);
+    text-align: left;
+  }
+
+  .lp-hero-board {
+    order: -1;
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+    aspect-ratio: 1 / 0.66;
+  }
+
+  .landing-screen .lp-hb-strip,
+  .landing-screen .lp-hb-note,
+  .landing-screen .lp-hb-stub,
+  .lp-hero .lp-hero-ctas {
+    display: none;
+  }
+
+  .lp-hb-a {
+    left: 3%;
+    top: 10%;
+    width: 31%;
+    transform: rotate(-8deg);
+  }
+
+  .lp-hb-b {
+    left: 33%;
+    top: 4%;
+    width: 35%;
+    transform: rotate(2deg);
+  }
+
+  .lp-hb-c {
+    right: 3%;
+    top: 0;
+    width: 30%;
+    transform: rotate(8deg);
+  }
+
+  /* The cards are narrow here: a shorter title, the hearts without
+     their number, no "added" line. */
+  .landing-screen .lp-hero-board .card-title {
+    font-size: 15px;
+  }
+
+  .landing-screen .lp-hero-board .hearts-value,
+  .landing-screen .lp-hero-board .card-meta {
+    display: none;
+  }
+
+  .landing-screen .lp-hero-board .card-rating .hearts {
+    --heart: 8px;
+  }
+
+  .lp-hero-title {
+    margin: 14px 0 10px;
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  .lp-hero-lede {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  /* ---------- 2 · sound familiar? and 3 · Slate keeps it ---------- */
+
+  #lp-problem.is-current,
+  #lp-answer.is-current {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100svh;
+    box-sizing: border-box;
+    padding: var(--lp-head) 0 var(--lp-foot);
+  }
+
+  .lp-section-head {
+    margin-bottom: 24px;
+    text-align: left;
+  }
+
+  .lp-h2 {
+    margin-top: 0;
+    font-size: 32px;
+  }
+
+  .lp-problems,
+  .lp-things {
+    gap: 22px;
+    max-width: none;
+  }
+
+  .lp-problem {
+    padding: 20px 20px 16px;
+  }
+
+  .lp-problem:nth-child(2) {
+    background: color-mix(in srgb, var(--accent) 36%, var(--paper));
+  }
+
+  .lp-problem:nth-child(3) {
+    background: color-mix(in srgb, var(--pop) 20%, var(--paper));
+  }
+
+  .lp-problem p {
+    font-size: 24px;
+  }
+
+  .lp-problem span {
+    margin-top: 8px;
+    font-size: 14px;
+  }
+
+  /* Each thing a ticket like the app's menu: its icon on a stub, a
+     perforation, a notch above and below it. */
+  .lp-thing {
+    padding: 16px 16px 16px 82px;
+  }
+
+  .lp-thing::before,
+  .lp-thing::after {
+    content: "";
+    position: absolute;
+    left: 56px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--bg);
+    box-shadow: none;
+  }
+
+  .lp-thing::before {
+    top: -8px;
+  }
+
+  .lp-thing::after {
+    bottom: -8px;
+  }
+
+  .lp-thing-icon {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 64px;
+    height: auto;
+    border-right: 2px dashed rgba(13, 12, 21, 0.35);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .lp-thing h3 {
+    margin: 0 0 4px;
+    font-size: 18px;
+  }
+
+  .lp-thing p {
+    font-size: 14px;
+  }
+
+  /* ---------- 4 · the invite, and the way to the letter ---------- */
+
+  .lp-final {
+    justify-content: center;
+    min-height: 100svh;
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: var(--lp-head) 0 calc(var(--safe-bottom) + 84px);
+  }
+
+  .lp-final-stub,
+  .lp-final-body {
+    flex: 0 0 auto;
+  }
+
+  .lp-final-body {
+    padding: 26px 22px 26px;
+  }
+
+  .lp-final-title {
+    font-size: 32px;
+  }
+
+  .lp-final-copy {
+    font-size: 15px;
+  }
+
+  .lp-final .lp-hero-ctas {
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 22px;
+  }
+
+  .lp-final .lp-btn {
+    width: 100%;
+  }
+
+  .lp-story-letter {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    position: fixed;
+    right: 0;
+    bottom: calc(var(--safe-bottom) + 20px);
+    left: 0;
+    width: fit-content;
+    min-height: 44px;
+    margin: 0 auto;
+    padding: 0 12px;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    font-family: var(--font-hand);
+    font-size: 19px;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .lp-story-letter svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* ---------- 5 · the letter, and the footer ---------- */
+
+  .lp-section--note {
+    padding-top: calc(var(--lp-head) + 28px);
+  }
+
+  .lp-footer {
+    margin-top: 64px;
+  }
+}
+
+/* A shorter phone (an iPhone SE is 667px tall): the same screens, tighter,
+   so each still fits between the bars and the call at the bottom. */
+@media (max-width: 640px) and (max-height: 740px) {
+  .lp-hero {
+    gap: 14px;
+  }
+
+  .lp-hero-board {
+    max-width: 250px;
+    aspect-ratio: 1 / 0.72;
+  }
+
+  .lp-hero-title {
+    margin: 10px 0 8px;
+    font-size: 26px;
+  }
+
+  .lp-hero-lede {
+    font-size: 14px;
+  }
+
+  .lp-section-head {
+    margin-bottom: 16px;
+  }
+
+  .lp-h2 {
+    font-size: 26px;
+  }
+
+  .lp-problems,
+  .lp-things {
+    gap: 16px;
+  }
+
+  .lp-problem {
+    padding: 14px 16px 12px;
+  }
+
+  .lp-problem p {
+    font-size: 21px;
+  }
+
+  .lp-problem span {
+    font-size: 13px;
+  }
+
+  .lp-thing {
+    padding: 11px 14px 11px 78px;
+  }
+
+  .lp-thing h3 {
+    font-size: 16px;
+  }
+
+  .lp-thing p {
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .lp-final-body {
+    padding: 20px 20px 22px;
+  }
+
+  .lp-final-title {
+    font-size: 28px;
   }
 }
 
