@@ -13,13 +13,110 @@
      Mobile         : max-width 480px  (1–2 col grids, full-width modals)
    ===================================================================== */
 
+/* ---------- The phone's edges ----------
+   With viewport-fit=cover (index.html) the page runs under the notch or
+   Dynamic Island, the status bar and the home bar, as an installed app
+   does. env() says how much of each edge they cover: 0 on a computer, so
+   nothing here moves anything there. Backgrounds still reach the edges;
+   text, buttons and windows keep clear of them. --screen-h is the height
+   left between the top and the bottom ones, what windows fit in. */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --screen-h: calc(100vh - var(--safe-top) - var(--safe-bottom));
+}
+
 /* Dynamic viewport height avoids the mobile URL-bar height jump. */
 @supports (height: 100dvh) {
+  :root {
+    --screen-h: calc(100dvh - var(--safe-top) - var(--safe-bottom));
+  }
   .app {
     height: 100dvh;
   }
   .auth-screen {
     min-height: 100dvh;
+  }
+}
+
+/* Windows are centered in what's left between the edges. */
+.modal-backdrop {
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+}
+
+.sidebar {
+  padding: calc(24px + var(--safe-top)) 18px calc(24px + var(--safe-bottom)) calc(18px + var(--safe-left));
+}
+
+.content {
+  padding: calc(36px + var(--safe-top)) calc(40px + var(--safe-right)) calc(36px + var(--safe-bottom)) 40px;
+}
+
+.toast {
+  bottom: calc(24px + var(--safe-bottom));
+}
+
+/* In the app, what scrolls up passes behind a strip of the theme's
+   background under the status bar, as in a phone's own apps, not behind
+   the clock. No height (so nothing) where no status bar is over the page. */
+.app::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 65;
+  height: var(--safe-top);
+  background: var(--bg);
+  pointer-events: none;
+}
+
+/* The login card and the landing page: their backgrounds run to the
+   edges, their content doesn't. */
+.auth-hero {
+  padding: calc(60px + var(--safe-top)) 64px calc(60px + var(--safe-bottom)) calc(64px + var(--safe-left));
+}
+
+.auth-panel {
+  padding: calc(40px + var(--safe-top)) calc(40px + var(--safe-right)) calc(40px + var(--safe-bottom)) 40px;
+}
+
+.auth-back {
+  top: calc(26px + var(--safe-top));
+  left: calc(30px + var(--safe-left));
+}
+
+.landing-screen {
+  padding-right: var(--safe-right);
+  padding-left: var(--safe-left);
+}
+
+.lp-nav {
+  padding-top: var(--safe-top);
+}
+
+.lp-footer {
+  padding-bottom: calc(46px + var(--safe-bottom));
+}
+
+/* No zooming in on a field when it's tapped: iPhones do it to any field
+   whose text is under 16px. Every text field, select and text box on a
+   touch screen gets at least that (tests/mobile.spec.js checks them). */
+@media (hover: none) and (pointer: coarse) {
+  .field-input,
+  .modal-search input,
+  .lib-search-input,
+  .add-filter,
+  .confirm-typed-input,
+  .settings-select,
+  .profile-input,
+  .up-next-select,
+  .lang-picker select,
+  #modal-input,
+  #favorite-input {
+    font-size: 16px;
   }
 }
 
@@ -220,7 +317,7 @@
 
   .auth-hero {
     min-height: 0;
-    padding: 44px 28px 32px;
+    padding: calc(44px + var(--safe-top)) calc(28px + var(--safe-right)) 32px calc(28px + var(--safe-left));
   }
 
   .auth-hero-title {
@@ -229,9 +326,9 @@
 
   /* The stacked hero starts with the logo top-left; keep clear of it. */
   .auth-back {
-    top: 18px;
+    top: calc(18px + var(--safe-top));
     left: auto;
-    right: 20px;
+    right: calc(20px + var(--safe-right));
   }
 
   .auth-hero-copy {
@@ -247,13 +344,13 @@
 
   .auth-panel {
     min-height: 0;
-    padding: 36px 28px 48px;
+    padding: 36px calc(28px + var(--safe-right)) calc(48px + var(--safe-bottom)) calc(28px + var(--safe-left));
   }
 }
 
 @media (max-width: 480px) {
   .auth-hero {
-    padding: 36px 22px 26px;
+    padding: calc(36px + var(--safe-top)) calc(22px + var(--safe-right)) 26px calc(22px + var(--safe-left));
   }
 
 
@@ -276,8 +373,8 @@
   .menu-toggle {
     display: flex;
     position: fixed;
-    top: 12px;
-    left: 12px;
+    top: calc(12px + var(--safe-top));
+    left: calc(12px + var(--safe-left));
     z-index: 70;
     flex-direction: column;
     justify-content: center;
@@ -338,7 +435,7 @@
 
   /* Content spans full width; top padding clears the floating toggle. */
   .content {
-    padding: 64px 20px 28px;
+    padding: calc(64px + var(--safe-top)) calc(20px + var(--safe-right)) calc(28px + var(--safe-bottom)) calc(20px + var(--safe-left));
   }
 
   .section-header {
@@ -365,7 +462,7 @@
 
   /* ---------- Forms & touch targets ---------- */
 
-  /* 16px prevents iOS Safari from zooming in on focus. */
+  /* Roomier fields to tap (their 16px, against iOS's zoom, is above). */
   .field-input,
   .modal-search input {
     font-size: 16px;
@@ -405,8 +502,13 @@
 
 /* =============================== MOBILE (≤480px) =============================== */
 @media (max-width: 480px) {
+  /* modal.css lowers it to 16px here; the home bar still comes first. */
+  .toast {
+    bottom: calc(16px + var(--safe-bottom));
+  }
+
   .content {
-    padding: 60px 14px 24px;
+    padding: calc(60px + var(--safe-top)) calc(14px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(14px + var(--safe-left));
   }
 
   .section-header {
@@ -494,7 +596,7 @@
   /* ---------- Modals: near full-width with small margins ---------- */
   .modal {
     width: calc(100vw - 20px);
-    max-height: calc(100vh - 24px);
+    max-height: calc(var(--screen-h) - 24px);
     padding: 16px;
   }
 

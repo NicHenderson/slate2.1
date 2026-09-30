@@ -2,7 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- viewport-fit=cover: on a phone the page runs edge to edge, under
+       the notch and the home bar, and css/responsive.css keeps what
+       matters clear of them (--safe-*). -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <!-- What search engines and link previews read: in Spanish, Slate's main
        language, for everyone (translate="no": js/i18n.js leaves them as
        they are, whatever language the page shows in). The image and
@@ -36,6 +39,17 @@
     { "@context": "https://schema.org", "@type": "WebSite", "name": "Slate", "alternateName": "myslate", "url": "https://myslate.pages.dev/", "inLanguage": ["es", "en"] }
   </script>
   <link rel="icon" type="image/png" sizes="96x96" href="img/favicon.png" />
+  <!-- Installable: "Add to Home Screen" gives Slate its own icon, and it
+       opens full screen, without the browser's bars. The icons are drawn
+       from img/Slate-logo.png on the brand's dark color. The status bar's
+       two tags are kept in step with the screen by js/statusBar.js. -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Slate" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0d0c15" />
   <script>
     // Applied before any CSS paints, from whatever theme was cached on the
     // last login — otherwise the page would flash the "midnight" default
@@ -67,19 +81,20 @@
   <link rel="stylesheet" href="css/sidebar.css?v=b0c4cd07" />
   <link rel="stylesheet" href="css/content.css?v=42b1b03a" />
   <link rel="stylesheet" href="css/cards.css?v=13cc816f" />
-  <link rel="stylesheet" href="css/modal.css?v=3982f90f" />
+  <link rel="stylesheet" href="css/modal.css?v=a71c7079" />
   <link rel="stylesheet" href="css/auth.css?v=a0cbf8ee" />
   <link rel="stylesheet" href="css/landing.css?v=1211144b" />
   <link rel="stylesheet" href="css/transitions.css?v=bf37ef65" />
   <link rel="stylesheet" href="css/settings.css?v=91ed6a31" />
-  <link rel="stylesheet" href="css/yourData.css?v=6c896678" />
-  <link rel="stylesheet" href="css/searchModal.css?v=e99bf1ca" />
+  <link rel="stylesheet" href="css/yourData.css?v=14cc77e9" />
+  <link rel="stylesheet" href="css/searchModal.css?v=3fbac303" />
   <link rel="stylesheet" href="css/hearts.css?v=a68715f0" />
   <link rel="stylesheet" href="css/viewings.css?v=0cd9462b" />
-  <link rel="stylesheet" href="css/episodes.css?v=b28051e2" />
+  <link rel="stylesheet" href="css/episodes.css?v=176d4679" />
   <link rel="stylesheet" href="css/whereToWatch.css?v=7528c42f" />
   <link rel="stylesheet" href="css/librarySearch.css?v=cce1cb12" />
-  <link rel="stylesheet" href="css/responsive.css?v=dd07ab14" />
+  <link rel="stylesheet" href="css/responsive.css?v=3e84690f" />
+  <script src="js/statusBar.js?v=b3d9396d"></script>
 </head>
 <body>
   <!-- ============================================================
@@ -1288,7 +1303,7 @@
   <script src="js/lang/es.js?v=7b01d796"></script>
   <script src="js/i18n.js?v=bffd9615"></script>
   <script src="js/escapeHtml.js?v=28c1feb8"></script>
-  <script src="js/viewTransitions.js?v=d587d807"></script>
+  <script src="js/viewTransitions.js?v=963b44f2"></script>
   <script src="js/config.js?v=7bbe3fe4"></script>
   <script src="js/supabaseClient.js?v=da013ab8"></script>
   <script src="js/navigation.js?v=39fe0a72"></script>
@@ -1312,7 +1327,7 @@
   <script src="js/viewings.js?v=a3e4287a"></script>
   <script src="js/episodes.js?v=ffe15719"></script>
   <script src="js/backgrounds.js?v=16d308bc"></script>
-  <script src="js/settings.js?v=5362ffcc"></script>
+  <script src="js/settings.js?v=29ff2f23"></script>
   <script src="js/whereToWatch.js?v=60bb1455"></script>
   <script src="js/profile.js?v=4f320145"></script>
   <script src="js/librarySearch.js?v=4c06d6e6"></script>

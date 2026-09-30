@@ -105,6 +105,7 @@ const confirmDeletesToggle = document.getElementById("confirm-deletes-toggle");
 
 function applyTheme(key) {
   document.documentElement.setAttribute("data-theme", key);
+  syncStatusBar();
 }
 
 function applyReduceMotion(on) {

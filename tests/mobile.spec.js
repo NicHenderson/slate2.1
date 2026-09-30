@@ -20,6 +20,19 @@ async function expectNoSidewaysScroll(page) {
   expect(wide, "scrolls sideways").toEqual([]);
 }
 
+// An iPhone zooms in on any field whose text is under 16px as it's tapped,
+// and doesn't zoom back out. (The login form's hidden bot trap is never
+// tapped by a person.)
+async function expectNoZoomingFields(page) {
+  const small = await page.evaluate(() =>
+    [...document.querySelectorAll("input, select, textarea")]
+      .filter((el) => !["checkbox", "radio", "hidden", "file", "range"].includes(el.type) && el.id !== "auth-website")
+      .filter((el) => parseFloat(getComputedStyle(el).fontSize) < 16)
+      .map((el) => `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ""}${el.classList.length ? `.${[...el.classList].join(".")}` : ""} at ${getComputedStyle(el).fontSize}`)
+  );
+  expect(small, "fields an iPhone would zoom into").toEqual([]);
+}
+
 async function expectOnScreen(locator) {
   const box = await locator.boundingBox();
   expect(box, "on screen").not.toBeNull();
@@ -34,6 +47,8 @@ test("on a phone: landing, login, the menu and adding a title all fit and work",
 
   await logIn(page);
   await expectNoSidewaysScroll(page);
+  // Every field in the page, the app's and the login card's alike.
+  await expectNoZoomingFields(page);
 
   // The sidebar is a drawer behind the menu button.
   const menu = page.locator("#menu-toggle");
@@ -67,4 +82,13 @@ test("on a phone: landing, login, the menu and adding a title all fit and work",
   await page.locator('.nav-btn[data-section="settings"]').tap();
   await expect(page.locator("#settings")).toHaveClass(/\bactive\b/);
   await expectNoSidewaysScroll(page);
+});
+
+test("installable: the manifest and every icon it names are there", async ({ page, request }) => {
+  await page.goto("/");
+  const href = await page.locator('link[rel="manifest"]').getAttribute("href");
+  const manifest = await (await request.get(`/${href}`)).json();
+  expect(manifest).toMatchObject({ name: "Slate", start_url: "/", display: "standalone" });
+  const icons = [...manifest.icons.map((icon) => icon.src), await page.locator('link[rel="apple-touch-icon"]').getAttribute("href")];
+  for (const src of icons) expect((await request.get(`/${src}`)).status(), src).toBe(200);
 });

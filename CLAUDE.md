@@ -655,24 +655,70 @@ directly.
   - later, not now: an automatic, read-only drop date for shows (needs a
     migration). Not wanted: dropping a show never started (delete it).
     Two viewings on the same day stay allowed.
-- **Then: Slate that feels like a phone app** (the owner's request),
-  on its own branch, `claude/mobile-app`, which goes straight to `main`
-  when done; `claude/funny-pascal-bk99gr` stays for small fixes meanwhile.
-  Phone-only changes; the computer layout stays as it is. Claude reviewed
-  every screen at phone size and proposed stages (installable app, bottom
-  tab bar and compact headers, windows as bottom sheets, full-screen
-  search and touch polish); none is built until the owner says so.
-  Talked over in Sept. 2026: the owner wants it polished until it feels
-  like a real phone app, and it's the next project (native Android / iOS
-  ports are out for now: Play's $25 and 12-tester closed test, Apple's
-  $99 a year and a Mac; a store port would wrap this same web app later).
-  Add to the stages: gestures, loading without a connection, performance,
-  and, early, **back navigation through history** (`pushState` for
-  sections and windows): an installed iOS web app does have the edge
-  swipe back (since iOS 12.2), but Slate pushes no history, so today it
-  does nothing (and leaves Slate in Safari; Android's back button too).
-  iOS's own back animation may clash with Slate's: tune on a real phone.
-  The owner tests on an iPhone 15, and has an Android for tests.
+- **Now: Slate that feels like a phone app** (the owner's request),
+  started Sept. 30, 2026 in a new session (the earlier one's artifacts
+  and the private privacy guides are in another Claude account). Branch
+  `claude/mobile-app`, made from `main` that day (preview:
+  claude-mobile-app.myslate.pages.dev); it goes to `main` **only when
+  the owner says so**, not after each stage. `claude/funny-pascal-bk99gr`
+  stays for small fixes meanwhile. Phone-only changes: the computer
+  layout stays as it is (checked by comparing screenshots). Native store
+  ports are out for now (Play's $25 and 12-tester closed test, Apple's
+  $99 a year and a Mac; one would wrap this same web app). The owner
+  tests on an iPhone 15 (an Android too, not at hand). Chromium here can
+  fake an iPhone's notch and home bar (CDP
+  `Emulation.setSafeAreaInsetsOverride`, e.g. top 59 / bottom 34) for
+  screenshots; anything Safari-only is checked on the owner's iPhone.
+  The stages, from the basics up (the owner asked for them in that
+  order), each only with their go-ahead, mockups first for 3–5:
+  A. The foundations (Slate looks the same, behaves like an app):
+  1. **Opens like an app** — done, waiting for the owner's check:
+     `manifest.webmanifest` + icons (`img/icon-192/512.png`,
+     `icon-maskable-512.png`, `apple-touch-icon.png`, the master logo on
+     the brand's #0d0c15), `viewport-fit=cover`; css/responsive.css's
+     `--safe-top/right/bottom/left` (env()) keep content, the ☰ button,
+     toasts, windows, the login card and the landing page clear of the
+     notch and home bar, `--screen-h` is the height windows fit in, and
+     a strip of the theme's background sits under the status bar in the
+     app. Every field is ≥16px on touch screens (iOS zooms otherwise;
+     tests/mobile.spec.js checks it). js/statusBar.js: `theme-color` is
+     the screen's background; the iOS status bar is `black-translucent`
+     (white text over the page) on dark backgrounds and `default` on the
+     light themes, as iOS can't draw dark text over the page. Unverified:
+     whether iOS reads that change while the app is open (it may need
+     reopening after a theme change); the owner checks with a light
+     theme. privacy.html keeps clear of the edges too.
+  2. **Back works** (`pushState` for sections and windows): the edge
+     swipe of an installed iOS app (since iOS 12.2), Android's back
+     button. The owner left it to Claude: back works on the computer
+     too (the browser's button), the one computer change. Keep the auth
+     card's `#login` / `#request-access` / `#forgot` routes and
+     Supabase's recovery link working. iOS's own back animation may
+     clash with Slate's: tune on the iPhone.
+  B. What you see (mockups first):
+  3. **Tab bar at the bottom** instead of the ☰ drawer. Slate has 6
+     sections and such a bar holds about 5: the mockups decide. Mind
+     landscape: an iPhone sideways (852px) gets the computer layout.
+  4. **Windows as sheets** that slide up and swipe down to close.
+  5. **Search and forms with the keyboard open**, search full screen.
+  C. The finishing:
+  6. **Touch**: 44px targets, a response on tap, swiping between
+     subtabs.
+  7. **Offline and speed**: opening with no signal showing what was
+     last loaded, read-only (a service worker: take care that nobody is
+     left stuck on an old version), smooth with 1,000+ cards. It keeps
+     more on the device, so the privacy policy changes first: v1.3, a
+     new date, the owner's approval word for word, `PRIVACY_VERSION`
+     bumped. The policy says Slate uses no analytics, trackers or
+     cookies: keep it that way.
+- **The owner's own pending tasks** (from the handoff): before Dec. 1,
+  2026 delete resolved access requests and sent welcome emails, check
+  Supabase's DPA, and turn on two-step verification in Gmail, Supabase,
+  GitHub and Cloudflare; check that Search Console reads the sitemap as
+  "Success" and Slate shows up when searching "myslate". Unanswered:
+  whether to drop "confetti" from "Reduce animations"' text. Later ideas:
+  a domain of its own (also IMDb / Letterboxd / Trakt import and the owl,
+  below).
 - **The test scenario** the owner follows to hunt bugs (PC first, then
   the phone): https://claude.ai/artifact/WV8WgTtnTG5LsviRT4amDm. It runs
   with a throwaway account (`+slate1` / `+slate2` Gmail aliases), never a

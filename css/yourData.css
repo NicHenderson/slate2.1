@@ -16,7 +16,7 @@
 .import-panel {
   position: relative;
   width: min(560px, calc(100vw - 32px));
-  max-height: calc(100vh - 48px);
+  max-height: calc(var(--screen-h) - 48px);
   overflow-y: auto;
   background: var(--paper);
   color: var(--ink);
