@@ -229,6 +229,14 @@ directly.
      owner: the watched date for IMDb (it only has the date rated), films
      Letterboxd has as watched but not in the diary, titles already in
      Slate, and where shows go.
+- **Spanish is Slate's main language** (the owner's decision, Sept. 30,
+  2026: Slate is for the Spanish-speaking community). English stays
+  available. The repo keeps its convention (code, comments and source
+  strings in English; Spanish is their translation in `js/lang/es.js`);
+  what changes is what people see first. Done: the share image. Proposed,
+  waiting for the owner: Spanish as the default when nothing was picked
+  on the device (today the browser's language, else English), and the
+  search / share title and description in Spanish.
 - Translation is done, and Slate is published (below). **Slate launches in
   English and Spanish only** (the owner's decision); German and Italian are out for
   now, and adding a language later only takes its dictionary.
@@ -690,9 +698,9 @@ directly.
   image (mockups: https://claude.ai/artifact/QT5HUTEm1GHPfqTvwYaCr7, A
   the board with pinned posters, B a taped note with an "Invite-only"
   stamp, C a cinema ticket; English / Spanish). The owner picked A;
-  done as `img/share.jpg` (1200×630, 82 KB, in English: they didn't
-  say, and English is the site's default and today's title; Spanish
-  if they ask), rendered from the mockup with Playwright;
+  done as `img/share.jpg` (1200×630, 84 KB, in Spanish, after the
+  owner's decision below), rendered from the mockup with Playwright
+  (fonts from Google Fonts through the proxy);
   2 the code (absolute og:image, og:url, twitter card, canonical,
   WebSite JSON-LD for the site name, privacy.html's tags, robots.txt,
   sitemap.xml, X-Robots-Tag noindex on tests/, tools/, supabase/,
