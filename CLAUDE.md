@@ -689,8 +689,10 @@ directly.
   privacy page). Claude's plan, in three stages: 1 the 1200×630 share
   image (mockups: https://claude.ai/artifact/QT5HUTEm1GHPfqTvwYaCr7, A
   the board with pinned posters, B a taped note with an "Invite-only"
-  stamp, C a cinema ticket; English / Spanish; waiting for the owner's
-  pick, and for which language the search title and description use);
+  stamp, C a cinema ticket; English / Spanish). The owner picked A;
+  done as `img/share.jpg` (1200×630, 82 KB, in English: they didn't
+  say, and English is the site's default and today's title; Spanish
+  if they ask), rendered from the mockup with Playwright;
   2 the code (absolute og:image, og:url, twitter card, canonical,
   WebSite JSON-LD for the site name, privacy.html's tags, robots.txt,
   sitemap.xml, X-Robots-Tag noindex on tests/, tools/, supabase/,
