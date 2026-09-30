@@ -744,12 +744,25 @@ directly.
   and at the first login ("I've read the Privacy Policy and I'm 14 or
   older", existing users asked once, kept in user metadata like
   `password_chosen`), so that stage ships with it.
-- **Background textures, a setting** (the owner's request, Sept. 2026):
-  of the gallery mockup (https://claude.ai/artifact/9qvFwgMLmMBFVQmC1WKcDQ)
-  they picked Felt, Linen, Film grain, Grid, Dot grid, Pegboard, Stripes
-  and None, as a choice in Settings → Appearance. Built on
-  `claude/episode-tracking-shows-s9gixh` (restarted from `main`), whose
-  CLAUDE.md has the details; never use the cork photo they once sent.
+- **Background textures, a setting** (the owner's request, Sept. 2026) —
+  built on `claude/episode-tracking-shows-s9gixh` (restarted from
+  `main` after PR #22), then merged into `claude/funny-pascal-bk99gr`
+  on the owner's word (Sept. 30, 2026), with the privacy page.
+  Never use the photo of a cork board they once sent, only patterns
+  drawn by code (they said so). Of the gallery mockup
+  (https://claude.ai/artifact/9qvFwgMLmMBFVQmC1WKcDQ) they picked Felt,
+  Linen, Film grain, Grid, Dot grid, Pegboard, Stripes and None, as a
+  choice in Settings → Appearance ("Background", saved in the account's
+  settings as `background`, no migration). The old three-dot speckle is
+  gone; Dot grid is the default (Claude's pick, closest to it; the
+  landing page and the login screen always show it, in the brand's
+  ink). Line and dot patterns are CSS (css/base.css, `data-background`);
+  felt, linen and grain are drawn on a canvas from a fixed seed
+  (js/backgrounds.js), redrawn when the theme flips dark / light.
+  The owner's addition: "Can't quite see it?" under the hint opens a
+  small animated window (a spring, zooming into the texture) with the
+  texture at twice its size and a pinned card for scale; its chips
+  preview without saving, "Use this one" saves.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - large-grid performance.
