@@ -1,10 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Privacy · Slate</title>
-  <meta name="description" content="Slate's privacy policy: what data Slate keeps, what for, where, and your rights over it." />
+  <!-- In Spanish, Slate's main language, for search engines and link
+       previews; the script below shows the page in the reader's. -->
+  <title>Privacidad · Slate</title>
+  <meta name="description" content="La política de privacidad de Slate: qué datos guarda, para qué, dónde, y tus derechos sobre ellos." />
+  <link rel="canonical" href="https://myslate.pages.dev/privacy.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Slate" />
+  <meta property="og:url" content="https://myslate.pages.dev/privacy.html" />
+  <meta property="og:locale" content="es_LA" />
+  <meta property="og:title" content="Privacidad · Slate" />
+  <meta property="og:description" content="La política de privacidad de Slate: qué datos guarda, para qué, dónde, y tus derechos sobre ellos." />
+  <meta property="og:image" content="https://myslate.pages.dev/img/share.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
   <link rel="icon" type="image/png" href="img/Slate-logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Patrick+Hand&family=Libre+Franklin:wght@400;500;600;700&family=Special+Elite&display=swap">
@@ -237,7 +250,7 @@ th { font-family: var(--font-type); font-weight: 400; font-size: 12.5px; letter-
     },
   };
   // In Slate's language, picked as js/i18n.js picks it: the one chosen on
-  // this device (in the app), else the browser's, else English. There's
+  // this device (in the app), else the browser's, else Spanish. There's
   // no picker here: the app's is the one.
   const LANGUAGE_KEY = "slate_language";
   function pickLanguage() {
@@ -249,7 +262,7 @@ th { font-family: var(--font-type); font-weight: 400; font-size: 12.5px; letter-
       const code = String(tag ?? "").toLowerCase().split("-")[0];
       if (TEXT[code]) return code;
     }
-    return "en";
+    return "es";
   }
   const state = { lang: pickLanguage() };
   const $ = (id) => document.getElementById(id);

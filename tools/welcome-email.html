@@ -7,7 +7,10 @@
   <!--
     Letting someone into Slate (see supabase/README.md, "Letting someone in"):
     this page makes their temporary password and the welcome email that
-    carries it, sent by hand from Slate's Gmail. It isn't part of the app
+    carries it, sent by hand from Slate's Gmail. The email goes out in
+    Spanish, Slate's main language, or in English if picked (remembered
+    on this computer); this page itself stays in English, like the
+    owner's other tools. It isn't part of the app
     and talks to nothing: everything happens in this page.
 
     The email is built from tables and inline styles only — what survives
@@ -96,6 +99,11 @@
     .primary:hover { background: var(--deep); border-color: var(--deep); }
     .status { min-height: 20px; margin: 10px 0 0; font-size: 13px; color: var(--accent); }
     .preview-label { margin-top: 0; }
+    .seg { display: flex; }
+    .seg button { border-radius: 0; }
+    .seg button:first-child { border-radius: 8px 0 0 8px; }
+    .seg button:last-child { border-radius: 0 8px 8px 0; margin-left: -1px; }
+    .seg button[aria-pressed="true"] { background: var(--strong); border-color: var(--strong); color: #fff; }
     .preview {
       border: 1px solid var(--border);
       border-radius: 12px;
@@ -116,10 +124,15 @@
       <ol class="steps">
         <li>Fill in their <strong>name</strong> and <strong>email</strong> from the request, and <strong>generate</strong> a temporary password.</li>
         <li>In Supabase: <strong>Authentication → Users → Add user</strong>, with that email and password, and <strong>Auto Confirm User</strong> ticked.</li>
-        <li><strong>Copy email</strong> and paste it into a new message from Slate's Gmail (Ctrl+V), to their email, with the subject <strong>Your Slate account is ready</strong>.</li>
+        <li><strong>Copy email</strong> and paste it into a new message from Slate's Gmail (Ctrl+V), to their email, with the subject <strong id="subject">Tu cuenta de Slate está lista</strong>.</li>
       </ol>
 
       <form id="form" autocomplete="off">
+        <label id="lang-label">Email language</label>
+        <div class="seg" id="lang" role="group" aria-labelledby="lang-label">
+          <button type="button" data-lang="es" aria-pressed="true">Español</button>
+          <button type="button" data-lang="en" aria-pressed="false">English</button>
+        </div>
         <label for="name">Their name</label>
         <input id="name" type="text" placeholder="Ana" />
 
@@ -152,6 +165,44 @@
 
   <script>
     const LINK_KEY = "slate-welcome-link";
+    const LANG_KEY = "slate-welcome-lang";
+    let lang = "es";
+
+    // The email's words, in Spanish (the default) and English.
+    const COPY = {
+      es: {
+        subject: "Tu cuenta de Slate está lista",
+        tagline: "Cada película. Cada serie. Todo guardado en un solo lugar.",
+        kicker: "TE DAMOS LA BIENVENIDA A SLATE",
+        ready: (n) => `¡Tu cuenta está lista, ${n}!`,
+        accepted: "Aceptamos tu solicitud para entrar a Slate. Así puedes iniciar sesión:",
+        email: "CORREO",
+        password: "CONTRASEÑA TEMPORAL",
+        open: "ABRIR SLATE",
+        orGo: "o entra a",
+        firstLogin: "La primera vez que inicies sesión, Slate te pedirá que <strong style=\"color:#1b1726;\">elijas una contraseña propia</strong>. Desde ahí la temporal deja de funcionar, así que no necesitas guardar este correo.",
+        bye: "¡Que disfrutes tus películas y series! 🍿<br />¿Dudas? Responde este correo.",
+        why: "Recibes este correo porque pediste acceso a Slate. Si no fuiste tú, puedes ignorarlo.",
+        blanks: { name: "[nombre]", email: "[correo]", password: "[contraseña temporal]", link: "[dirección de Slate]" },
+        text: (v) => `¡Tu cuenta está lista, ${v.name}!\n\nCorreo: ${v.email}\nContraseña temporal: ${v.password}\n\nInicia sesión en ${v.link}: Slate te pedirá que elijas una contraseña propia.`,
+      },
+      en: {
+        subject: "Your Slate account is ready",
+        tagline: "Every movie. Every show. Pinned to one board.",
+        kicker: "WELCOME TO SLATE",
+        ready: (n) => `Your account is ready, ${n}!`,
+        accepted: "Your request to join Slate was accepted. Here's how to log in:",
+        email: "EMAIL",
+        password: "TEMPORARY PASSWORD",
+        open: "OPEN SLATE",
+        orGo: "or go to",
+        firstLogin: "The first time you log in, Slate will ask you to <strong style=\"color:#1b1726;\">choose a password of your own</strong>. After that, the temporary one stops working — so there's no need to keep this email.",
+        bye: "Happy watching! 🍿<br />Questions? Just reply to this email.",
+        why: "You're getting this because you asked for access to Slate. If that wasn't you, you can ignore this email.",
+        blanks: { name: "[name]", email: "[email]", password: "[temporary password]", link: "[Slate's address]" },
+        text: (v) => `Your account is ready, ${v.name}!\n\nEmail: ${v.email}\nTemporary password: ${v.password}\n\nLog in at ${v.link} — Slate will ask you to choose a password of your own.`,
+      },
+    };
 
     const $ = (id) => document.getElementById(id);
     const fields = { name: $("name"), email: $("email"), password: $("password"), link: $("link") };
@@ -179,11 +230,12 @@
 
     // The email itself. Placeholders in [brackets] until a field is filled.
     function emailHtml({ name, email, password, link }) {
-      const n = escapeHtml(name || "[name]");
-      const e = escapeHtml(email || "[email]");
-      const p = escapeHtml(password || "[temporary password]");
+      const c = COPY[lang];
+      const n = escapeHtml(name || c.blanks.name);
+      const e = escapeHtml(email || c.blanks.email);
+      const p = escapeHtml(password || c.blanks.password);
       const href = /^https?:\/\//i.test(link) ? escapeHtml(link) : "#";
-      const linkText = escapeHtml(link || "[Slate's address]");
+      const linkText = escapeHtml(link || c.blanks.link);
       const font = "font-family:Arial,Helvetica,sans-serif;";
       const display = "font-family:'Arial Narrow',Arial,Helvetica,sans-serif;";
       return `
@@ -194,7 +246,7 @@
         <tr>
           <td style="background-color:#0d0c15;border-radius:13px 13px 0 0;padding:26px 32px 24px;">
             <div style="${display}font-size:30px;line-height:1;font-weight:700;letter-spacing:3px;color:#ece8f5;">SLATE</div>
-            <div style="${font}font-size:13px;line-height:1.4;color:#a78bfa;padding-top:8px;">Every movie. Every show. Pinned to one board.</div>
+            <div style="${font}font-size:13px;line-height:1.4;color:#a78bfa;padding-top:8px;">${c.tagline}</div>
           </td>
         </tr>
         <tr>
@@ -202,9 +254,9 @@
         </tr>
         <tr>
           <td style="padding:32px 32px 8px;">
-            <div style="${font}font-size:11px;font-weight:700;letter-spacing:2px;color:#6d28d9;">WELCOME TO SLATE</div>
-            <div style="${display}font-size:26px;line-height:1.2;font-weight:700;color:#1b1726;padding-top:6px;">Your account is ready, ${n}!</div>
-            <p style="${font}font-size:15px;line-height:1.6;color:#3d3650;margin:16px 0 0;">Your request to join Slate was accepted. Here's how to log in:</p>
+            <div style="${font}font-size:11px;font-weight:700;letter-spacing:2px;color:#6d28d9;">${c.kicker}</div>
+            <div style="${display}font-size:26px;line-height:1.2;font-weight:700;color:#1b1726;padding-top:6px;">${c.ready(n)}</div>
+            <p style="${font}font-size:15px;line-height:1.6;color:#3d3650;margin:16px 0 0;">${c.accepted}</p>
           </td>
         </tr>
         <tr>
@@ -212,13 +264,13 @@
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f6f3fc;border:2px dashed #c4b5fd;border-radius:10px;">
               <tr>
                 <td style="padding:18px 20px 6px;">
-                  <div style="${font}font-size:11px;font-weight:700;letter-spacing:1.5px;color:#6b6480;">EMAIL</div>
+                  <div style="${font}font-size:11px;font-weight:700;letter-spacing:1.5px;color:#6b6480;">${c.email}</div>
                   <div style="${font}font-size:16px;line-height:1.5;color:#1b1726;padding-top:2px;">${e}</div>
                 </td>
               </tr>
               <tr>
                 <td style="padding:12px 20px 18px;">
-                  <div style="${font}font-size:11px;font-weight:700;letter-spacing:1.5px;color:#6b6480;">TEMPORARY PASSWORD</div>
+                  <div style="${font}font-size:11px;font-weight:700;letter-spacing:1.5px;color:#6b6480;">${c.password}</div>
                   <div style="font-family:'Courier New',Courier,monospace;font-size:20px;line-height:1.5;font-weight:700;letter-spacing:1px;color:#6d28d9;padding-top:2px;">${p}</div>
                 </td>
               </tr>
@@ -230,26 +282,26 @@
             <table role="presentation" cellpadding="0" cellspacing="0" border="0">
               <tr>
                 <td align="center" style="background-color:#8b5cf6;border-radius:8px;border-bottom:4px solid #6d28d9;">
-                  <a href="${href}" target="_blank" style="display:inline-block;padding:14px 34px;${font}font-size:15px;font-weight:700;letter-spacing:1.5px;color:#ffffff;text-decoration:none;">OPEN SLATE</a>
+                  <a href="${href}" target="_blank" style="display:inline-block;padding:14px 34px;${font}font-size:15px;font-weight:700;letter-spacing:1.5px;color:#ffffff;text-decoration:none;">${c.open}</a>
                 </td>
               </tr>
             </table>
-            <div style="${font}font-size:12.5px;line-height:1.5;color:#6b6480;padding-top:12px;">or go to <a href="${href}" target="_blank" style="color:#6d28d9;">${linkText}</a></div>
+            <div style="${font}font-size:12.5px;line-height:1.5;color:#6b6480;padding-top:12px;">${c.orGo} <a href="${href}" target="_blank" style="color:#6d28d9;">${linkText}</a></div>
           </td>
         </tr>
         <tr>
           <td style="padding:24px 32px 8px;">
-            <p style="${font}font-size:14.5px;line-height:1.6;color:#3d3650;margin:0;">The first time you log in, Slate will ask you to <strong style="color:#1b1726;">choose a password of your own</strong>. After that, the temporary one stops working — so there's no need to keep this email.</p>
+            <p style="${font}font-size:14.5px;line-height:1.6;color:#3d3650;margin:0;">${c.firstLogin}</p>
           </td>
         </tr>
         <tr>
           <td style="padding:16px 32px 32px;">
-            <p style="${font}font-size:14.5px;line-height:1.6;color:#3d3650;margin:0;">Happy watching! 🍿<br />Questions? Just reply to this email.</p>
+            <p style="${font}font-size:14.5px;line-height:1.6;color:#3d3650;margin:0;">${c.bye}</p>
           </td>
         </tr>
         <tr>
           <td style="border-top:1px solid #ece7f5;padding:18px 32px 22px;">
-            <p style="${font}font-size:12px;line-height:1.5;color:#8a839c;margin:0;">You're getting this because you asked for access to Slate. If that wasn't you, you can ignore this email.</p>
+            <p style="${font}font-size:12px;line-height:1.5;color:#8a839c;margin:0;">${c.why}</p>
           </td>
         </tr>
       </table>
@@ -260,6 +312,8 @@
 
     function render() {
       $("preview").innerHTML = emailHtml(values());
+      $("subject").textContent = COPY[lang].subject;
+      document.querySelectorAll("#lang [data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
     }
 
     function say(message) {
@@ -275,7 +329,7 @@
       if (missing.length) return say(`Fill in ${missing.map((k) => labels[k]).join(", ")}.`);
       if (v.password.length < 8) return say("The password needs at least 8 characters.");
       const html = emailHtml(v);
-      const text = `Your account is ready, ${v.name}!\n\nEmail: ${v.email}\nTemporary password: ${v.password}\n\nLog in at ${v.link} — Slate will ask you to choose a password of your own.`;
+      const text = COPY[lang].text(v);
       try {
         await navigator.clipboard.write([
           new ClipboardItem({
@@ -298,7 +352,18 @@
 
     try {
       fields.link.value = localStorage.getItem(LINK_KEY) || "";
+      if (COPY[localStorage.getItem(LANG_KEY)]) lang = localStorage.getItem(LANG_KEY);
     } catch {}
+    $("lang").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-lang]");
+      if (!b) return;
+      lang = b.dataset.lang;
+      try {
+        localStorage.setItem(LANG_KEY, lang);
+      } catch {}
+      say("");
+      render();
+    });
     fields.password.value = generatePassword();
 
     $("form").addEventListener("input", (e) => {

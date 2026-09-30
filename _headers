@@ -6,3 +6,27 @@
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   X-Content-Type-Options: nosniff
+
+# The whole repo is served, but only the landing page and the privacy
+# policy are meant for search results: the rest is marked noindex (not
+# blocked in robots.txt, or crawlers could never see this header).
+/tests/*
+  X-Robots-Tag: noindex
+/tools/*
+  X-Robots-Tag: noindex
+/supabase/*
+  X-Robots-Tag: noindex
+/scripts/*
+  X-Robots-Tag: noindex
+/README.md
+  X-Robots-Tag: noindex
+/CLAUDE.md
+  X-Robots-Tag: noindex
+/THIRD-PARTY-NOTICES.txt
+  X-Robots-Tag: noindex
+/package.json
+  X-Robots-Tag: noindex
+/package-lock.json
+  X-Robots-Tag: noindex
+/playwright.config.js
+  X-Robots-Tag: noindex

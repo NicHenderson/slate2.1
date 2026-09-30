@@ -19,7 +19,8 @@
 
    The language is picked once, when the page loads: the one chosen on
    this device, else the first of the browser's languages Slate has, else
-   English. Choosing another reloads the page, so nothing that's already
+   Spanish, Slate's main language (the owner's decision: Slate is for the
+   Spanish-speaking community; the code stays in English). Choosing another reloads the page, so nothing that's already
    drawn needs drawing again. */
 
 const SLATE_LANGUAGES = {
@@ -39,7 +40,7 @@ function pickLanguage() {
     const code = String(tag ?? "").toLowerCase().split("-")[0];
     if (SLATE_LANGUAGES[code]) return code;
   }
-  return "en";
+  return SLATE_LANGUAGES.es ? "es" : "en";
 }
 
 const LANGUAGE = pickLanguage();

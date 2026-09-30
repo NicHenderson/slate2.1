@@ -95,13 +95,15 @@ directly.
     whole (a sentence with markup inside), `translate="no"` skips one;
   - dictionaries (`js/lang/<code>.js`, loaded before `i18n.js`) map each
     English string to its translation; the language is the one picked on
-    the device, else the browser's, else English, and changing it reloads.
+    the device, else the browser's, else Spanish (Slate's main language),
+    and changing it reloads.
     Dates use `LOCALE`.
   - `tests/i18n.spec.js` fails if a language lacks a string or has one
     nothing uses, if placeholders or markup differ, or if the main screens
     show text that doesn't go through translation.
-  - Stays in English on purpose: the owner's emails (Web3Forms request,
-    the welcome-email tool), Supabase's own emails and error texts (like
+  - Stays in English on purpose: the owner's emails (the Web3Forms
+    request) and the welcome-email tool's own page (the email it builds
+    is Spanish by default, English on request), Supabase's own emails and error texts (like
     weak passwords), emoji and icon names in the icon picker, and the
     "Untitled" saved as a title when TMDB has none.
 - **supabase-js is pinned** in `index.html` (exact version + SRI hash) to
@@ -164,7 +166,8 @@ directly.
   window's design (with its trailer), episode tracking for shows (all
   nine stages, below), and a new season after finishing (PR #22, Sept.
   29, 2026: the note and stamp, Keep watching, finishing again, the
-  card's starburst).
+  card's starburst), and (PR #23, Sept. 30, 2026) the privacy page with
+  its box, and the background textures setting.
 - Search and filters (`js/librarySearch.js`) cover Movies, Shows, Movies To
   Watch and the Shows Queue; the owner chose to leave collections for later.
   Their decisions:
@@ -228,6 +231,20 @@ directly.
      owner: the watched date for IMDb (it only has the date rated), films
      Letterboxd has as watched but not in the diary, titles already in
      Slate, and where shows go.
+- **Spanish is Slate's main language** (the owner's decision, Sept. 30,
+  2026: Slate is for the Spanish-speaking community). English stays
+  available. The repo keeps its convention (code, comments and source
+  strings in English; Spanish is their translation in `js/lang/es.js`);
+  what changes is what people see first. The owner's call on the
+  default: still the language picked on the device, else the browser's
+  (an English browser keeps English), and **Spanish, not English, when
+  the browser's is neither** (js/i18n.js, privacy.html). What search
+  engines and link previews read (title, description, share image) is
+  in Spanish for everyone: index.html's `<title>` and those metas carry
+  `translate="no"`, so an English page still has the Spanish tab title.
+  The welcome email (tools/welcome-email.html, sent to new users) now
+  goes out in Spanish by default, English if picked there (remembered
+  on the owner's computer); the tool's own page stays in English.
 - Translation is done, and Slate is published (below). **Slate launches in
   English and Spanish only** (the owner's decision); German and Italian are out for
   now, and adding a language later only takes its dictionary.
@@ -684,6 +701,28 @@ directly.
   previews likely lack it), a 1200×630 share image, `robots.txt` +
   noindex for `tests/`, `tools/`, `supabase/`, docs, a `sitemap.xml`;
   the owner registers Google Search Console.
+  **SEO, started Sept. 30, 2026** (the owner's go-ahead, after the
+  privacy page). Claude's plan, in three stages: 1 the 1200×630 share
+  image (mockups: https://claude.ai/artifact/QT5HUTEm1GHPfqTvwYaCr7, A
+  the board with pinned posters, B a taped note with an "Invite-only"
+  stamp, C a cinema ticket; English / Spanish). The owner picked A;
+  done as `img/share.jpg` (1200×630, 84 KB, in Spanish, after the
+  owner's decision below), rendered from the mockup with Playwright
+  (fonts from Google Fonts through the proxy);
+  2 the code (absolute og:image, og:url, twitter card, canonical,
+  WebSite JSON-LD for the site name, privacy.html's tags, robots.txt,
+  sitemap.xml, X-Robots-Tag noindex on tests/, tools/, supabase/,
+  scripts/ and *.md via `_headers`); 3 Search Console by the owner
+  (URL-prefix property, the verification tag in index.html, the
+  sitemap). Branch previews are noindex already (Cloudflare adds it).
+  Stage 2 — done, waiting for the owner's check: all of the above, in
+  Spanish; robots.txt allows everything (a Disallow would hide the
+  noindex header from crawlers). Tests: an absolute og:image that
+  exists (stamps.spec), and a French browser getting Spanish.
+  The owner asked about one branch per screen (landing / login / app
+  on their own subdomains): talked out of it (previews are noindex,
+  the session and settings are per origin, three copies of the code);
+  `/login` instead of `#login` stays a possible later nicety.
   **Privacy page first, on `claude/funny-pascal-bk99gr`** (the owner's
   call). Stages: 1 the text (Claude's draft, in chat) — the owner answered:
   the page names who's responsible by their real name, Manuel Pinto Devia,
@@ -740,9 +779,8 @@ directly.
   card and Settings → Account ("Privacy policy", "Read it");
   `tests/privacy.spec.js`. Its text is the owner's: change a word only
   with their approval, and bump the version and date if it changes.
-  **Before `main`:** the policy says a box is ticked on Request access
-  and at the first login, so that stage ships with it. Stage 4 — done,
-  waiting for the owner's check: the unticked box "I've read the
+  **In `main` since Sept. 30, 2026 (PR #23, CI green on its exact
+  head), on the owner's word.** Stage 4 — done: the unticked box "I've read the
   Privacy Policy and I'm 14 or older" (linked, opens in a new tab) on
   Request access (the Web3Forms email says it was ticked, and the
   version), on the first-login password card, and on its own card
@@ -751,17 +789,23 @@ directly.
   (`privacy_version`, `privacy_accepted_at`; no migration). A new
   policy version bumps `PRIVACY_VERSION` in js/auth.js and asks everyone
   again. If Supabase can't be asked, the app opens (never locked out
-  over this). Left for the law: the two internal guides (where they
-  live is the owner's call, still open), the owner's own tasks (delete
-  resolved requests and sent welcome emails, check Supabase's DPA), and
-  all of it in `main` before Dec. 1, 2026. No filing with the Agency is
+  over this); asked once per account, not per device (the owner
+  checked). The two internal guides (answering rights requests, with
+  templates and a register; security incidents, with templates and a
+  register) are done, in Spanish, in a private Claude Doc, not in this
+  public repo: https://claude.ai/code/artifact/971432be-eb59-4f24-9d59-8d71b3c9d22b
+  (Sept. 30, 2026; Claude asked there whether to always tell affected
+  users, as the policy's §7 promises, though the law only requires it
+  for sensitive, under-14 or financial data). Left for the law, before
+  Dec. 1, 2026: the owner's own tasks (delete resolved requests and sent welcome emails,
+  check Supabase's DPA). Then SEO basics. No filing with the Agency is
   needed (art. 14 ter asks for the policy published on the site; only
   breaches are reported, art. 14 sexies; the art. 49 compliance model
   is voluntary).
 - **Background textures, a setting** (the owner's request, Sept. 2026) —
   built on `claude/episode-tracking-shows-s9gixh` (restarted from
-  `main` after PR #22), then merged into `claude/funny-pascal-bk99gr`
-  on the owner's word (Sept. 30, 2026), with the privacy page.
+  `main` after PR #22), merged into `claude/funny-pascal-bk99gr`, and
+  in `main` since Sept. 30, 2026 (PR #23), with the privacy page.
   Never use the photo of a cork board they once sent, only patterns
   drawn by code (they said so). Of the gallery mockup
   (https://claude.ai/artifact/9qvFwgMLmMBFVQmC1WKcDQ) they picked Felt,

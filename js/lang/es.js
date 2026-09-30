@@ -548,7 +548,6 @@ window.SLATE_LANGUAGES = {
       "Your library is now this file: <strong>{library}</strong>.": "Tu biblioteca ahora es este archivo: <strong>{library}</strong>.",
       "Your previous library was downloaded as a backup first.": "Antes se descargó un respaldo de tu biblioteca anterior.",
       "Library replaced": "Biblioteca reemplazada",
-      "Slate — every movie, every show, all saved in one place": "Slate: cada película, cada serie, todo guardado en un solo lugar",
       "What you watched, what you thought of it, and what you want to watch next. Your record of movies and shows, safe for good.": "Lo que viste, qué te pareció y lo que quieres ver. Tu registro de películas y series, a salvo para siempre.",
       "Every movie.<br>Every show.<br><span class=\"lp-hl\">All saved in one place.</span>": "Cada película.<br>Cada serie.<br><span class=\"lp-hl\">Todo guardado en un solo lugar.</span>",
       "Keep": "Guarda",
