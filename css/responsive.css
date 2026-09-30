@@ -962,8 +962,23 @@
     display: none;
   }
 
+  /* The grip: a bar to see, the sheet's whole top edge to drag down by
+     (js/auth.js). Only the grip is dragged, so the form itself still
+     scrolls on a phone too short for it. */
   .auth-sheet-grip {
     display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1;
+    height: 40px;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .auth-sheet-grip::before {
+    content: "";
     position: absolute;
     top: 8px;
     left: 50%;
@@ -974,12 +989,12 @@
     background: rgba(13, 12, 21, 0.22);
   }
 
-  /* Above the card, which starts under it. */
+  /* Above the card, which starts under it, and the grip. */
   .auth-sheet-close {
     display: grid;
     place-items: center;
     position: absolute;
-    z-index: 1;
+    z-index: 2;
     top: 10px;
     right: calc(10px + var(--safe-right));
     width: 44px;
@@ -995,7 +1010,10 @@
   /* No way out but "Log out" on the cards a signed-in visitor must finish. */
   .auth-screen[data-mode="reset"] .auth-sheet-close,
   .auth-screen[data-mode="choose"] .auth-sheet-close,
-  .auth-screen[data-mode="privacy"] .auth-sheet-close {
+  .auth-screen[data-mode="privacy"] .auth-sheet-close,
+  .auth-screen[data-mode="reset"] .auth-sheet-grip,
+  .auth-screen[data-mode="choose"] .auth-sheet-grip,
+  .auth-screen[data-mode="privacy"] .auth-sheet-grip {
     display: none;
   }
 

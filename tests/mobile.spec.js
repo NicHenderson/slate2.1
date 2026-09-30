@@ -139,6 +139,28 @@ test("on a phone the login card is a sheet: its tabs, its fit and its ×", async
   await page.locator("#auth-sheet-close").tap();
   await expect(page.locator("#auth-screen")).toBeHidden();
   await expect(page.locator("#lp-top")).toBeVisible();
+
+  // A tap on the dimmed page above it closes it too…
+  await page.locator('.lp-story-cta a[href="#login"]').tap();
+  await expect(page.locator("#auth-screen")).toBeVisible();
+  await page.locator("#auth-screen").tap({ position: { x: 195, y: 40 } });
+  await expect(page.locator("#auth-screen")).toBeHidden();
+
+  // …and so does dragging its grip down; a short drag springs back.
+  await page.locator('.lp-story-cta a[href="#login"]').tap();
+  await expect(page.locator(".auth-sheet-grip")).toBeVisible();
+  const grip = await page.locator(".auth-sheet-grip").boundingBox();
+  const drag = async (distance) => {
+    await page.mouse.move(grip.x + grip.width / 2, grip.y + 20);
+    await page.mouse.down();
+    await page.mouse.move(grip.x + grip.width / 2, grip.y + 20 + distance, { steps: 8 });
+    await page.mouse.up();
+  };
+  await drag(20);
+  await page.waitForTimeout(400);
+  await expect(page.locator("#auth-screen")).toBeVisible();
+  await drag(320);
+  await expect(page.locator("#auth-screen")).toBeHidden();
 });
 
 test("installable: the manifest and every icon it names are there", async ({ page, request }) => {

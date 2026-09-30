@@ -335,6 +335,56 @@ document.getElementById("auth-sheet-close").addEventListener("click", () => {
   if (!signedInCard(authMode)) leaveAuthCard();
 });
 
+// As a phone's own sheets do, it also closes with a tap on the dimmed page
+// above it, or dragged down by its grip (let go too soon and it springs
+// back). Neither on the cards a signed-in visitor must finish, and only
+// while it's a sheet: on a computer the card fills its own screen.
+const authSheetLayout = matchMedia("(max-width: 640px)");
+const authPanel = document.querySelector(".auth-panel");
+const authGrip = document.querySelector(".auth-sheet-grip");
+let sheetDrag = null;
+
+authScreen.addEventListener("click", (e) => {
+  if (e.target === authScreen && authSheetLayout.matches && !signedInCard(authMode)) leaveAuthCard();
+});
+
+authGrip.addEventListener("pointerdown", (e) => {
+  if (signedInCard(authMode)) return;
+  sheetDrag = { startY: e.clientY, startTime: e.timeStamp, dy: 0 };
+  authGrip.setPointerCapture(e.pointerId);
+  authPanel.style.transition = "none";
+});
+
+authGrip.addEventListener("pointermove", (e) => {
+  if (!sheetDrag) return;
+  sheetDrag.dy = Math.max(0, e.clientY - sheetDrag.startY);
+  authPanel.style.transform = `translateY(${sheetDrag.dy}px)`;
+});
+
+function endSheetDrag(e) {
+  if (!sheetDrag) return;
+  const { dy, startTime } = sheetDrag;
+  sheetDrag = null;
+  const flicked = dy > 30 && dy / Math.max(1, e.timeStamp - startTime) > 0.5;
+  authPanel.style.transition = "transform 0.25s cubic-bezier(0.22, 1, 0.36, 1)";
+  if (dy > authPanel.offsetHeight * 0.25 || flicked) {
+    authPanel.style.transform = "translateY(100%)";
+    setTimeout(() => {
+      leaveAuthCard();
+      // Back in place, unseen, for the next time it opens.
+      setTimeout(() => {
+        authPanel.style.transition = "";
+        authPanel.style.transform = "";
+      }, 600);
+    }, 200);
+  } else {
+    authPanel.style.transform = "";
+  }
+}
+
+authGrip.addEventListener("pointerup", endSheetDrag);
+authGrip.addEventListener("pointercancel", endSheetDrag);
+
 const authTabs = document.querySelectorAll("[data-auth-tab]");
 authTabs.forEach((tab) =>
   tab.addEventListener("click", () => {

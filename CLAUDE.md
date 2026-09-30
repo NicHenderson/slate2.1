@@ -717,7 +717,11 @@ directly.
   title for Request access, no language / privacy link there either;
   both forms fit an iPhone 15 and an SE without scrolling
   (tests/mobile.spec.js); a shorter screen scrolls with no bar. It rises
-  and sinks as a view transition. Computer sizes pixel-identical.
+  and sinks as a view transition. Computer sizes pixel-identical. The
+  owner's note: the grip and the dimmed page promise ways out, so a tap
+  above the sheet closes it, and so does dragging the grip down (the
+  sheet's top 40px; a short drag springs back); only the grip drags, so
+  a form that must scroll still can.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
