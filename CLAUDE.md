@@ -686,6 +686,14 @@ directly.
   only) and speed. Asked the owner: each stage to `main` once checked,
   or all at the end. Claude can't run Safari here (Chromium only):
   iPhone sizes are simulated, Safari's quirks are checked on theirs.
+  **Handed over** (Sept. 30, 2026, the owner's call): the whole phone
+  project runs in a session on another of the owner's Claude accounts,
+  which can't open this account's artifacts (mockups, the test
+  scenario, the privacy guides); everything it needs is in this file.
+  It starts from a handover prompt (in Spanish, given to the owner) that
+  sends it here first. Stage 7 (offline) would keep the library on the
+  device: the privacy policy's §3 then needs a new version (owner's
+  approval, bump `PRIVACY_VERSION`).
 - **The test scenario** the owner follows to hunt bugs (PC first, then
   the phone): https://claude.ai/artifact/WV8WgTtnTG5LsviRT4amDm. It runs
   with a throwaway account (`+slate1` / `+slate2` Gmail aliases), never a
