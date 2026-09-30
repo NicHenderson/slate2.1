@@ -739,12 +739,20 @@ directly.
   found it too much text and went to the cards instead: of three card
   mockups (https://claude.ai/artifact/CxRDhL78JFdPYkNXvQpqiQ; A a wall
   of small polaroids three across, B diary rows, C posters by month)
-  they picked **A, to be used exactly**. Their idea with it: on the
-  phone, one Movies view holding Watched and To Watch, and maybe one
-  Shows view holding To Watch, Watching, Dropped and finished (still
-  being discussed), and how the menu (the ☰ drawer, or a bottom bar)
-  looks. Nothing built yet: the owner said not to start until that's
-  settled.
+  they picked **A, to be used exactly**. Their idea with it, agreed: on
+  the phone, **one Movies view** (tabs Watched · To Watch, opens on
+  Watched) and **one Shows view** (tabs Watching · To Watch · Finished
+  · Dropped, opens on Watching; Spanish "Viendo · Por ver · Terminadas
+  · Abandonadas", "Terminadas" rather than "Vistas" so it isn't
+  confused with Viendo), each remembering the last tab. The card
+  changes with the tab (Watching: "S2 · E3" + bar; To Watch: year +
+  seasons; Finished: hearts, date, the starburst; Dropped: "Stopped
+  at" + a faded bar). So the phone has 4 sections, and of two menu
+  mockups (same artifact, a bar fixed at the bottom vs. a redesigned ☰
+  drawer) the owner picked **the bottom bar**: Movies, Shows,
+  Collections, Settings, icon + label, the current one highlighted.
+  The computer keeps its 6 sections and sidebar. The list header in
+  the mockups is a placeholder, to be designed on its own.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
