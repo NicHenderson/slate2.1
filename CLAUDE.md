@@ -685,6 +685,22 @@ directly.
   previews likely lack it), a 1200×630 share image, `robots.txt` +
   noindex for `tests/`, `tools/`, `supabase/`, docs, a `sitemap.xml`;
   the owner registers Google Search Console.
+  **SEO, started Sept. 30, 2026** (the owner's go-ahead, after the
+  privacy page). Claude's plan, in three stages: 1 the 1200×630 share
+  image (mockups: https://claude.ai/artifact/QT5HUTEm1GHPfqTvwYaCr7, A
+  the board with pinned posters, B a taped note with an "Invite-only"
+  stamp, C a cinema ticket; English / Spanish; waiting for the owner's
+  pick, and for which language the search title and description use);
+  2 the code (absolute og:image, og:url, twitter card, canonical,
+  WebSite JSON-LD for the site name, privacy.html's tags, robots.txt,
+  sitemap.xml, X-Robots-Tag noindex on tests/, tools/, supabase/,
+  scripts/ and *.md via `_headers`); 3 Search Console by the owner
+  (URL-prefix property, the verification tag in index.html, the
+  sitemap). Branch previews are noindex already (Cloudflare adds it).
+  The owner asked about one branch per screen (landing / login / app
+  on their own subdomains): talked out of it (previews are noindex,
+  the session and settings are per origin, three copies of the code);
+  `/login` instead of `#login` stays a possible later nicety.
   **Privacy page first, on `claude/funny-pascal-bk99gr`** (the owner's
   call). Stages: 1 the text (Claude's draft, in chat) — the owner answered:
   the page names who's responsible by their real name, Manuel Pinto Devia,
