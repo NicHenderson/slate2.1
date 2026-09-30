@@ -673,6 +673,19 @@ directly.
   does nothing (and leaves Slate in Safari; Android's back button too).
   iOS's own back animation may clash with Slate's: tune on a real phone.
   The owner tests on an iPhone 15, and has an Android for tests.
+  **Started Sept. 30, 2026** (the owner's go-ahead; only their iPhone at
+  hand for now). `claude/mobile-app` brought up to `main`; preview at
+  claude-mobile-app.myslate.pages.dev. Claude's proposed order, each
+  stage with the owner's go-ahead (mockups first for 3 and 4): 1
+  installable app (manifest, home-screen icon, standalone, status bar,
+  safe areas, no zoom on focus: iOS zooms inputs under 16px, e.g. the
+  14px .field-input); 2 back navigation (history for sections and
+  windows); 3 bottom tab bar + compact headers; 4 windows as bottom
+  sheets (swipe down to close); 5 full-screen search with the keyboard;
+  6 touch polish and gestures; 7 offline (last loaded library, read
+  only) and speed. Asked the owner: each stage to `main` once checked,
+  or all at the end. Claude can't run Safari here (Chromium only):
+  iPhone sizes are simulated, Safari's quirks are checked on theirs.
 - **The test scenario** the owner follows to hunt bugs (PC first, then
   the phone): https://claude.ai/artifact/WV8WgTtnTG5LsviRT4amDm. It runs
   with a throwaway account (`+slate1` / `+slate2` Gmail aliases), never a
