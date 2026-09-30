@@ -735,8 +735,16 @@ directly.
   bottom tab bar (6 sections into ~5 tabs, mockups), compact list
   headers (stats folded, sort / filter as sheets, a floating +, status
   tabs by the title), windows as sheets, full-screen search, cards /
-  collections / settings, touch; then "back" and offline. Waiting for
-  the owner's answers.
+  collections / settings, touch; then "back" and offline. The owner
+  found it too much text and went to the cards instead: of three card
+  mockups (https://claude.ai/artifact/CxRDhL78JFdPYkNXvQpqiQ; A a wall
+  of small polaroids three across, B diary rows, C posters by month)
+  they picked **A, to be used exactly**. Their idea with it: on the
+  phone, one Movies view holding Watched and To Watch, and maybe one
+  Shows view holding To Watch, Watching, Dropped and finished (still
+  being discussed), and how the menu (the ☰ drawer, or a bottom bar)
+  looks. Nothing built yet: the owner said not to start until that's
+  settled.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
