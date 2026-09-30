@@ -44,6 +44,9 @@ test("on a phone: landing, login, the menu and adding a title all fit and work",
   await page.goto("/");
   await expect(page.locator("#landing-screen")).toBeVisible();
   await expectNoSidewaysScroll(page);
+  // No pinch zoom, as in an app: the viewport tag for Android, CSS for iPhones.
+  await expect(page.locator('meta[name="viewport"]')).toHaveAttribute("content", /user-scalable=no/);
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).touchAction)).toBe("pan-x pan-y");
 
   await logIn(page);
   await expectNoSidewaysScroll(page);

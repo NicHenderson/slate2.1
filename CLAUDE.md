@@ -695,7 +695,14 @@ directly.
   showed) and a pale frame when the page was pulled or pinched. Fixed:
   the stories' backdrop is a fixed layer covering the whole screen, the
   root doesn't bounce there, and on touch screens <html> is the brand's
-  dark while the landing page shows. Native store
+  dark while the landing page shows. **No pinch zoom on phones** (the
+  owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
+  that iOS only allows it by workaround): the viewport tag's
+  user-scalable=no (Android), `touch-action: pan-x pan-y` on <html> and
+  js/noZoom.js cancelling Safari's gesture events (iPhone), on touch
+  screens / ≤640px only (a Mac's Safari trackpad pinch sends the same
+  events). The system's accessibility zoom still works; privacy.html
+  stays zoomable. If an iOS update breaks it, that's why. Native store
   ports are out for now (Play's $25 and 12-tester closed test, Apple's
   $99 a year and a Mac; one would wrap this same web app). The owner
   tests on an iPhone 15 (an Android too, not at hand). Chromium here can

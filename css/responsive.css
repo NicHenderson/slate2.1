@@ -101,6 +101,16 @@
   padding-bottom: calc(46px + var(--safe-bottom));
 }
 
+/* No pinch zoom on a phone, as in an app (the owner's call): the page
+   only scrolls. Safari ignores the viewport tag's user-scalable=no, but
+   not this (js/noZoom.js covers what it misses). Touch screens only: a
+   computer's own zoom is left alone. */
+@media (hover: none) and (pointer: coarse), (max-width: 640px) {
+  html {
+    touch-action: pan-x pan-y;
+  }
+}
+
 /* No zooming in on a field when it's tapped: iPhones do it to any field
    whose text is under 16px. Every text field, select and text box on a
    touch screen gets at least that (tests/mobile.spec.js checks them). */

@@ -4,8 +4,11 @@
   <meta charset="UTF-8" />
   <!-- viewport-fit=cover: on a phone the page runs edge to edge, under
        the notch and the home bar, and css/responsive.css keeps what
-       matters clear of them (--safe-*). -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+       matters clear of them (--safe-*). No pinch zoom, as in an app (the
+       owner's call): Android reads it here; iPhones ignore it, so
+       js/noZoom.js and responsive.css do it there. The system's own
+       accessibility zoom still works. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <!-- What search engines and link previews read: in Spanish, Slate's main
        language, for everyone (translate="no": js/i18n.js leaves them as
        they are, whatever language the page shows in). The image and
@@ -93,8 +96,9 @@
   <link rel="stylesheet" href="css/episodes.css?v=176d4679" />
   <link rel="stylesheet" href="css/whereToWatch.css?v=7528c42f" />
   <link rel="stylesheet" href="css/librarySearch.css?v=cce1cb12" />
-  <link rel="stylesheet" href="css/responsive.css?v=a89479a2" />
+  <link rel="stylesheet" href="css/responsive.css?v=3995b956" />
   <script src="js/statusBar.js?v=b3d9396d"></script>
+  <script src="js/noZoom.js?v=632c1c6c"></script>
 </head>
 <body>
   <!-- ============================================================
