@@ -167,7 +167,9 @@ directly.
   nine stages, below), and a new season after finishing (PR #22, Sept.
   29, 2026: the note and stamp, Keep watching, finishing again, the
   card's starburst), and (PR #23, Sept. 30, 2026) the privacy page with
-  its box, and the background textures setting.
+  its box, and the background textures setting, and (PR #24, the same
+  day) Spanish first: SEO basics, the share image, the Spanish fallback
+  and the Spanish welcome email.
 - Search and filters (`js/librarySearch.js`) cover Movies, Shows, Movies To
   Watch and the Shows Queue; the owner chose to leave collections for later.
   Their decisions:
@@ -715,10 +717,13 @@ directly.
   scripts/ and *.md via `_headers`); 3 Search Console by the owner
   (URL-prefix property, the verification tag in index.html, the
   sitemap). Branch previews are noindex already (Cloudflare adds it).
-  Stage 2 — done, waiting for the owner's check: all of the above, in
-  Spanish; robots.txt allows everything (a Disallow would hide the
+  Stage 2 — done, in `main` since Sept. 30, 2026 (PR #24, CI green on
+  its exact head): all of the above, in Spanish; robots.txt allows everything (a Disallow would hide the
   noindex header from crawlers). Tests: an absolute og:image that
-  exists (stamps.spec), and a French browser getting Spanish.
+  exists (stamps.spec), and a French browser getting Spanish. Next:
+  stage 3, waiting for the owner's Search Console HTML-tag code (to add
+  to index.html's head), then check the link card (opengraph.xyz,
+  WhatsApp) and Google's Rich Results Test on the live site.
   The owner asked about one branch per screen (landing / login / app
   on their own subdomains): talked out of it (previews are noindex,
   the session and settings are per origin, three copies of the code);
