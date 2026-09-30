@@ -752,9 +752,14 @@ directly.
   policy version bumps `PRIVACY_VERSION` in js/auth.js and asks everyone
   again. If Supabase can't be asked, the app opens (never locked out
   over this); asked once per account, not per device (the owner
-  checked). Left for the law, before Dec. 1, 2026: the two internal
-  guides (where they live is the owner's call, still open) and the
-  owner's own tasks (delete resolved requests and sent welcome emails,
+  checked). The two internal guides (answering rights requests, with
+  templates and a register; security incidents, with templates and a
+  register) are done, in Spanish, in a private Claude Doc, not in this
+  public repo: https://claude.ai/code/artifact/971432be-eb59-4f24-9d59-8d71b3c9d22b
+  (Sept. 30, 2026; Claude asked there whether to always tell affected
+  users, as the policy's §7 promises, though the law only requires it
+  for sensitive, under-14 or financial data). Left for the law, before
+  Dec. 1, 2026: the owner's own tasks (delete resolved requests and sent welcome emails,
   check Supabase's DPA). Then SEO basics. No filing with the Agency is
   needed (art. 14 ter asks for the policy published on the site; only
   breaches are reported, art. 14 sexies; the art. 49 compliance model
