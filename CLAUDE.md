@@ -95,7 +95,8 @@ directly.
     whole (a sentence with markup inside), `translate="no"` skips one;
   - dictionaries (`js/lang/<code>.js`, loaded before `i18n.js`) map each
     English string to its translation; the language is the one picked on
-    the device, else the browser's, else English, and changing it reloads.
+    the device, else the browser's, else Spanish (Slate's main language),
+    and changing it reloads.
     Dates use `LOCALE`.
   - `tests/i18n.spec.js` fails if a language lacks a string or has one
     nothing uses, if placeholders or markup differ, or if the main screens
@@ -233,10 +234,15 @@ directly.
   2026: Slate is for the Spanish-speaking community). English stays
   available. The repo keeps its convention (code, comments and source
   strings in English; Spanish is their translation in `js/lang/es.js`);
-  what changes is what people see first. Done: the share image. Proposed,
-  waiting for the owner: Spanish as the default when nothing was picked
-  on the device (today the browser's language, else English), and the
-  search / share title and description in Spanish.
+  what changes is what people see first. The owner's call on the
+  default: still the language picked on the device, else the browser's
+  (an English browser keeps English), and **Spanish, not English, when
+  the browser's is neither** (js/i18n.js, privacy.html). What search
+  engines and link previews read (title, description, share image) is
+  in Spanish for everyone: index.html's `<title>` and those metas carry
+  `translate="no"`, so an English page still has the Spanish tab title.
+  Open question for the owner: the welcome email
+  (tools/welcome-email.html, sent to new users) is still in English.
 - Translation is done, and Slate is published (below). **Slate launches in
   English and Spanish only** (the owner's decision); German and Italian are out for
   now, and adding a language later only takes its dictionary.
@@ -707,6 +713,10 @@ directly.
   scripts/ and *.md via `_headers`); 3 Search Console by the owner
   (URL-prefix property, the verification tag in index.html, the
   sitemap). Branch previews are noindex already (Cloudflare adds it).
+  Stage 2 — done, waiting for the owner's check: all of the above, in
+  Spanish; robots.txt allows everything (a Disallow would hide the
+  noindex header from crawlers). Tests: an absolute og:image that
+  exists (stamps.spec), and a French browser getting Spanish.
   The owner asked about one branch per screen (landing / login / app
   on their own subdomains): talked out of it (previews are noindex,
   the session and settings are per origin, three copies of the code);

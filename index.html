@@ -1,13 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Slate — every movie, every show, all saved in one place</title>
-  <meta name="description" content="What you watched, what you thought of it, and what you want to watch next. Your record of movies and shows, safe for good." />
-  <meta property="og:title" content="Slate — every movie, every show, all saved in one place" />
-  <meta property="og:description" content="What you watched, what you thought of it, and what you want to watch next. Your record of movies and shows, safe for good." />
-  <meta property="og:image" content="img/Slate-logo.png" />
+  <!-- What search engines and link previews read: in Spanish, Slate's main
+       language, for everyone (translate="no": js/i18n.js leaves them as
+       they are, whatever language the page shows in). The image and
+       address are absolute: chat apps don't resolve relative ones.
+       img/share.jpg is 1200×630, from the owner's pick of the mockups. -->
+  <title translate="no">Slate — cada película, cada serie, todo guardado en un solo lugar</title>
+  <meta name="description" translate="no" content="Lo que viste, qué te pareció y lo que quieres ver. Tu registro de películas y series, a salvo para siempre." />
+  <link rel="canonical" href="https://myslate.pages.dev/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Slate" />
+  <meta property="og:url" content="https://myslate.pages.dev/" />
+  <meta property="og:locale" content="es_LA" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta property="og:title" translate="no" content="Slate — cada película, cada serie, todo guardado en un solo lugar" />
+  <meta property="og:description" translate="no" content="Lo que viste, qué te pareció y lo que quieres ver. Tu registro de películas y series, a salvo para siempre." />
+  <meta property="og:image" content="https://myslate.pages.dev/img/share.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Slate: cada película, cada serie, todo guardado en un solo lugar." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Slate — cada película, cada serie, todo guardado en un solo lugar" />
+  <meta name="twitter:description" content="Lo que viste, qué te pareció y lo que quieres ver. Tu registro de películas y series, a salvo para siempre." />
+  <meta name="twitter:image" content="https://myslate.pages.dev/img/share.jpg" />
+  <!-- Tells Google the site's name is Slate (not "myslate.pages.dev"). -->
+  <script type="application/ld+json">
+    { "@context": "https://schema.org", "@type": "WebSite", "name": "Slate", "alternateName": "myslate", "url": "https://myslate.pages.dev/", "inLanguage": ["es", "en"] }
+  </script>
   <link rel="icon" type="image/png" href="img/Slate-logo.png" />
   <script>
     // Applied before any CSS paints, from whatever theme was cached on the
@@ -1258,8 +1280,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-  <script src="js/lang/es.js?v=8474d109"></script>
-  <script src="js/i18n.js?v=dde7afb9"></script>
+  <script src="js/lang/es.js?v=7b01d796"></script>
+  <script src="js/i18n.js?v=bffd9615"></script>
   <script src="js/escapeHtml.js?v=28c1feb8"></script>
   <script src="js/viewTransitions.js?v=d587d807"></script>
   <script src="js/config.js?v=7bbe3fe4"></script>

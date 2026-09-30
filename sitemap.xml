@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The public pages. Everything else needs an account, or is internal. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://myslate.pages.dev/</loc>
+    <lastmod>2026-09-30</lastmod>
+  </url>
+  <url>
+    <loc>https://myslate.pages.dev/privacy.html</loc>
+    <lastmod>2026-09-30</lastmod>
+  </url>
+</urlset>

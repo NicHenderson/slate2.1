@@ -1,0 +1,8 @@
+# Search engines may read the public pages (the landing page and the
+# privacy policy). The rest of what's served (tests, tools, notes) is
+# kept out of results by an X-Robots-Tag header in _headers, which only
+# works if crawlers are allowed to fetch it, so nothing is blocked here.
+User-agent: *
+Allow: /
+
+Sitemap: https://myslate.pages.dev/sitemap.xml

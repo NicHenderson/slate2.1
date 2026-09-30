@@ -112,3 +112,15 @@ test.describe("in a Spanish browser", () => {
     await expect(page.locator("#grid-movies-watched .card-title")).toHaveText(["Alien"]);
   });
 });
+
+// Spanish is Slate's main language: a browser in a language Slate doesn't
+// have gets Spanish, not English (a browser in English still gets English).
+test.describe("a browser in French", () => {
+  test.use({ locale: "fr-FR" });
+
+  test("gets Slate in Spanish", async ({ page }) => {
+    await page.goto("/#login");
+    await expect(page.locator("html")).toHaveAttribute("lang", "es");
+    await expect(page.locator("#auth-title")).toHaveText("Iniciar sesión");
+  });
+});
