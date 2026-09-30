@@ -832,6 +832,12 @@ directly.
   small animated window (a spring, zooming into the texture) with the
   texture at twice its size and a pinned card for scale; its chips
   preview without saving, "Use this one" saves.
+- **Lighter logo** (Sept. 30, 2026, found while reviewing SEO; the owner
+  left it to Claude entirely): `img/Slate-logo.png` (1254 px, 1.7 MB) is
+  now only the master, referenced nowhere. Pages use `img/logo.webp`
+  (288 px, 22 KB: 3× the largest place it shows, the 86 px sidebar
+  logo) and `img/favicon.png` (96 px, 17 KB), made from the master by
+  halving steps on a canvas. Regenerate both if the logo changes.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - large-grid performance.
