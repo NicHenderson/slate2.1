@@ -664,7 +664,7 @@ directly.
   stays for small fixes meanwhile. Phone-only changes: the computer
   layout stays as it is (checked by comparing screenshots). **One phone
   design, chosen by the window's size, not by the device** (the owner's
-  call, Oct. 2026): a computer window made phone-narrow gets it too (no
+  call, Sept. 30, 2026): a computer window made phone-narrow gets it too (no
   separate narrow computer design); at computer sizes nothing changes.
   So everything in it must also work with a mouse (a gesture always has
   a button too). The owner finds the phone layout too much "a computer
