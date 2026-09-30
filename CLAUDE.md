@@ -693,7 +693,12 @@ directly.
   It starts from a handover prompt (in Spanish, given to the owner) that
   sends it here first. Stage 7 (offline) would keep the library on the
   device: the privacy policy's §3 then needs a new version (owner's
-  approval, bump `PRIVACY_VERSION`).
+  approval, bump `PRIVACY_VERSION`). The owner's flow for it: a brand-new
+  `claude/mobile-app` made from `main` by that session (the old one had
+  nothing of its own; this session couldn't delete it, the owner does
+  on GitHub), all stages there, then the whole project merged into
+  `claude/funny-pascal-bk99gr`, tested again, and to `main` only on
+  "súbelo a main" (not stage by stage).
 - **The test scenario** the owner follows to hunt bugs (PC first, then
   the phone): https://claude.ai/artifact/WV8WgTtnTG5LsviRT4amDm. It runs
   with a throwaway account (`+slate1` / `+slate2` Gmail aliases), never a
