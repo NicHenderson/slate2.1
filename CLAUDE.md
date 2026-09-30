@@ -714,7 +714,9 @@ directly.
   a sheet"): a grip, a × (= Back to Slate; none on reset / choose /
   privacy), tabs Log In | Request access (js/auth.js, `[data-auth-tab]`,
   replacing the link under the form there), a handwritten greeting, no
-  title for Request access, no language / privacy link there either;
+  title for Request access, no privacy link there either, and no
+  language picker on the sheet at all (the owner found it out of place;
+  the landing page's last screen has one);
   both forms fit an iPhone 15 and an SE without scrolling
   (tests/mobile.spec.js); a shorter screen scrolls with no bar. It rises
   and sinks as a view transition. Computer sizes pixel-identical. The

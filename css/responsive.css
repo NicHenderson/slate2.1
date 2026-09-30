@@ -1109,18 +1109,16 @@
     display: none;
   }
 
-  /* Language and the privacy page, quiet at the foot of the sheet; asking
-     for access has the policy in its box already, and no room to spare. */
-  .auth-panel .lang-picker,
+  /* The privacy page, quiet at the foot of the sheet; asking for access
+     has the policy in its box already, and no room to spare. No language
+     picker here (the owner found it out of place): the landing page's
+     last screen has one. */
   .auth-panel .auth-privacy-link {
     align-self: center;
-  }
-
-  .auth-panel .auth-privacy-link {
     margin-top: 0;
   }
 
-  .auth-screen[data-mode="request"] .auth-lang,
+  .auth-panel .auth-lang,
   .auth-screen[data-mode="request"] .auth-privacy-link {
     display: none;
   }
