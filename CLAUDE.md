@@ -101,8 +101,9 @@ directly.
   - `tests/i18n.spec.js` fails if a language lacks a string or has one
     nothing uses, if placeholders or markup differ, or if the main screens
     show text that doesn't go through translation.
-  - Stays in English on purpose: the owner's emails (Web3Forms request,
-    the welcome-email tool), Supabase's own emails and error texts (like
+  - Stays in English on purpose: the owner's emails (the Web3Forms
+    request) and the welcome-email tool's own page (the email it builds
+    is Spanish by default, English on request), Supabase's own emails and error texts (like
     weak passwords), emoji and icon names in the icon picker, and the
     "Untitled" saved as a title when TMDB has none.
 - **supabase-js is pinned** in `index.html` (exact version + SRI hash) to
@@ -241,8 +242,9 @@ directly.
   engines and link previews read (title, description, share image) is
   in Spanish for everyone: index.html's `<title>` and those metas carry
   `translate="no"`, so an English page still has the Spanish tab title.
-  Open question for the owner: the welcome email
-  (tools/welcome-email.html, sent to new users) is still in English.
+  The welcome email (tools/welcome-email.html, sent to new users) now
+  goes out in Spanish by default, English if picked there (remembered
+  on the owner's computer); the tool's own page stays in English.
 - Translation is done, and Slate is published (below). **Slate launches in
   English and Spanish only** (the owner's decision); German and Italian are out for
   now, and adding a language later only takes its dictionary.
