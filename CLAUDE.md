@@ -695,7 +695,17 @@ directly.
   showed) and a pale frame when the page was pulled or pinched. Fixed:
   the stories' backdrop is a fixed layer covering the whole screen, the
   root doesn't bounce there, and on touch screens <html> is the brand's
-  dark while the landing page shows. **No pinch zoom on phones** (the
+  dark while the landing page shows. The owner's next photo showed the
+  real cause: iOS 26's WebKit bug 301108 (an installed app with a
+  see-through status bar is told the screen is short by that bar, so
+  anything pinned to the bottom floats above an empty band; Safari and
+  Android are fine). js/screenFit.js measures the shortfall
+  (screen.height vs innerHeight, only when `navigator.standalone`, only
+  up to 80px) into `--ios-gap` / `html.ios-gap`, and the bottom-pinned
+  pieces (the stories' call, toasts, windows, the drawer, the login
+  screen, the app itself, pinned to the screen there) reach the real
+  bottom; 0 everywhere else. Simulated in Chromium; to be confirmed on
+  the iPhone. **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
   user-scalable=no (Android), `touch-action: pan-x pan-y` on <html> and

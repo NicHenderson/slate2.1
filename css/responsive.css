@@ -19,19 +19,26 @@
    does. env() says how much of each edge they cover: 0 on a computer, so
    nothing here moves anything there. Backgrounds still reach the edges;
    text, buttons and windows keep clear of them. --screen-h is the height
-   left between the top and the bottom ones, what windows fit in. */
+   left between the top and the bottom ones, what windows fit in.
+
+   --ios-gap: an iPhone running Slate installed (iOS 26, WebKit bug
+   301108) measures the screen short by the status bar's height, and
+   anything pinned to the bottom floated that far above it.
+   js/screenFit.js measures the shortfall there; everywhere else it's 0,
+   and every use below is a no-op. */
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
-  --screen-h: calc(100vh - var(--safe-top) - var(--safe-bottom));
+  --ios-gap: 0px;
+  --screen-h: calc(100vh + var(--ios-gap) - var(--safe-top) - var(--safe-bottom));
 }
 
 /* Dynamic viewport height avoids the mobile URL-bar height jump. */
 @supports (height: 100dvh) {
   :root {
-    --screen-h: calc(100dvh - var(--safe-top) - var(--safe-bottom));
+    --screen-h: calc(100dvh + var(--ios-gap) - var(--safe-top) - var(--safe-bottom));
   }
   .app {
     height: 100dvh;
@@ -43,7 +50,21 @@
 
 /* Windows are centered in what's left between the edges. */
 .modal-backdrop {
+  bottom: calc(0px - var(--ios-gap));
   padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+}
+
+/* The full-screen layers reach the real bottom (--ios-gap, above). The
+   app is pinned to the screen for it there, as its own height can't be
+   stretched past the page's without the whole page scrolling. */
+.auth-screen {
+  bottom: calc(0px - var(--ios-gap));
+}
+
+html.ios-gap .app {
+  position: fixed;
+  inset: 0 0 calc(0px - var(--ios-gap));
+  height: auto;
 }
 
 .sidebar {
@@ -55,7 +76,7 @@
 }
 
 .toast {
-  bottom: calc(24px + var(--safe-bottom));
+  bottom: calc(24px + var(--safe-bottom) - var(--ios-gap));
 }
 
 /* In the app, what scrolls up passes behind a strip of the theme's
@@ -375,7 +396,7 @@
   .landing-screen::before {
     content: "";
     position: fixed;
-    inset: 0;
+    inset: 0 0 calc(0px - var(--ios-gap));
     z-index: -1;
     background:
       radial-gradient(90% 55% at 85% 0%, color-mix(in srgb, var(--accent-strong) 22%, transparent), transparent 70%),
@@ -508,7 +529,7 @@
     gap: 6px;
     position: fixed;
     right: 0;
-    bottom: 0;
+    bottom: calc(0px - var(--ios-gap));
     left: 0;
     z-index: 50;
     padding: 18px calc(20px + var(--safe-right)) calc(8px + var(--safe-bottom)) calc(20px + var(--safe-left));
@@ -757,7 +778,7 @@
     gap: 4px;
     position: fixed;
     right: 0;
-    bottom: calc(var(--safe-bottom) + 20px);
+    bottom: calc(var(--safe-bottom) + 20px - var(--ios-gap));
     left: 0;
     width: fit-content;
     min-height: 44px;
@@ -947,7 +968,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    height: 100%;
+    height: calc(100% + var(--ios-gap));
     width: min(280px, 82vw);
     z-index: 100;
     transform: translateX(-100%);
@@ -967,7 +988,7 @@
   .sidebar-backdrop {
     display: block;
     position: fixed;
-    inset: 0;
+    inset: 0 0 calc(0px - var(--ios-gap));
     z-index: 96;
     background: rgba(8, 6, 14, 0.6);
     backdrop-filter: blur(1px);
@@ -1052,7 +1073,7 @@
 @media (max-width: 480px) {
   /* modal.css lowers it to 16px here; the home bar still comes first. */
   .toast {
-    bottom: calc(16px + var(--safe-bottom));
+    bottom: calc(16px + var(--safe-bottom) - var(--ios-gap));
   }
 
   .content {
