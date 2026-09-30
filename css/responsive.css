@@ -134,6 +134,9 @@
    page's story controls (its phone tier, below). */
 .menu-toggle,
 .sidebar-backdrop,
+.auth-sheet-grip,
+.auth-sheet-close,
+.auth-tabs,
 .lp-stories,
 .lp-story-letter,
 .lp-story-cta {
@@ -908,6 +911,222 @@
 
   .auth-card {
     padding: 28px 22px 24px;
+  }
+}
+
+/* ---------- The login card on a phone: a sheet ----------
+   Risen from the bottom over the landing page, which stays in sight
+   behind it (the owner's pick of three mockups): a grip, a ×, tabs
+   between logging in and asking for access, and everything sized to fit
+   the screen without scrolling (the owner asked). Only if a phone is too
+   short for it does the sheet scroll, with no bar showing. */
+@media (max-width: 640px) {
+  .auth-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    background: rgba(8, 6, 14, 0.5);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+  }
+
+  .auth-hero {
+    display: none;
+  }
+
+  .auth-panel {
+    /* A paper surface, as the card on it was. */
+    --text: var(--ink);
+    --text-muted: var(--ink-muted);
+    --border: rgba(13, 12, 21, 0.18);
+    position: relative;
+    flex: 0 1 auto;
+    gap: 12px;
+    align-items: stretch;
+    justify-content: flex-start;
+    min-height: 0;
+    max-height: calc(100% - var(--safe-top) - 8px);
+    padding: 20px calc(22px + var(--safe-right)) calc(var(--safe-bottom) + 18px) calc(22px + var(--safe-left));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    border-radius: 24px 24px 0 0;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 -14px 40px rgba(0, 0, 0, 0.5);
+    view-transition-name: auth-card;
+  }
+
+  .auth-panel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .auth-sheet-grip {
+    display: block;
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 40px;
+    height: 5px;
+    margin-left: -20px;
+    border-radius: 5px;
+    background: rgba(13, 12, 21, 0.22);
+  }
+
+  /* Above the card, which starts under it. */
+  .auth-sheet-close {
+    display: grid;
+    place-items: center;
+    position: absolute;
+    z-index: 1;
+    top: 10px;
+    right: calc(10px + var(--safe-right));
+    width: 44px;
+    height: 44px;
+    color: var(--ink-muted);
+  }
+
+  .auth-sheet-close svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* No way out but "Log out" on the cards a signed-in visitor must finish. */
+  .auth-screen[data-mode="reset"] .auth-sheet-close,
+  .auth-screen[data-mode="choose"] .auth-sheet-close,
+  .auth-screen[data-mode="privacy"] .auth-sheet-close {
+    display: none;
+  }
+
+  /* The card is the sheet now: no paper of its own, pin or tilt. */
+  .auth-card {
+    width: 100%;
+    padding: 34px 0 0;
+    background: none;
+    box-shadow: none;
+    transform: none;
+    animation: none;
+    view-transition-name: none;
+  }
+
+  .auth-card::before,
+  .auth-card-tape {
+    display: none;
+  }
+
+  .auth-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgba(13, 12, 21, 0.08);
+  }
+
+  .auth-screen:not([data-mode="login"]):not([data-mode="request"]) .auth-tabs {
+    display: none;
+  }
+
+  .auth-tab {
+    flex: 1;
+    min-height: 40px;
+    border-radius: 999px;
+    color: var(--ink-muted);
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .auth-tab[aria-pressed="true"] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  /* The tabs say which form this is: the line under them is the hand-
+     written greeting, and asking for access needs no title of its own. */
+  .auth-eyebrow {
+    margin-bottom: 2px;
+    color: var(--accent-deep);
+    font-family: var(--font-hand);
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .auth-title {
+    margin-bottom: 16px;
+    font-size: 28px;
+  }
+
+  .auth-screen[data-mode="request"] .auth-title {
+    display: none;
+  }
+
+  .auth-screen[data-mode="request"] .auth-hint {
+    margin: 2px 0 14px;
+  }
+
+  .auth-field {
+    margin-bottom: 12px;
+  }
+
+  /* Easy to hit with a thumb. */
+  .auth-forgot-btn {
+    min-height: 36px;
+    margin-top: 0;
+    font-size: 14px;
+  }
+
+  .auth-note {
+    height: 76px;
+    min-height: 0;
+  }
+
+  .auth-screen[data-mode="login"] .auth-toggle,
+  .auth-screen[data-mode="request"] .auth-toggle {
+    display: none;
+  }
+
+  /* Language and the privacy page, quiet at the foot of the sheet; asking
+     for access has the policy in its box already, and no room to spare. */
+  .auth-panel .lang-picker,
+  .auth-panel .auth-privacy-link {
+    align-self: center;
+  }
+
+  .auth-panel .auth-privacy-link {
+    margin-top: 0;
+  }
+
+  .auth-screen[data-mode="request"] .auth-lang,
+  .auth-screen[data-mode="request"] .auth-privacy-link {
+    display: none;
+  }
+
+  /* It rises from the bottom and sinks back, instead of the card's drop
+     onto the board. */
+  html[data-vt="open-auth"]::view-transition-new(auth-card) {
+    animation: vt-sheet-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  html[data-vt="close-auth"]::view-transition-old(auth-card) {
+    animation: vt-sheet-down 0.3s cubic-bezier(0.4, 0, 1, 1) both;
+  }
+}
+
+@keyframes vt-sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes vt-sheet-down {
+  to {
+    transform: translateY(100%);
   }
 }
 

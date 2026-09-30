@@ -328,6 +328,20 @@ document.getElementById("auth-back").addEventListener("click", (e) => {
   leaveAuthCard();
 });
 
+// The phone's sheet: its × is "Back to Slate", and its tabs switch
+// between logging in and asking for access, as the link under the form
+// does on a computer.
+document.getElementById("auth-sheet-close").addEventListener("click", () => {
+  if (!signedInCard(authMode)) leaveAuthCard();
+});
+
+const authTabs = document.querySelectorAll("[data-auth-tab]");
+authTabs.forEach((tab) =>
+  tab.addEventListener("click", () => {
+    if (tab.dataset.authTab !== authMode) setAuthRoute(tab.dataset.authTab);
+  })
+);
+
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !currentUserId && !authScreen.classList.contains("hidden")) {
     leaveAuthCard();
@@ -381,6 +395,7 @@ function setAuthMode(mode) {
   authHint.classList.toggle("hidden", !text.hint);
   authToggleText.textContent = text.toggleText;
   authToggleBtn.textContent = text.toggleBtn;
+  authTabs.forEach((tab) => tab.setAttribute("aria-pressed", String(tab.dataset.authTab === mode)));
   clearFieldErrors();
   clearMessage();
   hidePasswordFields();

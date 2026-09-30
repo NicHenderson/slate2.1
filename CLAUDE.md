@@ -704,7 +704,21 @@ directly.
   owner's word**: on their iPhone "Already have an account?" came out
   cut off, and they'd rather keep the dark band than stack patches. So
   on an installed iPhone the stories' bottom call sits a status bar's
-  height above the bottom until Apple fixes it. **No pinch zoom on phones** (the
+  height above the bottom until Apple fixes it. **Login and Request
+  access next**: of three phone mockups
+  (https://claude.ai/artifact/SStEPPN9etcqYe93NGXPhG; A a sheet over the
+  cover, B the invite's ticket, C a native-looking screen) the owner
+  picked A, asking that it never scroll. Built, waiting for the owner's
+  check: at ≤640px the card is a paper sheet risen from the bottom over
+  the blurred landing page (responsive.css, "The login card on a phone:
+  a sheet"): a grip, a × (= Back to Slate; none on reset / choose /
+  privacy), tabs Log In | Request access (js/auth.js, `[data-auth-tab]`,
+  replacing the link under the form there), a handwritten greeting, no
+  title for Request access, no language / privacy link there either;
+  both forms fit an iPhone 15 and an SE without scrolling
+  (tests/mobile.spec.js); a shorter screen scrolls with no bar. It rises
+  and sinks as a view transition. Computer sizes pixel-identical.
+  **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
   user-scalable=no (Android), `touch-action: pan-x pan-y` on <html> and

@@ -96,7 +96,7 @@
   <link rel="stylesheet" href="css/episodes.css?v=176d4679" />
   <link rel="stylesheet" href="css/whereToWatch.css?v=7528c42f" />
   <link rel="stylesheet" href="css/librarySearch.css?v=cce1cb12" />
-  <link rel="stylesheet" href="css/responsive.css?v=3995b956" />
+  <link rel="stylesheet" href="css/responsive.css?v=2ac1b6a8" />
   <script src="js/statusBar.js?v=b3d9396d"></script>
   <script src="js/noZoom.js?v=632c1c6c"></script>
 </head>
@@ -357,8 +357,18 @@
     </div>
 
     <div class="auth-panel">
+      <!-- On a phone the card is a sheet risen over the landing page (the
+           owner's pick of three mockups): a grip, a close button, and tabs
+           between logging in and asking for access. Hidden on a computer
+           (responsive.css). -->
+      <span class="auth-sheet-grip" aria-hidden="true"></span>
+      <button class="auth-sheet-close" id="auth-sheet-close" type="button" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
       <div class="auth-card">
         <span class="auth-card-tape" aria-hidden="true"></span>
+        <div class="auth-tabs" role="group">
+          <button class="auth-tab" type="button" data-auth-tab="login" aria-pressed="true">Log In</button>
+          <button class="auth-tab" type="button" data-auth-tab="request" aria-pressed="false">Request access</button>
+        </div>
         <p class="auth-eyebrow" id="auth-subtitle">Welcome back</p>
         <h2 class="auth-title" id="auth-title">Log In</h2>
         <p class="auth-hint hidden" id="auth-hint"></p>
@@ -1366,6 +1376,6 @@
   <script src="js/yourData.js?v=cfae9ebf"></script>
   <script src="js/deleteAccount.js?v=bb8fa209"></script>
   <script src="js/landing.js?v=ecfc7b41"></script>
-  <script src="js/auth.js?v=6028640d"></script>
+  <script src="js/auth.js?v=8010d199"></script>
 </body>
 </html>

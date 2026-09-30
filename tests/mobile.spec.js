@@ -116,6 +116,31 @@ test("on a phone the landing page is stories, stepped with the arrows and the ba
   await expect(page.locator("#auth-screen")).toBeVisible();
 });
 
+// Logging in and asking for access on a phone: a sheet over the landing
+// page, whose forms fit the screen without scrolling (the owner asked).
+test("on a phone the login card is a sheet: its tabs, its fit and its ×", async ({ page }) => {
+  await page.goto("/");
+  await page.locator('.lp-story-cta a[href="#login"]').tap();
+  await expect(page.locator("#auth-screen")).toHaveAttribute("data-mode", "login");
+  const fits = () =>
+    page.evaluate(() => {
+      const sheet = document.querySelector(".auth-panel");
+      return sheet.scrollHeight <= sheet.clientHeight;
+    });
+  expect(await fits(), "the login form fits").toBe(true);
+
+  await page.locator('[data-auth-tab="request"]').tap();
+  await expect(page.locator("#auth-screen")).toHaveAttribute("data-mode", "request");
+  await expect(page.locator("#auth-name")).toBeVisible();
+  await expect(page).toHaveURL(/#request-access$/);
+  expect(await fits(), "the request form fits").toBe(true);
+  await expectNoZoomingFields(page);
+
+  await page.locator("#auth-sheet-close").tap();
+  await expect(page.locator("#auth-screen")).toBeHidden();
+  await expect(page.locator("#lp-top")).toBeVisible();
+});
+
 test("installable: the manifest and every icon it names are there", async ({ page, request }) => {
   await page.goto("/");
   const href = await page.locator('link[rel="manifest"]').getAttribute("href");
