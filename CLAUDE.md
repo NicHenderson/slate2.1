@@ -668,7 +668,16 @@ directly.
   separate narrow computer design); at computer sizes nothing changes.
   So everything in it must also work with a mouse (a gesture always has
   a button too). The owner finds the phone layout too much "a computer
-  page trying to be an app": that gets fixed before stage 2. Native store
+  page trying to be an app": that gets fixed before stage 2, screen by
+  screen, mockups first. **The landing page first**: of three phone
+  mockups (https://claude.ai/artifact/W8YjrkyB4BRfB1VcNVwA9m; A a pocket
+  board with a fixed bottom bar, B stories, C a cinema ticket) the owner
+  loved B: one full screen per idea, swiped up like stories, a progress
+  bar on top, "Request access" fixed at the bottom; 1 the cover (pinned
+  polaroids, the hero text and lede), 2 "Sound familiar?" (the three
+  notes), 3 "Slate keeps it for you" (three tickets like the sidebar's),
+  4 the invite as an "Admit one" ticket, 5 the letter (scrolls) and the
+  footer. Same words as today's page, nothing added. Native store
   ports are out for now (Play's $25 and 12-tester closed test, Apple's
   $99 a year and a Mac; one would wrap this same web app). The owner
   tests on an iPhone 15 (an Android too, not at hand). Chromium here can
