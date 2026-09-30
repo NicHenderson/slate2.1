@@ -720,10 +720,13 @@ directly.
   Stage 2 — done, in `main` since Sept. 30, 2026 (PR #24, CI green on
   its exact head): all of the above, in Spanish; robots.txt allows everything (a Disallow would hide the
   noindex header from crawlers). Tests: an absolute og:image that
-  exists (stamps.spec), and a French browser getting Spanish. Next:
-  stage 3, waiting for the owner's Search Console HTML-tag code (to add
-  to index.html's head), then check the link card (opengraph.xyz,
-  WhatsApp) and Google's Rich Results Test on the live site.
+  exists (stamps.spec), and a French browser getting Spanish. Stage 3:
+  the Search Console property is the owner's, registered with
+  slateappmail@gmail.com (URL prefix https://myslate.pages.dev); its
+  verification tag is in index.html's head (keep it). Once in `main`:
+  the owner clicks Verify, submits sitemap.xml and asks to index the
+  home page; then check the link card (opengraph.xyz, WhatsApp) and
+  Google's Rich Results Test on the live site.
   The owner asked about one branch per screen (landing / login / app
   on their own subdomains): talked out of it (previews are noindex,
   the session and settings are per origin, three copies of the code);
