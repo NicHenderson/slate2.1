@@ -353,11 +353,81 @@
   white-space: nowrap;
 }
 
-/* Signed in by a reset link or a temporary password: no way back to the
-   page but "Log out". */
+/* Signed in by a reset link or a temporary password, or asked to accept
+   the Privacy Policy: no way back to the page but "Log out". */
 .auth-screen[data-mode="reset"] .auth-back,
-.auth-screen[data-mode="choose"] .auth-back {
+.auth-screen[data-mode="choose"] .auth-back,
+.auth-screen[data-mode="privacy"] .auth-back {
   display: none;
+}
+
+/* The Privacy Policy box: a drawn square the real checkbox sits under
+   (still reachable by keyboard and screen readers). */
+.auth-consent-label {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.auth-consent-label input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.auth-consent-box {
+  position: relative;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: var(--paper);
+  transform: rotate(-2deg);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.auth-consent-box::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 6px;
+  height: 11px;
+  border: solid #fff;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.18s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.auth-consent-label input:checked + .auth-consent-box {
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
+}
+
+.auth-consent-label input:checked + .auth-consent-box::after {
+  transform: rotate(45deg) scale(1);
+}
+
+.auth-consent-label input:focus-visible + .auth-consent-box {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
+.auth-consent-text a {
+  color: var(--accent-deep);
+  font-weight: 600;
+  text-decoration: underline;
 }
 
 .auth-field-error {

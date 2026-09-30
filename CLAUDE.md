@@ -741,9 +741,23 @@ directly.
   `tests/privacy.spec.js`. Its text is the owner's: change a word only
   with their approval, and bump the version and date if it changes.
   **Before `main`:** the policy says a box is ticked on Request access
-  and at the first login ("I've read the Privacy Policy and I'm 14 or
-  older", existing users asked once, kept in user metadata like
-  `password_chosen`), so that stage ships with it.
+  and at the first login, so that stage ships with it. Stage 4 — done,
+  waiting for the owner's check: the unticked box "I've read the
+  Privacy Policy and I'm 14 or older" (linked, opens in a new tab) on
+  Request access (the Web3Forms email says it was ticked, and the
+  version), on the first-login password card, and on its own card
+  ("Our Privacy Policy", `privacy` mode in js/auth.js) for accounts
+  made before it, once, before the app opens. Kept in user metadata
+  (`privacy_version`, `privacy_accepted_at`; no migration). A new
+  policy version bumps `PRIVACY_VERSION` in js/auth.js and asks everyone
+  again. If Supabase can't be asked, the app opens (never locked out
+  over this). Left for the law: the two internal guides (where they
+  live is the owner's call, still open), the owner's own tasks (delete
+  resolved requests and sent welcome emails, check Supabase's DPA), and
+  all of it in `main` before Dec. 1, 2026. No filing with the Agency is
+  needed (art. 14 ter asks for the policy published on the site; only
+  breaches are reported, art. 14 sexies; the art. 49 compliance model
+  is voluntary).
 - **Background textures, a setting** (the owner's request, Sept. 2026) —
   built on `claude/episode-tracking-shows-s9gixh` (restarted from
   `main` after PR #22), then merged into `claude/funny-pascal-bk99gr`

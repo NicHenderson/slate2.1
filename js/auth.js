@@ -22,13 +22,15 @@ const authForgotBtn = document.getElementById("auth-forgot-btn");
 const authNameField = document.getElementById("auth-name-field");
 const authName = document.getElementById("auth-name");
 const authNoteField = document.getElementById("auth-note-field");
+const authConsentField = document.getElementById("auth-consent-field");
+const authConsent = document.getElementById("auth-consent");
 const authNote = document.getElementById("auth-note");
 const authNoteCount = document.getElementById("auth-note-count");
 const authTrap = document.getElementById("auth-website");
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-let authMode = "login"; // "login" | "request" | "forgot" | "reset" | "choose"
+let authMode = "login"; // "login" | "request" | "forgot" | "reset" | "choose" | "privacy"
 let authBusy = false;
 
 /* ---------- the card's four modes ----------
@@ -43,7 +45,9 @@ let authBusy = false;
              it, but kept out of the app until the new password is saved)
    choose    the same, the first time someone logs in with the temporary
              password their account was made with: they pick their own
-             before the app opens. */
+             before the app opens.
+   privacy   only the Privacy Policy box, for an account made before the
+             policy (or before its current version): once, then the app. */
 
 const AUTH_MODES = {
   login: {
@@ -90,11 +94,40 @@ const AUTH_MODES = {
     toggleText: t("Not you?"),
     toggleBtn: t("Log out"),
   },
+  privacy: {
+    eyebrow: t("One more thing"),
+    title: t("Our Privacy Policy"),
+    hint: t("Before you go on, take a look at Slate's Privacy Policy: what it keeps about you, what for, and your rights over it. Then tick the box."),
+    submit: t("Continue"),
+    busy: t("Saving…"),
+    toggleText: t("Not now?"),
+    toggleBtn: t("Log out"),
+  },
 };
 
 // The two cards that set a password for someone already signed in: they
 // hide the email and the way back, and "Log out" is the only way out.
 const settingPassword = (mode) => mode === "reset" || mode === "choose";
+// Every card for someone already signed in, the policy's included.
+const signedInCard = (mode) => settingPassword(mode) || mode === "privacy";
+// The cards with the Privacy Policy box.
+const asksConsent = (mode) => mode === "request" || mode === "choose" || mode === "privacy";
+
+/* ---------- the Privacy Policy ----------
+
+   Accepting it is kept in the user's metadata, like password_chosen: the
+   version read and when (the policy says a box is ticked; this is the
+   record). A new version of privacy.html bumps PRIVACY_VERSION, and
+   everyone is asked once more at their next login. Like password_chosen,
+   it only records what the owner of the account did. */
+
+const PRIVACY_VERSION = "1.2"; // privacy.html's "Version 1.2"
+
+const acceptedPrivacy = (user) => user?.user_metadata?.privacy_version === PRIVACY_VERSION;
+
+function privacyAcceptance() {
+  return { privacy_version: PRIVACY_VERSION, privacy_accepted_at: new Date().toISOString() };
+}
 
 /* ---------- a password of their own ----------
 
@@ -262,7 +295,7 @@ function showPasswordView(mode) {
     clearAuthRoute();
     lastAuthRoute = null;
     authScreen.classList.remove("hidden");
-    if (matchMedia("(pointer: fine)").matches) authPassword.focus();
+    if (matchMedia("(pointer: fine)").matches) (mode === "privacy" ? authConsent : authPassword).focus();
   });
 }
 
@@ -291,7 +324,7 @@ function leaveAuthCard() {
 
 document.getElementById("auth-back").addEventListener("click", (e) => {
   e.preventDefault();
-  if (settingPassword(authMode)) return; // hidden then: the way out is "Log out"
+  if (signedInCard(authMode)) return; // hidden then: the way out is "Log out"
   leaveAuthCard();
 });
 
@@ -314,6 +347,7 @@ function clearFieldErrors() {
   setFieldError("auth-email-error", "");
   setFieldError("auth-password-error", "");
   setFieldError("auth-confirm-error", "");
+  setFieldError("auth-consent-error", "");
 }
 
 function showMessage(message, isError = true) {
@@ -332,10 +366,11 @@ function setAuthMode(mode) {
   const text = AUTH_MODES[mode];
   authScreen.dataset.mode = mode;
   authNameField.classList.toggle("hidden", mode !== "request");
-  authEmailField.classList.toggle("hidden", settingPassword(mode));
-  authPasswordField.classList.toggle("hidden", mode === "forgot" || mode === "request");
+  authEmailField.classList.toggle("hidden", signedInCard(mode));
+  authPasswordField.classList.toggle("hidden", mode === "forgot" || mode === "request" || mode === "privacy");
   authConfirmField.classList.toggle("hidden", !settingPassword(mode));
   authNoteField.classList.toggle("hidden", mode !== "request");
+  authConsentField.classList.toggle("hidden", !asksConsent(mode));
   authForgotBtn.classList.toggle("hidden", mode !== "login");
   authPasswordLabel.textContent = settingPassword(mode) ? t("New password") : t("Password");
   authConfirmLabel.textContent = settingPassword(mode) ? t("Confirm new password") : t("Confirm password");
@@ -396,11 +431,15 @@ function validate() {
     setFieldError("auth-name-error", t("Tell us your name."));
     ok = false;
   }
-  if (!settingPassword(authMode) && !EMAIL_RE.test(email)) {
+  if (!signedInCard(authMode) && !EMAIL_RE.test(email)) {
     setFieldError("auth-email-error", t("Enter a valid email address."));
     ok = false;
   }
-  if (authMode === "forgot" || authMode === "request") return ok;
+  if (asksConsent(authMode) && !authConsent.checked) {
+    setFieldError("auth-consent-error", t("Tick the box to go on."));
+    ok = false;
+  }
+  if (authMode === "forgot" || authMode === "request" || authMode === "privacy") return ok;
   if (password.length < 8) {
     setFieldError(
       "auth-password-error",
@@ -436,6 +475,8 @@ authForm.addEventListener("submit", async (e) => {
       await saveNewPassword(password);
     } else if (authMode === "choose") {
       await saveChosenPassword(password);
+    } else if (authMode === "privacy") {
+      await savePrivacyAcceptance();
     } else {
       const { error } = await db.auth.signInWithPassword({ email, password });
       if (error) {
@@ -499,6 +540,7 @@ async function sendAccessRequest(email) {
         name,
         email,
         message: note || "(no message)",
+        "Privacy Policy": `Ticked "I've read the Privacy Policy and I'm 14 or older" (version ${PRIVACY_VERSION}).`,
         "Requested on": new Date().toLocaleString("en-US", {
           year: "numeric",
           month: "short",
@@ -531,8 +573,8 @@ async function sendAccessRequest(email) {
 
 // Saves the password and marks it as their own. False (and says why on
 // the card) if it wasn't saved.
-async function updatePassword(password, sessionGoneMessage) {
-  const { error } = await db.auth.updateUser({ password, data: { password_chosen: true } });
+async function updatePassword(password, sessionGoneMessage, moreData = {}) {
+  const { error } = await db.auth.updateUser({ password, data: { password_chosen: true, ...moreData } });
   if (!error) return true;
   if (error.code === "same_password") {
     setFieldError("auth-password-error", t("That's already your password — choose a different one."));
@@ -550,10 +592,23 @@ async function updatePassword(password, sessionGoneMessage) {
 // First login: their own password replaces the temporary one, and the app
 // opens straight away — no need to log in again.
 async function saveChosenPassword(password) {
-  const saved = await updatePassword(password, t("You've been signed out. Log out and log in again with your temporary password."));
+  const saved = await updatePassword(password, t("You've been signed out. Log out and log in again with your temporary password."), privacyAcceptance());
   if (!saved) return;
   authForm.reset();
   enterApp().then(() => showToast(t("Password saved. Welcome to Slate!")));
+}
+
+// An account from before the policy: the box ticked, then into the app.
+async function savePrivacyAcceptance() {
+  const { error } = await db.auth.updateUser({ data: privacyAcceptance() });
+  if (error) {
+    console.error("Privacy acceptance error:", error.message);
+    const gone = error.status === 401 || error.code === "session_not_found" || error.code === "session_expired";
+    showMessage(gone ? t("You've been signed out. Log out and log in again.") : t("Couldn't save that. Please try again."));
+    return;
+  }
+  authForm.reset();
+  enterApp();
 }
 
 async function saveNewPassword(password) {
@@ -578,8 +633,8 @@ async function saveNewPassword(password) {
 let authNotice = null;
 
 authToggleBtn.addEventListener("click", () => {
-  if (settingPassword(authMode)) {
-    // Not saving a new password after all: leave signed out.
+  if (signedInCard(authMode)) {
+    // Not saving a new password (or not accepting) after all: leave signed out.
     setRecoveryPending(false);
     db.auth.signOut();
     return;
@@ -670,18 +725,21 @@ db.auth.onAuthStateChange((event, session) => {
       enterApp().then(() => {
         if (linkFailed) showToast(LINK_EXPIRED, true);
       });
-    if (hasOwnPassword(session.user)) {
+    if (hasOwnPassword(session.user) && acceptedPrivacy(session.user)) {
       open();
     } else {
-      // A session saved on this device before the flag was set carries old
-      // metadata: ask the server before asking for a password. Deferred out
-      // of the callback, like every Supabase call from here.
+      // A session saved on this device before the flags were set carries
+      // old metadata: ask the server before asking for anything. Deferred
+      // out of the callback, like every Supabase call from here. If the
+      // server can't answer, the app opens: never locked out over this.
       setTimeout(async () => {
         const { data, error } = await db.auth.getUser();
         if (currentUserId !== nextUserId) return; // logged out meanwhile
         if (error) console.error("User check error:", error.message);
-        if (error || hasOwnPassword(data.user)) open();
-        else showPasswordView("choose");
+        if (error) open();
+        else if (!hasOwnPassword(data.user)) showPasswordView("choose");
+        else if (!acceptedPrivacy(data.user)) showPasswordView("privacy");
+        else open();
       }, 0);
     }
   } else {

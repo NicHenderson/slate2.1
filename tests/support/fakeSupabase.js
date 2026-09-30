@@ -735,11 +735,14 @@ function createBackend() {
 
   /* ---------- test setup helpers ---------- */
 
-  // An account as it is once its owner has chosen a password. `temporary`:
-  // as just made by hand in Supabase (Add user), still on the password it
-  // was given — Slate asks for a new one first (migration 0006).
-  function addUser(email, password, { temporary = false } = {}) {
+  // An account as it is once its owner has chosen a password and accepted
+  // the Privacy Policy (the version js/auth.js asks for). `temporary`: as
+  // just made by hand in Supabase (Add user), still on the password it was
+  // given — Slate asks for a new one first (migration 0006). `privacy:
+  // false`: made before the policy, so Slate asks for it once.
+  function addUser(email, password, { temporary = false, privacy = !temporary } = {}) {
     const metadata = temporary ? {} : { password_chosen: true };
+    if (privacy) Object.assign(metadata, { privacy_version: "1.2", privacy_accepted_at: "2026-09-30T12:00:00.000Z" });
     const user = { id: crypto.randomUUID(), email, password, metadata };
     users.set(user.id, user);
     return user;

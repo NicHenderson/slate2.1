@@ -41,7 +41,7 @@
   <link rel="stylesheet" href="css/content.css?v=42b1b03a" />
   <link rel="stylesheet" href="css/cards.css?v=13cc816f" />
   <link rel="stylesheet" href="css/modal.css?v=3982f90f" />
-  <link rel="stylesheet" href="css/auth.css?v=7f6723f9" />
+  <link rel="stylesheet" href="css/auth.css?v=a0cbf8ee" />
   <link rel="stylesheet" href="css/landing.css?v=1211144b" />
   <link rel="stylesheet" href="css/transitions.css?v=bf37ef65" />
   <link rel="stylesheet" href="css/settings.css?v=91ed6a31" />
@@ -337,6 +337,18 @@
               <span class="auth-counter" id="auth-note-count" aria-live="polite">0/500</span>
             </div>
             <textarea id="auth-note" class="field-input auth-note" rows="3" maxlength="500" placeholder="Who are you? How did you hear about Slate?"></textarea>
+          </div>
+
+          <!-- The Privacy Policy's own words (§4, §11): unticked, and needed
+               to ask for access, to finish the first login, and once by
+               everyone who had an account before (js/auth.js). -->
+          <div class="auth-field auth-consent hidden" id="auth-consent-field">
+            <label class="auth-consent-label">
+              <input type="checkbox" id="auth-consent" />
+              <span class="auth-consent-box" aria-hidden="true"></span>
+              <span class="auth-consent-text" data-i18n>I've read the <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and I'm 14 or older.</span>
+            </label>
+            <p class="auth-field-error hidden" id="auth-consent-error"></p>
           </div>
 
           <!-- Left empty by people; bots fill in every field they find. -->
@@ -1246,7 +1258,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-  <script src="js/lang/es.js?v=97d757c1"></script>
+  <script src="js/lang/es.js?v=8474d109"></script>
   <script src="js/i18n.js?v=dde7afb9"></script>
   <script src="js/escapeHtml.js?v=28c1feb8"></script>
   <script src="js/viewTransitions.js?v=d587d807"></script>
@@ -1284,6 +1296,6 @@
   <script src="js/yourData.js?v=cfae9ebf"></script>
   <script src="js/deleteAccount.js?v=bb8fa209"></script>
   <script src="js/landing.js?v=69197ae5"></script>
-  <script src="js/auth.js?v=43a43f19"></script>
+  <script src="js/auth.js?v=6028640d"></script>
 </body>
 </html>
