@@ -723,8 +723,11 @@ directly.
   exists (stamps.spec), and a French browser getting Spanish. Stage 3:
   the Search Console property is the owner's, registered with
   slateappmail@gmail.com (URL prefix https://myslate.pages.dev); its
-  verification tag is in index.html's head (keep it). Once in `main`:
-  the owner clicks Verify, submits sitemap.xml and asks to index the
+  verification tag is in index.html's head (keep it), in `main` since
+  Sept. 30, 2026 (PR #25). The owner verified it the same day; the
+  live URL test says the home page is available to Google and can be
+  indexed. "Request indexing" hit its daily quota (common on a new
+  property; the sitemap does the job anyway). Left to the owner: click Verify, submits sitemap.xml and asks to index the
   home page; then check the link card (opengraph.xyz, WhatsApp) and
   Google's Rich Results Test on the live site.
   The owner asked about one branch per screen (landing / login / app
@@ -829,6 +832,12 @@ directly.
   small animated window (a spring, zooming into the texture) with the
   texture at twice its size and a pinned card for scale; its chips
   preview without saving, "Use this one" saves.
+- **Lighter logo** (Sept. 30, 2026, found while reviewing SEO; the owner
+  left it to Claude entirely): `img/Slate-logo.png` (1254 px, 1.7 MB) is
+  now only the master, referenced nowhere. Pages use `img/logo.webp`
+  (288 px, 22 KB: 3× the largest place it shows, the 86 px sidebar
+  logo) and `img/favicon.png` (96 px, 17 KB), made from the master by
+  halving steps on a canvas. Regenerate both if the logo changes.
 - Optional ideas, not requirements:
   - reordering cards with the keyboard;
   - large-grid performance.
