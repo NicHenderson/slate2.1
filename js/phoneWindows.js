@@ -11,6 +11,10 @@ const PHONE_WINDOWS = [
   { backdrop: "update-modal", sheet: ".update-layout", head: ".update-ticket", close: "update-close" },
   { backdrop: "start-modal", sheet: ".update-layout", head: ".update-ticket", close: "start-close" },
   { backdrop: "confirm-modal", sheet: ".confirm-modal", head: ".modal-head", close: "confirm-close" },
+  { backdrop: "collection-modal", sheet: ".modal", head: ".modal-head", close: "collection-close" },
+  { backdrop: "library-modal", sheet: ".modal", head: ".modal-head", close: "library-close" },
+  { backdrop: "favorite-modal", sheet: ".modal", head: ".modal-head", close: "favorite-close" },
+  { backdrop: "import-modal", sheet: ".import-panel", head: ".update-ticket", close: "import-close" },
 ];
 
 const phoneWindowLayout = matchMedia("(max-width: 640px)");

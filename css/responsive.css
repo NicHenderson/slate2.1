@@ -3420,3 +3420,474 @@
     }
   }
 }
+
+/* ==================== Windows on a phone, stage 2 ====================
+   The same sheet of paper (above) for a new collection, adding titles to
+   one, the favorite picker and Import. */
+@media (max-width: 640px) {
+  :is(#collection-modal, #library-modal, #favorite-modal, #import-modal) {
+    align-items: end;
+    justify-items: stretch;
+    padding: var(--safe-top) 0 0;
+    background: rgba(5, 4, 10, 0.6);
+    backdrop-filter: blur(3px);
+  }
+
+  :is(#collection-modal, #library-modal, #favorite-modal) .modal,
+  #import-modal .import-panel {
+    --sheet-paper: var(--paper);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: calc(100dvh - var(--safe-top) - 16px);
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: var(--sheet-paper);
+    color: var(--ink);
+    box-shadow: 0 -10px 34px rgba(0, 0, 0, 0.5);
+    transform: none;
+    animation: phone-window-up 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+
+  /* Lists stand tall, so their sheet does too: it doesn't jump as they fill. */
+  :is(#library-modal, #favorite-modal) .modal {
+    height: calc(100dvh - var(--safe-top) - 16px);
+  }
+
+  :is(#collection-modal, #library-modal, #favorite-modal) .modal::before,
+  #import-modal .import-panel::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -7px;
+    height: 8px;
+    background: radial-gradient(circle at 6px -2px, transparent 6px, var(--sheet-paper) 6.5px) 0 0 / 12px 8px repeat-x;
+    pointer-events: none;
+  }
+
+  :is(#collection-modal, #library-modal, #favorite-modal) .modal::after,
+  #import-modal .import-panel::after {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    top: -11px;
+    left: 50%;
+    width: 76px;
+    height: 22px;
+    margin-left: -38px;
+    background: color-mix(in srgb, var(--accent) 78%, transparent);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transform: rotate(-2deg);
+    pointer-events: none;
+  }
+
+  /* ---------- the head ---------- */
+  :is(#collection-modal, #library-modal, #favorite-modal) .modal-head,
+  #import-modal .update-ticket {
+    flex: none;
+    display: block;
+    margin: 0;
+    padding: 24px 56px 12px 20px;
+    border-bottom: 2px dashed color-mix(in srgb, var(--ink) 18%, transparent);
+    background: none;
+    color: var(--ink);
+    touch-action: none;
+  }
+
+  #import-modal .update-ticket::after {
+    content: none;
+  }
+
+  :is(#collection-modal, #library-modal, #favorite-modal) .modal-head h2,
+  #import-modal .update-eyebrow {
+    display: table;
+    margin-bottom: 0;
+    padding: 3px 12px 2px;
+    background: color-mix(in srgb, var(--accent-strong) 55%, var(--paper));
+    color: var(--ink);
+    font-family: var(--font-hand);
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-transform: none;
+    opacity: 1;
+    transform: rotate(-1.5deg);
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  #import-modal .update-eyebrow {
+    margin-bottom: 7px;
+  }
+
+  #import-modal .update-movie-title,
+  #import-modal .update-movie-meta {
+    display: inline;
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    line-height: 1.6;
+    opacity: 1;
+  }
+
+  #import-modal .update-movie-title {
+    font-weight: 700;
+  }
+
+  #import-modal .update-movie-meta {
+    color: var(--ink-muted);
+  }
+
+  #import-modal .update-movie-title:not(:empty) + .update-movie-meta:not(:empty)::before {
+    content: " · ";
+  }
+
+  :is(#collection-close, #library-close, #favorite-close, #import-close) {
+    position: absolute;
+    z-index: 3;
+    top: 16px;
+    right: 10px;
+    display: grid;
+    width: 40px;
+    height: 40px;
+    color: var(--ink);
+    background: none;
+  }
+
+  /* ---------- a new collection ---------- */
+  #collection-form {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 2px 20px 0;
+  }
+
+  #collection-form .field-label {
+    margin: 14px 0 6px;
+  }
+
+  #collection-form .icon-grid {
+    max-height: 200px;
+  }
+
+  #collection-modal .confirm-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    display: flex;
+    gap: 14px;
+    margin: 14px -20px 0;
+    padding: 14px 20px calc(12px + var(--safe-bottom));
+    background: var(--sheet-paper);
+  }
+
+  #collection-modal .confirm-actions button {
+    flex: 1;
+    min-height: 48px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 0;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  #collection-modal .confirm-actions .modal-search-btn {
+    background: var(--accent-strong);
+    color: #fff;
+    box-shadow: 3px 4px 0 var(--accent-deep);
+    transform: rotate(-1deg);
+  }
+
+  #collection-modal .confirm-actions .cancel-btn {
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 3px 4px 0 color-mix(in srgb, var(--ink) 35%, transparent);
+    transform: rotate(1deg);
+  }
+
+  /* ---------- adding titles: the filter first, then the list as rows ---------- */
+  #library-modal .modal > :not(.modal-head):not(.batch-footer) {
+    width: auto;
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+
+  #library-modal .library-tools {
+    order: 1;
+    margin-top: 14px;
+    margin-bottom: 12px;
+  }
+
+  #library-modal .add-hint {
+    order: 2;
+    margin-bottom: 12px;
+  }
+
+  #library-modal .add-filter {
+    order: 3;
+    margin-top: 0;
+    padding: 10px 14px;
+  }
+
+  #library-modal .add-grid {
+    order: 4;
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    display: block;
+    margin-top: 6px;
+    padding: 0;
+    overscroll-behavior: contain;
+  }
+
+  #library-modal .batch-footer {
+    order: 5;
+  }
+
+  /* Each title a row: its poster, its name and year · length (and where
+     it stands, if not to watch), the round toggle on the right. */
+  #library-modal .add-card {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) 30px;
+    grid-template-rows: auto auto auto;
+    align-content: center;
+    column-gap: 12px;
+    padding: 8px 0;
+    border-top: 1px dashed color-mix(in srgb, var(--ink) 16%, transparent);
+  }
+
+  #library-modal .add-card:first-child {
+    border-top: 0;
+  }
+
+  #library-modal .add-card-inner {
+    display: contents;
+  }
+
+  #library-modal .add-card-inner::before {
+    content: none;
+  }
+
+  #library-modal .add-poster {
+    grid-area: 1 / 1 / 4 / 2;
+    width: 40px;
+    height: 58px;
+    align-self: center;
+  }
+
+  #library-modal .add-title {
+    grid-area: 1 / 2;
+    align-self: end;
+    overflow: hidden;
+    padding: 0;
+    font-size: 18px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #library-modal .add-card .card-glance {
+    grid-area: 2 / 2;
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+
+  /* Seen / Watching / Abandoned: a small stamp under the title (the
+     poster is too small for it here). */
+  #library-modal .add-stamp {
+    grid-area: 3 / 2;
+    justify-self: start;
+    position: static;
+    margin-top: 4px;
+    padding: 0 5px;
+    border: 1.5px solid var(--ink-muted);
+    background: none;
+    color: var(--ink-muted);
+    font-size: 9.5px;
+    transform: rotate(-3deg);
+  }
+
+  /* The round toggle on the right of each row. */
+  #library-modal .add-check {
+    grid-area: 1 / 3 / 4 / 4;
+    align-self: center;
+    position: static;
+    width: 30px;
+    height: 30px;
+    border: 2px solid color-mix(in srgb, var(--ink) 30%, transparent);
+    background: none;
+    color: transparent;
+    box-shadow: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  #library-modal .add-card.selected .add-check {
+    border-color: var(--accent-strong);
+    background: var(--accent-strong);
+    color: #fff;
+  }
+
+  #library-modal .batch-footer {
+    flex: none;
+    margin: 0;
+    padding: 12px 20px calc(12px + var(--safe-bottom));
+    border-top: 2px dashed color-mix(in srgb, var(--ink) 18%, transparent);
+  }
+
+  /* The button says how many already. */
+  #library-modal .batch-count {
+    display: none;
+  }
+
+  #library-modal .batch-footer .tmdb-go-btn {
+    flex: 1;
+    min-height: 48px;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    transform: rotate(-1deg);
+  }
+
+  /* ---------- the favorite picker: search as you type, a tap picks ---------- */
+  #favorite-modal .tmdb-search-row {
+    margin: 14px 20px 6px;
+  }
+
+  #favorite-modal .tmdb-search-row input {
+    border: 2px solid var(--accent-strong);
+    box-shadow: 3px 4px 0 var(--accent-deep);
+  }
+
+  /* It searches as you type: the button isn't needed here. */
+  #favorite-search-btn {
+    display: none;
+  }
+
+  #favorite-modal .modal-error {
+    margin: 4px 20px;
+  }
+
+  #favorite-modal .tmdb-list {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    gap: 0;
+    padding: 0 20px calc(16px + var(--safe-bottom));
+    overscroll-behavior: contain;
+  }
+
+  #favorite-modal .tmdb-row {
+    position: relative;
+    align-items: center;
+    padding: 8px 0;
+    border: 0;
+    border-top: 1px dashed color-mix(in srgb, var(--ink) 16%, transparent);
+    background: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  #favorite-modal .tmdb-row:first-child {
+    border-top: 0;
+  }
+
+  #favorite-modal .tmdb-stub {
+    flex: none;
+    width: 40px;
+  }
+
+  #favorite-modal .tmdb-poster {
+    width: 40px;
+    height: 58px;
+  }
+
+  #favorite-modal .tmdb-info {
+    padding: 0 12px;
+  }
+
+  #favorite-modal .tmdb-row-actions {
+    padding: 0;
+  }
+
+  /* The whole row picks it, not only its button (js/profile.js). */
+  #favorite-modal .tmdb-row {
+    cursor: pointer;
+  }
+
+  #favorite-modal .tmdb-add-btn.added {
+    padding: 3px 8px;
+    border: 1.5px solid var(--ink-muted);
+    background: none;
+    font-size: 10px;
+    transform: rotate(-3deg);
+  }
+
+  /* A message while a window is up comes down from the top: at the
+     bottom it covered the window's buttons. */
+  body:has(.modal-backdrop:not(.hidden)) .toast {
+    top: calc(var(--safe-top) + 12px);
+    bottom: auto;
+  }
+
+  /* ---------- Import ---------- */
+  #import-modal .import-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 16px 20px 0;
+  }
+
+  #import-modal .import-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 14px;
+    margin: 18px -20px 0;
+    padding: 14px 20px calc(12px + var(--safe-bottom));
+    background: var(--sheet-paper);
+  }
+
+  #import-modal .import-actions > span:empty {
+    display: none;
+  }
+
+  #import-modal .import-actions .update-actions-right {
+    display: contents;
+  }
+
+  #import-modal .import-actions button {
+    flex: 1;
+    min-height: 48px;
+    padding: 0 12px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    white-space: normal;
+  }
+
+  #import-modal .import-actions .modal-search-btn,
+  #import-modal .import-actions .import-replace-btn {
+    transform: rotate(-1deg);
+  }
+
+  #import-modal .import-actions .cancel-btn {
+    border: 2px solid var(--ink);
+    box-shadow: 3px 4px 0 color-mix(in srgb, var(--ink) 35%, transparent);
+    transform: rotate(1deg);
+  }
+}

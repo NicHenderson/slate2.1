@@ -946,7 +946,20 @@ directly.
   springs back); the question got a phone-only × (`#confirm-close`).
   Fits an iPhone 15 without scrolling, the refinish pencil note
   included. Computer sizes pixel-identical (1280/900/700, each window
-  open).
+  open). The owner has things to fix in stages 1 and 2 (to be told
+  after stage 2) and said go for stage 2. Stage 2 — built, waiting for
+  the owner's check: the same sheet for #collection-modal (the icon
+  box scrolls inside, stamps pinned), #library-modal (adding titles:
+  the filter above the list, each title a row with year · length,
+  where it stands as a small stamp, a round toggle; the add stamp
+  says how many), #favorite-modal (searches as you type, no Search
+  button; the whole row picks, js/profile.js, phone only) and
+  #import-modal (its views' buttons as stamps pinned at the bottom).
+  Lists stand tall so they don't jump as they fill. A message while a
+  window is up comes from the top (at the bottom it covered the
+  window's buttons). Computer pixel-identical (the new collection
+  window's emoji render a few hundred pixels differently run to run,
+  old code too).
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

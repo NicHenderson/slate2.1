@@ -82,6 +82,7 @@ function libraryRowHtml(row) {
         ${collectionAddMode ? `<span class="add-check" aria-hidden="true">✓</span>` : ""}
       </div>
       <p class="add-title">${escapeHtml(row.title ?? t("Untitled"))}</p>
+      ${cardGlanceHtml(libraryType === "movie" ? "grid-movies-towatch" : "grid-shows-towatch", row)}
     </div>`;
 }
 

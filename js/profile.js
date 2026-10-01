@@ -397,8 +397,13 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !favoriteModal.classList.contains("hidden")) closeFavoritePicker();
 });
 
+// On a phone the whole row picks it (css/responsive.css draws it as one).
+const favoritePhoneLayout = matchMedia("(max-width: 640px)");
+
 favoriteResults.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-pick-id]");
+  const btn =
+    e.target.closest("[data-pick-id]") ??
+    (favoritePhoneLayout.matches ? e.target.closest(".tmdb-row")?.querySelector("[data-pick-id]") : null);
   if (!btn) return;
   const item = pickerResults.get(Number(btn.dataset.pickId));
   if (!item) return;

@@ -423,3 +423,32 @@ test("on a phone, a window is a sheet that fits, and closes by dragging it down"
   await expect(page.locator("#confirm-modal")).toBeHidden();
   await expect(page.locator("#update-modal")).toBeVisible();
 });
+
+// Adding titles to a collection, as rows: tapping one ticks it, and the
+// stamp adds it. Picking a favorite: a tap anywhere on its row picks it.
+test("on a phone, titles are added to a collection by tapping their rows; a favorite by tapping its row", async ({ page, backend }) => {
+  backend.seed("movies", [{ tmdb_id: 27205, title: "Inception", release_year: 2010, duration: 148, watched_date: null }], backend.user.id);
+  await page.goto("/");
+  await logIn(page);
+  await page.locator('.tab-bar-btn[data-tab="collections"]').tap();
+  await page.locator("#grid-collections .collection-card").first().click();
+  await page.locator('#col-banner [data-col-action="add"]').tap();
+  const row = page.locator("#library-results .add-card", { hasText: "Inception" });
+  await expect(row.locator(".card-glance")).toHaveText("2010 · 2h 28m");
+  await expectOnScreen(row.locator(".add-check"));
+  await row.tap();
+  await expect(row).toHaveClass(/selected/);
+  await page.locator("#library-add-btn").tap();
+  await expect(page.locator("#library-modal")).toBeHidden();
+  await expect.poll(() => backend.db.collection_items.length).toBe(3);
+
+  await page.locator('.tab-bar-btn[data-tab="settings"]').tap();
+  await page.locator('[data-settings-page="profile"]').tap();
+  await page.locator('[data-fav-slot="movie"] button').first().click();
+  await page.locator("#favorite-input").fill("alien");
+  const fav = page.locator("#favorite-results .tmdb-row").first();
+  const box = await fav.boundingBox();
+  await page.touchscreen.tap(box.x + 120, box.y + box.height / 2); // the title, not the button
+  await expect(page.locator("#favorite-modal")).toBeHidden();
+  await expect(page.locator('[data-fav-slot="movie"] .favorite-title')).not.toHaveText("");
+});
