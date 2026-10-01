@@ -922,9 +922,17 @@ directly.
   that asks for the title typed; Edit of a finished show (both dates
   on one row); starting a show; a new collection (only the icons' box
   scrolls); adding titles to a collection (search A's picking); the
-  favorite picker (search A, a tap picks); Import's two ways. Waiting
-  for the owner's OK. Then everything is designed; nothing is built
-  until the owner says so.
+  favorite picker (search A, a tap picks); Import's two ways. The
+  owner approved it: everything is designed. Claude's build order,
+  proposed, waiting for the owner's go-ahead (nothing built until
+  then; each stage checked on the iPhone before the next; computer
+  pixel-identical): 1 base C + Confirm, the dates window, Edit; 2
+  new collection, adding titles, the favorite picker, Import; 3 a
+  title's window (compact A, all its states and pieces); 4 search A;
+  5 episodes C; 6 a last pass on the iPhone. Pieces with no mockup of
+  their own (the finish window's pencil note, "Keep watching"'s
+  question, the viewings list, the trailer, "Add to collection") take
+  the same style and are shown for checking in their stage.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
