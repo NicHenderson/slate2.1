@@ -357,3 +357,22 @@ test("on a phone, Settings is tiles saying what's set, and one page at a time", 
   await page.locator("#settings-back").tap();
   await expect(page.locator('[data-settings-glance="look"]')).toHaveText("Ocean");
 });
+
+// The bottom bar doesn't scroll: a drag on it must not move the page (an
+// iPhone bounced the whole app), and a tap still changes the place.
+test("on a phone, dragging on the bottom bar doesn't move the page", async ({ page }) => {
+  await page.goto("/");
+  await logIn(page);
+  const moved = await page.evaluate(() => {
+    const el = document.querySelector('.tab-bar-btn[data-tab="shows"]');
+    const r = el.getBoundingClientRect();
+    const touch = (y) => new Touch({ identifier: 1, target: el, clientX: r.left + 10, clientY: y });
+    el.dispatchEvent(new TouchEvent("touchstart", { bubbles: true, cancelable: true, touches: [touch(r.top + 10)] }));
+    const move = new TouchEvent("touchmove", { bubbles: true, cancelable: true, touches: [touch(r.top - 40)] });
+    el.dispatchEvent(move);
+    return !move.defaultPrevented;
+  });
+  expect(moved, "the drag reached the page").toBe(false);
+  await page.locator('.tab-bar-btn[data-tab="shows"]').tap();
+  await expect(page.locator('.tab-bar-btn[data-tab="shows"]')).toHaveAttribute("aria-current", "page");
+});

@@ -1486,9 +1486,18 @@
     padding: calc(16px + var(--safe-top)) calc(14px + var(--safe-right)) 28px calc(14px + var(--safe-left));
   }
 
+  /* The app scrolls inside .content: the page itself never bounces, nor
+     does a drag on the bar move it (js/phoneNav.js stops the drag there,
+     which an iPhone needs too). */
+  html:has(.app:not(.hidden)),
+  html:has(.app:not(.hidden)) body {
+    overscroll-behavior: none;
+  }
+
   .tab-bar {
     display: flex;
     flex: none;
+    touch-action: none;
     z-index: 80;
     padding: 0 calc(6px + var(--safe-right)) var(--safe-bottom) calc(6px + var(--safe-left));
     background: var(--bg-elevated);

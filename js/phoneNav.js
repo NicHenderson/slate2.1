@@ -74,7 +74,18 @@ function syncPhoneNav() {
     if (btn.dataset.tab === tab) btn.setAttribute("aria-current", "page");
     else btn.removeAttribute("aria-current");
   });
-  viewTabButtons.forEach((btn) => btn.setAttribute("aria-pressed", String(btn.dataset.view === view)));
+  // The bar doesn't scroll, so an iPhone hands a drag on it to the page,
+// which then bounces the whole app up or down. The drag stops here; a tap
+// is still a tap.
+document.getElementById("tab-bar").addEventListener(
+  "touchmove",
+  (e) => {
+    if (e.cancelable) e.preventDefault();
+  },
+  { passive: false }
+);
+
+viewTabButtons.forEach((btn) => btn.setAttribute("aria-pressed", String(btn.dataset.view === view)));
   // However it was reached (the bar, a tab, "Open to", a link in Settings),
   // the view is its tab's last one.
   if (PHONE_VIEWS[view]) {

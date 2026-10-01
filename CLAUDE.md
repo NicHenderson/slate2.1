@@ -860,6 +860,10 @@ directly.
   size + Reduce animations side by side, the size a handwritten word
   over an unseen <select> (`#density-select`, phone only). Computer
   sizes pixel-identical (1280/900/700, every page).
+  The owner's iPhone: a drag on the bottom bar bounced the whole app.
+  The bar doesn't scroll, so iOS hands the drag to the page: the bar now
+  cancels its own touchmoves (js/phoneNav.js, `touch-action: none`) and
+  the page doesn't overscroll while the app shows.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
