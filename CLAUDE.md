@@ -797,7 +797,14 @@ directly.
   fixes the diagnosis' cut-off Sort menu and the Shows Queue's buttons
   running off the screen. Collections and Settings keep their headers
   for now. Computer sizes pixel-identical, the sort menu and filters
-  panel open included.
+  panel open included. The owner's iPhone showed both sheets cut in half
+  and scrolling the list instead of themselves (Done out of reach):
+  Safari makes a container-query container (`.section`, content.css)
+  the frame position: fixed is measured in, Chromium doesn't. Fixed:
+  the phone's list sections aren't containers (`container: none`), and
+  what those queries did for the numbers strip is restated for phones;
+  tests/mobile.spec.js stands in for Safari with contain: layout. Keep
+  any fixed sheet out of a container, or this comes back.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

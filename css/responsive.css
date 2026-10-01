@@ -1947,12 +1947,45 @@
     display: none;
   }
 
+  /* Not a container for content.css's container queries here: Safari
+     makes a container the frame that position: fixed is measured in, so
+     the Sort and Filters sheets sat at the bottom of the whole list, half
+     off the screen, and scrolling moved the list under them. What those
+     queries did for the numbers is said below instead. */
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) {
+    container: none;
+  }
+
   /* ---------- the numbers: one strip, the first three until "More" ---------- */
   :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats {
     width: 100%;
     box-sizing: border-box;
     padding: 6px 0;
     box-shadow: 2px 4px 0 var(--accent-deep);
+    transform: none;
+  }
+
+  /* Open: two per row, perforated between rows and columns, an odd one
+     out across the last row (as content.css's narrow container query). */
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats.is-open {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats.is-open > .hs-item + .hs-item {
+    border-left: 0;
+  }
+
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats.is-open > .hs-item:nth-child(even) {
+    border-left: 2px dashed rgba(13, 12, 21, 0.22);
+  }
+
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats.is-open > .hs-item:nth-child(n + 3) {
+    border-top: 2px dashed rgba(13, 12, 21, 0.22);
+  }
+
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats.is-open > .hs-item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
 
   /* Folded: one row (content.css's phone grid of two per row is for the

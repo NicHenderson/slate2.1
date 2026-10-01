@@ -212,3 +212,42 @@ test("installable: the manifest and every icon it names are there", async ({ pag
   const icons = [...manifest.icons.map((icon) => icon.src), await page.locator('link[rel="apple-touch-icon"]').getAttribute("href")];
   for (const src of icons) expect((await request.get(`/${src}`)).status(), src).toBe(200);
 });
+
+// Sort and Filters rise from the bottom of the screen, whole, however far
+// down a long list is scrolled. Safari makes any container-query container
+// the frame position: fixed is measured in (Chromium doesn't): stood in for
+// here with contain: layout on each, which does the same in Chromium.
+test("on a phone, Sort and Filters are whole sheets on screen in a long list", async ({ page, backend }) => {
+  backend.seed(
+    "movies",
+    Array.from({ length: 40 }, (_, i) => ({ tmdb_id: 900000 + i, title: `Film ${i}`, release_year: 1960 + i, duration: 80 + i * 3, genres: ["Drama", "Comedy", "Horror", "Action"][i % 4], watched_date: "2026-01-02", rating: 1 + (i % 10) })),
+    backend.user.id
+  );
+  await page.emulateMedia({ reducedMotion: "reduce" }); // measured where they stop, not as they rise
+  await page.goto("/");
+  await logIn(page);
+  await page.evaluate(() =>
+    document.querySelectorAll("*").forEach((el) => {
+      if (getComputedStyle(el).containerType !== "normal") el.style.contain = "layout";
+    })
+  );
+  await page.locator("#app .content").evaluate((el) => el.scrollTo(0, 600));
+
+  const onScreen = async (locator) => {
+    const box = await locator.boundingBox();
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height).toBeLessThanOrEqual(844 + 1);
+  };
+  await page.locator('[data-phone-action="sort"]').tap();
+  await onScreen(page.locator("#movies-sort-menu"));
+  await page.locator(".phone-sheet-backdrop").tap({ position: { x: 200, y: 60 } });
+  await expect(page.locator("#movies-sort-menu")).toBeHidden();
+
+  await page.locator('[data-phone-action="filter"]').tap();
+  const panel = page.locator('[data-lib-section="movies-watched"] .lib-filter-panel');
+  await onScreen(panel);
+  await panel.locator(".lf-done").scrollIntoViewIfNeeded();
+  await onScreen(panel.locator(".lf-done"));
+  await panel.locator(".lf-done").tap();
+  await expect(panel).toBeHidden();
+});
