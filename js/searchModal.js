@@ -79,7 +79,7 @@ function openModal(type) {
   showPreviewHint();
   updateBatchFooter();
   modal.classList.remove("hidden");
-  modalInput.focus();
+  focusOnOpen(modalInput);
 }
 
 function closeModal() {
@@ -317,6 +317,8 @@ function renderPreviewDetails(details) {
       <div class="detail-trailer">${TRAILER_BTN_LOADING}</div>
     </div>
     ${whereToWatchSlotHtml()}`;
+  // On a phone the synopsis is cut to three lines; "more" opens it there.
+  markCut(modalPreview.querySelector(".detail-synopsis"));
   const stillShowing = () => previewId === id && !modal.classList.contains("hidden");
   loadPreviewTrailer(id, stillShowing);
   loadWhereToWatch(modalPreview.querySelector(".where-to-watch"), currentType, id, stillShowing);
@@ -491,6 +493,17 @@ modalPreview.addEventListener("click", (e) => {
   const trailerBtn = e.target.closest('[data-action="toggle-trailer"]');
   if (trailerBtn) {
     toggleTrailer(trailerBtn);
+    return;
+  }
+  // On a phone the trailer plays over the window: a tap on the dim closes it.
+  if (detailPhoneLayout.matches && e.target.classList.contains("detail-trailer-frame")) {
+    toggleTrailer(modalPreview.querySelector('[data-action="toggle-trailer"]'));
+    return;
+  }
+  const cut = e.target.closest(".detail-synopsis.is-cut");
+  if (cut) {
+    cut.classList.remove("is-cut");
+    cut.classList.add("is-open");
     return;
   }
   const el = e.target.closest("[data-action]");

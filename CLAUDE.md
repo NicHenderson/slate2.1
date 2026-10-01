@@ -1004,6 +1004,21 @@ directly.
   (1280/900/700, every state, viewings, the collection menu).
   The owner's note: the note's × should be plain to see; it's now a
   round ink sticker over the note's corner. Then: go for stage 4.
+  Stage 4 — built, waiting for the owner's check (css/responsive.css
+  "Windows on a phone, stage 4"): #search-modal is the same paper sheet
+  (it joins stage 2's shared rules), standing tall. The field on top
+  (no focus as it rises: a tap types, as in the other windows), then
+  one list: each result a row (poster, name, year, "In your library"
+  as a small stamp, a › or, picking several, the round toggle), the
+  picked ones as chips and the add stamp at the bottom. A result opens
+  in the list's place as a compact title's window: "← Results" in the
+  head, the polaroid beside the title, the synopsis cut to 3 lines
+  ("more" opens it right there, `markCut` in js/detailModal.js), where
+  to watch a row per kind, its button (Add / Pick / In your library) a
+  stamp pinned at the bottom; the picked ones' bar hides meanwhile.
+  The trailer plays over it as in a title's window. The head drags it
+  down. Computer pixel-identical (1280/900/700: the list, a result,
+  picking).
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

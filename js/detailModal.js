@@ -362,12 +362,17 @@ function closeDetailModal() {
 const detailPhoneLayout = matchMedia("(max-width: 640px)");
 const detailNote = document.getElementById("detail-note");
 
+// Says whether a text was cut short (CSS cuts it, on a phone only), so it
+// can end in "more". Also used by the search window's synopsis.
+function markCut(el) {
+  if (!el) return;
+  const cut = detailPhoneLayout.matches && el.scrollHeight > el.clientHeight + 1;
+  el.classList.toggle("is-cut", cut);
+  if (cut) el.dataset.more = t("more");
+}
+
 function markCutText() {
-  detailBody.querySelectorAll(".detail-synopsis, .detail-review:not(.detail-review-empty)").forEach((el) => {
-    const cut = detailPhoneLayout.matches && el.scrollHeight > el.clientHeight + 1;
-    el.classList.toggle("is-cut", cut);
-    if (cut) el.dataset.more = t("more");
-  });
+  detailBody.querySelectorAll(".detail-synopsis, .detail-review:not(.detail-review-empty)").forEach(markCut);
 }
 
 function openDetailNote(el) {

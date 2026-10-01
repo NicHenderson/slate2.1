@@ -18,6 +18,7 @@ const PHONE_WINDOWS = [
   // A title's window: its head (the polaroid and the title) is drawn anew
   // for each title, so it's looked for when the drag starts.
   { backdrop: "detail-modal", sheet: ".detail-layout", head: ".detail-head", close: "detail-close" },
+  { backdrop: "search-modal", sheet: ".modal", head: ".modal-head", close: "modal-close" },
 ];
 
 const phoneWindowLayout = matchMedia("(max-width: 640px)");

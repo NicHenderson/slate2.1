@@ -468,6 +468,37 @@ test("on a phone, a title's window fits one screen; a long review opens whole on
   await expectOnScreen(page.locator('#detail-modal [data-action="drop-series"]'));
 });
 
+// Searching TMDB: one list in the sheet, a result opening in its place
+// with its button pinned at the bottom, and back to the list.
+test("on a phone, a search result opens in the list's place, its button at the bottom", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await logIn(page);
+  await page.locator('.view-tab[data-view="movies-towatch"]').tap();
+  await page.locator("#phone-add").tap();
+  await expect(page.locator("#search-modal")).toBeVisible();
+  // Not focused as it rises (an iPhone would shift the page): a tap types.
+  expect(await page.evaluate(() => document.activeElement?.id)).not.toBe("modal-input");
+  await page.locator("#modal-input").tap();
+  await page.keyboard.type("i");
+  const row = page.locator(".tmdb-hit", { hasText: "Paddington" });
+  await row.locator(".tmdb-pick").tap();
+  await expectOnScreen(page.locator("#batch-add-btn"));
+
+  await row.locator(".tmdb-hit-main").tap();
+  await expect(page.locator("#modal-results")).toBeHidden();
+  const action = page.locator(".tmdb-preview-action");
+  await expect(action).toHaveText("✓ Picked");
+  const box = await action.boundingBox();
+  expect(844 - (box.y + box.height), "pinned at the bottom").toBeLessThan(30);
+  await expectNoSidewaysScroll(page);
+  await page.locator(".tmdb-preview-back").tap();
+  await expect(row).toBeVisible();
+  await page.locator("#batch-add-btn").tap();
+  await expect(page.locator("#search-modal")).toBeHidden();
+  await expect(page.locator("#grid-movies-towatch .card", { hasText: "Paddington" })).toBeVisible();
+});
+
 // Adding titles to a collection, as rows: tapping one ticks it, and the
 // stamp adds it. Picking a favorite: a tap anywhere on its row picks it.
 test("on a phone, titles are added to a collection by tapping their rows; a favorite by tapping its row", async ({ page, backend }) => {

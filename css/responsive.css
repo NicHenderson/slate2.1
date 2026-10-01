@@ -3478,14 +3478,14 @@
    The same sheet of paper (above) for a new collection, adding titles to
    one, the favorite picker and Import. */
 @media (max-width: 640px) {
-  :is(#collection-modal, #library-modal, #favorite-modal, #import-modal) {
+  :is(#collection-modal, #library-modal, #favorite-modal, #import-modal, #search-modal) {
     align-items: end;
     justify-items: stretch;
     padding: var(--safe-top) 0 0;
     background: rgba(5, 4, 10, 0.68);
   }
 
-  :is(#collection-modal, #library-modal, #favorite-modal) .modal,
+  :is(#collection-modal, #library-modal, #favorite-modal, #search-modal) .modal,
   #import-modal .import-panel {
     --sheet-paper: var(--paper);
     position: relative;
@@ -3506,11 +3506,11 @@
   }
 
   /* Lists stand tall, so their sheet does too: it doesn't jump as they fill. */
-  :is(#library-modal, #favorite-modal) .modal {
+  :is(#library-modal, #favorite-modal, #search-modal) .modal {
     height: calc(100dvh - var(--safe-top) - 16px);
   }
 
-  :is(#collection-modal, #library-modal, #favorite-modal) .modal::before,
+  :is(#collection-modal, #library-modal, #favorite-modal, #search-modal) .modal::before,
   #import-modal .import-panel::before {
     content: "";
     position: absolute;
@@ -3522,7 +3522,7 @@
     pointer-events: none;
   }
 
-  :is(#collection-modal, #library-modal, #favorite-modal) .modal::after,
+  :is(#collection-modal, #library-modal, #favorite-modal, #search-modal) .modal::after,
   #import-modal .import-panel::after {
     content: "";
     position: absolute;
@@ -3539,7 +3539,7 @@
   }
 
   /* ---------- the head ---------- */
-  :is(#collection-modal, #library-modal, #favorite-modal) .modal-head,
+  :is(#collection-modal, #library-modal, #favorite-modal, #search-modal) .modal-head,
   #import-modal .update-ticket {
     flex: none;
     display: block;
@@ -3555,7 +3555,7 @@
     content: none;
   }
 
-  :is(#collection-modal, #library-modal, #favorite-modal) .modal-head h2,
+  :is(#collection-modal, #library-modal, #favorite-modal, #search-modal) .modal-head h2,
   #import-modal .update-eyebrow {
     display: table;
     margin-bottom: 0;
@@ -3599,7 +3599,7 @@
     content: " · ";
   }
 
-  :is(#collection-close, #library-close, #favorite-close, #import-close) {
+  :is(#collection-close, #library-close, #favorite-close, #import-close, #modal-close) {
     position: absolute;
     z-index: 3;
     top: 16px;
@@ -4195,7 +4195,7 @@
 
   /* The trailer plays over the window, the rest dimmed; a tap on the dim
      or the × above the player closes it (js/detailModal.js). */
-  #detail-modal .detail-trailer-frame {
+  :is(#detail-modal, #search-modal) .detail-trailer-frame {
     position: fixed;
     z-index: 30;
     left: 0;
@@ -4206,7 +4206,7 @@
     transform: translateY(-50%);
   }
 
-  #detail-modal .detail-trailer-frame::before {
+  :is(#detail-modal, #search-modal) .detail-trailer-frame::before {
     content: "";
     position: fixed;
     inset: -100vh 0;
@@ -4214,7 +4214,7 @@
     background: rgba(5, 4, 10, 0.86);
   }
 
-  #detail-modal .detail-trailer-frame::after {
+  :is(#detail-modal, #search-modal) .detail-trailer-frame::after {
     content: "✕";
     position: absolute;
     top: -48px;
@@ -4780,5 +4780,412 @@
     from {
       opacity: 0;
     }
+  }
+}
+
+/* ==================== Windows on a phone, stage 4: search ====================
+   The owner's pick ("A"): the same sheet, one list in it. The field on
+   top, each result a row (its poster, name and year, "In your library"
+   as a small stamp, a › or, when picking several, the round toggle);
+   the picked ones and the add stamp at the bottom. A result opens in the
+   list's place as a compact title's window, "‹ Results" in the head and
+   its button a stamp pinned at the bottom. What scrolls is the space
+   between the field and the bottom, whichever of the two shows. */
+@media (max-width: 640px) {
+  #search-modal .modal-head {
+    min-height: 64px;
+  }
+
+  #search-modal .modal-head-left {
+    display: block;
+  }
+
+  /* Its own way back is in the details (below). */
+  #modal-back {
+    display: none;
+  }
+
+  #search-modal .tmdb-search-field {
+    flex: none;
+    margin: 14px 20px 0;
+  }
+
+  #search-modal .tmdb-search-field input {
+    padding-top: 11px;
+    padding-bottom: 11px;
+    border-color: var(--accent-strong);
+    box-shadow: 3px 4px 0 var(--accent-deep);
+  }
+
+  #search-modal .tmdb-status {
+    flex: none;
+    min-height: 0;
+    margin: 10px 20px 0;
+    font-size: 12px;
+  }
+
+  #search-modal .tmdb-status:empty {
+    margin-top: 4px;
+  }
+
+  /* What scrolls: the list, or a result's details. Neither is placed,
+     so the details' pinned stamp and way back are placed against the
+     sheet. */
+  #search-modal .tmdb-split {
+    position: static;
+    display: block;
+    flex: 1;
+    min-height: 0;
+    margin-top: 6px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  #search-modal .tmdb-hits,
+  #search-modal .tmdb-preview {
+    position: static;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  /* ---------- the list ---------- */
+  #search-modal .tmdb-hits {
+    gap: 0;
+    padding: 0 20px 16px;
+  }
+
+  #search-modal .results-status {
+    padding: 12px 0;
+  }
+
+  #search-modal .tmdb-hit {
+    gap: 10px;
+    padding: 8px 0;
+    border-left: 0;
+    border-top: 1px dashed color-mix(in srgb, var(--ink) 16%, transparent);
+    background: none;
+    box-shadow: none;
+  }
+
+  #search-modal .tmdb-hit:first-child {
+    border-top: 0;
+  }
+
+  #search-modal .tmdb-hit-main {
+    gap: 12px;
+    padding: 0;
+  }
+
+  #search-modal .tmdb-hit-poster {
+    width: 40px;
+  }
+
+  #search-modal .tmdb-hit .tmdb-row-title {
+    font-size: 19px;
+    line-height: 1.1;
+  }
+
+  #search-modal .tmdb-hit .tmdb-row-year {
+    font-size: 12px;
+  }
+
+  /* A result to open says so: a › on its right. */
+  #search-modal .tmdb-hit:not(.is-have):not(:has(.tmdb-pick)) .tmdb-hit-main::after {
+    content: "›";
+    margin-left: auto;
+    padding: 0 4px 0 8px;
+    color: var(--ink-muted);
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  #search-modal .tmdb-hit.is-have .tmdb-hit-text {
+    opacity: 0.6;
+  }
+
+  /* Already there: a small stamp. */
+  #search-modal .tmdb-hit-have {
+    margin-right: 2px;
+    padding: 1px 6px;
+    border: 1.5px solid var(--ink-muted);
+    font-family: var(--font-display);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: normal;
+    max-width: 120px;
+    text-align: center;
+    transform: rotate(-3deg);
+  }
+
+  #search-modal .tmdb-pick {
+    width: 32px;
+    height: 32px;
+    margin-right: 2px;
+    border-color: color-mix(in srgb, var(--ink) 30%, transparent);
+    color: transparent;
+  }
+
+  #search-modal .tmdb-pick[aria-pressed="true"] {
+    border-color: var(--accent-strong);
+    color: #fff;
+  }
+
+  /* ---------- a result opened: the list's field and status go ---------- */
+  #search-modal .modal:has(.tmdb-split.is-previewing) :is(.modal-head h2, .tmdb-search-field, .tmdb-status, .batch-footer) {
+    display: none;
+  }
+
+  #search-modal .tmdb-split.is-previewing {
+    margin-top: 0;
+  }
+
+  /* The details as a title's window: the polaroid beside the title, the
+     synopsis cut to three lines ("more" opens it), the button pinned. */
+  #search-modal .tmdb-split.is-previewing .tmdb-preview {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto 1fr;
+    column-gap: 14px;
+    align-items: start;
+    padding: 18px 18px calc(88px + var(--safe-bottom)) 16px;
+    background: none;
+    box-shadow: none;
+  }
+
+  #search-modal .tmdb-preview > * {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  #search-modal :is(.tmdb-preview-top, .tmdb-preview-head, .tmdb-preview-actions) {
+    display: contents;
+  }
+
+  #search-modal .tmdb-preview-back {
+    position: absolute;
+    z-index: 3;
+    top: 18px;
+    left: 12px;
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    margin: 0;
+    padding: 0 8px;
+    font-size: 15px;
+  }
+
+  #search-modal .tmdb-preview-poster-wrap {
+    grid-column: 1;
+    grid-row: 1 / 6;
+    margin: 0 0 4px;
+    padding: 5px 5px 16px;
+    background: #fff;
+    box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+    transform: rotate(-3deg);
+  }
+
+  #search-modal .tmdb-preview-poster-wrap::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: -6px;
+    left: calc(50% - 6px);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-strong);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4), inset -2px -2px 3px rgba(0, 0, 0, 0.3), inset 2px 2px 2px rgba(255, 255, 255, 0.5);
+  }
+
+  #search-modal .tmdb-preview-poster {
+    width: 100%;
+    box-shadow: none;
+  }
+
+  #search-modal .tmdb-have-stamp {
+    top: 16px;
+    left: 3px;
+    font-size: 8.5px;
+  }
+
+  #search-modal .tmdb-preview-head .detail-title {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 26px;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+  }
+
+  #search-modal .tmdb-preview-head .detail-meta-runtime {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 4px;
+    font-size: 12.5px;
+  }
+
+  #search-modal .tmdb-preview-head .detail-genre-line {
+    grid-column: 2;
+    grid-row: 3;
+    margin-top: 3px;
+    font-size: 16px;
+    line-height: 1.2;
+  }
+
+  #search-modal .tmdb-preview-actions .detail-trailer {
+    grid-column: 2;
+    grid-row: 4;
+    margin-top: 8px;
+  }
+
+  #search-modal .trailer-btn {
+    min-height: 30px;
+    margin: 0;
+    padding: 3px 10px;
+    border: 1.5px solid var(--accent-deep);
+    border-radius: 0;
+    background: none;
+    color: var(--accent-deep);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  #search-modal .trailer-btn:disabled {
+    border-color: color-mix(in srgb, var(--ink) 30%, transparent);
+    color: var(--ink-muted);
+  }
+
+  #search-modal :is(.tmdb-preview-loading, .tmdb-preview-failed) {
+    margin-top: 16px;
+  }
+
+  #search-modal .tmdb-preview .detail-synopsis {
+    position: relative;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    margin-top: 12px;
+    font-size: 13.5px;
+    line-height: 1.42;
+  }
+
+  #search-modal .tmdb-preview .detail-synopsis.is-open {
+    display: block;
+  }
+
+  #search-modal .tmdb-preview .is-cut {
+    cursor: pointer;
+  }
+
+  #search-modal .tmdb-preview .is-cut::after {
+    content: attr(data-more);
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding-left: 30px;
+    background: linear-gradient(90deg, transparent, var(--sheet-paper) 26px);
+    color: var(--accent-deep);
+    font-weight: 700;
+  }
+
+  /* Where to watch: under a dashed line, a row per kind. */
+  #search-modal .tmdb-preview .where-to-watch {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 2px dashed color-mix(in srgb, var(--ink) 16%, transparent);
+  }
+
+  #search-modal .wtw-title {
+    margin-bottom: 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  #search-modal .wtw-groups {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #search-modal .wtw-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #search-modal .wtw-kind {
+    flex: none;
+    width: 76px;
+    margin: 0;
+    font-size: 16px;
+  }
+
+  #search-modal .wtw-provider {
+    width: 40px;
+    height: 40px;
+  }
+
+  #search-modal .wtw-credit {
+    margin-top: 8px;
+  }
+
+  /* Its button: a stamp pinned at the bottom of the sheet. */
+  #search-modal .tmdb-preview-action {
+    position: absolute;
+    z-index: 2;
+    left: 18px;
+    right: 18px;
+    bottom: calc(12px + var(--safe-bottom));
+    min-height: 50px;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    transform: rotate(-1deg);
+  }
+
+  /* A strip of paper under it, so the details pass behind it, not
+     around it (placed against the sheet too, so it doesn't scroll). */
+  #search-modal .tmdb-split.is-previewing:has(.tmdb-preview-action)::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(74px + var(--safe-bottom));
+    background: var(--sheet-paper);
+  }
+
+  /* ---------- the picked ones and the add stamp ---------- */
+  #search-modal .batch-footer {
+    flex: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin: 0;
+    padding: 12px 20px calc(12px + var(--safe-bottom));
+    border-top: 2px dashed color-mix(in srgb, var(--ink) 18%, transparent);
+  }
+
+  #search-modal .batch-chip {
+    padding-left: 8px;
+    border: 1.5px solid var(--accent-strong);
+    background: #fff;
+    font-size: 16px;
+  }
+
+  #search-modal .batch-footer .tmdb-go-btn {
+    min-height: 50px;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    transform: rotate(-1deg);
   }
 }
