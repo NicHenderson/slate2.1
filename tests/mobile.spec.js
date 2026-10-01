@@ -301,3 +301,26 @@ test("on a phone, Sort and Filters are whole sheets on screen in a long list", a
   await panel.locator(".lf-done").tap();
   await expect(panel).toBeHidden();
 });
+
+// Reordering collections by hold-and-drag: the copy under the finger is
+// the row it came from, not the computer's booklet (it lives in <body>,
+// outside the list, so it can't take its looks from there).
+test("on a phone, a collection being dragged looks like its row", async ({ page, backend, context }) => {
+  backend.seed("collections", [{ name: "Terror", icon: "👻", position: 2 }], backend.user.id);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await logIn(page);
+  await page.locator('.tab-bar-btn[data-tab="collections"]').tap();
+  const row = await page.locator("#grid-collections .collection-card").first().boundingBox();
+  const cdp = await context.newCDPSession(page);
+  const touch = (type, y) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x: row.x + 100, y }] });
+  const y = row.y + row.height / 2;
+  await touch("touchStart", y);
+  await page.waitForTimeout(700); // the hold that starts a drag
+  for (let i = 1; i <= 5; i++) await touch("touchMove", y + i * 12);
+  // Its posters stay the small fan at the row's end (the booklet's cover
+  // spilled far out of it, over the page).
+  const cover = await page.locator("body > .drag-ghost .booklet-stamp").boundingBox();
+  expect(cover.height).toBeLessThan(row.height);
+  await touch("touchEnd");
+});

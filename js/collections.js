@@ -529,6 +529,9 @@ function setupDragReorder(grid, cardSelector, onReorder, canDrag = () => true) {
     const g = card.cloneNode(true);
     g.classList.remove("dragging");
     g.classList.add("drag-ghost");
+    // Where it came from: a phone draws a list's cards its own way, and the
+    // copy, out in <body>, needs telling which (css/responsive.css).
+    g.dataset.ghostOf = grid.id;
     // A card grabbed while it's still sliding into a new slot (flipReorder)
     // carries that slide inline: the clone must not keep the offset, nor a
     // transition that would replace the ghost's own.

@@ -1618,6 +1618,7 @@
 
   [id^="grid-movies-"] .card,
   [id^="grid-shows-"] .card,
+  .drag-ghost[data-ghost-of$="-towatch"],
   [id^="grid-movies-"] .ghost-card,
   [id^="grid-shows-"] .ghost-card {
     gap: 5px;
@@ -1626,7 +1627,8 @@
   }
 
   [id^="grid-movies-"] .card::before,
-  [id^="grid-shows-"] .card::before {
+  [id^="grid-shows-"] .card::before,
+  .drag-ghost[data-ghost-of$="-towatch"]::before {
     top: -6px;
     right: 12px;
     width: 30px;
@@ -1634,7 +1636,8 @@
   }
 
   [id^="grid-movies-"] .card-title,
-  [id^="grid-shows-"] .card-title {
+  [id^="grid-shows-"] .card-title,
+  .drag-ghost[data-ghost-of$="-towatch"] .card-title {
     padding: 0 2px;
     font-size: 14.5px;
     line-height: 1.1;
@@ -1645,12 +1648,14 @@
      ago" line goes (the mockup has the episode line only). */
   [id^="grid-movies-"] .card-rating,
   [id^="grid-shows-"] .card-rating,
+  .drag-ghost[data-ghost-of$="-towatch"] .card-rating,
   [id^="grid-shows-"] .card-meta {
     display: none;
   }
 
   [id^="grid-movies-"] .card-glance,
-  [id^="grid-shows-"] .card-glance {
+  [id^="grid-shows-"] .card-glance,
+  .drag-ghost[data-ghost-of$="-towatch"] .card-glance {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2212,20 +2217,20 @@
     padding-bottom: 72px;
   }
 
-  #grid-collections .booklet-card {
+  .collection-card {
     min-height: 78px;
     border-top: 5px solid var(--accent-strong);
     box-shadow: 2px 5px 12px rgba(0, 0, 0, 0.45);
   }
 
-  #grid-collections .booklet-spine,
-  #grid-collections .booklet-ribbon {
+  .collection-card .booklet-spine,
+  .collection-card .booklet-ribbon {
     display: none;
   }
 
   /* The seal on the left, the name and progress beside it, the posters
      on the right: the cover's two parts become the row's. */
-  #grid-collections .booklet-body {
+  .collection-card .booklet-body {
     display: grid;
     grid-template-columns: 44px minmax(0, 1fr);
     grid-template-areas:
@@ -2237,12 +2242,12 @@
     padding: 10px 98px 10px 12px;
   }
 
-  #grid-collections .booklet-cover {
+  .collection-card .booklet-cover {
     display: contents;
   }
 
-  #grid-collections .booklet-icon,
-  #grid-collections .booklet-empty-icon {
+  .collection-card .booklet-icon,
+  .collection-card .booklet-empty-icon {
     grid-area: seal;
     position: static;
     width: 42px;
@@ -2251,24 +2256,24 @@
     transform: none;
   }
 
-  #grid-collections .booklet-icon .ico {
+  .collection-card .booklet-icon .ico {
     width: 24px;
     height: 24px;
   }
 
-  #grid-collections .booklet-empty-icon {
+  .collection-card .booklet-empty-icon {
     display: grid;
     place-items: center;
     border-radius: 50%;
     border: 2px dashed var(--ink-muted);
   }
 
-  #grid-collections .booklet-empty-icon .ico {
+  .collection-card .booklet-empty-icon .ico {
     width: 24px;
     height: 24px;
   }
 
-  #grid-collections .booklet-title {
+  .collection-card .booklet-title {
     grid-area: title;
     margin: 0;
     font-size: 15px;
@@ -2277,7 +2282,7 @@
     -webkit-line-clamp: 2;
   }
 
-  #grid-collections .booklet-footer {
+  .collection-card .booklet-footer {
     grid-area: footer;
     margin: 0;
     padding: 0;
@@ -2285,23 +2290,23 @@
   }
 
   /* The count above the bar, as the mockup has it. */
-  #grid-collections .booklet-progress {
+  .collection-card .booklet-progress {
     display: flex;
     flex-direction: column-reverse;
     gap: 4px;
   }
 
-  #grid-collections .booklet-progress-text {
+  .collection-card .booklet-progress-text {
     margin: 0;
     font-size: 10.5px;
   }
 
-  #grid-collections .booklet-bar {
+  .collection-card .booklet-bar {
     height: 6px;
   }
 
   /* Three posters fanned on the right, the first in front. */
-  #grid-collections .booklet-stamp {
+  .collection-card .booklet-stamp {
     position: absolute;
     top: 50%;
     right: 10px;
@@ -2314,7 +2319,7 @@
     aspect-ratio: auto;
   }
 
-  #grid-collections .booklet-stamp > * {
+  .collection-card .booklet-stamp > * {
     position: absolute;
     top: 0;
     width: 38px;
@@ -2323,29 +2328,29 @@
     box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.35);
   }
 
-  #grid-collections .booklet-stamp > :nth-child(1) {
+  .collection-card .booklet-stamp > :nth-child(1) {
     right: 0;
     z-index: 3;
     transform: rotate(4deg);
   }
 
-  #grid-collections .booklet-stamp > :nth-child(2) {
+  .collection-card .booklet-stamp > :nth-child(2) {
     right: 18px;
     z-index: 2;
     transform: rotate(-5deg) translateY(3px);
   }
 
-  #grid-collections .booklet-stamp > :nth-child(3) {
+  .collection-card .booklet-stamp > :nth-child(3) {
     right: 36px;
     z-index: 1;
     transform: rotate(-2deg);
   }
 
-  #grid-collections .booklet-stamp > :nth-child(n + 4) {
+  .collection-card .booklet-stamp > :nth-child(n + 4) {
     display: none;
   }
 
-  #grid-collections .booklet-cover.is-empty {
+  .collection-card .booklet-cover.is-empty {
     border: 0;
     background: none;
   }
@@ -2599,32 +2604,32 @@
     padding-bottom: 72px;
   }
 
-  #col-detail-grid .card,
+  .card.col-item-card,
   #col-detail-grid .ghost-card {
     gap: 5px;
     padding: 5px 5px 7px;
     box-shadow: 2px 6px 14px rgba(0, 0, 0, 0.35);
   }
 
-  #col-detail-grid .card::before {
+  .col-item-card::before {
     top: -6px;
     right: 12px;
     width: 30px;
     height: 11px;
   }
 
-  #col-detail-grid .card-title {
+  .col-item-card .card-title {
     padding: 0 2px;
     font-size: 14.5px;
     line-height: 1.1;
     -webkit-line-clamp: 1;
   }
 
-  #col-detail-grid .card-rating {
+  .col-item-card .card-rating {
     display: none;
   }
 
-  #col-detail-grid .card-glance {
+  .col-item-card .card-glance {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2636,14 +2641,14 @@
     white-space: nowrap;
   }
 
-  #col-detail-grid .status-badge {
+  .col-item-card .status-badge {
     top: 9px;
     left: 9px;
     width: 22px;
     height: 22px;
   }
 
-  #col-detail-grid .col-item-remove {
+  .col-item-card .col-item-remove {
     top: 9px;
     right: 9px;
     width: 24px;

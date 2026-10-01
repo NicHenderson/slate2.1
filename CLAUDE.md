@@ -836,7 +836,12 @@ directly.
   header button, which is hidden with the stats strip. Movies / Shows as
   pills; the titles three across with their status badge and the
   glance line (`cardGlanceHtml` via `gridIdFor`). Computer sizes
-  pixel-identical, open collection included.
+  pixel-identical, open collection included. The owner's iPhone: a
+  collection held to reorder showed the computer's huge booklet under
+  the finger. The drag copy lives in <body>, out of the list, so the
+  phone styles now follow the card (`.collection-card`,
+  `.col-item-card`) and a watchlist card's copy says where it came from
+  (`data-ghost-of`, js/collections.js). Test in tests/mobile.spec.js.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
