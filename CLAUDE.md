@@ -903,8 +903,13 @@ directly.
   lines and the review to 3, each with "más" that shows the whole text
   on a taped note over the window; the watched date, "↻ La vi otra
   vez" and "×2 ›" on one row; Up next with its photo beside the text;
-  everything fits an iPhone 15 with room left. Waiting for the
-  owner's OK on it.
+  everything fits an iPhone 15 with room left. The owner approved it.
+  Search next (same artifact, each while typing with the keyboard up,
+  a result opened, and picking several from To Watch / a collection):
+  A one list in the sheet, a result's compact window in its place
+  ("‹ Resultados"); B results as a wall of polaroids, a result rising
+  on its own sheet above; C the search field at the bottom over the
+  keyboard, results above it. Waiting for the owner's pick.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
