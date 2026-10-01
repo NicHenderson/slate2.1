@@ -915,8 +915,16 @@ directly.
   E4 + name, two lines, a small photo, "↓ Marcar hasta aquí"); B each
   episode a big polaroid photo with its text below; C the season as a
   card of numbered hand-drawn boxes (tap to see one below, with "✓ Ya
-  lo vi" and "↓ Hasta aquí"; no scrolling for most seasons). Waiting
-  for the owner's pick.
+  lo vi" and "↓ Hasta aquí"; no scrolling for most seasons). The
+  owner picked **C** (on the computer they had preferred rows; this is
+  phone only). The other 7 windows' review (same artifact, row
+  "Repaso", each on base C and fitting one screen): a confirmation
+  that asks for the title typed; Edit of a finished show (both dates
+  on one row); starting a show; a new collection (only the icons' box
+  scrolls); adding titles to a collection (search A's picking); the
+  favorite picker (search A, a tap picks); Import's two ways. Waiting
+  for the owner's OK. Then everything is designed; nothing is built
+  until the owner says so.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
