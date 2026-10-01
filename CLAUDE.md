@@ -814,7 +814,11 @@ directly.
   Then (the owner's iPhone again): a drag on a sheet with nowhere left
   to scroll went on to scroll the list behind. The list can't scroll
   while a sheet is up (`.app.has-sheet .content { overflow: hidden }`,
-  its place kept) and the sheets contain their own overscroll.
+  its place kept) and the sheets contain their own overscroll. That
+  wasn't enough on the iPhone (the whole page bounced under Sort): a
+  touchmove listener (js/phoneHead.js) cancels any drag while a sheet
+  is up unless it scrolls a sheet that can still scroll that way, and
+  the root's overscroll is off meanwhile.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

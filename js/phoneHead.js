@@ -206,6 +206,35 @@ const phoneSheetObserver = new MutationObserver(() =>
 );
 phoneSheets.forEach((sheet) => phoneSheetObserver.observe(sheet, { attributes: true, attributeFilter: ["class"] }));
 
+// Nothing behind a sheet moves. An iPhone hands a drag that has nowhere
+// to go (on Sort, on the dimmed page, on Filters at either end) to the
+// page, which then scrolls or bounces under the sheet; CSS can't stop it
+// there, so the drag is cancelled unless it scrolls a sheet.
+let phoneSheetTouchY = 0;
+document.addEventListener(
+  "touchstart",
+  (e) => {
+    phoneSheetTouchY = e.touches[0]?.clientY ?? 0;
+  },
+  { passive: true }
+);
+document.addEventListener(
+  "touchmove",
+  (e) => {
+    if (!phoneAppEl.classList.contains("has-sheet") || e.touches.length !== 1) return;
+    const y = e.touches[0].clientY;
+    const down = y > phoneSheetTouchY; // the finger moves down: the content moves up to its top
+    phoneSheetTouchY = y;
+    const sheet = e.target.closest?.(".sort-menu, .lib-filter-panel");
+    const canScroll =
+      sheet &&
+      sheet.scrollHeight > sheet.clientHeight + 1 &&
+      (down ? sheet.scrollTop > 0 : sheet.scrollTop + sheet.clientHeight < sheet.scrollHeight - 1);
+    if (!canScroll && e.cancelable) e.preventDefault();
+  },
+  { passive: false }
+);
+
 /* ---------- keeping up ---------- */
 
 const phoneHeadObserver = new MutationObserver(queuePhoneHead);

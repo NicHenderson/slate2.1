@@ -221,7 +221,7 @@ test("installable: the manifest and every icon it names are there", async ({ pag
 test("on a phone, Sort and Filters are whole sheets on screen in a long list", async ({ page, backend }) => {
   backend.seed(
     "movies",
-    Array.from({ length: 40 }, (_, i) => ({ tmdb_id: 900000 + i, title: `Film ${i}`, release_year: 1960 + i, duration: 80 + i * 3, genres: ["Drama", "Comedy", "Horror", "Action"][i % 4], watched_date: "2026-01-02", rating: 1 + (i % 10) })),
+    Array.from({ length: 40 }, (_, i) => ({ tmdb_id: 900000 + i, title: `Film ${i}`, release_year: 1960 + i, duration: 80 + i * 3, genres: ["Drama", "Comedy", "Horror", "Action", "Animation", "Romance", "Crime", "Documentary", "Family", "Fantasy", "Thriller", "Mystery"][i % 12], watched_date: `${2014 + (i % 12)}-01-02`, rating: 1 + (i % 10) })),
     backend.user.id
   );
   await page.emulateMedia({ reducedMotion: "reduce" }); // measured where they stop, not as they rise
@@ -264,6 +264,22 @@ test("on a phone, Sort and Filters are whole sheets on screen in a long list", a
   await page.locator('[data-phone-action="sort"]').tap();
   await onScreen(page.locator("#movies-sort-menu"));
   await nothingTraps(page.locator("#movies-sort-menu"));
+  // A drag on it, or on the dimmed page, can't move anything behind (an
+  // iPhone bounced the page under it): the browser is told not to scroll.
+  const dragCancelled = (selector, dy) =>
+    page.evaluate(([selector, dy]) => {
+      const el = document.querySelector(selector);
+      const r = el.getBoundingClientRect();
+      const x = r.left + r.width / 2;
+      const y = r.top + r.height / 2;
+      const touch = (y) => new Touch({ identifier: 1, target: el, clientX: x, clientY: y });
+      el.dispatchEvent(new TouchEvent("touchstart", { bubbles: true, cancelable: true, touches: [touch(y)] }));
+      const move = new TouchEvent("touchmove", { bubbles: true, cancelable: true, touches: [touch(y + dy)] });
+      el.dispatchEvent(move);
+      return move.defaultPrevented;
+    }, [selector, dy]);
+  expect(await dragCancelled("#movies-sort-menu .sort-option", -40)).toBe(true);
+  expect(await dragCancelled(".phone-sheet-backdrop", -40)).toBe(true);
   await page.locator(".phone-sheet-backdrop").tap({ position: { x: 200, y: 60 } });
   await expect(page.locator("#movies-sort-menu")).toBeHidden();
 
@@ -271,6 +287,9 @@ test("on a phone, Sort and Filters are whole sheets on screen in a long list", a
   const panel = page.locator('[data-lib-section="movies-watched"] .lib-filter-panel');
   await onScreen(panel);
   await nothingTraps(panel);
+  // Filters scrolls itself, down from its top; not up past it.
+  expect(await dragCancelled('[data-lib-section="movies-watched"] .lf-chip', -40)).toBe(false);
+  expect(await dragCancelled('[data-lib-section="movies-watched"] .lf-chip', 40)).toBe(true);
   await panel.locator(".lf-done").scrollIntoViewIfNeeded();
   await onScreen(panel.locator(".lf-done"));
   await panel.locator(".lf-done").tap();

@@ -1972,6 +1972,11 @@
     overflow: hidden;
   }
 
+  html:has(.app.has-sheet),
+  html:has(.app.has-sheet) body {
+    overscroll-behavior: none;
+  }
+
   /* ---------- the numbers: one strip, the first three until "More" ---------- */
   :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats {
     width: 100%;
