@@ -1965,6 +1965,13 @@
     view-transition-name: none;
   }
 
+  /* And the list stays put under an open sheet: on an iPhone a drag on a
+     sheet with nowhere left to scroll (Sort, or Filters at either end)
+     went on to scroll the list behind it. */
+  .app.has-sheet .content {
+    overflow: hidden;
+  }
+
   /* ---------- the numbers: one strip, the first three until "More" ---------- */
   :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats {
     width: 100%;
@@ -2105,6 +2112,7 @@
     box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
     transition: transform 0.25s ease;
     animation: phone-sheet-up 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+    overscroll-behavior: contain;
   }
 
   /* Its top band drags it down (js/phoneHead.js). */

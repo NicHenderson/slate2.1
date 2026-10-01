@@ -811,6 +811,10 @@ directly.
   no ancestor of an open sheet has a transform, filter, contain,
   container, view-transition-name, etc. Keep it that way, or this comes
   back. Can't be seen in Chromium: the owner's iPhone is the check.
+  Then (the owner's iPhone again): a drag on a sheet with nowhere left
+  to scroll went on to scroll the list behind. The list can't scroll
+  while a sheet is up (`.app.has-sheet .content { overflow: hidden }`,
+  its place kept) and the sheets contain their own overscroll.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

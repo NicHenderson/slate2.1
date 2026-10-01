@@ -257,6 +257,9 @@ test("on a phone, Sort and Filters are whole sheets on screen in a long list", a
       return found;
     });
     expect(traps, "ancestors that would trap a fixed sheet in Safari").toEqual([]);
+    // And the list under it can't be scrolled (an iPhone passed a drag on
+    // the sheet on to it).
+    expect(await page.locator("#app .content").evaluate((el) => getComputedStyle(el).overflowY)).toBe("hidden");
   };
   await page.locator('[data-phone-action="sort"]').tap();
   await onScreen(page.locator("#movies-sort-menu"));
