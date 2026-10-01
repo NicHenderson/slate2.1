@@ -68,7 +68,7 @@ function openDeleteConfirm(table, row) {
 
   confirmError.classList.add("hidden");
   confirmModal.classList.remove("hidden");
-  if (watched) confirmTypedInput.focus();
+  if (watched) focusOnOpen(confirmTypedInput);
 }
 
 // Deleting one of a movie's viewings (js/viewings.js): always asked, and
@@ -93,7 +93,7 @@ function openViewingDeleteConfirm(movie, viewing, run) {
   confirmYes.disabled = true;
   confirmError.classList.add("hidden");
   confirmModal.classList.remove("hidden");
-  confirmTypedInput.focus();
+  focusOnOpen(confirmTypedInput);
 }
 
 // Asked before something that isn't a delete (Keep watching, js/episodes.js):

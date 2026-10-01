@@ -1103,7 +1103,7 @@ function openCreateCollectionModal() {
   collectionError.classList.add("hidden");
   iconPickerSet("", true); // an icon is required, so start with the picker open
   collectionModal.classList.remove("hidden");
-  collectionName.focus();
+  focusOnOpen(collectionName);
 }
 
 function openCollectionEditor(col) {
@@ -1114,7 +1114,7 @@ function openCollectionEditor(col) {
   collectionError.classList.add("hidden");
   iconPickerSet(col.icon ?? "", false);
   collectionModal.classList.remove("hidden");
-  collectionName.focus();
+  focusOnOpen(collectionName);
 }
 
 function closeCollectionModal() {

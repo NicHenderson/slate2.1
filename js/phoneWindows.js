@@ -49,3 +49,25 @@ PHONE_WINDOWS.forEach(({ backdrop, sheet: sheetSel, head: headSel, close }) => {
   head.addEventListener("pointerup", end);
   head.addEventListener("pointercancel", end);
 });
+
+/* ---------- Typing in a window, on a phone ----------
+
+   A field focused as its window opens makes an iPhone bring up the
+   keyboard while the sheet is still rising from below the screen: it
+   scrolls the whole page to show the field, and the page stays shifted
+   (the owner's iPhone: the window jumped down, cut off at the top). On
+   a phone the field waits to be tapped; on a computer it's focused as
+   before. */
+function focusOnOpen(field) {
+  if (!phoneWindowLayout.matches) field.focus();
+}
+
+// The app never scrolls as a whole (its lists scroll inside), so a page
+// an iPhone left shifted after the keyboard went away goes back.
+document.addEventListener("focusout", () => {
+  if (!phoneWindowLayout.matches) return;
+  setTimeout(() => {
+    const typing = document.activeElement?.matches?.("input, textarea, select");
+    if (!typing && (window.scrollY || document.documentElement.scrollTop)) window.scrollTo(0, 0);
+  }, 150);
+});

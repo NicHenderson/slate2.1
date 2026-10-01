@@ -144,7 +144,7 @@ function openLibraryModal(type) {
   libraryFilter.value = "";
   renderLibraryList();
   libraryModal.classList.remove("hidden");
-  libraryFilter.focus();
+  focusOnOpen(libraryFilter);
 }
 
 function closeLibraryModal() {
@@ -236,7 +236,7 @@ modalBack.addEventListener("click", () => {
   renderLibraryList();
   updateLibraryFooter();
   libraryModal.classList.remove("hidden");
-  libraryFilter.focus();
+  focusOnOpen(libraryFilter);
 });
 
 libraryClose.addEventListener("click", closeLibraryModal);

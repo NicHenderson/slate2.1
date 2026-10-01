@@ -433,6 +433,11 @@ test("on a phone, titles are added to a collection by tapping their rows; a favo
   await page.locator('.tab-bar-btn[data-tab="collections"]').tap();
   await page.locator("#grid-collections .collection-card").first().click();
   await page.locator('#col-banner [data-col-action="add"]').tap();
+  // No field is focused as the window rises: on an iPhone that brings the
+  // keyboard up mid-rise and leaves the whole page shifted.
+  const focused = () => page.evaluate(() => document.activeElement?.tagName ?? "");
+  await expect(page.locator("#library-modal")).toBeVisible();
+  expect(await focused()).not.toBe("INPUT");
   const row = page.locator("#library-results .add-card", { hasText: "Inception" });
   await expect(row.locator(".card-glance")).toHaveText("2010 · 2h 28m");
   await expectOnScreen(row.locator(".add-check"));
@@ -441,6 +446,11 @@ test("on a phone, titles are added to a collection by tapping their rows; a favo
   await page.locator("#library-add-btn").tap();
   await expect(page.locator("#library-modal")).toBeHidden();
   await expect.poll(() => backend.db.collection_items.length).toBe(3);
+  await page.locator('#col-banner [data-col-action="back"]').tap();
+  await page.locator("#phone-add").tap();
+  await expect(page.locator("#collection-modal")).toBeVisible();
+  expect(await focused()).not.toBe("INPUT");
+  await page.locator("#collection-close").tap();
 
   await page.locator('.tab-bar-btn[data-tab="settings"]').tap();
   await page.locator('[data-settings-page="profile"]').tap();

@@ -3304,6 +3304,31 @@
     height: 128px;
   }
 
+  /* An iPhone's date field has a width of its own that ignores 100% and
+     pushed the form sideways (the owner's iPhone); drawn plain, it fits. */
+  :is(#update-modal, #start-modal) input[type="date"] {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 46px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  :is(#update-modal, #start-modal) input[type="date"]::-webkit-date-and-time-value {
+    text-align: left;
+  }
+
+  /* Nothing in a window scrolls sideways, whatever a field does. */
+  :is(#update-modal, #start-modal) .update-form-body,
+  #collection-form,
+  #import-modal .import-body,
+  #library-modal .add-grid,
+  #favorite-modal .tmdb-list {
+    overflow-x: hidden;
+  }
+
   /* Both dates on one row. */
   #start-form {
     display: grid;

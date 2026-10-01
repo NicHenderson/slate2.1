@@ -320,7 +320,7 @@ function openFavoritePicker(type) {
   favoriteError.classList.add("hidden");
   favoriteResults.innerHTML = pickerPromptHtml();
   favoriteModal.classList.remove("hidden");
-  favoriteInput.focus();
+  focusOnOpen(favoriteInput);
 }
 
 function closeFavoritePicker() {

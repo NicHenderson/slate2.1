@@ -959,7 +959,15 @@ directly.
   window is up comes from the top (at the bottom it covered the
   window's buttons). Computer pixel-identical (the new collection
   window's emoji render a few hundred pixels differently run to run,
-  old code too).
+  old code too). The owner's iPhone, fixed: (1) Edit and the dates
+  window scrolled sideways: iOS date fields have a width of their own
+  that ignores 100%; drawn plain (`appearance: none`, min-width 0) and
+  the windows' bodies never scroll sideways. (2) A new collection and
+  adding titles jumped down, cut off at the top: a field focused as the
+  sheet rose brought the keyboard up mid-rise and iOS shifted the page.
+  On a phone, fields in windows wait to be tapped (`focusOnOpen`,
+  js/phoneWindows.js; the computer still focuses them), and a page
+  left shifted once the keyboard goes goes back to the top.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
