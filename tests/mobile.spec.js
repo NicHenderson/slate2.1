@@ -429,7 +429,8 @@ test("on a phone, a window is a sheet that fits, and closes by dragging it down"
 // whole on a note over the window. Its buttons sit at the bottom.
 test("on a phone, a title's window fits one screen; a long review opens whole on a note", async ({ page, backend }) => {
   const alien = backend.db.movies.find((m) => m.title === "Alien");
-  const review = "Still terrifying, forty years later.\nRipley is the best of them all, and the dinner scene still leaves me breathless. I'd watch it once a year, and I couldn't sleep for a week the first time.";
+  // Long enough not to fit the screen even on the note.
+  const review = Array.from({ length: 12 }, (_, i) => `${i + 1}. Still terrifying, forty years later.\nRipley is the best of them all, and the dinner scene still leaves me breathless.`).join("\n");
   alien.review = review;
   backend.seed("viewings", [{ movie_id: alien.id, watched_on: "2024-03-03" }], backend.user.id);
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -450,6 +451,13 @@ test("on a phone, a title's window fits one screen; a long review opens whole on
   await cut.tap();
   await expect(page.locator("#detail-note")).toBeVisible();
   await expect(page.locator("#detail-note-text")).toHaveText(review);
+  // Too long for the screen: the note stays on it, and its text scrolls.
+  const paper = await page.locator(".detail-note-paper").boundingBox();
+  expect(paper.y + paper.height, "the note runs off the screen").toBeLessThanOrEqual(844);
+  await expect(page.locator("#detail-note")).toHaveClass(/\bcan-scroll\b/);
+  await page.locator("#detail-note-text").evaluate((el) => (el.scrollTop = el.scrollHeight));
+  await expect(page.locator("#detail-note")).toHaveClass(/\bat-end\b/);
+  await expectOnScreen(page.locator("#detail-note-close"));
   await page.keyboard.press("Escape");
   await expect(page.locator("#detail-note")).toBeHidden();
   await expect(page.locator("#detail-modal")).toBeVisible();

@@ -4697,13 +4697,14 @@
     animation: detail-note-in 0.2s ease-out;
   }
 
-  /* Only its text scrolls (a very long review), so the × can stick out
-     of the corner. */
+  /* Never taller than the screen (a grid row grows with what's in it,
+     so 100% wasn't a limit and a very long review ran off the screen):
+     only its text scrolls, so the × can stick out of the corner. */
   .detail-note-paper {
     position: relative;
     display: flex;
     flex-direction: column;
-    max-height: 100%;
+    max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 48px);
     padding: 30px 20px 22px;
     background: color-mix(in srgb, var(--accent) 16%, var(--paper));
     color: var(--ink);
@@ -4711,8 +4712,11 @@
     transform: rotate(-1deg);
   }
 
-  .detail-note.is-review .detail-note-paper {
+  /* A review on ruled lines, drawn on the text itself so they scroll
+     with it ("local") and stay under each line. */
+  .detail-note.is-review .detail-note-text {
     background-image: repeating-linear-gradient(180deg, transparent 0 29px, color-mix(in srgb, var(--accent-deep) 22%, transparent) 29px 30px);
+    background-attachment: local;
   }
 
   .detail-note-paper::before {
@@ -4765,9 +4769,62 @@
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     white-space: pre-line;
     font-size: 15px;
     line-height: 1.55;
+  }
+
+  /* Too long for the screen: the last lines fade out while there's more
+     below. (Room for the bar is kept either way, so the lines don't
+     re-wrap when it shows.) */
+  .detail-note-text {
+    padding-right: 14px;
+  }
+
+  .detail-note.can-scroll:not(.at-end) .detail-note-text {
+    -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 48px), transparent);
+    mask-image: linear-gradient(180deg, #000 calc(100% - 48px), transparent);
+  }
+
+  /* Its own scroll bar, always there while it can scroll (an iPhone's
+     only shows while the finger moves): how far in, and how much is left. */
+  .detail-note-track {
+    display: none;
+    position: absolute;
+    top: 58px;
+    bottom: 22px;
+    right: 8px;
+    width: 4px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--ink) 12%, transparent);
+    pointer-events: none;
+  }
+
+  .detail-note.can-scroll .detail-note-track {
+    display: block;
+  }
+
+  .detail-note-thumb {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-radius: 2px;
+    background: var(--accent-deep);
+  }
+
+  /* "Keep scrolling" under the text while there's more. */
+  .detail-note-more {
+    display: none;
+    margin-top: 6px;
+    font-family: var(--font-hand);
+    font-size: 16px;
+    color: var(--accent-deep);
+    text-align: center;
+  }
+
+  .detail-note.can-scroll:not(.at-end) .detail-note-more {
+    display: block;
   }
 
   .detail-note.is-review .detail-note-text {

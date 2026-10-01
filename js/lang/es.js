@@ -633,6 +633,7 @@ window.SLATE_LANGUAGES = {
       "Surprise Me": "Sorpréndeme",
       "More": "Más",
       "more": "más",
+      "↓ Scroll to keep reading": "↓ Desliza para seguir leyendo",
       "Less": "Menos",
       "log out ⇦": "cerrar sesión ⇦",
       "Sorted by": "Ordenado por",

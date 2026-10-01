@@ -1004,6 +1004,13 @@ directly.
   (1280/900/700, every state, viewings, the collection menu).
   The owner's note: the note's × should be plain to see; it's now a
   round ink sticker over the note's corner. Then: go for stage 4.
+  The owner's iPhone: a very long review ran off the screen on the note
+  (a grid row grows with its content, so the paper's max-height: 100%
+  didn't limit it). Now the paper is capped to the screen and only the
+  text scrolls, with its own bar (always shown while it can scroll; an
+  iPhone's own shows only mid-swipe), the last lines fading and
+  "↓ Scroll to keep reading" until the end; the ruled lines scroll
+  with the text (`background-attachment: local`).
   Stage 4 — built, waiting for the owner's check (css/responsive.css
   "Windows on a phone, stage 4"): #search-modal is the same paper sheet
   (it joins stage 2's shared rules), standing tall. The field on top
