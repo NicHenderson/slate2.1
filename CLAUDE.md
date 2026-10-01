@@ -803,8 +803,14 @@ directly.
   the frame position: fixed is measured in, Chromium doesn't. Fixed:
   the phone's list sections aren't containers (`container: none`), and
   what those queries did for the numbers strip is restated for phones;
-  tests/mobile.spec.js stands in for Safari with contain: layout. Keep
-  any fixed sheet out of a container, or this comes back.
+  The owner's iPhone still showed it: the sheets were cut at the list
+  area's bottom edge. Second cause: `.content`'s view-transition-name
+  (for logging in / out) makes it a layer of its own in Safari, which
+  clips fixed children and takes their scrolling; it's dropped while a
+  sheet is up (`.app.has-sheet`). tests/mobile.spec.js now checks that
+  no ancestor of an open sheet has a transform, filter, contain,
+  container, view-transition-name, etc. Keep it that way, or this comes
+  back. Can't be seen in Chromium: the owner's iPhone is the check.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

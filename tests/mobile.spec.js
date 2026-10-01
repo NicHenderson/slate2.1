@@ -214,9 +214,10 @@ test("installable: the manifest and every icon it names are there", async ({ pag
 });
 
 // Sort and Filters rise from the bottom of the screen, whole, however far
-// down a long list is scrolled. Safari makes any container-query container
-// the frame position: fixed is measured in (Chromium doesn't): stood in for
-// here with contain: layout on each, which does the same in Chromium.
+// down a long list is scrolled. Safari traps a fixed sheet in ancestors
+// Chromium doesn't (a container-query container, a view transition's
+// layer): the sheets were cut off and the list scrolled under them. So
+// besides where they land, nothing around them may be such an ancestor.
 test("on a phone, Sort and Filters are whole sheets on screen in a long list", async ({ page, backend }) => {
   backend.seed(
     "movies",
@@ -226,11 +227,6 @@ test("on a phone, Sort and Filters are whole sheets on screen in a long list", a
   await page.emulateMedia({ reducedMotion: "reduce" }); // measured where they stop, not as they rise
   await page.goto("/");
   await logIn(page);
-  await page.evaluate(() =>
-    document.querySelectorAll("*").forEach((el) => {
-      if (getComputedStyle(el).containerType !== "normal") el.style.contain = "layout";
-    })
-  );
   await page.locator("#app .content").evaluate((el) => el.scrollTo(0, 600));
 
   const onScreen = async (locator) => {
@@ -238,14 +234,40 @@ test("on a phone, Sort and Filters are whole sheets on screen in a long list", a
     expect(box.y).toBeGreaterThanOrEqual(0);
     expect(box.y + box.height).toBeLessThanOrEqual(844 + 1);
   };
+  // Safari also clips a fixed sheet at the edges of any ancestor that's a
+  // layer of its own, and scrolls that instead: nothing around an open
+  // sheet may be one.
+  const nothingTraps = async (locator) => {
+    const traps = await locator.evaluate((sheet) => {
+      const found = [];
+      for (let el = sheet.parentElement; el && el !== document.documentElement; el = el.parentElement) {
+        const cs = getComputedStyle(el);
+        const why = [
+          cs.transform !== "none" && "transform",
+          cs.filter !== "none" && "filter",
+          cs.backdropFilter && cs.backdropFilter !== "none" && "backdrop-filter",
+          cs.perspective !== "none" && "perspective",
+          cs.contain !== "none" && "contain",
+          cs.containerType !== "normal" && "container",
+          cs.viewTransitionName && cs.viewTransitionName !== "none" && "view-transition-name",
+          /transform|filter|perspective/.test(cs.willChange) && "will-change",
+        ].filter(Boolean);
+        if (why.length) found.push(`${el.tagName.toLowerCase()}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}: ${why.join(", ")}`);
+      }
+      return found;
+    });
+    expect(traps, "ancestors that would trap a fixed sheet in Safari").toEqual([]);
+  };
   await page.locator('[data-phone-action="sort"]').tap();
   await onScreen(page.locator("#movies-sort-menu"));
+  await nothingTraps(page.locator("#movies-sort-menu"));
   await page.locator(".phone-sheet-backdrop").tap({ position: { x: 200, y: 60 } });
   await expect(page.locator("#movies-sort-menu")).toBeHidden();
 
   await page.locator('[data-phone-action="filter"]').tap();
   const panel = page.locator('[data-lib-section="movies-watched"] .lib-filter-panel');
   await onScreen(panel);
+  await nothingTraps(panel);
   await panel.locator(".lf-done").scrollIntoViewIfNeeded();
   await onScreen(panel.locator(".lf-done"));
   await panel.locator(".lf-done").tap();

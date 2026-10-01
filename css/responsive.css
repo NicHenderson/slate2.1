@@ -1956,6 +1956,15 @@
     container: none;
   }
 
+  /* Nor the scrolling list itself, while a sheet is up: its view
+     transition name (css/transitions.css, for logging in and out) makes
+     it a layer of its own in Safari, which then clips the sheets at its
+     bottom edge and takes their scrolling. It's only needed as the app
+     opens and closes, never with a sheet up. */
+  .app.has-sheet .content {
+    view-transition-name: none;
+  }
+
   /* ---------- the numbers: one strip, the first three until "More" ---------- */
   :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats {
     width: 100%;
