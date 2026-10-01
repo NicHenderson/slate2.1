@@ -71,8 +71,20 @@ test("on a phone: landing, login, the bottom bar and adding a title all fit and 
   await expect(tab("movies-towatch")).toHaveAttribute("aria-pressed", "true");
   await expectNoSidewaysScroll(page);
 
-  // Adding a title, start to finish.
-  await page.locator("#movies-towatch .add-btn").tap();
+  // The header is one row of round buttons: search narrows the list…
+  await page.locator('[data-phone-action="search"]').tap();
+  await page.keyboard.type("alien");
+  await expect(page.locator("#grid-movies-towatch .card")).toHaveCount(0);
+  await page.locator("#phone-search-cancel").tap();
+  await expect(page.locator("#grid-movies-towatch .card")).toHaveCount(1);
+  // …and Sort is a sheet from the bottom, its options on screen.
+  await page.locator('[data-phone-action="sort"]').tap();
+  await expectOnScreen(page.locator('#movies-towatch-sort-menu [data-sort="alpha-asc"]'));
+  await page.locator('#movies-towatch-sort-menu [data-sort="alpha-asc"]').tap();
+  await expect(page.locator("#movies-towatch-sort-menu")).toBeHidden();
+
+  // Adding a title, start to finish, from the floating "+".
+  await page.locator("#phone-add").tap();
   await expectOnScreen(page.locator("#modal-input"));
   await page.fill("#modal-input", "paddington");
   await page.press("#modal-input", "Enter");

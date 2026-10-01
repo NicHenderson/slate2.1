@@ -777,6 +777,27 @@ directly.
   dropped keep their episode line, smaller ("Started 12d ago" hidden;
   a dropped card breaks "Stopped at" before the code, never in it). The
   starburst and ×N scaled down. Computer sizes pixel-identical.
+  Stage 3 — built, waiting for the owner's check: of three header
+  mockups (same artifact: A one row of round buttons, B a search bar
+  always there with chips, C a big header folding as you scroll) the
+  owner picked **A**. js/phoneHead.js: above the tabs, the view's name
+  and the list's count, round buttons for 🎲 (lists to watch), search,
+  sort, filters (with a count badge), and a floating "+" over the
+  bottom right. Each button works the section's own control (its search
+  box, sort menu, filters panel, add button), which stay in the page,
+  hidden, so search / sort / filters behave as on the computer. The
+  search button turns the row into a search field with Cancel. Sort
+  and Filters are sheets from the bottom over a dimmed page (the tab
+  bar and "+" hidden meanwhile): a tap on the dim or dragging the grip
+  down closes them (the grip is a real element with touch-action:
+  none, appended last, as the menus style their first child; re-added
+  when they redraw). The numbers fold into one strip of the first three
+  with "More ▾" (`.hstats-more`, beside the strip, as it's redrawn).
+  With "+" floating, the "+ Add" card shows only in an empty list. This
+  fixes the diagnosis' cut-off Sort menu and the Shows Queue's buttons
+  running off the screen. Collections and Settings keep their headers
+  for now. Computer sizes pixel-identical, the sort menu and filters
+  panel open included.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
