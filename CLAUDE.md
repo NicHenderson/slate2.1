@@ -897,7 +897,14 @@ directly.
   A the poster as a polaroid beside the title, all the rest below; B
   the poster as the sheet's cover, the title a sticker label, ‹ ›
   arrows to step; C a compact head and tabs (your record · about it ·
-  where to watch). Waiting for the owner's pick.
+  where to watch). The owner picked **A, with no scrolling at all**
+  (they liked compacting everything). Compact A (same artifact, row
+  "Ficha A, compacta"): the polaroid smaller, the synopsis cut to 2
+  lines and the review to 3, each with "más" that shows the whole text
+  on a taped note over the window; the watched date, "↻ La vi otra
+  vez" and "×2 ›" on one row; Up next with its photo beside the text;
+  everything fits an iPhone 15 with room left. Waiting for the
+  owner's OK on it.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
