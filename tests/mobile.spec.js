@@ -424,6 +424,50 @@ test("on a phone, a window is a sheet that fits, and closes by dragging it down"
   await expect(page.locator("#update-modal")).toBeVisible();
 });
 
+// A title's window fits one screen with nothing to scroll (the owner's
+// call): a long review is cut to three lines, and tapping it shows it
+// whole on a note over the window. Its buttons sit at the bottom.
+test("on a phone, a title's window fits one screen; a long review opens whole on a note", async ({ page, backend }) => {
+  const alien = backend.db.movies.find((m) => m.title === "Alien");
+  const review = "Still terrifying, forty years later.\nRipley is the best of them all, and the dinner scene still leaves me breathless. I'd watch it once a year, and I couldn't sleep for a week the first time.";
+  alien.review = review;
+  backend.seed("viewings", [{ movie_id: alien.id, watched_on: "2024-03-03" }], backend.user.id);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await logIn(page);
+  await page.locator("#grid-movies-watched .card", { hasText: "Alien" }).tap();
+  const sheet = page.locator("#detail-modal .detail-layout");
+  await expect(sheet).toBeVisible();
+  const box = await sheet.boundingBox();
+  expect(Math.round(box.y + box.height)).toBe(844);
+  const scrolls = await page.locator("#detail-modal .detail-panel").evaluate((p) => p.scrollHeight > p.clientHeight + 1);
+  expect(scrolls, "the window scrolls").toBe(false);
+  await expectOnScreen(page.locator('#detail-modal [data-action="edit"]'));
+  await expectNoSidewaysScroll(page);
+
+  const cut = page.locator("#detail-modal .detail-review");
+  await expect(cut).toHaveClass(/\bis-cut\b/);
+  await cut.tap();
+  await expect(page.locator("#detail-note")).toBeVisible();
+  await expect(page.locator("#detail-note-text")).toHaveText(review);
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#detail-note")).toBeHidden();
+  await expect(page.locator("#detail-modal")).toBeVisible();
+
+  // A show being watched, its "Up next" note included, fits too.
+  await page.locator("#detail-close").tap();
+  const dark = backend.db.shows.find((s) => s.title === "Dark");
+  Object.assign(dark, { finished_watching_date: null, rating: null });
+  backend.seed("watched_episodes", [{ show_id: dark.id, season: 1, episode: 3 }], backend.user.id);
+  await page.reload();
+  await page.locator('.tab-bar-btn[data-tab="shows"]').tap();
+  await page.locator("#grid-shows-watching .card", { hasText: "Dark" }).tap();
+  await expect(page.locator("#detail-modal .up-next-head")).toHaveText("Up next S1 · E4");
+  const showScrolls = await page.locator("#detail-modal .detail-panel").evaluate((p) => p.scrollHeight > p.clientHeight + 1);
+  expect(showScrolls, "the window scrolls").toBe(false);
+  await expectOnScreen(page.locator('#detail-modal [data-action="drop-series"]'));
+});
+
 // Adding titles to a collection, as rows: tapping one ticks it, and the
 // stamp adds it. Picking a favorite: a tap anywhere on its row picks it.
 test("on a phone, titles are added to a collection by tapping their rows; a favorite by tapping its row", async ({ page, backend }) => {

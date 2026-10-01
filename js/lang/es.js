@@ -632,6 +632,7 @@ window.SLATE_LANGUAGES = {
       "Finished": "Terminadas",
       "Surprise Me": "Sorpréndeme",
       "More": "Más",
+      "more": "más",
       "Less": "Menos",
       "log out ⇦": "cerrar sesión ⇦",
       "Sorted by": "Ordenado por",

@@ -147,6 +147,7 @@
 .settings-page-name,
 .density-select-wrap,
 .confirm-close,
+.detail-head-poster,
 .sheet-grip,
 .auth-sheet-grip,
 .auth-sheet-close,
@@ -3940,5 +3941,826 @@
     border: 2px solid var(--ink);
     box-shadow: 3px 4px 0 color-mix(in srgb, var(--ink) 35%, transparent);
     transform: rotate(1deg);
+  }
+}
+
+/* ==================== Windows on a phone, stage 3: a title's window ====================
+   The owner's pick ("A, compact"): the same sheet of paper, everything on
+   one screen with no scrolling. The poster is a small polaroid beside the
+   title; the synopsis is cut to two lines and the review to three, each
+   ending in "more" when cut, which shows the whole text on a note taped
+   over the window (js/detailModal.js). The buttons are stamps pinned at
+   the bottom: the main one wide, "Add to collection" and delete / drop as
+   square stamps with only their icon. The window still scrolls inside if
+   a small phone needs it; its head and buttons stay put. */
+@media (max-width: 640px) {
+  #detail-modal {
+    align-items: end;
+    justify-items: stretch;
+    padding: var(--safe-top) 0 0;
+    background: rgba(5, 4, 10, 0.68);
+  }
+
+  /* ---------- the sheet ---------- */
+  #detail-modal .detail-layout {
+    --sheet-paper: var(--paper);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    /* Always this tall, so stepping to another title or a note loading
+       doesn't make it jump. */
+    height: calc(100dvh - var(--safe-top) - 22px);
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    background: var(--sheet-paper);
+    color: var(--ink);
+    box-shadow: 0 -10px 34px rgba(0, 0, 0, 0.5);
+    animation: phone-window-up 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+
+  #detail-modal .detail-layout::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -7px;
+    height: 8px;
+    background: radial-gradient(circle at 6px -2px, transparent 6px, var(--sheet-paper) 6.5px) 0 0 / 12px 8px repeat-x;
+    pointer-events: none;
+  }
+
+  #detail-modal .detail-layout::after {
+    content: "";
+    position: absolute;
+    z-index: 3;
+    top: -11px;
+    left: 50%;
+    width: 76px;
+    height: 22px;
+    margin-left: -38px;
+    background: color-mix(in srgb, var(--accent) 78%, transparent);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transform: rotate(-2deg);
+    pointer-events: none;
+  }
+
+  #detail-modal .detail-poster-box {
+    display: none;
+  }
+
+  /* What scrolls, if anything has to. It isn't positioned, so the × and
+     the buttons (placed against the sheet) stay where they are. */
+  #detail-modal .detail-panel {
+    position: static;
+    align-self: stretch;
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    color: var(--ink);
+    box-shadow: none;
+  }
+
+  #detail-modal .detail-panel::before,
+  #detail-modal .detail-panel::after {
+    content: none;
+  }
+
+  #detail-modal .detail-close-btn {
+    position: absolute;
+    z-index: 3;
+    top: 12px;
+    right: 8px;
+    display: grid;
+    width: 40px;
+    height: 40px;
+    color: var(--ink);
+    background: none;
+  }
+
+  /* ---------- the head: the polaroid, and the title beside it ----------
+     One grid for the whole window, so the trailer's button (after the
+     synopsis in the page) can sit beside the polaroid too. The fifth row
+     takes whatever the polaroid is taller than the words beside it. */
+  #detail-modal .detail-body {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto 1fr;
+    column-gap: 14px;
+    align-items: start;
+    flex: none;
+    min-height: 0;
+    overflow: visible;
+    padding: 22px 18px calc(88px + var(--safe-bottom)) 16px;
+    scrollbar-gutter: auto;
+  }
+
+  #detail-modal .detail-body > * {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  #detail-modal .detail-head,
+  #detail-modal .detail-head-left {
+    display: contents;
+  }
+
+  /* It's what drags the sheet down (js/phoneWindows.js). */
+  #detail-modal .detail-head-poster,
+  #detail-modal .detail-head-left > *,
+  #detail-modal .detail-head .detail-meta {
+    touch-action: none;
+  }
+
+  #detail-modal .detail-head-poster {
+    position: relative;
+    display: block;
+    grid-column: 1;
+    grid-row: 1 / 6;
+    margin: 0 0 4px;
+    padding: 5px 5px 16px;
+    background: #fff;
+    box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+    transform: rotate(-3deg);
+  }
+
+  /* Its pin. */
+  #detail-modal .detail-head-poster::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: -6px;
+    left: calc(50% - 6px);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-strong);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4), inset -2px -2px 3px rgba(0, 0, 0, 0.3), inset 2px 2px 2px rgba(255, 255, 255, 0.5);
+  }
+
+  #detail-modal .detail-head-poster img,
+  #detail-modal .detail-head-poster .detail-poster-empty {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+  }
+
+  /* "New season!" on the polaroid, smaller. */
+  #detail-modal .detail-head-poster .new-season-stamp {
+    top: 22%;
+    padding: 3px 5px;
+    border-width: 2px;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+
+  #detail-modal .detail-head-left > .detail-title {
+    grid-column: 2;
+    grid-row: 1;
+    padding-right: 30px; /* clear of the × */
+    font-size: 26px;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+  }
+
+  #detail-modal .detail-head > .detail-meta {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 4px;
+    text-align: left;
+    color: var(--ink-muted);
+    font-size: 12.5px;
+  }
+
+  #detail-modal .detail-meta-year,
+  #detail-modal .detail-meta-runtime {
+    margin: 0;
+    font-size: inherit;
+    font-weight: 400;
+    color: inherit;
+  }
+
+  #detail-modal .detail-meta-runtime::before {
+    content: "\00a0· ";
+  }
+
+  #detail-modal .detail-head-left > .detail-genre-line {
+    grid-column: 2;
+    grid-row: 3;
+    margin-top: 3px;
+    font-size: 16px;
+    line-height: 1.2;
+  }
+
+  #detail-modal .detail-body > .detail-trailer {
+    grid-column: 2;
+    grid-row: 4;
+    margin-top: 8px;
+  }
+
+  #detail-modal .trailer-btn {
+    min-height: 30px;
+    margin: 0;
+    padding: 3px 10px;
+    border: 1.5px solid var(--accent-deep);
+    border-radius: 0;
+    background: none;
+    color: var(--accent-deep);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  #detail-modal .trailer-btn:disabled {
+    border-color: color-mix(in srgb, var(--ink) 30%, transparent);
+    color: var(--ink-muted);
+  }
+
+  /* The trailer plays over the window, the rest dimmed; a tap on the dim
+     or the × above the player closes it (js/detailModal.js). */
+  #detail-modal .detail-trailer-frame {
+    position: fixed;
+    z-index: 30;
+    left: 0;
+    right: 0;
+    top: 50%;
+    margin: 0;
+    border: 0;
+    transform: translateY(-50%);
+  }
+
+  #detail-modal .detail-trailer-frame::before {
+    content: "";
+    position: fixed;
+    inset: -100vh 0;
+    z-index: -1;
+    background: rgba(5, 4, 10, 0.86);
+  }
+
+  #detail-modal .detail-trailer-frame::after {
+    content: "✕";
+    position: absolute;
+    top: -48px;
+    right: 8px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    color: #fff;
+    font-size: 22px;
+  }
+
+  /* ---------- the synopsis: two lines, then "more" ---------- */
+  #detail-modal .detail-synopsis {
+    position: relative;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    margin-top: 12px;
+    font-size: 13.5px;
+    line-height: 1.42;
+  }
+
+  /* The dashed line under it, between what the title is and your record
+     of it. */
+  #detail-modal .detail-synopsis + .detail-trailer + :not(.detail-actions),
+  #detail-modal .detail-synopsis + .detail-trailer + .detail-actions + * {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 2px dashed color-mix(in srgb, var(--ink) 16%, transparent);
+  }
+
+  #detail-modal .is-cut {
+    cursor: pointer;
+  }
+
+  #detail-modal .is-cut::after {
+    content: attr(data-more);
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding-left: 30px;
+    background: linear-gradient(90deg, transparent, var(--note-bg, var(--sheet-paper)) 26px);
+    color: var(--accent-deep);
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: inherit;
+  }
+
+  /* ---------- labels and dates ---------- */
+  #detail-modal .detail-label {
+    margin-bottom: 3px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+  }
+
+  #detail-modal .detail-date-value {
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  /* "Started on 1 Sep 2026" on one line (a show being watched or dropped). */
+  #detail-modal .detail-section:has(> .detail-date-value) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 8px;
+  }
+
+  #detail-modal .detail-section {
+    margin-top: 12px;
+  }
+
+  /* ---------- watched / finished: the date, the hearts ---------- */
+  #detail-modal .detail-meta-strip {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 12px 0 0;
+    border-bottom: 0;
+  }
+
+  #detail-modal .detail-field {
+    flex: none;
+  }
+
+  /* A movie's date, "Watched it again" and its viewings, on one row. */
+  #detail-modal .detail-field-again {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: end;
+    column-gap: 10px;
+  }
+
+  #detail-modal .detail-field-again > .detail-label {
+    grid-column: 1 / -1;
+  }
+
+  #detail-modal .detail-field-again > .detail-date-value {
+    grid-row: 2;
+    grid-column: 1;
+    align-self: center;
+  }
+
+  #detail-modal .detail-field-again .again-btn {
+    grid-row: 2;
+    grid-column: 2;
+    margin: 0;
+    padding: 5px 9px;
+  }
+
+  #detail-modal .detail-field-again .viewings-toggle {
+    grid-row: 2;
+    grid-column: 3;
+    margin: 0;
+    padding: 4px 0;
+    border: 0;
+    background: none;
+    font-family: var(--font-hand);
+    font-size: 17px;
+    font-weight: 400;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  #detail-modal .viewings-caret {
+    display: none;
+  }
+
+  #detail-modal .viewings-toggle::after {
+    content: "›";
+    display: inline-block;
+    margin-left: 4px;
+    transition: transform var(--transition);
+  }
+
+  #detail-modal .viewings-toggle[aria-expanded="true"]::after {
+    transform: rotate(90deg);
+  }
+
+  #detail-modal .viewings-list {
+    margin-top: 10px;
+  }
+
+  #detail-modal .viewing-item {
+    padding: 7px 12px;
+  }
+
+  #detail-modal .rating-row .hearts {
+    --heart: 24px;
+  }
+
+  #detail-modal .hearts-value {
+    font-family: var(--font-hand);
+    font-size: 19px;
+  }
+
+  /* ---------- the review: three lines, then "more" ---------- */
+  #detail-modal .detail-section:has(> .detail-review) {
+    margin-top: 14px;
+  }
+
+  #detail-modal .detail-review {
+    --note-bg: color-mix(in srgb, var(--accent) 16%, var(--paper));
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    margin: 6px 2px 0;
+    /* The bottom edge a border, not padding: the lines cut off show
+       through padding. */
+    padding: 10px 14px 0;
+    border-bottom: 10px solid var(--note-bg);
+    font-size: 18px;
+    line-height: 1.35;
+    transform: rotate(-0.6deg);
+  }
+
+  /* Its tape pokes over the top edge: drawn inside, as the note now cuts
+     what overflows. */
+  #detail-modal .detail-review::before {
+    top: 0;
+    height: 9px;
+  }
+
+  #detail-modal .detail-review.is-cut::after {
+    right: 14px;
+    bottom: 0;
+    font-family: var(--font-hand);
+    font-size: 18px;
+  }
+
+  /* ---------- a show: "Up next", its photo beside the words ---------- */
+  /* The fourth row takes whatever the photo is taller than the words. */
+  #detail-modal .up-next {
+    grid-template-columns: 118px minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr;
+    gap: 0 12px;
+    margin: 12px 0 0;
+    padding: 12px 14px;
+    max-width: none;
+    transform: rotate(0.5deg);
+  }
+
+  #detail-modal .up-next.is-loading {
+    min-height: 150px;
+  }
+
+  #detail-modal .up-next-text {
+    display: contents;
+  }
+
+  #detail-modal .up-next-text > * {
+    grid-column: 2;
+    min-width: 0;
+  }
+
+  /* What needs the room: the row of actions, and "Where are you?"'s picker. */
+  #detail-modal .up-next-text > :is(.up-next-row, .up-next-pick, .up-next-or, .up-next-or + .up-next-hint),
+  #detail-modal .up-next-text:only-child > * {
+    grid-column: 1 / -1;
+  }
+
+  #detail-modal .up-next-photo {
+    order: 0;
+    grid-column: 1;
+    grid-row: 1 / 5;
+    max-width: none;
+    margin: 4px 0 0;
+    padding: 4px 4px 10px;
+    transform: rotate(-2.5deg);
+  }
+
+  #detail-modal .up-next-clip {
+    top: -10px;
+    left: 12px;
+    width: 10px;
+    height: 26px;
+    border-width: 2px;
+  }
+
+  #detail-modal .up-next-head {
+    font-size: 20px;
+    line-height: 1.05;
+  }
+
+  #detail-modal .up-next-name {
+    margin-top: 3px;
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  #detail-modal .up-next-desc,
+  #detail-modal .up-next-hint {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--ink-muted);
+  }
+
+  /* Up to date: what was watched and when the next one airs; three lines. */
+  #detail-modal .up-next-hint {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  #detail-modal .up-next-row {
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+
+  #detail-modal .up-next-all {
+    margin-left: auto;
+    font-size: 16px;
+  }
+
+  #detail-modal .up-next-pick {
+    margin-top: 8px;
+  }
+
+  #detail-modal .up-next-or {
+    margin-top: 8px;
+  }
+
+  /* A finished show with something new: the same note, shorter. */
+  #detail-modal .new-season {
+    margin: 12px 0 0;
+    padding: 12px 14px;
+    max-width: none;
+  }
+
+  #detail-modal .new-season-head {
+    font-size: 22px;
+  }
+
+  #detail-modal .detail-see-all {
+    margin-top: 8px;
+  }
+
+  /* ---------- where to watch: a row per kind ---------- */
+  #detail-modal .where-to-watch {
+    margin-top: 12px;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  #detail-modal .wtw-title {
+    margin-bottom: 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+  }
+
+  #detail-modal .wtw-groups {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #detail-modal .wtw-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #detail-modal .wtw-kind {
+    flex: none;
+    width: 76px;
+    margin: 0;
+    font-size: 16px;
+  }
+
+  #detail-modal .wtw-provider {
+    width: 40px;
+    height: 40px;
+  }
+
+  #detail-modal .wtw-credit {
+    margin-top: 8px;
+  }
+
+  /* ---------- the stamps, pinned at the bottom ---------- */
+  #detail-modal .detail-actions {
+    position: absolute;
+    z-index: 2;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: stretch;
+    gap: 12px;
+    margin: 0;
+    padding: 12px 18px calc(12px + var(--safe-bottom));
+    border: 0;
+    background: var(--sheet-paper);
+  }
+
+  /* The main one: wide, in the theme's color. */
+  #detail-modal .detail-actions :is(.complete-btn, [data-action="edit"]) {
+    flex: 1;
+    min-height: 50px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 0;
+    background: var(--accent-strong);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    box-shadow: 3px 4px 0 var(--accent-deep);
+    transform: rotate(-1deg);
+  }
+
+  /* The others: square, their icon only (their words stay for screen
+     readers). */
+  #detail-modal .detail-actions :is([data-action="add-to-collection"], [data-action="delete"], [data-action="drop-series"]) {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 54px;
+    min-height: 50px;
+    padding: 0;
+    border: 2px solid var(--accent-strong);
+    border-radius: 0;
+    background: var(--sheet-paper);
+    color: var(--accent-deep);
+    font-size: 0;
+    box-shadow: 3px 4px 0 color-mix(in srgb, var(--accent-deep) 60%, transparent);
+    transform: rotate(1.5deg);
+  }
+
+  #detail-modal .detail-actions :is([data-action="delete"], [data-action="drop-series"]) {
+    border-color: #dc2626;
+    box-shadow: 3px 4px 0 #b42318;
+    transform: rotate(-1.5deg);
+  }
+
+  #detail-modal .detail-actions [data-action="add-to-collection"]::before {
+    content: "🗂";
+    font-size: 21px;
+  }
+
+  #detail-modal .detail-actions [data-action="delete"]::before {
+    content: "🗑";
+    font-size: 21px;
+  }
+
+  #detail-modal .detail-actions [data-action="drop-series"]::before {
+    content: "⏸";
+    font-size: 21px;
+    color: #b42318;
+  }
+
+  /* One viewing open: its delete a red line, its save the stamp. */
+  #detail-modal .viewing-actions .delete-btn {
+    flex: none;
+    min-height: 50px;
+    padding: 0 6px;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    color: #b42318;
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    transform: none;
+  }
+
+  #detail-modal .viewing-back {
+    justify-self: start;
+    margin-bottom: 12px;
+    padding-right: 40px;
+  }
+
+  #detail-modal .viewing-form input[type="date"] {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* "Add to collection"'s list: a paper card above its stamp. */
+  .detail-col-menu {
+    border: 0;
+    border-radius: 0;
+    background: var(--paper);
+    box-shadow: 3px 5px 0 var(--accent-deep), 0 10px 30px rgba(0, 0, 0, 0.45);
+  }
+
+  /* ---------- the note: a text cut short, whole ---------- */
+  .detail-note {
+    position: fixed;
+    z-index: 25;
+    inset: 0;
+    display: grid;
+    align-items: center;
+    padding: calc(var(--safe-top) + 24px) 22px calc(var(--safe-bottom) + 24px);
+    background: rgba(13, 12, 21, 0.45);
+    animation: detail-note-in 0.2s ease-out;
+  }
+
+  .detail-note-paper {
+    position: relative;
+    max-height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 30px 20px 22px;
+    background: color-mix(in srgb, var(--accent) 16%, var(--paper));
+    color: var(--ink);
+    box-shadow: 4px 10px 30px rgba(0, 0, 0, 0.45);
+    transform: rotate(-1deg);
+  }
+
+  .detail-note.is-review .detail-note-paper {
+    background-image: repeating-linear-gradient(180deg, transparent 0 29px, color-mix(in srgb, var(--accent-deep) 22%, transparent) 29px 30px);
+  }
+
+  .detail-note-paper::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 70px;
+    height: 12px;
+    margin-left: -35px;
+    background: color-mix(in srgb, var(--accent) 80%, transparent);
+    transform: rotate(-3deg);
+  }
+
+  .detail-note-close {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    color: var(--ink);
+    font-size: 18px;
+  }
+
+  .detail-note-label {
+    margin: 0 36px 6px 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .detail-note-text {
+    white-space: pre-line;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .detail-note.is-review .detail-note-text {
+    font-family: var(--font-hand);
+    font-size: 19px;
+    line-height: 30px;
+  }
+
+  @keyframes detail-note-in {
+    from {
+      opacity: 0;
+    }
   }
 }

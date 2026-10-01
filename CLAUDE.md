@@ -978,6 +978,30 @@ directly.
   The owner's Android: Appearance's theme previews shrank to slivers
   (that browser doesn't stretch a button in a grid cell); the swatch and
   its preview now say width: 100% on phones. Fine on the iPhone.
+  The owner checked stages 1 and 2 and said go for stage 3. Stage 3 —
+  built, waiting for the owner's check (css/responsive.css "Windows on
+  a phone, stage 3"): #detail-modal is the same paper sheet, always the
+  screen's height minus a strip (so stepping titles doesn't jump); the
+  poster a small polaroid beside the title (`.detail-head-poster`,
+  drawn in renderDetail, hidden on computers; the big one hidden on
+  phones; "New season!" stamped on it too), year · length, genres and
+  the trailer chip beside it (one grid for the window, `display:
+  contents` on the head). Synopsis cut to 2 lines and review to 3; when
+  cut (`markCutText`, measured once the window shows and when fonts
+  arrive) they end in "more" and a tap shows the whole text on a taped
+  note over the window (`#detail-note`, index.html). A movie's date,
+  "↻ Watched it again" and "N viewings ›" on one row; Up next with its
+  photo beside the words; where to watch a row per kind. The buttons
+  are stamps pinned at the bottom (placed against the sheet, outside
+  what scrolls): the main one wide, Add to collection / delete / drop
+  square with only their icon (font-size 0, the icon a ::before; the
+  words stay for screen readers). The trailer plays over the window,
+  the rest dimmed (a tap on the dim closes it). The head drags the
+  sheet down (js/phoneWindows.js now finds each head when the drag
+  starts). Fits an iPhone 15 with no scrolling (tests/mobile.spec.js);
+  "Where are you?" scrolls a little on an iPhone SE. No ‹ › arrows on a
+  phone (hidden below 860px, as before). Computer pixel-identical
+  (1280/900/700, every state, viewings, the collection menu).
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

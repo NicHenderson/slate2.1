@@ -140,7 +140,7 @@ function openViewingView(movie, viewing) {
     </form>`;
   updateDetailNav();
   syncFutureNote(document.getElementById("viewing-date"));
-  document.getElementById("viewing-date").focus();
+  focusOnOpen(document.getElementById("viewing-date"));
 }
 
 function backToSummary() {

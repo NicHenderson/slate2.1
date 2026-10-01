@@ -148,8 +148,14 @@ function renderDetail(cfg, row) {
 
   const genreLine = parseGenres(row.genres).map(genreName).join(" · ");
 
+  // On a phone the poster is a small polaroid beside the title (the one
+  // beside the window is hidden there; css/responsive.css).
+  const headPoster = `<figure class="detail-head-poster" aria-hidden="true">${
+    row.poster ? `<img src="${escapeHtml(row.poster)}" alt="" />` : `<span class="detail-poster-empty"></span>`
+  }</figure>`;
   const head = `
     <div class="detail-head">
+      ${headPoster}
       <div class="detail-head-left">
         <h2 class="detail-title">${escapeHtml(row.title ?? t("Untitled"))}</h2>
         ${genreLine ? `<p class="detail-genre-line">${escapeHtml(genreLine)}</p>` : ""}
@@ -293,6 +299,8 @@ function openDetailModal(gridId, id, listProvider) {
   currentDetail = { cfg, row, gridId, listProvider: listProvider ?? null, viewing: null, viewingsOpen: false };
   showDetailMain();
   detailModal.classList.remove("hidden");
+  // Measured once it shows: hidden, nothing has a height.
+  markCutText();
 }
 
 // The title's summary, drawn from what STORE holds now.
@@ -301,6 +309,7 @@ function showDetailMain() {
   const row = STORE[cfg.table].get(currentDetail.row.id) ?? currentDetail.row;
   currentDetail.row = row;
   renderDetail(cfg, row);
+  markCutText();
   loadDetailTrailer(cfg.table, row);
   loadDetailWhereToWatch(cfg.table, row);
   loadUpNext(row);
@@ -335,12 +344,58 @@ function loadDetailWhereToWatch(table, row) {
 
 function closeDetailModal() {
   detailModal.classList.add("hidden");
+  closeDetailNote();
   // A show's episodes window goes with it (js/episodes.js).
   closeEpisodesWindow();
   // A hidden modal still plays audio, so an open trailer has to go with it.
   const trailerBtn = detailBody.querySelector('[data-action="toggle-trailer"]');
   if (trailerBtn && detailBody.querySelector(".detail-trailer-frame")) toggleTrailer(trailerBtn);
 }
+
+/* ---------- a phone: one screen, no scrolling ----------
+
+   On a phone the window fits one screen (the owner's call): the synopsis
+   is cut to two lines and the review to three (css/responsive.css), each
+   then ending in "more", and a tap on it shows the whole text on a note
+   taped over the window. */
+
+const detailPhoneLayout = matchMedia("(max-width: 640px)");
+const detailNote = document.getElementById("detail-note");
+
+function markCutText() {
+  detailBody.querySelectorAll(".detail-synopsis, .detail-review:not(.detail-review-empty)").forEach((el) => {
+    const cut = detailPhoneLayout.matches && el.scrollHeight > el.clientHeight + 1;
+    el.classList.toggle("is-cut", cut);
+    if (cut) el.dataset.more = t("more");
+  });
+}
+
+function openDetailNote(el) {
+  const review = el.classList.contains("detail-review");
+  document.getElementById("detail-note-label").textContent = review ? t("Personal review") : (currentDetail.row.title ?? t("Untitled"));
+  document.getElementById("detail-note-text").textContent = el.textContent;
+  detailNote.classList.toggle("is-review", review);
+  detailNote.classList.remove("hidden");
+}
+
+function closeDetailNote() {
+  detailNote.classList.add("hidden");
+}
+
+// Measured again when the room changes, or a font arrives (the review's
+// hand takes more room than the font shown until then).
+const remarkCutText = () => {
+  if (!detailModal.classList.contains("hidden") && currentDetail && !currentDetail.viewing) markCutText();
+};
+detailPhoneLayout.addEventListener("change", () => {
+  remarkCutText();
+  if (!detailPhoneLayout.matches) closeDetailNote();
+});
+document.fonts?.addEventListener?.("loadingdone", remarkCutText);
+
+detailNote.addEventListener("click", (e) => {
+  if (e.target === detailNote || e.target.closest("#detail-note-close")) closeDetailNote();
+});
 
 /* ---------- trailer ----------
 
@@ -557,6 +612,10 @@ document.addEventListener("keydown", (e) => {
 
   // A viewing open (js/viewings.js): Escape goes back to the summary, and
   // the arrows are the date field's, not the window's.
+  if (!detailNote.classList.contains("hidden")) {
+    if (e.key === "Escape") closeDetailNote();
+    return;
+  }
   if (currentDetail?.viewing) {
     if (e.key === "Escape") backToSummary();
     return;
@@ -677,6 +736,17 @@ detailBody.addEventListener("click", (e) => {
   const trailerBtn = e.target.closest('[data-action="toggle-trailer"]');
   if (trailerBtn) {
     toggleTrailer(trailerBtn);
+    return;
+  }
+  // On a phone the trailer plays over the window, the rest dimmed: a tap
+  // on the dim (the frame's own box, around the player) closes it.
+  if (detailPhoneLayout.matches && e.target.classList.contains("detail-trailer-frame")) {
+    toggleTrailer(detailBody.querySelector('[data-action="toggle-trailer"]'));
+    return;
+  }
+  const cut = e.target.closest(".is-cut");
+  if (cut) {
+    openDetailNote(cut);
     return;
   }
   if (e.target.closest('[data-action="mark-watched"]')) {

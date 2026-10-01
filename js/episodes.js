@@ -285,8 +285,11 @@ async function loadNewSeason(row) {
   slot.classList.remove("hidden");
   // The note has its own "See all episodes →".
   detailBody.querySelector(".detail-see-all")?.classList.add("hidden");
-  detailPoster.querySelector(".new-season-stamp")?.remove();
-  detailPoster.insertAdjacentHTML("beforeend", `<span class="new-season-stamp" aria-hidden="true">${headline}</span>`);
+  // On the poster beside the window, and on the phone's polaroid by the title.
+  [detailPoster, detailBody.querySelector(".detail-head-poster")].forEach((poster) => {
+    poster?.querySelector(".new-season-stamp")?.remove();
+    poster?.insertAdjacentHTML("beforeend", `<span class="new-season-stamp" aria-hidden="true">${headline}</span>`);
+  });
   easeNoteHeight(slot, 0);
 }
 

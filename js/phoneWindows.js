@@ -15,24 +15,26 @@ const PHONE_WINDOWS = [
   { backdrop: "library-modal", sheet: ".modal", head: ".modal-head", close: "library-close" },
   { backdrop: "favorite-modal", sheet: ".modal", head: ".modal-head", close: "favorite-close" },
   { backdrop: "import-modal", sheet: ".import-panel", head: ".update-ticket", close: "import-close" },
+  // A title's window: its head (the polaroid and the title) is drawn anew
+  // for each title, so it's looked for when the drag starts.
+  { backdrop: "detail-modal", sheet: ".detail-layout", head: ".detail-head", close: "detail-close" },
 ];
 
 const phoneWindowLayout = matchMedia("(max-width: 640px)");
 
 PHONE_WINDOWS.forEach(({ backdrop, sheet: sheetSel, head: headSel, close }) => {
   const sheet = document.getElementById(backdrop).querySelector(sheetSel);
-  const head = sheet.querySelector(headSel);
   let drag = null;
 
-  head.addEventListener("pointerdown", (e) => {
-    if (!phoneWindowLayout.matches || e.target.closest("button, a, input")) return;
+  sheet.addEventListener("pointerdown", (e) => {
+    if (!phoneWindowLayout.matches || !e.target.closest(headSel) || e.target.closest("button, a, input")) return;
     drag = { startY: e.clientY, startT: e.timeStamp, dy: 0 };
-    head.setPointerCapture(e.pointerId);
+    sheet.setPointerCapture(e.pointerId);
     // A layer of its own before it moves: an iPhone otherwise repaints the
     // whole sheet, shadow and all, each frame (Android works it out itself).
     sheet.style.willChange = "transform";
   });
-  head.addEventListener("pointermove", (e) => {
+  sheet.addEventListener("pointermove", (e) => {
     if (!drag) return;
     drag.dy = Math.max(0, e.clientY - drag.startY);
     sheet.style.transition = "none";
@@ -50,8 +52,8 @@ PHONE_WINDOWS.forEach(({ backdrop, sheet: sheetSel, head: headSel, close }) => {
       document.getElementById(close).click();
     }
   };
-  head.addEventListener("pointerup", end);
-  head.addEventListener("pointercancel", end);
+  sheet.addEventListener("pointerup", end);
+  sheet.addEventListener("pointercancel", end);
 });
 
 /* ---------- Typing in a window, on a phone ----------
