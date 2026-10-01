@@ -60,6 +60,12 @@ test("on a phone: landing, login, the bottom bar and adding a title all fit and 
   const tab = (view) => page.locator(`.view-tab[data-view="${view}"]`);
   await expect(bar("movies")).toHaveAttribute("aria-current", "page");
   await expect(tab("movies-watched")).toHaveAttribute("aria-pressed", "true");
+  // Cards are small polaroids, three across: a watched one's rating is one
+  // heart and its number, in place of the ten hearts.
+  const alien = page.locator("#grid-movies-watched .card", { hasText: "Alien" });
+  await expect(alien.locator(".card-glance-rating")).toHaveText("9");
+  await expect(alien.locator(".card-rating")).toBeHidden();
+  expect(await page.$eval("#grid-movies-watched", (g) => getComputedStyle(g).gridTemplateColumns.split(" ").length)).toBe(3);
   await tab("movies-towatch").tap();
   await expect(page.locator("#movies-towatch")).toHaveClass(/\bactive\b/);
   await expect(tab("movies-towatch")).toHaveAttribute("aria-pressed", "true");

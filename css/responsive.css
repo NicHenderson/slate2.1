@@ -136,6 +136,7 @@
 .sidebar-backdrop,
 .tab-bar,
 .view-tabs,
+.card-glance,
 .auth-sheet-grip,
 .auth-sheet-close,
 .auth-tabs,
@@ -1591,5 +1592,162 @@
   /* Toasts rise above the bar. */
   .toast {
     bottom: calc(60px + 14px + var(--safe-bottom));
+  }
+}
+
+/* ==================== The lists on a phone: small polaroids ====================
+   Three across (the owner's pick of three mockups, "A"): the poster, the
+   title on one line, and one line under it (cardGlanceHtml, js/data.js):
+   a watched title's heart and date, a title to watch its year and length,
+   a show being watched or dropped its episode line. Only the six lists of
+   Movies and Shows; collections come later. */
+@media (max-width: 640px) {
+  [id^="grid-movies-"].card-grid,
+  [id^="grid-shows-"].card-grid,
+  [data-density="compact"] [id^="grid-movies-"].card-grid,
+  [data-density="compact"] [id^="grid-shows-"].card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px 10px;
+  }
+
+  [id^="grid-movies-"] .card,
+  [id^="grid-shows-"] .card,
+  [id^="grid-movies-"] .ghost-card,
+  [id^="grid-shows-"] .ghost-card {
+    gap: 5px;
+    padding: 5px 5px 7px;
+    box-shadow: 2px 6px 14px rgba(0, 0, 0, 0.35);
+  }
+
+  [id^="grid-movies-"] .card::before,
+  [id^="grid-shows-"] .card::before {
+    top: -6px;
+    right: 12px;
+    width: 30px;
+    height: 11px;
+  }
+
+  [id^="grid-movies-"] .card-title,
+  [id^="grid-shows-"] .card-title {
+    padding: 0 2px;
+    font-size: 14.5px;
+    line-height: 1.1;
+    -webkit-line-clamp: 1;
+  }
+
+  /* The glance line takes the ten hearts' place, and the "Started 12d
+     ago" line goes (the mockup has the episode line only). */
+  [id^="grid-movies-"] .card-rating,
+  [id^="grid-shows-"] .card-rating,
+  [id^="grid-shows-"] .card-meta {
+    display: none;
+  }
+
+  [id^="grid-movies-"] .card-glance,
+  [id^="grid-shows-"] .card-glance {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    min-height: 16px;
+    padding: 0 2px;
+    color: var(--text-muted);
+    font-size: 10.5px;
+    white-space: nowrap;
+  }
+
+  .card-glance-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--text);
+    font-family: var(--font-hand);
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  .card-glance-heart {
+    width: 13px;
+    height: 13px;
+    background: var(--accent-strong);
+    -webkit-mask: var(--heart-one) center / contain no-repeat;
+    mask: var(--heart-one) center / contain no-repeat;
+  }
+
+  .card-glance-unrated {
+    font-family: var(--font-hand);
+    font-size: 13px;
+  }
+
+  .card-glance-date {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* The episode line, smaller. */
+  [id^="grid-shows-"] .card-episode {
+    gap: 3px;
+    padding: 0 2px;
+  }
+
+  [id^="grid-shows-"] .card-episode-code,
+  [data-density="compact"] [id^="grid-shows-"] .card-episode-code {
+    font-size: 15px;
+  }
+
+  [id^="grid-shows-"] .card-episode-count {
+    font-size: 10.5px;
+  }
+
+  [id^="grid-shows-"] .card-episode-bar {
+    height: 6px;
+    border-width: 1.5px;
+  }
+
+  /* A dropped show's bar is where it stopped: faded. */
+  #grid-shows-dropped .card-episode-bar {
+    opacity: 0.6;
+  }
+
+  #grid-shows-dropped .card-episode-code {
+    font-size: 13px;
+    line-height: 1.1;
+  }
+
+  .card-episode-nowrap {
+    white-space: nowrap;
+  }
+
+  /* The stickers on the poster, at the card's size. */
+  [id^="grid-shows-"] .card-new-season,
+  [data-density="compact"] [id^="grid-shows-"] .card-new-season {
+    top: 4px;
+    right: 2px;
+    width: 62px;
+    padding: 8px 6px;
+    font-size: 10.5px;
+  }
+
+  [id^="grid-movies-"] .card-rewatch {
+    top: 10px;
+    right: 4px;
+    padding: 2px 6px;
+    font-size: 11px;
+  }
+
+  [id^="grid-movies-"] .ghost-card,
+  [id^="grid-shows-"] .ghost-card {
+    min-height: 0;
+  }
+
+  [id^="grid-movies-"] .ghost-plus,
+  [id^="grid-shows-"] .ghost-plus {
+    font-size: 28px;
+  }
+
+  [id^="grid-movies-"] .ghost-label,
+  [id^="grid-shows-"] .ghost-label {
+    padding: 0 2px;
+    font-size: 13px;
   }
 }

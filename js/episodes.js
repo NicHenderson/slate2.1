@@ -1115,7 +1115,8 @@ function episodeProgressHtml(row) {
   const last = ticked[ticked.length - 1];
   const code = episodeCode(last.season, last.episode);
   const count = ticked.length;
-  const label = row.is_dropped ? t("Stopped at {code}", { code }) : total && count >= total ? t("Up to date") : code;
+  // A narrow card breaks "Stopped at" before the code, never inside it.
+  const label = row.is_dropped ? t("Stopped at {code}", { code: `<span class="card-episode-nowrap">${code}</span>` }) : total && count >= total ? t("Up to date") : code;
   const countHtml = row.is_dropped || !total ? "" : `<span class="card-episode-count">${count}/${total}</span>`;
   const bar = total
     ? `<span class="card-episode-bar" aria-hidden="true"><span style="width: ${Math.min(100, Math.round((count / total) * 100))}%"></span></span>`

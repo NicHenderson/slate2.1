@@ -768,6 +768,15 @@ directly.
   status): `data-i18n-key` in js/i18n.js. On an installed iPhone the
   bar will likely sit a status bar's height above the bottom (the iOS
   bug above). Computer sizes checked pixel for pixel (1280/900/700).
+  Stage 2 — built, waiting for the owner's check: the six Movies /
+  Shows lists, three polaroids across at ≤640px (density too;
+  collections untouched), the title on one line, and under it
+  `cardGlanceHtml` (js/data.js; hidden on computers): watched / finished
+  = one heart + rating and a short date ("Sep 28" this year, else the
+  year), to watch = year · length (seasons for shows); watching and
+  dropped keep their episode line, smaller ("Started 12d ago" hidden;
+  a dropped card breaks "Stopped at" before the code, never in it). The
+  starburst and ×N scaled down. Computer sizes pixel-identical.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

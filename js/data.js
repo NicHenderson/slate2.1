@@ -217,6 +217,44 @@ function startedAgoHtml(row) {
   return `<p class="card-meta${stale}">${text}</p>`;
 }
 
+// A date short enough for a phone's small card: "Sep 28" this year, just
+// the year before ("Unrated" and "Aug 2024" don't fit side by side).
+function formatShortDate(value) {
+  const date = new Date(value);
+  if (date.getUTCFullYear() !== new Date().getFullYear()) return String(date.getUTCFullYear());
+  return date.toLocaleDateString(LOCALE, { month: "short", day: "numeric", timeZone: "UTC" });
+}
+
+// The line a phone shows under a card's title, instead of the ten hearts
+// (css/responsive.css hides one or the other): a watched title's rating as
+// one heart and its date; a title to watch, its year and length. Watching
+// and dropped shows have their episode line already.
+function cardGlanceHtml(gridId, row) {
+  const state = GRID_CONFIG[gridId].state;
+  let parts;
+  if (state === "watched") {
+    const rated = row.rating !== null && row.rating !== undefined;
+    const rating = rated
+      ? `<span class="card-glance-rating"><span class="card-glance-heart" aria-hidden="true"></span>${Number.isInteger(row.rating) ? row.rating : formatDecimal(row.rating)}</span>`
+      : `<span class="card-glance-unrated">${t("Unrated")}</span>`;
+    const date = row.watched_date ?? row.finished_watching_date;
+    parts = [rating, date ? `<span class="card-glance-date">${formatShortDate(date)}</span>` : ""];
+  } else if (state === "towatch") {
+    const length =
+      GRID_CONFIG[gridId].table === "movies"
+        ? row.duration
+          ? formatRuntime(row.duration)
+          : ""
+        : row.total_seasons
+          ? tn(row.total_seasons, "{n} season", "{n} seasons")
+          : "";
+    parts = [`<span class="card-glance-date">${[row.release_year, length].filter(Boolean).join(" · ")}</span>`];
+  } else {
+    return "";
+  }
+  return `<p class="card-glance">${parts.join("")}</p>`;
+}
+
 // extra: markup for under the title (the rating, a "Started 12d ago" line).
 function cardHtml(item, showRating = false, extra = "") {
   const poster = item.poster
@@ -293,12 +331,13 @@ function gridHtml(gridId, rows) {
           : gridId === "grid-shows-watched"
             ? newSeasonStickerHtml
             : () => "";
+  const card = (row) => cardHtml(row, showRating, extra(row) + cardGlanceHtml(gridId, row));
   // Searched: only what matches — no "+ Add" card among the results.
   if (isLibraryFiltered(gridId)) {
-    return visible.length ? visible.map((row) => cardHtml(row, showRating, extra(row))).join("") : libraryEmptyHtml(gridId);
+    return visible.length ? visible.map(card).join("") : libraryEmptyHtml(gridId);
   }
   return (
-    visible.map((row) => cardHtml(row, showRating, extra(row))).join("") +
+    visible.map(card).join("") +
     (NO_GHOST_GRIDS.has(gridId) ? "" : ghostCardHtml(cfg.type))
   );
 }
