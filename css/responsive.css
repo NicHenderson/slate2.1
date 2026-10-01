@@ -3003,6 +3003,33 @@
     margin-top: 12px;
   }
 
+  /* "Can't quite see it?" opens inside the tile, in the chips' place (it
+     has its own), pushing what follows down: hung over the tiles below,
+     as on the computer, they showed through it and it ran off the
+     screen. */
+  .tile-background:has(.bg-loupe:not([hidden])) .background-swatches {
+    display: none;
+  }
+
+  .bg-loupe {
+    position: static;
+    order: 2;
+    width: auto;
+    margin-top: 16px;
+    box-shadow: 4px 4px 0 var(--accent-strong);
+  }
+
+  .bg-loupe::before {
+    position: relative;
+    top: -22px;
+    left: 16px;
+    margin-bottom: -26px; /* its own height and the loupe's gap */
+  }
+
+  .bg-loupe-view {
+    height: 180px;
+  }
+
   /* Card size and animations, side by side. */
   .settings-page[data-page="look"]:not([hidden]) {
     display: grid;

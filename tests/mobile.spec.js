@@ -354,6 +354,15 @@ test("on a phone, Settings is tiles saying what's set, and one page at a time", 
   await expect(page.locator("html")).toHaveAttribute("data-density", "compact");
   await expect(page.locator(".density-select-wrap")).toHaveAttribute("data-label", "Compact");
   await expectNoZoomingFields(page);
+  // "Can't quite see it?" opens inside its tile: what follows moves down
+  // rather than showing through it.
+  await page.locator("#bg-loupe-open").tap();
+  await expect(page.locator("#bg-loupe")).toBeVisible();
+  // Measured together: the page scrolls to show it meanwhile.
+  const gap = await page.evaluate(
+    () => document.querySelector(".tile-motion").getBoundingClientRect().top - document.getElementById("bg-loupe").getBoundingClientRect().bottom
+  );
+  expect(gap).toBeGreaterThan(0);
   await page.locator("#settings-back").tap();
   await expect(page.locator('[data-settings-glance="look"]')).toHaveText("Ocean");
 });

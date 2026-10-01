@@ -859,7 +859,11 @@ directly.
   backgrounds as chips ("Can't quite see it?" still there), and card
   size + Reduce animations side by side, the size a handwritten word
   over an unseen <select> (`#density-select`, phone only). Computer
-  sizes pixel-identical (1280/900/700, every page).
+  sizes pixel-identical (1280/900/700, every page). The owner's iPhone:
+  "Can't quite see it?" hung over the two small tiles, which showed
+  through it, and ran off the screen; on a phone it now opens inside
+  the Background tile, in the chips' place (it has its own), pushing
+  the rest down.
   The owner's iPhone: a drag on the bottom bar bounced the whole app.
   The bar doesn't scroll, so iOS hands the drag to the page: the bar now
   cancels its own touchmoves (js/phoneNav.js, `touch-action: none`) and
