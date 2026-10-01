@@ -909,7 +909,14 @@ directly.
   A one list in the sheet, a result's compact window in its place
   ("‹ Resultados"); B results as a wall of polaroids, a result rising
   on its own sheet above; C the search field at the bottom over the
-  keyboard, results above it. Waiting for the owner's pick.
+  keyboard, results above it. The owner picked **A**. Episodes next
+  (same artifact, each a show being watched opening on "up next" and a
+  dropped one only to look; season tabs kept): A compact rows (box,
+  E4 + name, two lines, a small photo, "↓ Marcar hasta aquí"); B each
+  episode a big polaroid photo with its text below; C the season as a
+  card of numbered hand-drawn boxes (tap to see one below, with "✓ Ya
+  lo vi" and "↓ Hasta aquí"; no scrolling for most seasons). Waiting
+  for the owner's pick.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
