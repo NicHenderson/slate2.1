@@ -975,6 +975,9 @@ directly.
   just before it moves and moves by translate3d; no backdrop blur
   behind any window on a phone (only the dim); a dragged card's lift
   without the wide glow, its `translate` hinted.
+  The owner's Android: Appearance's theme previews shrank to slivers
+  (that browser doesn't stretch a button in a grid cell); the swatch and
+  its preview now say width: 100% on phones. Fine on the iPhone.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

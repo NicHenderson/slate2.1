@@ -2907,7 +2907,17 @@
     box-shadow: none;
   }
 
+  /* Full width said outright: some Android browsers don't stretch a
+     button in a grid cell, and the preview shrank to a sliver there (the
+     owner's Android). */
+  .theme-swatch {
+    justify-self: stretch;
+    width: 100%;
+    min-width: 0;
+  }
+
   .theme-swatch-preview {
+    width: 100%;
     height: 58px;
     border-radius: 8px;
   }
