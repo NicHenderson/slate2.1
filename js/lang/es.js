@@ -308,8 +308,6 @@ window.SLATE_LANGUAGES = {
       "Show": "Serie",
       "No username yet": "Todavía sin nombre de usuario",
       "Member since {date}": "Miembro desde {date}",
-      "Slate · Member": "Slate · Socio",
-      "By invitation": "Por invitación",
       "Export, import": "Exportar, importar",
       "No bio yet.": "Todavía sin biografía.",
       "Favorite movie": "Película favorita",

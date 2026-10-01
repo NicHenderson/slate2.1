@@ -325,14 +325,14 @@ test("on a phone, a collection being dragged looks like its row", async ({ page,
   await touch("touchEnd");
 });
 
-// Settings: a member's card and the pages as tiles, each saying what's set
+// Settings: the profile card and the pages as tiles, each saying what's set
 // there; a page opens in the menu's place under its name, and only that
 // page shows (Appearance once showed under every other).
 test("on a phone, Settings is tiles saying what's set, and one page at a time", async ({ page }) => {
   await page.goto("/");
   await logIn(page);
   await page.locator('.tab-bar-btn[data-tab="settings"]').tap();
-  await expect(page.locator(".pp-card-top")).toBeVisible();
+  await expect(page.locator("#profile-preview .pp-bio")).toBeVisible();
   await expect(page.locator('[data-settings-glance="profile"]')).toHaveText("@tester");
   await expect(page.locator('[data-settings-glance="account"]')).toHaveText("tester@slate.test");
   await expect(page.locator('[data-settings-glance="look"]')).toHaveText("Midnight");

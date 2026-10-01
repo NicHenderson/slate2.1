@@ -142,7 +142,6 @@
 .phone-sheet-backdrop,
 .hstats-more,
 .col-banner,
-.pp-card-top,
 .settings-menu-value,
 .settings-back-chevron,
 .settings-page-name,
@@ -2667,8 +2666,8 @@
 }
 
 /* ==================== Settings on a phone ====================
-   The owner's pick of three mockups ("B"): the profile card as a member's
-   card in the theme's color, the six pages as paper tiles two across,
+   The owner's pick of three mockups ("B"): the profile card as on the
+   computer (the owner asked to keep it), the six pages as paper tiles two across,
    each saying what's set there (js/phoneSettings.js), and a page opening
    in the menu's place under "‹ Its name". Appearance: the themes three
    across, the backgrounds as chips, card size and animations side by
@@ -2693,7 +2692,7 @@
     display: none;
   }
 
-  /* ---------- the member card ---------- */
+  /* ---------- the menu: the profile card, then the pages as tiles ---------- */
   .settings-menu {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2705,110 +2704,10 @@
     display: none;
   }
 
+  /* The profile card as on the computer, across both columns. */
   .settings-menu .profile-preview {
-    position: relative;
     grid-column: 1 / -1;
-    gap: 0;
     margin-bottom: 6px;
-    padding: 16px 16px 14px;
-    overflow: hidden;
-    border: 0;
-    border-radius: 14px;
-    background: linear-gradient(135deg, var(--accent-strong), var(--accent-deep));
-    color: #fff;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
-  }
-
-  /* A soft circle of light in the corner, as on a plastic card. */
-  .settings-menu .profile-preview::before {
-    content: "";
-    position: absolute;
-    top: -30px;
-    right: -30px;
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-    pointer-events: none;
-  }
-
-  .pp-card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-
-  .pp-card-brand {
-    font-family: var(--font-display);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-  }
-
-  .pp-card-stamp {
-    padding: 2px 8px;
-    border: 2px solid #fff;
-    font-family: var(--font-display);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    transform: rotate(6deg);
-  }
-
-  .settings-menu .pp-head {
-    gap: 14px;
-    margin-top: 14px;
-  }
-
-  .settings-menu .pp-monogram {
-    width: 54px;
-    height: 54px;
-    background: var(--paper);
-    color: var(--accent-deep);
-    font-size: 24px;
-    box-shadow: none;
-  }
-
-  .settings-menu .pp-username {
-    font-family: var(--font-hand);
-    font-size: 24px;
-    font-weight: 400;
-    line-height: 1.05;
-  }
-
-  .settings-menu .pp-since {
-    margin-top: 3px;
-    color: inherit;
-    opacity: 0.85;
-  }
-
-  /* Who you are and what you've logged: the bio and favorites are for the
-     Profile page. */
-  .settings-menu .pp-bio,
-  .settings-menu .pp-favs {
-    display: none;
-  }
-
-  .settings-menu .pp-stats {
-    margin-top: 14px;
-    padding-top: 10px;
-    border-top: 1px dashed rgba(255, 255, 255, 0.4);
-  }
-
-  .settings-menu .pp-num {
-    font-size: 20px;
-    color: inherit;
-  }
-
-  .settings-menu .pp-label {
-    margin-top: 2px;
-    font-size: 10px;
-    color: inherit;
-    opacity: 0.85;
   }
 
   /* ---------- the pages as tiles ---------- */

@@ -849,10 +849,9 @@ directly.
   B a "member card" on top and the six pages as tiles; C one page of
   folders that fold open). The owner picked **B**. Built, waiting for
   the owner's check (css/responsive.css "Settings on a phone",
-  js/phoneSettings.js): the profile card as a member's card in the
-  theme's color ("Slate · Member", a "By invitation" stamp where the
-  mockup had "Nº 0042": Slate can't know a real member number; no bio
-  or favorites there), the six pages as tilted paper tiles two across,
+  js/phoneSettings.js): the profile card exactly as on the computer
+  (bio, favorites with posters; the owner rejected the mockup's
+  "member card" once built: don't restyle it), the six pages as tilted paper tiles two across,
   each with what's set there (@username, email, theme, language ·
   country, default sort); a page opens under "‹ Its name" (the header
   hidden). Its tiles are flat paper with a hard shadow; Appearance has

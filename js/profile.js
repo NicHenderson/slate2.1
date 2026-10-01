@@ -278,13 +278,7 @@ function renderProfilePreview() {
   const stat = (n, label) =>
     `<div class="pp-stat"><span class="pp-num">${n}</span><span class="pp-label">${label}</span></div>`;
 
-  // The phone shows the card as a member's card (css/responsive.css); the
-  // computer doesn't show this line.
   previewEl.innerHTML = `
-    <div class="pp-card-top" aria-hidden="true">
-      <span class="pp-card-brand">${t("Slate · Member")}</span>
-      <span class="pp-card-stamp">${t("By invitation")}</span>
-    </div>
     <div class="pp-head">
       <span class="pp-monogram" aria-hidden="true">${initial}</span>
       <div class="pp-names">
