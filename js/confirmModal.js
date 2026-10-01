@@ -198,6 +198,7 @@ async function deleteRecord(table, row) {
 }
 
 confirmCancel.addEventListener("click", closeConfirmModal);
+document.getElementById("confirm-close").addEventListener("click", closeConfirmModal);
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !confirmModal.classList.contains("hidden")) {

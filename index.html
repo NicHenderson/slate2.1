@@ -96,7 +96,7 @@
   <link rel="stylesheet" href="css/episodes.css?v=176d4679" />
   <link rel="stylesheet" href="css/whereToWatch.css?v=7528c42f" />
   <link rel="stylesheet" href="css/librarySearch.css?v=cce1cb12" />
-  <link rel="stylesheet" href="css/responsive.css?v=8faf938f" />
+  <link rel="stylesheet" href="css/responsive.css?v=0748fd91" />
   <script src="js/statusBar.js?v=b3d9396d"></script>
   <script src="js/noZoom.js?v=632c1c6c"></script>
 </head>
@@ -1399,6 +1399,8 @@
           </span>
           <h2 id="confirm-heading">Delete</h2>
         </div>
+        <!-- On a phone the question is a sheet with its own × (css/responsive.css). -->
+        <button class="modal-close confirm-close" id="confirm-close" type="button" aria-label="Close">✕</button>
       </div>
       <p class="confirm-text" id="confirm-text"></p>
       <div class="confirm-typed-check hidden" id="confirm-typed-check">
@@ -1436,7 +1438,7 @@
   <script src="js/heartsInput.js?v=75776d63"></script>
   <script src="js/updateModal.js?v=462c7f71"></script>
   <script src="js/startModal.js?v=0bc9ea79"></script>
-  <script src="js/confirmModal.js?v=09cd2e80"></script>
+  <script src="js/confirmModal.js?v=8b0cf9ba"></script>
   <script src="js/viewings.js?v=a3e4287a"></script>
   <script src="js/episodes.js?v=a360d823"></script>
   <script src="js/backgrounds.js?v=16d308bc"></script>
@@ -1455,6 +1457,7 @@
   <script src="js/phoneCollection.js?v=96f071a1"></script>
   <script src="js/phoneHead.js?v=45ada40c"></script>
   <script src="js/phoneSettings.js?v=fdf8f9de"></script>
+  <script src="js/phoneWindows.js?v=46b45b83"></script>
   <script src="js/auth.js?v=c67e9625"></script>
 </body>
 </html>

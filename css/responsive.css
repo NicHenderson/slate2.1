@@ -146,6 +146,7 @@
 .settings-back-chevron,
 .settings-page-name,
 .density-select-wrap,
+.confirm-close,
 .sheet-grip,
 .auth-sheet-grip,
 .auth-sheet-close,
@@ -3119,5 +3120,303 @@
     min-width: 0;
     min-height: 0;
     opacity: 0;
+  }
+}
+
+/* ==================== Windows on a phone: a sheet of paper ====================
+   The owner's pick of three mockups ("C"): every window rises from the
+   bottom as a sheet of Slate's paper, taped on, its scalloped top edge
+   torn off a pad; its name a handwritten label, its buttons stamps pinned
+   at the bottom. It closes with its ×, a tap above it, or by dragging its
+   head down (js/phoneWindows.js). Stage 1: the question (#confirm-modal),
+   Edit / Mark as watched (#update-modal) and the dates window
+   (#start-modal). The computer's windows don't change. */
+@media (max-width: 640px) {
+  :is(#update-modal, #start-modal, #confirm-modal) {
+    align-items: end;
+    justify-items: stretch;
+    padding: var(--safe-top) 0 0;
+    background: rgba(5, 4, 10, 0.6);
+    backdrop-filter: blur(3px);
+  }
+
+  /* ---------- the sheet ---------- */
+  :is(#update-modal, #start-modal) .update-layout,
+  #confirm-modal .confirm-modal {
+    --sheet-paper: var(--paper);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: calc(100dvh - var(--safe-top) - 16px);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: var(--sheet-paper);
+    color: var(--ink);
+    box-shadow: 0 -10px 34px rgba(0, 0, 0, 0.5);
+    animation: phone-window-up 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+
+  :is(#update-modal, #start-modal) .update-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+    background: none;
+    box-shadow: none;
+  }
+
+  :is(#update-modal, #start-modal) .update-poster-box {
+    display: none;
+  }
+
+  /* The edge torn off the pad, and the tape holding it on. */
+  :is(#update-modal, #start-modal) .update-layout::before,
+  #confirm-modal .confirm-modal::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -7px;
+    height: 8px;
+    background: radial-gradient(circle at 6px -2px, transparent 6px, var(--sheet-paper) 6.5px) 0 0 / 12px 8px repeat-x;
+    pointer-events: none;
+  }
+
+  :is(#update-modal, #start-modal) .update-layout::after,
+  #confirm-modal .confirm-modal::after {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    top: -11px;
+    left: 50%;
+    width: 76px;
+    height: 22px;
+    margin-left: -38px;
+    background: color-mix(in srgb, var(--accent) 78%, transparent);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transform: rotate(-2deg);
+    pointer-events: none; /* the head under it is what drags */
+  }
+
+  /* ---------- its head: the name as a label, what it's about under it ---------- */
+  :is(#update-modal, #start-modal) .update-ticket,
+  #confirm-modal .modal-head {
+    flex: none;
+    margin: 0;
+    padding: 24px 56px 12px 20px;
+    border-bottom: 2px dashed color-mix(in srgb, var(--ink) 18%, transparent);
+    background: none;
+    color: var(--ink);
+    touch-action: none; /* it drags the sheet down */
+  }
+
+  :is(#update-modal, #start-modal) .update-ticket::after {
+    content: none;
+  }
+
+  :is(#update-modal, #start-modal) .update-eyebrow,
+  #confirm-modal .modal-head h2 {
+    display: table;
+    padding: 3px 12px 2px;
+    background: color-mix(in srgb, var(--accent-strong) 55%, var(--paper));
+    color: var(--ink);
+    font-family: var(--font-hand);
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-transform: none;
+    opacity: 1;
+    transform: rotate(-1.5deg);
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  :is(#update-modal, #start-modal) .update-movie-title,
+  :is(#update-modal, #start-modal) .update-movie-meta {
+    display: inline;
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    line-height: 1.6;
+    opacity: 1;
+  }
+
+  :is(#update-modal, #start-modal) .update-movie-title {
+    font-weight: 700;
+  }
+
+  :is(#update-modal, #start-modal) .update-movie-meta {
+    color: var(--ink-muted);
+  }
+
+  :is(#update-modal, #start-modal) .update-movie-meta:not(:empty)::before {
+    content: " · ";
+  }
+
+  :is(#update-modal, #start-modal) .update-movie-title:empty + .update-movie-meta::before {
+    content: none;
+  }
+
+  /* The first line under the label. */
+  :is(#update-modal, #start-modal) .update-eyebrow {
+    margin-bottom: 7px;
+  }
+
+  #confirm-modal .confirm-head-row {
+    gap: 10px;
+  }
+
+  :is(#update-modal, #start-modal) .update-close-btn,
+  #confirm-modal .confirm-close {
+    position: absolute;
+    z-index: 3;
+    top: 16px;
+    right: 10px;
+    display: grid;
+    width: 40px;
+    height: 40px;
+    color: var(--ink);
+    background: none;
+  }
+
+  /* ---------- its body: scrolls only if a small phone needs it ---------- */
+  :is(#update-modal, #start-modal) .update-form-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 2px 20px 0;
+  }
+
+  :is(#update-modal, #start-modal) .field-label {
+    margin: 14px 0 6px;
+  }
+
+  /* The review: four ruled lines to start (seven pushed the buttons off
+     the screen); it still scrolls inside for a long one. */
+  :is(#update-modal, #start-modal) .field-input.review-input {
+    min-height: 0;
+    height: 128px;
+  }
+
+  /* Both dates on one row. */
+  #start-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 14px;
+    align-content: start;
+  }
+
+  #start-form > *,
+  #start-form > .update-actions > * {
+    grid-column: 1 / -1;
+  }
+
+  #start-form > label[for="start-date"] { grid-area: 1 / 1; }
+  #start-form > #start-date { grid-area: 2 / 1; }
+  #start-form > #start-date + .date-future-note { grid-area: 3 / 1; }
+  #start-form > label[for="start-finish-date"] { grid-area: 1 / 2; }
+  #start-form > #start-finish-date { grid-area: 2 / 2; }
+  #start-form > #start-finish-date + .date-future-note { grid-area: 3 / 2; }
+
+  #start-form > label[for="start-date"],
+  #start-form > label[for="start-finish-date"] {
+    align-self: end;
+  }
+
+  /* ---------- the question ---------- */
+  #confirm-modal .confirm-modal > :not(.modal-head):not(.confirm-actions) {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+
+  #confirm-modal .confirm-text {
+    margin-top: 16px;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  #confirm-modal .confirm-modal.confirm-danger {
+    --sheet-paper: color-mix(in srgb, var(--paper) 92%, #dc2626 8%);
+    border-top: 3px solid #dc2626;
+    animation: phone-window-up 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), confirm-danger-pulse 1.6s ease-in-out 0.3s infinite;
+  }
+
+  /* ---------- the stamps, pinned at the bottom ---------- */
+  :is(#update-modal, #start-modal) .update-actions {
+    display: contents;
+  }
+
+  /* Delete: a red line at the end of the form, not a third button. */
+  :is(#update-modal, #start-modal) .update-actions > .delete-btn {
+    justify-self: start;
+    width: auto;
+    margin-top: 14px;
+    padding: 6px 0;
+    background: none;
+    box-shadow: none;
+    color: #b42318;
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    transform: none;
+  }
+
+  :is(#update-modal, #start-modal) .update-actions-right,
+  #confirm-modal .confirm-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    display: flex;
+    gap: 14px;
+    width: auto;
+    margin: 14px -20px 0;
+    padding: 14px 20px calc(12px + var(--safe-bottom));
+    background: var(--sheet-paper, var(--paper));
+  }
+
+  #confirm-modal .confirm-actions {
+    position: static;
+    margin: 4px 0 0;
+  }
+
+  :is(#update-modal, #start-modal) .update-actions .cancel-btn,
+  :is(#update-modal, #start-modal) .update-actions .modal-search-btn,
+  #confirm-modal .confirm-actions .cancel-btn,
+  #confirm-modal .confirm-actions .delete-btn {
+    flex: 1;
+    min-height: 48px;
+    padding: 0 14px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  :is(#update-modal, #start-modal) .update-actions .modal-search-btn {
+    transform: rotate(-1deg);
+  }
+
+  :is(#update-modal, #start-modal) .update-actions .cancel-btn,
+  #confirm-modal .confirm-actions .cancel-btn {
+    border: 2px solid var(--ink);
+    box-shadow: 3px 4px 0 color-mix(in srgb, var(--ink) 35%, transparent);
+    transform: rotate(1deg);
+  }
+
+  #confirm-modal .confirm-actions .delete-btn {
+    transform: rotate(-1deg);
+  }
+
+  @keyframes phone-window-up {
+    from {
+      transform: translateY(100%);
+    }
   }
 }

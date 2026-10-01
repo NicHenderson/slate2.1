@@ -932,7 +932,21 @@ directly.
   5 episodes C; 6 a last pass on the iPhone. Pieces with no mockup of
   their own (the finish window's pencil note, "Keep watching"'s
   question, the viewings list, the trailer, "Add to collection") take
-  the same style and are shown for checking in their stage.
+  the same style and are shown for checking in their stage. The owner
+  said go for stage 1. Stage 1 — built, waiting for the owner's check
+  (css/responsive.css "Windows on a phone", js/phoneWindows.js): at
+  ≤640px #update-modal (Edit / Mark as watched), #start-modal (the
+  dates window: start, finish, Edit of a show) and #confirm-modal rise
+  from the bottom as the paper sheet (scalloped top, tape, the window's
+  name as a handwritten label, the title · year · length under it, no
+  poster), the form scrolling inside only if a phone is too short, the
+  buttons pinned at the bottom as stamps, Delete a red line above them;
+  the review starts at four lines; a show's two dates on one row. They
+  close with the ×, a tap above, or dragging the head down (a short drag
+  springs back); the question got a phone-only × (`#confirm-close`).
+  Fits an iPhone 15 without scrolling, the refinish pencil note
+  included. Computer sizes pixel-identical (1280/900/700, each window
+  open).
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

@@ -385,3 +385,41 @@ test("on a phone, dragging on the bottom bar doesn't move the page", async ({ pa
   await page.locator('.tab-bar-btn[data-tab="shows"]').tap();
   await expect(page.locator('.tab-bar-btn[data-tab="shows"]')).toHaveAttribute("aria-current", "page");
 });
+
+// Windows are sheets of paper from the bottom: Edit fits an iPhone with
+// its buttons on screen, without scrolling; dragging its head down a
+// little springs back, further closes it; the question has its own ×.
+test("on a phone, a window is a sheet that fits, and closes by dragging it down", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await logIn(page);
+  await page.locator('.tab-bar-btn[data-tab="movies"]').tap();
+  await page.locator("#grid-movies-watched .card[data-id]").first().click();
+  await page.locator('#detail-modal [data-action="edit"]').first().click();
+  const sheet = page.locator("#update-modal .update-layout");
+  await expect(sheet).toBeVisible();
+  const box = await sheet.boundingBox();
+  expect(Math.round(box.y + box.height)).toBe(844);
+  await expectOnScreen(page.locator("#update-save"));
+  const scrolls = await page.locator("#update-form").evaluate((f) => f.scrollHeight > f.clientHeight + 1);
+  expect(scrolls, "the form scrolls").toBe(false);
+
+  const head = await page.locator("#update-modal .update-ticket").boundingBox();
+  const drag = async (dy) => {
+    await page.mouse.move(head.x + 40, head.y + 30);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i++) await page.mouse.move(head.x + 40, head.y + 30 + (dy * i) / 8);
+    await page.mouse.up();
+  };
+  await drag(20);
+  await expect(page.locator("#update-modal")).toBeVisible();
+  await drag(300);
+  await expect(page.locator("#update-modal")).toBeHidden();
+
+  await page.locator('#detail-modal [data-action="edit"]').first().click();
+  await page.locator("#update-delete").click();
+  await expect(page.locator("#confirm-close")).toBeVisible();
+  await page.locator("#confirm-close").tap();
+  await expect(page.locator("#confirm-modal")).toBeHidden();
+  await expect(page.locator("#update-modal")).toBeVisible();
+});
