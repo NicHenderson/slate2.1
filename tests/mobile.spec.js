@@ -1,5 +1,5 @@
 // Slate on a phone: a narrow, touch screen. Nothing may be wider than the
-// screen, and the everyday path — landing, login, menu, adding a title —
+// screen, and the everyday path — landing, login, the bottom bar, adding a title —
 // works with taps.
 const { test, expect, logIn } = require("./support/fixtures");
 
@@ -40,7 +40,7 @@ async function expectOnScreen(locator) {
   expect(box.x + box.width).toBeLessThanOrEqual(390);
 }
 
-test("on a phone: landing, login, the menu and adding a title all fit and work", async ({ page, backend }) => {
+test("on a phone: landing, login, the bottom bar and adding a title all fit and work", async ({ page, backend }) => {
   await page.goto("/");
   await expect(page.locator("#landing-screen")).toBeVisible();
   await expectNoSidewaysScroll(page);
@@ -53,14 +53,16 @@ test("on a phone: landing, login, the menu and adding a title all fit and work",
   // Every field in the page, the app's and the login card's alike.
   await expectNoZoomingFields(page);
 
-  // The sidebar is a drawer behind the menu button.
-  const menu = page.locator("#menu-toggle");
-  await expect(menu).toBeVisible();
-  await menu.tap();
-  await expect(menu).toHaveAttribute("aria-expanded", "true");
-  await page.locator('.nav-btn[data-section="movies-towatch"]').tap();
-  await expect(menu).toHaveAttribute("aria-expanded", "false");
+  // No sidebar: a bar at the bottom, and Movies' lists as tabs.
+  await expect(page.locator("#menu-toggle")).toBeHidden();
+  await expect(page.locator("#sidebar")).toBeHidden();
+  const bar = (tab) => page.locator(`.tab-bar-btn[data-tab="${tab}"]`);
+  const tab = (view) => page.locator(`.view-tab[data-view="${view}"]`);
+  await expect(bar("movies")).toHaveAttribute("aria-current", "page");
+  await expect(tab("movies-watched")).toHaveAttribute("aria-pressed", "true");
+  await tab("movies-towatch").tap();
   await expect(page.locator("#movies-towatch")).toHaveClass(/\bactive\b/);
+  await expect(tab("movies-towatch")).toHaveAttribute("aria-pressed", "true");
   await expectNoSidewaysScroll(page);
 
   // Adding a title, start to finish.
@@ -80,10 +82,31 @@ test("on a phone: landing, login, the menu and adding a title all fit and work",
   await expectNoSidewaysScroll(page);
   await page.keyboard.press("Escape");
 
+  // Shows opens on Watching; its other lists are tabs too.
+  await bar("shows").tap();
+  await expect(bar("shows")).toHaveAttribute("aria-current", "page");
+  await expect(page.locator("#shows-towatch")).toHaveClass(/\bactive\b/);
+  await expect(page.locator("#grid-shows-watching")).not.toHaveClass(/subtab-hidden/);
+  await expect(tab("shows-watching")).toHaveAttribute("aria-pressed", "true");
+  await tab("shows-watched").tap();
+  await expect(page.locator("#grid-shows-watched .card-title")).toContainText(["Dark"]);
+  await tab("shows-dropped").tap();
+  await expect(page.locator("#grid-shows-dropped")).not.toHaveClass(/subtab-hidden/);
+  await expectNoSidewaysScroll(page);
+
+  // Each view comes back on the tab it was left on.
+  await bar("movies").tap();
+  await expect(tab("movies-towatch")).toHaveAttribute("aria-pressed", "true");
+  await bar("shows").tap();
+  await expect(tab("shows-dropped")).toHaveAttribute("aria-pressed", "true");
+
+  await bar("collections").tap();
+  await expect(page.locator("#collections")).toHaveClass(/\bactive\b/);
+
   // Settings, the longest page.
-  await menu.tap();
-  await page.locator('.nav-btn[data-section="settings"]').tap();
+  await bar("settings").tap();
   await expect(page.locator("#settings")).toHaveClass(/\bactive\b/);
+  await expect(bar("settings")).toHaveAttribute("aria-current", "page");
   await expectNoSidewaysScroll(page);
 });
 

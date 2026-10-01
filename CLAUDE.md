@@ -752,7 +752,22 @@ directly.
   drawer) the owner picked **the bottom bar**: Movies, Shows,
   Collections, Settings, icon + label, the current one highlighted.
   The computer keeps its 6 sections and sidebar. The list header in
-  the mockups is a placeholder, to be designed on its own.
+  the mockups is a placeholder, to be designed on its own. Stages (the
+  owner's go-ahead, Oct. 1, 2026): 1 the bar and the two views, 2 the A
+  cards, 3 the list header (mockups first). Stage 1 — built, waiting
+  for the owner's check: at ≤640px (641–768 keeps the drawer) the ☰
+  and sidebar are gone; `.tab-bar` is the app's last row (`.app` turns
+  a column, so nothing scrolls under it), and Movies / Shows show their
+  tabs as pills (`.view-tabs`, top of `.content`). js/phoneNav.js maps
+  each tab to a computer section (three Shows tabs = Shows Queue + its
+  status tab) and clicks those buttons, so everything listening to
+  them still works; a MutationObserver on the sections keeps the bar
+  in step however a section changes. Last tab per view in
+  `slate_phone_views`; tapping the current place scrolls to the top.
+  "Vistas" needed its own dictionary entry ("Watched" is "Visto" as a
+  status): `data-i18n-key` in js/i18n.js. On an installed iPhone the
+  bar will likely sit a status bar's height above the bottom (the iOS
+  bug above). Computer sizes checked pixel for pixel (1280/900/700).
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
