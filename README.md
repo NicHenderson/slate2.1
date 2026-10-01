@@ -76,7 +76,7 @@ your data and don't break when your password does.
 | `i18n.spec.js` | Every language has every string, and nothing on screen escapes translation |
 | `settings.spec.js` | Settings kept by the account, and saving the profile |
 | `account.spec.js` | Deleting an account: the locks, a wrong password, a server failure, and the account gone |
-| `mobile.spec.js` | Slate on a phone: nothing scrolls sideways, no field makes an iPhone zoom in, the landing page's stories, the bottom bar with its Movies and Shows tabs, cards three across, the header's search and sort sheet, and adding a title from the floating + work by tapping, and it's installable |
+| `mobile.spec.js` | Slate on a phone: nothing scrolls sideways, no field makes an iPhone zoom in, the landing page's stories, the bottom bar with its Movies and Shows tabs, cards three across, the header's search and sort sheet, adding a title from the floating +, and opening a collection work by tapping, and it's installable |
 | `bigLibrary.spec.js` | Libraries past 1,000 rows load whole |
 | `welcomeEmail.spec.js` | The welcome-email tool (`tools/welcome-email.html`) |
 | `stamps.spec.js` | Every CSS/JS link in `index.html` has its file's current stamp |

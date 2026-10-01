@@ -120,6 +120,12 @@ test("on a phone: landing, login, the bottom bar and adding a title all fit and 
 
   await bar("collections").tap();
   await expect(page.locator("#collections")).toHaveClass(/\bactive\b/);
+  // An open collection: its cover, whose back button goes back.
+  await page.locator("#grid-collections .collection-card").first().tap();
+  await expect(page.locator("#col-banner-name")).toHaveText("Sci-fi night");
+  await expectNoSidewaysScroll(page);
+  await page.locator('#col-banner [data-col-action="back"]').tap();
+  await expect(page.locator("#collections")).toHaveClass(/\bactive\b/);
 
   // Settings, the longest page.
   await bar("settings").tap();

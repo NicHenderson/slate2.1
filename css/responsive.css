@@ -141,6 +141,7 @@
 .phone-add,
 .phone-sheet-backdrop,
 .hstats-more,
+.col-banner,
 .sheet-grip,
 .auth-sheet-grip,
 .auth-sheet-close,
@@ -1763,9 +1764,14 @@
    right. The sections' own controls stay in the page, out of sight, as
    the buttons work them: only what shows changes. */
 @media (max-width: 640px) {
-  .app.has-phone-list .phone-head {
+  .app.has-phone-list .phone-head,
+  .app.has-phone-collections .phone-head {
     display: block;
     margin-bottom: 12px;
+  }
+
+  .app.has-phone-collections .phone-head-btn {
+    display: none;
   }
 
   .phone-head [hidden],
@@ -1882,7 +1888,8 @@
   }
 
   /* "+": round, over the bottom right, above the bar. */
-  .app.has-phone-list .phone-add {
+  .app.has-phone-list .phone-add,
+  .app.has-phone-collections .phone-add {
     position: fixed;
     right: calc(16px + var(--safe-right));
     bottom: calc(60px + 16px + var(--safe-bottom));
@@ -1914,12 +1921,12 @@
 
   /* What the row stands in for: the title block (all but the drag hint),
      the header's buttons, the search box and the Filters button. */
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .section-header {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .section-header {
     display: block;
     margin-bottom: 12px;
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .section-header > div:first-child > :not(.drag-hint),
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .section-header > div:first-child > :not(.drag-hint),
   :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .header-actions > .surprise-btn,
   :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .header-actions > .add-btn,
   :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .sort-wrap > .sort-btn,
@@ -1952,7 +1959,7 @@
      the Sort and Filters sheets sat at the bottom of the whole list, half
      off the screen, and scrolling moved the list under them. What those
      queries did for the numbers is said below instead. */
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) {
     container: none;
   }
 
@@ -1978,7 +1985,7 @@
   }
 
   /* ---------- the numbers: one strip, the first three until "More" ---------- */
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats {
     width: 100%;
     box-sizing: border-box;
     padding: 6px 0;
@@ -1988,81 +1995,81 @@
 
   /* Open: two per row, perforated between rows and columns, an odd one
      out across the last row (as content.css's narrow container query). */
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats.is-open {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats.is-open {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats.is-open > .hs-item + .hs-item {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats.is-open > .hs-item + .hs-item {
     border-left: 0;
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats.is-open > .hs-item:nth-child(even) {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats.is-open > .hs-item:nth-child(even) {
     border-left: 2px dashed rgba(13, 12, 21, 0.22);
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats.is-open > .hs-item:nth-child(n + 3) {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats.is-open > .hs-item:nth-child(n + 3) {
     border-top: 2px dashed rgba(13, 12, 21, 0.22);
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats.is-open > .hs-item:last-child:nth-child(odd) {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats.is-open > .hs-item:last-child:nth-child(odd) {
     grid-column: 1 / -1;
   }
 
   /* Folded: one row (content.css's phone grid of two per row is for the
      open strip). */
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats:not(.is-open, [hidden]) {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats:not(.is-open, [hidden]) {
     display: flex;
     flex-wrap: nowrap;
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats:not(.is-open) > .hs-item {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats:not(.is-open) > .hs-item {
     border-top: 0;
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats:not(.is-open) > .hs-item + .hs-item {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats:not(.is-open) > .hs-item + .hs-item {
     border-left: 2px dashed rgba(13, 12, 21, 0.22);
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats:not(.is-open) > :nth-child(n + 4) {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats:not(.is-open) > :nth-child(n + 4) {
     display: none;
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hs-item {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hs-item {
     flex: 1 1 0;
     min-width: 0;
     gap: 3px;
     padding: 2px 10px;
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats.is-open .hs-item {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats.is-open .hs-item {
     padding: 8px 12px;
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hs-value {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hs-value {
     font-size: 17px;
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hs-text .hs-value {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hs-text .hs-value {
     max-width: 100%;
     font-size: 14px;
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hs-label {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hs-label {
     overflow: hidden;
     font-size: 9.5px;
     text-overflow: ellipsis;
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats:not(.is-open) .hs-label {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats:not(.is-open) .hs-label {
     white-space: nowrap;
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats.is-open .hs-label {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats.is-open .hs-label {
     white-space: normal;
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats-more {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats-more {
     display: block;
     margin: 4px 0 0 auto;
     min-height: 32px;
@@ -2074,18 +2081,18 @@
     cursor: pointer;
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats-more::after {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats-more::after {
     content: " ▾";
   }
 
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats-more[aria-expanded="true"]::after {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats-more[aria-expanded="true"]::after {
     content: " ▴";
   }
 
   /* Only when there's more to show, and only under the strip on screen. */
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats:not(:has(> :nth-child(4))) + .hstats-more,
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats[hidden] + .hstats-more,
-  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .hstats.subtab-hidden + .hstats-more {
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats:not(:has(> :nth-child(4))) + .hstats-more,
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats[hidden] + .hstats-more,
+  :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch, #collections) .hstats.subtab-hidden + .hstats-more {
     display: none;
   }
 
@@ -2187,5 +2194,464 @@
 @keyframes phone-sheet-up {
   from {
     transform: translateY(100%);
+  }
+}
+
+/* ==================== Collections on a phone ====================
+   The owner's pick of three mockups ("B"). The list: each collection a
+   folder in a row, its seal, name, how much is seen and three of its
+   posters fanned on the right. Open: a cover of its posters with its
+   seal, name and progress (js/phoneCollection.js), Movies / Shows as
+   pills, and its titles three across, like the other lists. */
+@media (max-width: 640px) {
+  /* ---------- the list: folders in rows ---------- */
+  #grid-collections.card-grid,
+  [data-density="compact"] #grid-collections.card-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding-bottom: 72px;
+  }
+
+  #grid-collections .booklet-card {
+    min-height: 78px;
+    border-top: 5px solid var(--accent-strong);
+    box-shadow: 2px 5px 12px rgba(0, 0, 0, 0.45);
+  }
+
+  #grid-collections .booklet-spine,
+  #grid-collections .booklet-ribbon {
+    display: none;
+  }
+
+  /* The seal on the left, the name and progress beside it, the posters
+     on the right: the cover's two parts become the row's. */
+  #grid-collections .booklet-body {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-areas:
+      "seal title"
+      "seal footer";
+    align-content: center;
+    column-gap: 12px;
+    row-gap: 4px;
+    padding: 10px 98px 10px 12px;
+  }
+
+  #grid-collections .booklet-cover {
+    display: contents;
+  }
+
+  #grid-collections .booklet-icon,
+  #grid-collections .booklet-empty-icon {
+    grid-area: seal;
+    position: static;
+    width: 42px;
+    height: 42px;
+    font-size: 22px;
+    transform: none;
+  }
+
+  #grid-collections .booklet-icon .ico {
+    width: 24px;
+    height: 24px;
+  }
+
+  #grid-collections .booklet-empty-icon {
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 2px dashed var(--ink-muted);
+  }
+
+  #grid-collections .booklet-empty-icon .ico {
+    width: 24px;
+    height: 24px;
+  }
+
+  #grid-collections .booklet-title {
+    grid-area: title;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.15;
+    -webkit-line-clamp: 2;
+  }
+
+  #grid-collections .booklet-footer {
+    grid-area: footer;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  /* The count above the bar, as the mockup has it. */
+  #grid-collections .booklet-progress {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 4px;
+  }
+
+  #grid-collections .booklet-progress-text {
+    margin: 0;
+    font-size: 10.5px;
+  }
+
+  #grid-collections .booklet-bar {
+    height: 6px;
+  }
+
+  /* Three posters fanned on the right, the first in front. */
+  #grid-collections .booklet-stamp {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    display: block;
+    width: 82px;
+    height: 60px;
+    margin-top: -30px;
+    border: 0;
+    background: none;
+    aspect-ratio: auto;
+  }
+
+  #grid-collections .booklet-stamp > * {
+    position: absolute;
+    top: 0;
+    width: 38px;
+    height: 56px;
+    border: 2px solid #fff;
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.35);
+  }
+
+  #grid-collections .booklet-stamp > :nth-child(1) {
+    right: 0;
+    z-index: 3;
+    transform: rotate(4deg);
+  }
+
+  #grid-collections .booklet-stamp > :nth-child(2) {
+    right: 18px;
+    z-index: 2;
+    transform: rotate(-5deg) translateY(3px);
+  }
+
+  #grid-collections .booklet-stamp > :nth-child(3) {
+    right: 36px;
+    z-index: 1;
+    transform: rotate(-2deg);
+  }
+
+  #grid-collections .booklet-stamp > :nth-child(n + 4) {
+    display: none;
+  }
+
+  #grid-collections .booklet-cover.is-empty {
+    border: 0;
+    background: none;
+  }
+
+  /* With "+" floating, "Add Collection" is only for an empty list. */
+  #grid-collections .ghost-card:not(:only-child) {
+    display: none;
+  }
+
+  /* ---------- an open collection: the cover ---------- */
+  #collection-view > .section-header,
+  #col-stats,
+  #col-stats[hidden] {
+    display: none;
+  }
+
+  /* The drag hint (custom order) stays: it's said under the cover. */
+  #collection-view > .section-header:has(.drag-hint:not([hidden])) {
+    display: block;
+    margin: 0 0 10px;
+  }
+
+  #collection-view > .section-header > div:first-child > :not(.drag-hint),
+  #collection-view > .section-header > .header-actions {
+    display: none;
+  }
+
+  .col-banner {
+    display: block;
+    position: relative;
+    margin: calc(-16px - var(--safe-top)) calc(-14px - var(--safe-right)) 12px calc(-14px - var(--safe-left));
+    padding: calc(8px + var(--safe-top)) calc(14px + var(--safe-right)) 0 calc(14px + var(--safe-left));
+    overflow: hidden;
+  }
+
+  .col-banner-posters {
+    position: absolute;
+    inset: 0 0 52px;
+    display: grid;
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
+    opacity: 0.5;
+    filter: blur(1.5px);
+  }
+
+  .col-banner-posters img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    object-fit: cover;
+  }
+
+  .col-banner-posters::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(color-mix(in srgb, var(--bg) 25%, transparent), var(--bg));
+  }
+
+  .col-banner-bar,
+  .col-banner-main,
+  .col-banner-actions {
+    position: relative;
+  }
+
+  .col-banner-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .col-banner-tools {
+    display: flex;
+    gap: 7px;
+  }
+
+  .col-banner-btn {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    color: var(--text);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .col-banner-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .col-banner-btn[data-col-action="delete"] {
+    color: #f87171;
+  }
+
+  .col-banner-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 34px;
+  }
+
+  .col-banner-seal {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 56px;
+    height: 56px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--paper);
+    box-shadow: 2px 3px 0 var(--accent-deep);
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .col-banner-seal .ico {
+    width: 32px;
+    height: 32px;
+  }
+
+  .col-banner-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .col-banner-name {
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    line-height: 1.05;
+    text-transform: uppercase;
+    color: var(--text);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .col-banner-meta {
+    margin: 5px 0 6px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+
+  .col-banner-meta:empty {
+    display: none;
+  }
+
+  /* The progress bar and "8/12 watched", on the dark cover. */
+  .col-banner-progress .booklet-bar {
+    height: 7px;
+    border-color: color-mix(in srgb, var(--text) 60%, transparent);
+    background: color-mix(in srgb, var(--text) 12%, transparent);
+  }
+
+  .col-banner-progress .booklet-progress-text {
+    color: var(--text-muted);
+  }
+
+  .col-banner-actions {
+    display: flex;
+    gap: 10px;
+    padding: 14px 0 4px;
+  }
+
+  .col-banner-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 42px;
+    padding: 0 14px;
+    border: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 700 14px var(--font-display);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    box-shadow: 3px 3px 0 var(--accent-deep);
+    cursor: pointer;
+  }
+
+  .col-banner-action.is-primary {
+    background: var(--accent-strong);
+    color: #fff;
+  }
+
+  .col-banner-action svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  /* ---------- Movies | Shows, as pills ---------- */
+  #col-type-tabs {
+    display: flex;
+    gap: 4px;
+    margin: 0 0 14px;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  #col-type-tabs .status-tab {
+    flex: none;
+    gap: 0;
+    min-width: 0;
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: none;
+    color: var(--text-muted);
+    font: 600 12.5px var(--font-body);
+    box-shadow: none;
+    transform: none;
+  }
+
+  #col-type-tabs .status-tab.active {
+    border-color: var(--accent-strong);
+    background: var(--accent-strong);
+    color: #fff;
+  }
+
+  #col-type-tabs .status-tab-icon {
+    display: none;
+  }
+
+  #col-type-tabs .status-tab-count,
+  #col-type-tabs .status-tab.active .status-tab-count {
+    margin-left: 5px;
+    padding: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    opacity: 0.8;
+  }
+
+  /* ---------- its titles: three across, like the other lists ---------- */
+  #col-detail-grid.card-grid,
+  [data-density="compact"] #col-detail-grid.card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px 10px;
+    padding-bottom: 72px;
+  }
+
+  #col-detail-grid .card,
+  #col-detail-grid .ghost-card {
+    gap: 5px;
+    padding: 5px 5px 7px;
+    box-shadow: 2px 6px 14px rgba(0, 0, 0, 0.35);
+  }
+
+  #col-detail-grid .card::before {
+    top: -6px;
+    right: 12px;
+    width: 30px;
+    height: 11px;
+  }
+
+  #col-detail-grid .card-title {
+    padding: 0 2px;
+    font-size: 14.5px;
+    line-height: 1.1;
+    -webkit-line-clamp: 1;
+  }
+
+  #col-detail-grid .card-rating {
+    display: none;
+  }
+
+  #col-detail-grid .card-glance {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    min-height: 16px;
+    padding: 0 2px;
+    color: var(--text-muted);
+    font-size: 10.5px;
+    white-space: nowrap;
+  }
+
+  #col-detail-grid .status-badge {
+    top: 9px;
+    left: 9px;
+    width: 22px;
+    height: 22px;
+  }
+
+  #col-detail-grid .col-item-remove {
+    top: 9px;
+    right: 9px;
+    width: 24px;
+    height: 24px;
+  }
+
+  /* The cover's "Add" does what this card did. */
+  #col-detail-grid .ghost-card {
+    display: none;
   }
 }

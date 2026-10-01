@@ -9,7 +9,8 @@
    Nothing here is a second copy of those controls: each button works the
    section's own (the same search box, sort menu, filters panel and add
    button the computer uses), which stay in the page, out of sight. So the
-   search, the sort and the filters a list has are the same on both. */
+   search, the sort and the filters a list has are the same on both.
+   Collections' list gets the same row, with its name, count and "+". */
 
 const phoneHeadName = document.getElementById("phone-head-name");
 const phoneHeadCount = document.getElementById("phone-head-count");
@@ -46,6 +47,16 @@ function phoneControls(list) {
 function syncPhoneHead() {
   const list = phoneList();
   phoneAppEl.classList.toggle("has-phone-list", Boolean(list));
+  // Collections' list has the same row, with only its name, its count and
+  // "+" (it has no search, sort or filters).
+  const onCollections = document.getElementById("collections").classList.contains("active");
+  phoneAppEl.classList.toggle("has-phone-collections", onCollections);
+  if (onCollections) {
+    phoneHeadName.textContent = t("Collections");
+    phoneHeadCount.textContent = STORE.collections.size;
+    phoneAddBtn.hidden = false;
+    return;
+  }
   if (!list) {
     phoneAddBtn.hidden = true;
     return;
@@ -116,6 +127,11 @@ document.getElementById("phone-search-cancel").addEventListener("click", () => {
 });
 
 phoneAddBtn.addEventListener("click", () => {
+  if (document.getElementById("collections").classList.contains("active")) {
+    // The "Add Collection" card, which is how the computer adds one.
+    document.querySelector("#grid-collections .ghost-card")?.click();
+    return;
+  }
   const list = phoneList();
   if (list) phoneControls(list).add?.click();
 });
@@ -125,7 +141,7 @@ phoneAddBtn.addEventListener("click", () => {
    strips are redrawn often (js/sectionHeaders.js), so the button lives
    beside them, not inside. */
 
-PHONE_LIST_SECTIONS.forEach((id) =>
+[...PHONE_LIST_SECTIONS, "collections"].forEach((id) =>
   document.querySelectorAll(`#${id} .hstats`).forEach((stats) => {
     const more = document.createElement("button");
     more.type = "button";
@@ -239,7 +255,7 @@ document.addEventListener(
 
 const phoneHeadObserver = new MutationObserver(queuePhoneHead);
 phoneHeadObserver.observe(phoneAppEl, { attributes: true, attributeFilter: ["data-phone-tab"] });
-PHONE_LIST_SECTIONS.forEach((id) =>
+[...PHONE_LIST_SECTIONS, "collections"].forEach((id) =>
   phoneHeadObserver.observe(document.getElementById(id), { attributes: true, childList: true, subtree: true })
 );
 syncPhoneHead();

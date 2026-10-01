@@ -231,7 +231,7 @@ function colItemCardHtml(item) {
       <span class="status-badge is-${status}" title="${badge.label}" role="img" aria-label="${badge.label}">${badge.inner}</span>
       ${poster}
       <p class="card-title">${escapeHtml(row.title ?? t("Untitled"))}</p>
-      ${rating}
+      ${rating}${cardGlanceHtml(gridIdFor(table, row), row)}
     </article>`;
 }
 

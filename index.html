@@ -96,7 +96,7 @@
   <link rel="stylesheet" href="css/episodes.css?v=176d4679" />
   <link rel="stylesheet" href="css/whereToWatch.css?v=7528c42f" />
   <link rel="stylesheet" href="css/librarySearch.css?v=cce1cb12" />
-  <link rel="stylesheet" href="css/responsive.css?v=e7014e79" />
+  <link rel="stylesheet" href="css/responsive.css?v=da5e7b2a" />
   <script src="js/statusBar.js?v=b3d9396d"></script>
   <script src="js/noZoom.js?v=632c1c6c"></script>
 </head>
@@ -766,6 +766,30 @@
       </section>
 
       <section class="section" id="collection-view">
+        <!-- On a phone, the open collection's cover: its posters behind its
+             name and progress, and its buttons (js/phoneCollection.js). -->
+        <div class="col-banner" id="col-banner">
+          <div class="col-banner-posters" id="col-banner-posters" aria-hidden="true"></div>
+          <div class="col-banner-bar">
+            <button class="col-banner-btn" type="button" data-col-action="back" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg></button>
+            <span class="col-banner-tools">
+              <button class="col-banner-btn" type="button" data-col-action="edit" aria-label="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4z"/></svg></button>
+              <button class="col-banner-btn" type="button" data-col-action="delete" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/></svg></button>
+            </span>
+          </div>
+          <div class="col-banner-main">
+            <span class="col-banner-seal" id="col-banner-seal"></span>
+            <div class="col-banner-text">
+              <h1 class="col-banner-name" id="col-banner-name"></h1>
+              <p class="col-banner-meta" id="col-banner-meta"></p>
+              <div class="col-banner-progress" id="col-banner-progress"></div>
+            </div>
+          </div>
+          <div class="col-banner-actions">
+            <button class="col-banner-action is-primary" type="button" data-col-action="surprise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="15" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/><circle cx="9" cy="15" r="1.2" fill="currentColor"/></svg><span>Surprise Me</span></button>
+            <button class="col-banner-action" type="button" data-col-action="add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Add</span></button>
+          </div>
+        </div>
         <header class="section-header">
           <div>
             <p class="drag-hint" id="col-detail-drag-hint" hidden><svg class="drag-hint-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg><span class="hint-pointer">Drag to reorder</span><span class="hint-touch">Press &amp; hold to reorder</span></p>
@@ -1391,7 +1415,7 @@
   <script src="js/iconData.js?v=051d09a4"></script>
   <script src="js/icons.js?v=3a450da2"></script>
   <script src="js/iconPicker.js?v=60949f19"></script>
-  <script src="js/collections.js?v=a2da4383"></script>
+  <script src="js/collections.js?v=70b6220f"></script>
   <script src="js/detailModal.js?v=19841e57"></script>
   <script src="js/heartsInput.js?v=75776d63"></script>
   <script src="js/updateModal.js?v=462c7f71"></script>
@@ -1412,7 +1436,8 @@
   <script src="js/deleteAccount.js?v=bb8fa209"></script>
   <script src="js/landing.js?v=ecfc7b41"></script>
   <script src="js/phoneNav.js?v=ef05a4d2"></script>
-  <script src="js/phoneHead.js?v=7bd94732"></script>
+  <script src="js/phoneCollection.js?v=96f071a1"></script>
+  <script src="js/phoneHead.js?v=45ada40c"></script>
   <script src="js/auth.js?v=c67e9625"></script>
 </body>
 </html>

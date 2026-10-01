@@ -823,7 +823,20 @@ directly.
   mockups for the list and an open collection, same artifact (A the
   booklets two across, open with the lists' row of round buttons; B
   folders as rows, open with a banner of its posters; C album covers,
-  open with the cover centered), waiting for the owner's pick.
+  open with the cover centered). The owner picked **B**. Built, waiting
+  for the owner's check: the list (CSS only, css/responsive.css
+  "Collections on a phone") turns each booklet into a folder row (seal,
+  name on up to 2 lines, "8/12 watched" over its bar, three posters
+  fanned on the right), under the lists' row with only the name, count
+  and "+" (which clicks the "Add Collection" card, shown only when there
+  are none). Open: `#col-banner` (index.html, filled by
+  js/phoneCollection.js from STORE): posters blurred behind, back /
+  edit / delete (red) round buttons, seal, name, "2 movies · ♥ 9,0",
+  the progress bar, Surprise Me and Add; each works the computer's
+  header button, which is hidden with the stats strip. Movies / Shows as
+  pills; the titles three across with their status badge and the
+  glance line (`cardGlanceHtml` via `gridIdFor`). Computer sizes
+  pixel-identical, open collection included.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
