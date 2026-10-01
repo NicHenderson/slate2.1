@@ -754,8 +754,8 @@ directly.
   The computer keeps its 6 sections and sidebar. The list header in
   the mockups is a placeholder, to be designed on its own. Stages (the
   owner's go-ahead, Oct. 1, 2026): 1 the bar and the two views, 2 the A
-  cards, 3 the list header (mockups first). Stage 1 — built, waiting
-  for the owner's check: at ≤640px (641–768 keeps the drawer) the ☰
+  cards, 3 the list header (mockups first). Stage 1 — done, checked
+  by the owner: at ≤640px (641–768 keeps the drawer) the ☰
   and sidebar are gone; `.tab-bar` is the app's last row (`.app` turns
   a column, so nothing scrolls under it), and Movies / Shows show their
   tabs as pills (`.view-tabs`, top of `.content`). js/phoneNav.js maps
@@ -768,7 +768,7 @@ directly.
   status): `data-i18n-key` in js/i18n.js. On an installed iPhone the
   bar will likely sit a status bar's height above the bottom (the iOS
   bug above). Computer sizes checked pixel for pixel (1280/900/700).
-  Stage 2 — built, waiting for the owner's check: the six Movies /
+  Stage 2 — done, checked by the owner: the six Movies /
   Shows lists, three polaroids across at ≤640px (density too;
   collections untouched), the title on one line, and under it
   `cardGlanceHtml` (js/data.js; hidden on computers): watched / finished
