@@ -880,7 +880,16 @@ directly.
   proposal, waiting for the owner's go-ahead: 1 one shared phone base
   for all of them at once (mockups first: how a window rises, closes,
   its header and buttons), then own mockups only for 2 a title's
-  window, 3 search, 4 episodes, 5 a last pass on the rest.
+  window, 3 search, 4 episodes, 5 a last pass on the rest. The owner
+  agreed, and asked that **nothing be built until they say so** (they
+  want to be as sure as possible here). Base mockups (same artifact,
+  each on a confirmation, the Edit form and adding titles to a
+  collection): A a sheet rising from the bottom like Sort / Filters
+  (fits its content, a tall one stops under the status bar; grip, ×,
+  the main button pinned at the bottom), B full-screen pages like
+  Settings' ("‹ Atrás" / Cancelar · Guardar; questions as a card in
+  the middle), C A's sheet as Slate's paper (tape, a sticker title,
+  stamped buttons). Waiting for the owner's pick.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
