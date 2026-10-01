@@ -890,7 +890,14 @@ directly.
   Settings' ("‹ Atrás" / Cancelar · Guardar; questions as a card in
   the middle), C A's sheet as Slate's paper (tape, a sticker title,
   stamped buttons). The owner picked **C** (Oct. 1, 2026); still
-  nothing built: they say when.
+  nothing built: they say when. Next, at their go-ahead, the big
+  windows' mockups first (all designed before anything is built).
+  A title's window (same artifact, each a watched movie, a show being
+  watched, a movie to watch; actions pinned at the bottom as stamps):
+  A the poster as a polaroid beside the title, all the rest below; B
+  the poster as the sheet's cover, the title a sticker label, ‹ ›
+  arrows to step; C a compact head and tabs (your record · about it ·
+  where to watch). Waiting for the owner's pick.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
