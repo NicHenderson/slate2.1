@@ -868,6 +868,19 @@ directly.
   The bar doesn't scroll, so iOS hands the drag to the page: the bar now
   cancels its own touchmoves (js/phoneNav.js, `touch-action: none`) and
   the page doesn't overscroll while the app shows.
+  **Windows next** (the owner asked, Oct. 1, 2026: every window
+  redesigned for the phone). Claude's count, from screenshots at iPhone
+  size: 10 windows. Big ones with their own design: a title's window
+  (5 states, viewings, trailer, "Add to collection"), the episodes
+  list, TMDB search. Forms and small ones: Edit, the dates window
+  (start / finish / mark watched), new / edit collection (+ icons),
+  adding titles to a collection, the favorite picker, Import, Confirm.
+  Today they're computer windows squeezed in (centered cards, the
+  poster taking half the screen, the × by the runtime). Claude's
+  proposal, waiting for the owner's go-ahead: 1 one shared phone base
+  for all of them at once (mockups first: how a window rises, closes,
+  its header and buttons), then own mockups only for 2 a title's
+  window, 3 search, 4 episodes, 5 a last pass on the rest.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
