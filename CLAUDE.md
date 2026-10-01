@@ -842,6 +842,12 @@ directly.
   phone styles now follow the card (`.collection-card`,
   `.col-item-card`) and a watchlist card's copy says where it came from
   (`data-ghost-of`, js/collections.js). Test in tests/mobile.spec.js.
+  **Settings next** (the owner asked for mockups, Oct. 1, 2026; the gear
+  icon was redrawn first, sidebar and bar, with their OK): three
+  mockups, same artifact, each the menu and Appearance (A grouped
+  lists on paper, iPhone-like, each page's current value on the right;
+  B a "member card" on top and the six pages as tiles; C one page of
+  folders that fold open). Waiting for the owner's pick.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
