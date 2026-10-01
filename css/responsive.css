@@ -142,6 +142,11 @@
 .phone-sheet-backdrop,
 .hstats-more,
 .col-banner,
+.pp-card-top,
+.settings-menu-value,
+.settings-back-chevron,
+.settings-page-name,
+.density-select-wrap,
 .sheet-grip,
 .auth-sheet-grip,
 .auth-sheet-close,
@@ -2658,5 +2663,526 @@
   /* The cover's "Add" does what this card did. */
   #col-detail-grid .ghost-card {
     display: none;
+  }
+}
+
+/* ==================== Settings on a phone ====================
+   The owner's pick of three mockups ("B"): the profile card as a member's
+   card in the theme's color, the six pages as paper tiles two across,
+   each saying what's set there (js/phoneSettings.js), and a page opening
+   in the menu's place under "‹ Its name". Appearance: the themes three
+   across, the backgrounds as chips, card size and animations side by
+   side. Every control is the computer's own, restyled. */
+@media (max-width: 640px) {
+  /* ---------- the header: the name only, as the lists have it ---------- */
+  #settings > .section-header {
+    margin-bottom: 12px;
+  }
+
+  #settings > .section-header .section-sub {
+    display: none;
+  }
+
+  #settings > .section-header h1 {
+    font-size: 24px;
+    letter-spacing: 0.03em;
+  }
+
+  /* A page brings its own: "‹ Appearance". */
+  #settings:has(.settings-c:not(.at-menu)) > .section-header {
+    display: none;
+  }
+
+  /* ---------- the member card ---------- */
+  .settings-menu {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .settings-menu-group,
+  .settings-menu-go {
+    display: none;
+  }
+
+  .settings-menu .profile-preview {
+    position: relative;
+    grid-column: 1 / -1;
+    gap: 0;
+    margin-bottom: 6px;
+    padding: 16px 16px 14px;
+    overflow: hidden;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent-strong), var(--accent-deep));
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  /* A soft circle of light in the corner, as on a plastic card. */
+  .settings-menu .profile-preview::before {
+    content: "";
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+  }
+
+  .pp-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .pp-card-brand {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .pp-card-stamp {
+    padding: 2px 8px;
+    border: 2px solid #fff;
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transform: rotate(6deg);
+  }
+
+  .settings-menu .pp-head {
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  .settings-menu .pp-monogram {
+    width: 54px;
+    height: 54px;
+    background: var(--paper);
+    color: var(--accent-deep);
+    font-size: 24px;
+    box-shadow: none;
+  }
+
+  .settings-menu .pp-username {
+    font-family: var(--font-hand);
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.05;
+  }
+
+  .settings-menu .pp-since {
+    margin-top: 3px;
+    color: inherit;
+    opacity: 0.85;
+  }
+
+  /* Who you are and what you've logged: the bio and favorites are for the
+     Profile page. */
+  .settings-menu .pp-bio,
+  .settings-menu .pp-favs {
+    display: none;
+  }
+
+  .settings-menu .pp-stats {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.4);
+  }
+
+  .settings-menu .pp-num {
+    font-size: 20px;
+    color: inherit;
+  }
+
+  .settings-menu .pp-label {
+    margin-top: 2px;
+    font-size: 10px;
+    color: inherit;
+    opacity: 0.85;
+  }
+
+  /* ---------- the pages as tiles ---------- */
+  .settings-menu-item,
+  .settings-menu-item[aria-current="page"] {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    min-width: 0;
+    padding: 14px;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 2px 4px 0 var(--accent-deep);
+  }
+
+  .settings-menu-item:nth-of-type(1) { transform: rotate(-0.8deg); }
+  .settings-menu-item:nth-of-type(2) { transform: rotate(0.6deg); }
+  .settings-menu-item:nth-of-type(3) { transform: rotate(-0.4deg); }
+  .settings-menu-item:nth-of-type(4) { transform: rotate(0.7deg); }
+  .settings-menu-item:nth-of-type(5) { transform: rotate(-0.6deg); }
+  .settings-menu-item:nth-of-type(6) { transform: rotate(0.5deg); }
+
+  .settings-menu-item:active {
+    translate: 1px 2px;
+    box-shadow: 1px 2px 0 var(--accent-deep);
+  }
+
+  .settings-menu-icon {
+    width: auto;
+    font-size: 26px;
+    line-height: 1.15;
+  }
+
+  .settings-menu-label {
+    max-width: 100%;
+    margin-top: 8px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .settings-menu-value {
+    display: block;
+    max-width: 100%;
+    min-height: 1.3em;
+    margin-top: 2px;
+    overflow: hidden;
+    font-size: 12px;
+    font-weight: 400;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ink-muted);
+  }
+
+  /* ---------- a page: "‹ Its name" ---------- */
+  .settings-c:not(.at-menu) .settings-pages {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 4px;
+  }
+
+  .settings-pages > .settings-page {
+    grid-column: 1 / -1;
+  }
+
+  .settings-back {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin: 0 0 8px -10px;
+    color: var(--accent);
+  }
+
+  .settings-back-chevron {
+    display: block;
+    width: 26px;
+    height: 26px;
+  }
+
+  /* Still its name for a screen reader. */
+  .settings-back-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .settings-page-name {
+    display: block;
+    min-width: 0;
+    margin: 0 0 8px;
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--text);
+  }
+
+  /* ---------- its tiles: flat paper with a hard shadow ---------- */
+  .settings-tile {
+    padding: 16px 14px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: 2px 4px 0 var(--accent-deep);
+  }
+
+  /* A page of one tile has its name above already. */
+  .settings-page:not([data-page="look"]) > .settings-tile:first-child > .settings-tile-title {
+    display: none;
+  }
+
+  /* Its first row, then, needs no line above it. */
+  .settings-page:not([data-page="look"]) > .settings-tile:first-child > .settings-tile-title + .data-action {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  /* The others name it above the paper, as a label on the page. */
+  .settings-page[data-page="look"] > :is(.tile-theme, .tile-background),
+  .tile-danger {
+    isolation: isolate;
+    padding-top: 40px;
+    background: none;
+    box-shadow: none;
+  }
+
+  .settings-page[data-page="look"] > :is(.tile-theme, .tile-background)::before,
+  .tile-danger::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 26px 0 0;
+    background: var(--paper);
+    box-shadow: 2px 4px 0 var(--accent-deep);
+  }
+
+  .tile-danger::before {
+    box-shadow: 2px 4px 0 #991b1b;
+  }
+
+  .settings-page[data-page="look"] > :is(.tile-theme, .tile-background),
+  .tile-danger {
+    position: relative;
+  }
+
+  .settings-page[data-page="look"] > :is(.tile-theme, .tile-background) > .settings-tile-title,
+  .tile-danger > .settings-tile-title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Appearance ---------- */
+  .theme-swatches {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px 8px;
+  }
+
+  .theme-swatch,
+  .theme-swatch:hover {
+    gap: 6px;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .theme-swatch.is-active,
+  .theme-swatch.is-active:hover {
+    box-shadow: none;
+  }
+
+  .theme-swatch-preview {
+    height: 58px;
+    border-radius: 8px;
+  }
+
+  .theme-swatch.is-active .theme-swatch-preview {
+    outline: 3px solid var(--sw-accent);
+    outline-offset: 2px;
+  }
+
+  .theme-swatch-check {
+    top: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+  }
+
+  /* The miniature without its sidebar: the page and a card. */
+  .tsp-sidebar,
+  .tsp-title {
+    display: none;
+  }
+
+  .tsp-main {
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .tsp-sub {
+    flex: none;
+    transform: none;
+  }
+
+  .tsp-line.is-short {
+    display: none;
+  }
+
+  .theme-swatch-meta {
+    padding: 0;
+  }
+
+  .theme-swatch-label {
+    font-size: 12.5px;
+  }
+
+  .theme-swatch-mode {
+    display: none;
+  }
+
+  /* The backgrounds as chips; "Can't quite see it?" shows them up close. */
+  .tile-background > .settings-row-hint {
+    display: none;
+  }
+
+  .background-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 0;
+  }
+
+  .background-swatch,
+  .background-swatch:hover {
+    padding: 7px 12px;
+    border: 1.5px solid color-mix(in srgb, var(--ink) 25%, transparent);
+    border-radius: 999px;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .background-swatch.is-active {
+    border-color: var(--accent-strong);
+    background: var(--accent-strong);
+    box-shadow: none;
+  }
+
+  .background-swatch-preview {
+    display: none;
+  }
+
+  .background-swatch-label,
+  .background-swatch.is-active .background-swatch-label {
+    padding: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  .background-swatch.is-active .background-swatch-label {
+    color: #fff;
+  }
+
+  .tile-background .bg-loupe-open {
+    order: 1;
+    margin-top: 12px;
+  }
+
+  /* Card size and animations, side by side. */
+  .settings-page[data-page="look"]:not([hidden]) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 12px;
+  }
+
+  .settings-page[data-page="look"] > :is(.tile-theme, .tile-background) {
+    grid-column: 1 / -1;
+  }
+
+  .tile-motion,
+  .tile-density {
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .tile-motion > .settings-tile-title,
+  .tile-motion .settings-row-hint,
+  .tile-density > .settings-row-hint,
+  .tile-density > .settings-segmented {
+    display: none;
+  }
+
+  .tile-density > .settings-tile-title {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .tile-motion .settings-row {
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding: 0;
+  }
+
+  .tile-motion .settings-row-title {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  /* The card size as a word that opens the choice: the word and its ▾
+     are drawn, and the select itself, unseen, lies over them to be
+     tapped (js/settings.js keeps the word). */
+  .density-select-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 4px;
+    min-height: 34px;
+    margin-top: 2px;
+    color: var(--accent-deep);
+    font-family: var(--font-hand);
+    font-size: 19px;
+  }
+
+  .density-select-wrap::before {
+    content: attr(data-label);
+  }
+
+  .density-select-wrap::after {
+    content: "▾";
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    border: 0;
+    transform: none;
+    font-family: var(--font-body);
+    font-size: 13px;
+  }
+
+  .density-select-wrap:has(:focus-visible) {
+    outline: 2px solid var(--accent-deep);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .settings-select.density-select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    opacity: 0;
   }
 }

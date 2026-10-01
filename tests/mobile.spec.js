@@ -324,3 +324,36 @@ test("on a phone, a collection being dragged looks like its row", async ({ page,
   expect(cover.height).toBeLessThan(row.height);
   await touch("touchEnd");
 });
+
+// Settings: a member's card and the pages as tiles, each saying what's set
+// there; a page opens in the menu's place under its name, and only that
+// page shows (Appearance once showed under every other).
+test("on a phone, Settings is tiles saying what's set, and one page at a time", async ({ page }) => {
+  await page.goto("/");
+  await logIn(page);
+  await page.locator('.tab-bar-btn[data-tab="settings"]').tap();
+  await expect(page.locator(".pp-card-top")).toBeVisible();
+  await expect(page.locator('[data-settings-glance="profile"]')).toHaveText("@tester");
+  await expect(page.locator('[data-settings-glance="account"]')).toHaveText("tester@slate.test");
+  await expect(page.locator('[data-settings-glance="look"]')).toHaveText("Midnight");
+  await expectNoSidewaysScroll(page);
+
+  await page.locator('[data-settings-page="account"]').tap();
+  await expect(page.locator("#settings-page-name")).toHaveText("Account");
+  await expect(page.locator("#settings-logout-btn")).toBeVisible();
+  await expect(page.locator("#theme-swatches")).toBeHidden();
+  await expect(page.locator('[data-settings-page="look"]')).toBeHidden();
+
+  await page.locator("#settings-back").tap();
+  await page.locator('[data-settings-page="look"]').tap();
+  await expect(page.locator("#settings-page-name")).toHaveText("Appearance");
+  await expect(page.locator("#settings-logout-btn")).toBeHidden();
+  await page.locator('[data-theme-key="ocean"]').tap();
+  // The card size is a word over its own list.
+  await page.locator("#density-select").selectOption("compact");
+  await expect(page.locator("html")).toHaveAttribute("data-density", "compact");
+  await expect(page.locator(".density-select-wrap")).toHaveAttribute("data-label", "Compact");
+  await expectNoZoomingFields(page);
+  await page.locator("#settings-back").tap();
+  await expect(page.locator('[data-settings-glance="look"]')).toHaveText("Ocean");
+});

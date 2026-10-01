@@ -96,6 +96,7 @@ const appRootEl = document.getElementById("app");
 const themeSwatchesEl = document.getElementById("theme-swatches");
 const reduceMotionToggle = document.getElementById("reduce-motion-toggle");
 const densityControl = document.getElementById("density-control");
+const densitySelect = document.getElementById("density-select"); // the phone's
 const backgroundSwatchesEl = document.getElementById("background-swatches");
 const openToSelect = document.getElementById("setting-open-to");
 const defaultSortSelect = document.getElementById("setting-default-sort");
@@ -252,6 +253,10 @@ function renderSettingsPage() {
     btn.classList.toggle("is-active", on);
     btn.setAttribute("aria-pressed", String(on));
   });
+  densitySelect.value = currentSettings.density;
+  // Shown as a word right before its ▾ (css/responsive.css), however long
+  // the other choice is.
+  densitySelect.parentElement.dataset.label = densitySelect.selectedOptions[0]?.textContent ?? "";
 
   openToSelect.value = currentSettings.openTo;
   defaultSortSelect.value = currentSettings.defaultSort;
@@ -384,6 +389,7 @@ densityControl.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-density-value]");
   if (btn) saveSetting("density", btn.dataset.densityValue);
 });
+densitySelect.addEventListener("change", () => saveSetting("density", densitySelect.value));
 
 openToSelect.addEventListener("change", () => saveSetting("openTo", openToSelect.value));
 defaultSortSelect.addEventListener("change", () => saveSetting("defaultSort", defaultSortSelect.value));

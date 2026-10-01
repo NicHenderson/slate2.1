@@ -847,7 +847,20 @@ directly.
   mockups, same artifact, each the menu and Appearance (A grouped
   lists on paper, iPhone-like, each page's current value on the right;
   B a "member card" on top and the six pages as tiles; C one page of
-  folders that fold open). Waiting for the owner's pick.
+  folders that fold open). The owner picked **B**. Built, waiting for
+  the owner's check (css/responsive.css "Settings on a phone",
+  js/phoneSettings.js): the profile card as a member's card in the
+  theme's color ("Slate · Member", a "By invitation" stamp where the
+  mockup had "Nº 0042": Slate can't know a real member number; no bio
+  or favorites there), the six pages as tilted paper tiles two across,
+  each with what's set there (@username, email, theme, language ·
+  country, default sort); a page opens under "‹ Its name" (the header
+  hidden). Its tiles are flat paper with a hard shadow; Appearance has
+  the themes three across (the miniature without its sidebar), the
+  backgrounds as chips ("Can't quite see it?" still there), and card
+  size + Reduce animations side by side, the size a handwritten word
+  over an unseen <select> (`#density-select`, phone only). Computer
+  sizes pixel-identical (1280/900/700, every page).
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
