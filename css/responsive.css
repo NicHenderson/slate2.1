@@ -3136,8 +3136,7 @@
     align-items: end;
     justify-items: stretch;
     padding: var(--safe-top) 0 0;
-    background: rgba(5, 4, 10, 0.6);
-    backdrop-filter: blur(3px);
+    background: rgba(5, 4, 10, 0.68);
   }
 
   /* ---------- the sheet ---------- */
@@ -3439,6 +3438,24 @@
     transform: rotate(-1deg);
   }
 
+  /* No blur behind any window on a phone, only the dim: an iPhone works
+     the blur out again each frame something moves over it, which made
+     dragging a sheet stutter there. */
+  .modal-backdrop {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  /* A card being dragged: a plainer lift (the wide glow was repainted as
+     it moved, slow on an iPhone). */
+  body > .drag-ghost {
+    will-change: transform, translate; /* it moves by `translate` */
+  }
+
+  body > .drag-ghost.lifted {
+    box-shadow: 0 0 0 2px var(--accent-strong), 6px 14px 20px rgba(0, 0, 0, 0.45);
+  }
+
   @keyframes phone-window-up {
     from {
       transform: translateY(100%);
@@ -3454,8 +3471,7 @@
     align-items: end;
     justify-items: stretch;
     padding: var(--safe-top) 0 0;
-    background: rgba(5, 4, 10, 0.6);
-    backdrop-filter: blur(3px);
+    background: rgba(5, 4, 10, 0.68);
   }
 
   :is(#collection-modal, #library-modal, #favorite-modal) .modal,

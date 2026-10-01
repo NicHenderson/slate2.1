@@ -968,6 +968,13 @@ directly.
   On a phone, fields in windows wait to be tapped (`focusOnOpen`,
   js/phoneWindows.js; the computer still focuses them), and a page
   left shifted once the keyboard goes goes back to the top.
+  The owner: dragging (sheets down, cards to reorder) is smooth on
+  Android, slow on the iPhone (an iPhone 15 is 60 Hz; many Androids
+  90–120). Done, to be checked on the iPhone (Chromium can't show it):
+  a dragged sheet (windows, Sort / Filters, login) gets `will-change`
+  just before it moves and moves by translate3d; no backdrop blur
+  behind any window on a phone (only the dim); a dragged card's lift
+  without the wide glow, its `translate` hinted.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

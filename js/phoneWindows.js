@@ -28,12 +28,15 @@ PHONE_WINDOWS.forEach(({ backdrop, sheet: sheetSel, head: headSel, close }) => {
     if (!phoneWindowLayout.matches || e.target.closest("button, a, input")) return;
     drag = { startY: e.clientY, startT: e.timeStamp, dy: 0 };
     head.setPointerCapture(e.pointerId);
+    // A layer of its own before it moves: an iPhone otherwise repaints the
+    // whole sheet, shadow and all, each frame (Android works it out itself).
+    sheet.style.willChange = "transform";
   });
   head.addEventListener("pointermove", (e) => {
     if (!drag) return;
     drag.dy = Math.max(0, e.clientY - drag.startY);
     sheet.style.transition = "none";
-    sheet.style.transform = `translateY(${drag.dy}px)`;
+    sheet.style.transform = `translate3d(0, ${drag.dy}px, 0)`;
   });
   const end = (e) => {
     if (!drag) return;
@@ -41,6 +44,7 @@ PHONE_WINDOWS.forEach(({ backdrop, sheet: sheetSel, head: headSel, close }) => {
     drag = null;
     sheet.style.transition = "";
     sheet.style.transform = "";
+    sheet.style.willChange = "";
     // A long drag, or a quick flick that went somewhere.
     if (dy > sheet.offsetHeight * 0.25 || (dy > 30 && dy / Math.max(1, e.timeStamp - startT) > 0.5)) {
       document.getElementById(close).click();

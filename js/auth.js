@@ -353,18 +353,22 @@ authGrip.addEventListener("pointerdown", (e) => {
   sheetDrag = { startY: e.clientY, startTime: e.timeStamp, dy: 0 };
   authGrip.setPointerCapture(e.pointerId);
   authPanel.style.transition = "none";
+  // A layer of its own before it moves: an iPhone otherwise repaints the
+  // whole sheet each frame of the drag (Android works it out by itself).
+  authPanel.style.willChange = "transform";
 });
 
 authGrip.addEventListener("pointermove", (e) => {
   if (!sheetDrag) return;
   sheetDrag.dy = Math.max(0, e.clientY - sheetDrag.startY);
-  authPanel.style.transform = `translateY(${sheetDrag.dy}px)`;
+  authPanel.style.transform = `translate3d(0, ${sheetDrag.dy}px, 0)`;
 });
 
 function endSheetDrag(e) {
   if (!sheetDrag) return;
   const { dy, startTime } = sheetDrag;
   sheetDrag = null;
+  setTimeout(() => (authPanel.style.willChange = ""), 300);
   const flicked = dy > 30 && dy / Math.max(1, e.timeStamp - startTime) > 0.5;
   authPanel.style.transition = "transform 0.25s cubic-bezier(0.22, 1, 0.36, 1)";
   if (dy > authPanel.offsetHeight * 0.25 || flicked) {
