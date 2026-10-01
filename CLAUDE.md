@@ -777,7 +777,7 @@ directly.
   dropped keep their episode line, smaller ("Started 12d ago" hidden;
   a dropped card breaks "Stopped at" before the code, never in it). The
   starburst and ×N scaled down. Computer sizes pixel-identical.
-  Stage 3 — built, waiting for the owner's check: of three header
+  Stage 3 — done, checked by the owner on their iPhone: of three header
   mockups (same artifact: A one row of round buttons, B a search bar
   always there with chips, C a big header folding as you scroll) the
   owner picked **A**. js/phoneHead.js: above the tabs, the view's name
@@ -819,6 +819,11 @@ directly.
   touchmove listener (js/phoneHead.js) cancels any drag while a sheet
   is up unless it scrolls a sheet that can still scroll that way, and
   the root's overscroll is off meanwhile.
+  **Collections next** (the owner's go-ahead, Oct. 1, 2026): three
+  mockups for the list and an open collection, same artifact (A the
+  booklets two across, open with the lists' row of round buttons; B
+  folders as rows, open with a banner of its posters; C album covers,
+  open with the cover centered), waiting for the owner's pick.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
