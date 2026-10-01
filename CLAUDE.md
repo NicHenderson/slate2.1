@@ -889,7 +889,8 @@ directly.
   the main button pinned at the bottom), B full-screen pages like
   Settings' ("‹ Atrás" / Cancelar · Guardar; questions as a card in
   the middle), C A's sheet as Slate's paper (tape, a sticker title,
-  stamped buttons). Waiting for the owner's pick.
+  stamped buttons). The owner picked **C** (Oct. 1, 2026); still
+  nothing built: they say when.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
