@@ -1002,6 +1002,8 @@ directly.
   "Where are you?" scrolls a little on an iPhone SE. No ‹ › arrows on a
   phone (hidden below 860px, as before). Computer pixel-identical
   (1280/900/700, every state, viewings, the collection menu).
+  The owner's note: the note's × should be plain to see; it's now a
+  round ink sticker over the note's corner. Then: go for stage 4.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
