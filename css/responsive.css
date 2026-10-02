@@ -1963,6 +1963,14 @@
     display: none;
   }
 
+  /* The drag hint (custom order) sat flush on the numbers strip, as if it
+     were its caption: centred, with room under it. */
+  :is(#movies-towatch, #shows-towatch, #collections, #collection-view) .section-header .drag-hint:not([hidden]) {
+    display: flex;
+    width: fit-content;
+    margin: 0 auto 12px;
+  }
+
   :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .header-actions,
   :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .sort-wrap,
   :is(#movies-watched, #movies-towatch, #shows-watched, #shows-towatch) .lib-filter-wrap {
