@@ -220,3 +220,25 @@ test("a movie added from Movies opens its form, with no word of a change elsewhe
   await page.waitForTimeout(500);
   await expect(page.locator("#update-modal .form-stale")).toHaveCount(0);
 });
+
+// Saving the form of a movie just added from the search (Movies, watched)
+// is the end of adding it: every window closes and the list shows it.
+test("rating a movie just added from Movies closes the search too", async ({ page, backend }) => {
+  await logIn(page);
+  await page.click('.nav-btn[data-section="movies-watched"]');
+  await page.click("#movies-watched .add-btn");
+  await page.click("#library-search-hint");
+  await page.fill("#modal-input", "inception");
+  await page.press("#modal-input", "Enter");
+  await page.locator("#modal-results .tmdb-hit-main").first().click();
+  await page.locator("#modal-preview .tmdb-preview-action:not([disabled])").click();
+  await expect(page.locator("#update-modal")).toBeVisible();
+  await page.fill("#update-review", "Dreams within dreams.");
+  await page.click("#update-save");
+
+  await expect(page.locator("#update-modal")).toBeHidden();
+  await expect(page.locator("#search-modal")).toBeHidden();
+  await expect(page.locator(".modal-backdrop:not(.hidden)")).toHaveCount(0);
+  await expect(page.locator("#grid-movies-watched .card", { hasText: "Inception" })).toBeVisible();
+  expect(backend.db.movies.find((m) => m.title === "Inception").review).toBe("Dreams within dreams.");
+});

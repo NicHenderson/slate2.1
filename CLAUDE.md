@@ -1107,6 +1107,11 @@ directly.
   nothing below). Chromium can't show the bug: checked
   pixel-identical with the rules forced on; the owner's iPhone is the
   check. If it misbehaves, this block is the one place to look.
+  Then (the owner's ask): a title added from the search in Movies /
+  Shows (watched lists) opens its form over the search; saving that
+  form now closes the search too, so the list shows it at once (Cancel
+  leaves the search open, as before). `updateFromSearch` /
+  `startFromSearch`; test in tests/library.spec.js.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
