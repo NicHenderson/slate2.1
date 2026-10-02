@@ -1085,6 +1085,9 @@ directly.
   down (`layer` in PHONE_WINDOWS, `slideAway`), as "← Results" does.
   The preview's scrolling part is wrapped (`.tmdb-preview-scroll` >
   `.tmdb-preview-body`, js/searchModal.js); computer pixel-identical.
+  Then: "Press & hold to reorder" (custom order: Movies / Shows To
+  Watch, Collections, an open collection) sat flush on the numbers
+  strip; on a phone it's now centred with 12px under it.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
