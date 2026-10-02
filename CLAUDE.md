@@ -1089,6 +1089,24 @@ directly.
   Watch, Collections, an open collection) sat flush on the numbers
   strip; on a phone it now has 12px under it, left-aligned (the
   owner tried it centred and preferred it on the left).
+  Then (the owner's iPhone, Oct. 2, 2026): after a field's keyboard
+  came up, a dark band sat under the bottom bar (and under windows,
+  the "+", ...) until the app was closed, and the app jumped as the
+  keyboard rose. An iOS 26 bug in installed apps with a see-through
+  status bar (others hit it too, e.g. github.com/endziu/0xchat/pull/135,
+  github.com/MiguelMedeiros/ghostly/pull/651): 100dvh, innerHeight
+  and what's pinned to the bottom come up short by the status bar's
+  height (~59px), and iOS draws nothing below. Only 100lvh stays
+  right. Fix, CSS only, in installed apps (`display-mode: standalone`;
+  css/responsive.css "The installed app's height"): `--screen-full` is
+  100lvh (the app, html / body, windows' heights) and everything
+  pinned to the bottom gets `margin-bottom: -(100lvh - 100dvh)`,
+  which is 0 when the screen is measured right (Android, computers).
+  It also covers the landing page's band (the earlier JS fix there
+  failed likely because the page itself stayed short, so iOS drew
+  nothing below). Chromium can't show the bug: checked
+  pixel-identical with the rules forced on; the owner's iPhone is the
+  check. If it misbehaves, this block is the one place to look.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
