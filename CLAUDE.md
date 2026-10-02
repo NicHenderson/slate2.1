@@ -655,50 +655,567 @@ directly.
   - later, not now: an automatic, read-only drop date for shows (needs a
     migration). Not wanted: dropping a show never started (delete it).
     Two viewings on the same day stay allowed.
-- **Then: Slate that feels like a phone app** (the owner's request),
-  on its own branch, `claude/mobile-app`, which goes straight to `main`
-  when done; `claude/funny-pascal-bk99gr` stays for small fixes meanwhile.
-  Phone-only changes; the computer layout stays as it is. Claude reviewed
-  every screen at phone size and proposed stages (installable app, bottom
-  tab bar and compact headers, windows as bottom sheets, full-screen
-  search and touch polish); none is built until the owner says so.
-  Talked over in Sept. 2026: the owner wants it polished until it feels
-  like a real phone app, and it's the next project (native Android / iOS
-  ports are out for now: Play's $25 and 12-tester closed test, Apple's
-  $99 a year and a Mac; a store port would wrap this same web app later).
-  Add to the stages: gestures, loading without a connection, performance,
-  and, early, **back navigation through history** (`pushState` for
-  sections and windows): an installed iOS web app does have the edge
-  swipe back (since iOS 12.2), but Slate pushes no history, so today it
-  does nothing (and leaves Slate in Safari; Android's back button too).
-  iOS's own back animation may clash with Slate's: tune on a real phone.
-  The owner tests on an iPhone 15, and has an Android for tests.
-  **Started Sept. 30, 2026** (the owner's go-ahead; only their iPhone at
-  hand for now). `claude/mobile-app` brought up to `main`; preview at
-  claude-mobile-app.myslate.pages.dev. Claude's proposed order, each
-  stage with the owner's go-ahead (mockups first for 3 and 4): 1
-  installable app (manifest, home-screen icon, standalone, status bar,
-  safe areas, no zoom on focus: iOS zooms inputs under 16px, e.g. the
-  14px .field-input); 2 back navigation (history for sections and
-  windows); 3 bottom tab bar + compact headers; 4 windows as bottom
-  sheets (swipe down to close); 5 full-screen search with the keyboard;
-  6 touch polish and gestures; 7 offline (last loaded library, read
-  only) and speed. Asked the owner: each stage to `main` once checked,
-  or all at the end. Claude can't run Safari here (Chromium only):
-  iPhone sizes are simulated, Safari's quirks are checked on theirs.
-  **Handed over** (Sept. 30, 2026, the owner's call): the whole phone
-  project runs in a session on another of the owner's Claude accounts,
-  which can't open this account's artifacts (mockups, the test
-  scenario, the privacy guides); everything it needs is in this file.
-  It starts from a handover prompt (in Spanish, given to the owner) that
-  sends it here first. Stage 7 (offline) would keep the library on the
-  device: the privacy policy's §3 then needs a new version (owner's
-  approval, bump `PRIVACY_VERSION`). The owner's flow for it: a brand-new
-  `claude/mobile-app` made from `main` by that session (the old one had
-  nothing of its own; this session couldn't delete it, the owner does
-  on GitHub), all stages there, then the whole project merged into
-  `claude/funny-pascal-bk99gr`, tested again, and to `main` only on
-  "súbelo a main" (not stage by stage).
+- **Now: Slate that feels like a phone app** (the owner's request),
+  started Sept. 30, 2026 in a new session (the earlier one's artifacts
+  and the private privacy guides are in another Claude account). Branch
+  `claude/mobile-app`, made from `main` that day (preview:
+  claude-mobile-app.myslate.pages.dev); it goes to `main` **only when
+  the owner says so**, not after each stage. The owner's flow: the whole
+  project merged into `claude/funny-pascal-bk99gr` (done Oct. 2, 2026,
+  on their word), tested again there, then to `main` on "súbelo a main". `claude/funny-pascal-bk99gr`
+  stays for small fixes meanwhile. Phone-only changes: the computer
+  layout stays as it is (checked by comparing screenshots). **One phone
+  design, chosen by the window's size, not by the device** (the owner's
+  call, Sept. 30, 2026): a computer window made phone-narrow gets it too (no
+  separate narrow computer design); at computer sizes nothing changes.
+  So everything in it must also work with a mouse (a gesture always has
+  a button too). The owner finds the phone layout too much "a computer
+  page trying to be an app": that gets fixed before stage 2, screen by
+  screen, mockups first. **The landing page first**: of three phone
+  mockups (https://claude.ai/artifact/W8YjrkyB4BRfB1VcNVwA9m; A a pocket
+  board with a fixed bottom bar, B stories, C a cinema ticket) the owner
+  loved B: one full screen per idea, swiped up like stories, a progress
+  bar on top, "Request access" fixed at the bottom; 1 the cover (pinned
+  polaroids, the hero text and lede), 2 "Sound familiar?" (the three
+  notes), 3 "Slate keeps it for you" (three tickets like the sidebar's),
+  4 the invite as an "Admit one" ticket, 5 the letter (scrolls) and the
+  footer. Same words as today's page, nothing added. The owner's calls
+  after: the bars mean stories, so they're stepped sideways, not by
+  scrolling up; first with ‹ › buttons under the bars (and the bars
+  themselves, a 44px tap area each), no swipe (Safari's edge swipe is
+  "back"); tapping the left / right side to step may come after. An
+  iPhone held sideways keeps the computer page. Built, waiting for the
+  owner's check: at ≤640px wide (responsive.css, "The landing page on a
+  phone: stories"; js/landing.js marks `[data-story].is-current`), the
+  top nav and film strip hidden, "Request access" + "Already have an
+  account? Log in" fixed under screens 1–3, "A letter from Slate's
+  creator ›" under the invite, tighter at ≤740px tall; computer sizes
+  checked pixel for pixel. The owner's iPhone showed two things Android
+  didn't: a pale band under screens 1–4 (an installed app with a
+  see-through status bar measures the screen short by the bar, so the
+  page ended above the bottom and the cached light theme on <html>
+  showed) and a pale frame when the page was pulled or pinched. Fixed:
+  the stories' backdrop is a fixed layer covering the whole screen, the
+  root doesn't bounce there, and on touch screens <html> is the brand's
+  dark while the landing page shows. The real cause, found next: iOS
+  26's WebKit bug 301108 (an installed app with a see-through status bar
+  is told the screen is short by that bar, so anything pinned to the
+  bottom floats above an empty band; Safari and Android are fine). A
+  fix measuring the shortfall (screen.height vs innerHeight) and moving
+  the bottom-pinned pieces down by it was tried and **reverted on the
+  owner's word**: on their iPhone "Already have an account?" came out
+  cut off, and they'd rather keep the dark band than stack patches. So
+  on an installed iPhone the stories' bottom call sits a status bar's
+  height above the bottom until Apple fixes it. **Login and Request
+  access next**: of three phone mockups
+  (https://claude.ai/artifact/SStEPPN9etcqYe93NGXPhG; A a sheet over the
+  cover, B the invite's ticket, C a native-looking screen) the owner
+  picked A, asking that it never scroll. Built, waiting for the owner's
+  check: at ≤640px the card is a paper sheet risen from the bottom over
+  the blurred landing page (responsive.css, "The login card on a phone:
+  a sheet"): a grip, a × (= Back to Slate; none on reset / choose /
+  privacy), tabs Log In | Request access (js/auth.js, `[data-auth-tab]`,
+  replacing the link under the form there), a handwritten greeting, no
+  title for Request access, no privacy link there either, and no
+  language picker on the sheet at all (the owner found it out of place;
+  the landing page's last screen has one);
+  both forms fit an iPhone 15 and an SE without scrolling
+  (tests/mobile.spec.js); a shorter screen scrolls with no bar. It rises
+  and sinks as a view transition. Computer sizes pixel-identical. The
+  owner's note: the grip and the dimmed page promise ways out, so a tap
+  above the sheet closes it, and so does dragging the grip down (the
+  sheet's top 40px; a short drag springs back); only the grip drags, so
+  a form that must scroll still can. The language picker is gone from
+  the sheet (the owner's call).
+  **Then the app inside** (the owner asked for thorough help): Claude's
+  screen-by-screen diagnosis at iPhone size, with screenshots, six bugs
+  that were already there (the Sort menu cut off on the left; Shows
+  Queue's and an open collection's header buttons running off the
+  right; the ☰ floating over content; the detail window's × stuck to
+  the runtime; hover effects stuck after a tap) and a plan in stages:
+  https://claude.ai/artifact/5Rqyw2faFYEXbcFybmVSW4. Proposed order:
+  bottom tab bar (6 sections into ~5 tabs, mockups), compact list
+  headers (stats folded, sort / filter as sheets, a floating +, status
+  tabs by the title), windows as sheets, full-screen search, cards /
+  collections / settings, touch; then "back" and offline. The owner
+  found it too much text and went to the cards instead: of three card
+  mockups (https://claude.ai/artifact/CxRDhL78JFdPYkNXvQpqiQ; A a wall
+  of small polaroids three across, B diary rows, C posters by month)
+  they picked **A, to be used exactly**. Their idea with it, agreed: on
+  the phone, **one Movies view** (tabs Watched · To Watch, opens on
+  Watched) and **one Shows view** (tabs Watching · To Watch · Finished
+  · Dropped, opens on Watching; Spanish "Viendo · Por ver · Terminadas
+  · Abandonadas", "Terminadas" rather than "Vistas" so it isn't
+  confused with Viendo), each remembering the last tab. The card
+  changes with the tab (Watching: "S2 · E3" + bar; To Watch: year +
+  seasons; Finished: hearts, date, the starburst; Dropped: "Stopped
+  at" + a faded bar). So the phone has 4 sections, and of two menu
+  mockups (same artifact, a bar fixed at the bottom vs. a redesigned ☰
+  drawer) the owner picked **the bottom bar**: Movies, Shows,
+  Collections, Settings, icon + label, the current one highlighted.
+  The computer keeps its 6 sections and sidebar. The list header in
+  the mockups is a placeholder, to be designed on its own. Stages (the
+  owner's go-ahead, Oct. 1, 2026): 1 the bar and the two views, 2 the A
+  cards, 3 the list header (mockups first). Stage 1 — done, checked
+  by the owner: at ≤640px (641–768 keeps the drawer) the ☰
+  and sidebar are gone; `.tab-bar` is the app's last row (`.app` turns
+  a column, so nothing scrolls under it), and Movies / Shows show their
+  tabs as pills (`.view-tabs`, top of `.content`). js/phoneNav.js maps
+  each tab to a computer section (three Shows tabs = Shows Queue + its
+  status tab) and clicks those buttons, so everything listening to
+  them still works; a MutationObserver on the sections keeps the bar
+  in step however a section changes. Last tab per view in
+  `slate_phone_views`; tapping the current place scrolls to the top.
+  "Vistas" needed its own dictionary entry ("Watched" is "Visto" as a
+  status): `data-i18n-key` in js/i18n.js. On an installed iPhone the
+  bar will likely sit a status bar's height above the bottom (the iOS
+  bug above). Computer sizes checked pixel for pixel (1280/900/700).
+  Stage 2 — done, checked by the owner: the six Movies /
+  Shows lists, three polaroids across at ≤640px (density too;
+  collections untouched), the title on one line, and under it
+  `cardGlanceHtml` (js/data.js; hidden on computers): watched / finished
+  = one heart + rating and a short date ("Sep 28" this year, else the
+  year), to watch = year · length (seasons for shows); watching and
+  dropped keep their episode line, smaller ("Started 12d ago" hidden;
+  a dropped card breaks "Stopped at" before the code, never in it). The
+  starburst and ×N scaled down. Computer sizes pixel-identical.
+  Stage 3 — done, checked by the owner on their iPhone: of three header
+  mockups (same artifact: A one row of round buttons, B a search bar
+  always there with chips, C a big header folding as you scroll) the
+  owner picked **A**. js/phoneHead.js: above the tabs, the view's name
+  and the list's count, round buttons for 🎲 (lists to watch), search,
+  sort, filters (with a count badge), and a floating "+" over the
+  bottom right. Each button works the section's own control (its search
+  box, sort menu, filters panel, add button), which stay in the page,
+  hidden, so search / sort / filters behave as on the computer. The
+  search button turns the row into a search field with Cancel. Sort
+  and Filters are sheets from the bottom over a dimmed page (the tab
+  bar and "+" hidden meanwhile): a tap on the dim or dragging the grip
+  down closes them (the grip is a real element with touch-action:
+  none, appended last, as the menus style their first child; re-added
+  when they redraw). The numbers fold into one strip of the first three
+  with "More ▾" (`.hstats-more`, beside the strip, as it's redrawn).
+  With "+" floating, the "+ Add" card shows only in an empty list. This
+  fixes the diagnosis' cut-off Sort menu and the Shows Queue's buttons
+  running off the screen. Collections and Settings keep their headers
+  for now. Computer sizes pixel-identical, the sort menu and filters
+  panel open included. The owner's iPhone showed both sheets cut in half
+  and scrolling the list instead of themselves (Done out of reach):
+  Safari makes a container-query container (`.section`, content.css)
+  the frame position: fixed is measured in, Chromium doesn't. Fixed:
+  the phone's list sections aren't containers (`container: none`), and
+  what those queries did for the numbers strip is restated for phones;
+  The owner's iPhone still showed it: the sheets were cut at the list
+  area's bottom edge. Second cause: `.content`'s view-transition-name
+  (for logging in / out) makes it a layer of its own in Safari, which
+  clips fixed children and takes their scrolling; it's dropped while a
+  sheet is up (`.app.has-sheet`). tests/mobile.spec.js now checks that
+  no ancestor of an open sheet has a transform, filter, contain,
+  container, view-transition-name, etc. Keep it that way, or this comes
+  back. Can't be seen in Chromium: the owner's iPhone is the check.
+  Then (the owner's iPhone again): a drag on a sheet with nowhere left
+  to scroll went on to scroll the list behind. The list can't scroll
+  while a sheet is up (`.app.has-sheet .content { overflow: hidden }`,
+  its place kept) and the sheets contain their own overscroll. That
+  wasn't enough on the iPhone (the whole page bounced under Sort): a
+  touchmove listener (js/phoneHead.js) cancels any drag while a sheet
+  is up unless it scrolls a sheet that can still scroll that way, and
+  the root's overscroll is off meanwhile.
+  **Collections next** (the owner's go-ahead, Oct. 1, 2026): three
+  mockups for the list and an open collection, same artifact (A the
+  booklets two across, open with the lists' row of round buttons; B
+  folders as rows, open with a banner of its posters; C album covers,
+  open with the cover centered). The owner picked **B**. Built, waiting
+  for the owner's check: the list (CSS only, css/responsive.css
+  "Collections on a phone") turns each booklet into a folder row (seal,
+  name on up to 2 lines, "8/12 watched" over its bar, three posters
+  fanned on the right), under the lists' row with only the name, count
+  and "+" (which clicks the "Add Collection" card, shown only when there
+  are none). Open: `#col-banner` (index.html, filled by
+  js/phoneCollection.js from STORE): posters blurred behind, back /
+  edit / delete (red) round buttons, seal, name, "2 movies · ♥ 9,0",
+  the progress bar, Surprise Me and Add; each works the computer's
+  header button, which is hidden with the stats strip. Movies / Shows as
+  pills; the titles three across with their status badge and the
+  glance line (`cardGlanceHtml` via `gridIdFor`). Computer sizes
+  pixel-identical, open collection included. The owner's iPhone: a
+  collection held to reorder showed the computer's huge booklet under
+  the finger. The drag copy lives in <body>, out of the list, so the
+  phone styles now follow the card (`.collection-card`,
+  `.col-item-card`) and a watchlist card's copy says where it came from
+  (`data-ghost-of`, js/collections.js). Test in tests/mobile.spec.js.
+  **Settings next** (the owner asked for mockups, Oct. 1, 2026; the gear
+  icon was redrawn first, sidebar and bar, with their OK): three
+  mockups, same artifact, each the menu and Appearance (A grouped
+  lists on paper, iPhone-like, each page's current value on the right;
+  B a "member card" on top and the six pages as tiles; C one page of
+  folders that fold open). The owner picked **B**. Built, waiting for
+  the owner's check (css/responsive.css "Settings on a phone",
+  js/phoneSettings.js): the profile card exactly as on the computer
+  (bio, favorites with posters; the owner rejected the mockup's
+  "member card" once built: don't restyle it), the six pages as tilted paper tiles two across,
+  each with what's set there (@username, email, theme, language ·
+  country, default sort); a page opens under "‹ Its name" (the header
+  hidden). Its tiles are flat paper with a hard shadow; Appearance has
+  the themes three across (the miniature without its sidebar), the
+  backgrounds as chips ("Can't quite see it?" still there), and card
+  size + Reduce animations side by side, the size a handwritten word
+  over an unseen <select> (`#density-select`, phone only). Computer
+  sizes pixel-identical (1280/900/700, every page). The owner's iPhone:
+  "Can't quite see it?" hung over the two small tiles, which showed
+  through it, and ran off the screen; on a phone it now opens inside
+  the Background tile, in the chips' place (it has its own), pushing
+  the rest down.
+  The owner's iPhone: a drag on the bottom bar bounced the whole app.
+  The bar doesn't scroll, so iOS hands the drag to the page: the bar now
+  cancels its own touchmoves (js/phoneNav.js, `touch-action: none`) and
+  the page doesn't overscroll while the app shows.
+  **Windows next** (the owner asked, Oct. 1, 2026: every window
+  redesigned for the phone). Claude's count, from screenshots at iPhone
+  size: 10 windows. Big ones with their own design: a title's window
+  (5 states, viewings, trailer, "Add to collection"), the episodes
+  list, TMDB search. Forms and small ones: Edit, the dates window
+  (start / finish / mark watched), new / edit collection (+ icons),
+  adding titles to a collection, the favorite picker, Import, Confirm.
+  Today they're computer windows squeezed in (centered cards, the
+  poster taking half the screen, the × by the runtime). Claude's
+  proposal, waiting for the owner's go-ahead: 1 one shared phone base
+  for all of them at once (mockups first: how a window rises, closes,
+  its header and buttons), then own mockups only for 2 a title's
+  window, 3 search, 4 episodes, 5 a last pass on the rest. The owner
+  agreed, and asked that **nothing be built until they say so** (they
+  want to be as sure as possible here). Base mockups (same artifact,
+  each on a confirmation, the Edit form and adding titles to a
+  collection): A a sheet rising from the bottom like Sort / Filters
+  (fits its content, a tall one stops under the status bar; grip, ×,
+  the main button pinned at the bottom), B full-screen pages like
+  Settings' ("‹ Atrás" / Cancelar · Guardar; questions as a card in
+  the middle), C A's sheet as Slate's paper (tape, a sticker title,
+  stamped buttons). The owner picked **C** (Oct. 1, 2026); still
+  nothing built: they say when. Next, at their go-ahead, the big
+  windows' mockups first (all designed before anything is built).
+  A title's window (same artifact, each a watched movie, a show being
+  watched, a movie to watch; actions pinned at the bottom as stamps):
+  A the poster as a polaroid beside the title, all the rest below; B
+  the poster as the sheet's cover, the title a sticker label, ‹ ›
+  arrows to step; C a compact head and tabs (your record · about it ·
+  where to watch). The owner picked **A, with no scrolling at all**
+  (they liked compacting everything). Compact A (same artifact, row
+  "Ficha A, compacta"): the polaroid smaller, the synopsis cut to 2
+  lines and the review to 3, each with "más" that shows the whole text
+  on a taped note over the window; the watched date, "↻ La vi otra
+  vez" and "×2 ›" on one row; Up next with its photo beside the text;
+  everything fits an iPhone 15 with room left. The owner approved it.
+  Search next (same artifact, each while typing with the keyboard up,
+  a result opened, and picking several from To Watch / a collection):
+  A one list in the sheet, a result's compact window in its place
+  ("‹ Resultados"); B results as a wall of polaroids, a result rising
+  on its own sheet above; C the search field at the bottom over the
+  keyboard, results above it. The owner picked **A**. Episodes next
+  (same artifact, each a show being watched opening on "up next" and a
+  dropped one only to look; season tabs kept): A compact rows (box,
+  E4 + name, two lines, a small photo, "↓ Marcar hasta aquí"); B each
+  episode a big polaroid photo with its text below; C the season as a
+  card of numbered hand-drawn boxes (tap to see one below, with "✓ Ya
+  lo vi" and "↓ Hasta aquí"; no scrolling for most seasons). The
+  owner picked **C** (on the computer they had preferred rows; this is
+  phone only). The other 7 windows' review (same artifact, row
+  "Repaso", each on base C and fitting one screen): a confirmation
+  that asks for the title typed; Edit of a finished show (both dates
+  on one row); starting a show; a new collection (only the icons' box
+  scrolls); adding titles to a collection (search A's picking); the
+  favorite picker (search A, a tap picks); Import's two ways. The
+  owner approved it: everything is designed. Claude's build order,
+  proposed, waiting for the owner's go-ahead (nothing built until
+  then; each stage checked on the iPhone before the next; computer
+  pixel-identical): 1 base C + Confirm, the dates window, Edit; 2
+  new collection, adding titles, the favorite picker, Import; 3 a
+  title's window (compact A, all its states and pieces); 4 search A;
+  5 episodes C; 6 a last pass on the iPhone. Pieces with no mockup of
+  their own (the finish window's pencil note, "Keep watching"'s
+  question, the viewings list, the trailer, "Add to collection") take
+  the same style and are shown for checking in their stage. The owner
+  said go for stage 1. Stage 1 — built, waiting for the owner's check
+  (css/responsive.css "Windows on a phone", js/phoneWindows.js): at
+  ≤640px #update-modal (Edit / Mark as watched), #start-modal (the
+  dates window: start, finish, Edit of a show) and #confirm-modal rise
+  from the bottom as the paper sheet (scalloped top, tape, the window's
+  name as a handwritten label, the title · year · length under it, no
+  poster), the form scrolling inside only if a phone is too short, the
+  buttons pinned at the bottom as stamps, Delete a red line above them;
+  the review starts at four lines; a show's two dates on one row. They
+  close with the ×, a tap above, or dragging the head down (a short drag
+  springs back); the question got a phone-only × (`#confirm-close`).
+  Fits an iPhone 15 without scrolling, the refinish pencil note
+  included. Computer sizes pixel-identical (1280/900/700, each window
+  open). The owner has things to fix in stages 1 and 2 (to be told
+  after stage 2) and said go for stage 2. Stage 2 — built, waiting for
+  the owner's check: the same sheet for #collection-modal (the icon
+  box scrolls inside, stamps pinned), #library-modal (adding titles:
+  the filter above the list, each title a row with year · length,
+  where it stands as a small stamp, a round toggle; the add stamp
+  says how many), #favorite-modal (searches as you type, no Search
+  button; the whole row picks, js/profile.js, phone only) and
+  #import-modal (its views' buttons as stamps pinned at the bottom).
+  Lists stand tall so they don't jump as they fill. A message while a
+  window is up comes from the top (at the bottom it covered the
+  window's buttons). Computer pixel-identical (the new collection
+  window's emoji render a few hundred pixels differently run to run,
+  old code too). The owner's iPhone, fixed: (1) Edit and the dates
+  window scrolled sideways: iOS date fields have a width of their own
+  that ignores 100%; drawn plain (`appearance: none`, min-width 0) and
+  the windows' bodies never scroll sideways. (2) A new collection and
+  adding titles jumped down, cut off at the top: a field focused as the
+  sheet rose brought the keyboard up mid-rise and iOS shifted the page.
+  On a phone, fields in windows wait to be tapped (`focusOnOpen`,
+  js/phoneWindows.js; the computer still focuses them), and a page
+  left shifted once the keyboard goes goes back to the top.
+  The owner: dragging (sheets down, cards to reorder) is smooth on
+  Android, slow on the iPhone (an iPhone 15 is 60 Hz; many Androids
+  90–120). Done, to be checked on the iPhone (Chromium can't show it):
+  a dragged sheet (windows, Sort / Filters, login) gets `will-change`
+  just before it moves and moves by translate3d; no backdrop blur
+  behind any window on a phone (only the dim); a dragged card's lift
+  without the wide glow, its `translate` hinted.
+  The owner's Android: Appearance's theme previews shrank to slivers
+  (that browser doesn't stretch a button in a grid cell); the swatch and
+  its preview now say width: 100% on phones. Fine on the iPhone.
+  The owner checked stages 1 and 2 and said go for stage 3. Stage 3 —
+  built, waiting for the owner's check (css/responsive.css "Windows on
+  a phone, stage 3"): #detail-modal is the same paper sheet, always the
+  screen's height minus a strip (so stepping titles doesn't jump); the
+  poster a small polaroid beside the title (`.detail-head-poster`,
+  drawn in renderDetail, hidden on computers; the big one hidden on
+  phones; "New season!" stamped on it too), year · length, genres and
+  the trailer chip beside it (one grid for the window, `display:
+  contents` on the head). Synopsis cut to 2 lines and review to 3; when
+  cut (`markCutText`, measured once the window shows and when fonts
+  arrive) they end in "more" and a tap shows the whole text on a taped
+  note over the window (`#detail-note`, index.html). A movie's date,
+  "↻ Watched it again" and "N viewings ›" on one row; Up next with its
+  photo beside the words; where to watch a row per kind. The buttons
+  are stamps pinned at the bottom (placed against the sheet, outside
+  what scrolls): the main one wide, Add to collection / delete / drop
+  square with only their icon (font-size 0, the icon a ::before; the
+  words stay for screen readers). The trailer plays over the window,
+  the rest dimmed (a tap on the dim closes it). The head drags the
+  sheet down (js/phoneWindows.js now finds each head when the drag
+  starts). Fits an iPhone 15 with no scrolling (tests/mobile.spec.js);
+  "Where are you?" scrolls a little on an iPhone SE. No ‹ › arrows on a
+  phone (hidden below 860px, as before). Computer pixel-identical
+  (1280/900/700, every state, viewings, the collection menu).
+  The owner's note: the note's × should be plain to see; it's now a
+  round ink sticker over the note's corner. Then: go for stage 4.
+  The owner's iPhone: a very long review ran off the screen on the note
+  (a grid row grows with its content, so the paper's max-height: 100%
+  didn't limit it). Now the paper is capped to the screen and only the
+  text scrolls, the last lines fading and "↓ Scroll to keep reading"
+  until the end; the ruled lines scroll with the text
+  (`background-attachment: local`). A bar drawn by Slate showed beside
+  the iPhone's own; the owner kept the iPhone's, so Slate's is gone.
+  Stage 4 — built, waiting for the owner's check (css/responsive.css
+  "Windows on a phone, stage 4"): #search-modal is the same paper sheet
+  (it joins stage 2's shared rules), standing tall. The field on top
+  (no focus as it rises: a tap types, as in the other windows), then
+  one list: each result a row (poster, name, year, "In your library"
+  as a small stamp, a › or, picking several, the round toggle), the
+  picked ones as chips and the add stamp at the bottom. A result opens
+  in the list's place as a compact title's window: "← Results" in the
+  head, the polaroid beside the title, the synopsis cut to 3 lines
+  ("more" opens it right there, `markCut` in js/detailModal.js), where
+  to watch a row per kind, its button (Add / Pick / In your library) a
+  stamp pinned at the bottom; the picked ones' bar hides meanwhile.
+  The trailer plays over it as in a title's window. The head drags it
+  down. Computer pixel-identical (1280/900/700: the list, a result,
+  picking).
+  Stage 5 — built, waiting for the owner's check (css/responsive.css
+  "Windows on a phone, stage 5"): #episodes-modal is the same tall
+  sheet; the head is its name as a label, "Tap a number to see that
+  episode." (or the read-only note), "12 of 19 watched" and the bar;
+  the seasons as tabs sliding sideways; the season a card of numbered
+  hand-drawn boxes five across (ticked ones checked, not out dashed,
+  Up next / Stopped here / New as a tag under the box). **On a phone a
+  box picks, it doesn't tick** (a stray tap must not tick): the picked
+  one is ringed and shown below on a note (photo, Up next / Stopped
+  here / New / Watched, "E4 · name", four lines), with "✓ Watched it"
+  (or "Untick it") and "↓ Up to here" where it can be ticked; ticking
+  moves on to the next one (js/episodes.js, `episodesWindow.picked`,
+  `episodeCardHtml`). It opens on the flagged episode, else the first
+  not watched. Computer keeps its rows, pixel-identical. Found on the
+  way: a show of eight seasons widened the sheet past the screen (its
+  tabs' width leaked through the backdrop's grid); the sheets'
+  backdrops are now one screen-wide column.
+  The owner checked stage 5 ("funciona bien"). Stage 6, the last pass —
+  done, waiting for the owner's iPhone: every window opened at iPhone
+  size with a notch and home bar faked, in a dark and a light theme (27
+  screens: each state of a title's window, Edit, Mark as watched,
+  starting / finishing / refinishing a show, Keep watching's question,
+  deleting a movie, a viewing and the account, a new collection, adding
+  titles, the favorite picker, Import, search, episodes). All on base C
+  and inside the screen. Fixed: (1) the diagnosis' old bug, a card left
+  lifted after a tap (a tap counts as a hover on a phone and sticks):
+  the cards' hover lift now needs a pointer that hovers
+  (`html.touch-only`, set from `(any-hover: none)` in js/phoneNav.js;
+  css/cards.css, modal.css); (2) Delete, before the title is typed, was
+  a grey block on the paper; on a phone it's a faded red stamp. The
+  danger question keeps Cancel on the right (a deliberate safety swap,
+  css/modal.css). Computer unchanged (its hover lift checked).
+  **Before `main`** the owner listed general bugs to fix first (Oct. 2,
+  2026), then they test the whole app on the phone. Fixed: (1) a request
+  sent on a phone pushed "Send again in Ns" off the non-scrolling sheet:
+  the form now makes way for the message (`request-sent` on
+  #auth-screen, phone only), and after the cooldown "Send another
+  request" brings it back; (2) the Privacy Policy box was asked twice
+  (Request access and the first login's password card). **The owner's
+  call: only on Request access** (where someone first hands over their
+  data; the policy says "when you request access or sign in for the first
+  time"). The first login now records the acceptance on the account
+  without asking (`privacy_accepted_with: "access request"`; the request
+  email, with the version, is the proof). Accounts made before the policy
+  and a new policy version still get the "Our Privacy Policy" card once.
+  So an account should only ever be made from a request (one made for
+  someone who never sent one would carry an acceptance they never gave).
+  Then, from the owner's phone test: dragging the search window down
+  while a result was open closed the whole search (the list and what was
+  picked lost). Dragging down now steps back one level, as "← Results"
+  does; from the list it closes. The × still closes everything. The
+  owner then found the swap abrupt ("metido a fuerzas"): a result's
+  details are now a sheet of their own over the results (#modal-preview
+  absolute over the window, its own torn edge and shadow; the results
+  stay beneath), rising when opened; its top band (64px) drags it alone,
+  the results showing under it, and letting go far enough slides it on
+  down (`layer` in PHONE_WINDOWS, `slideAway`), as "← Results" does.
+  The preview's scrolling part is wrapped (`.tmdb-preview-scroll` >
+  `.tmdb-preview-body`, js/searchModal.js); computer pixel-identical.
+  Then: "Press & hold to reorder" (custom order: Movies / Shows To
+  Watch, Collections, an open collection) sat flush on the numbers
+  strip; on a phone it now has 12px under it, left-aligned (the
+  owner tried it centred and preferred it on the left).
+  Then (the owner's iPhone, Oct. 2, 2026): after a field's keyboard
+  came up, a dark band sat under the bottom bar (and under windows,
+  the "+", ...) until the app was closed, and the app jumped as the
+  keyboard rose. An iOS 26 bug in installed apps with a see-through
+  status bar (others hit it too, e.g. github.com/endziu/0xchat/pull/135,
+  github.com/MiguelMedeiros/ghostly/pull/651): 100dvh, innerHeight
+  and what's pinned to the bottom come up short by the status bar's
+  height (~59px), and iOS draws nothing below. Only 100lvh stays
+  right. Fix, CSS only, in installed apps (`display-mode: standalone`;
+  css/responsive.css "The installed app's height"): `--screen-full` is
+  100lvh (the app, html / body, windows' heights) and everything
+  pinned to the bottom gets `margin-bottom: -(100lvh - 100dvh)`,
+  which is 0 when the screen is measured right (Android, computers).
+  It also covers the landing page's band (the earlier JS fix there
+  failed likely because the page itself stayed short, so iOS drew
+  nothing below). Chromium can't show the bug: checked
+  pixel-identical with the rules forced on; the owner's iPhone is the
+  check. If it misbehaves, this block is the one place to look.
+  Then (the owner's ask): a title added from the search in Movies /
+  Shows (watched lists) opens its form over the search; saving that
+  form now closes the search too, so the list shows it at once (Cancel
+  leaves the search open, as before). `updateFromSearch` /
+  `startFromSearch`; test in tests/library.spec.js.
+  Then (the owner): "Card density" did nothing on a phone (stage 2
+  had pinned three across for both). Now Compact there is four across,
+  every piece of the polaroid a size down (lists and an open
+  collection), and shorter folder rows in Collections
+  (css/responsive.css "Compact cards on a phone"); Comfortable as
+  before.
+  Then (the owner): an empty Watching / Dropped list (no "+ Add" card
+  there) was a blank page. Now a taped paper note says what lands there
+  ("Nothing playing right now." with "Go to To Watch →"; "No dropped
+  shows. So far, so good!"), computer and phone alike
+  (`emptyListNoteHtml`, js/data.js; `.empty-note`, css/cards.css).
+  Then (the owner found it ugly): on a phone, no collections showed the
+  "Add Collection" booklet as a big empty full-width box. It's now the
+  same note ("No collections yet." + "Create a collection"); the
+  booklet is hidden on phones (the floating "+" still clicks it);
+  computers keep the booklet, pixel-identical.
+  Then (the owner's iPhone): "Can't quite see it?" → "Use this one"
+  left the page at the top of Appearance with the loupe still open
+  further down, until the next touch closed it (Chromium doesn't jump;
+  the cause wasn't found here). "Use this one" now saves and closes the
+  loupe (the owner expected that; it used to stay open with "In use"),
+  computer too, and puts the screen's scroll back where it was.
+  Then (the owner): picking several in the search (from To Watch or a
+  collection), "✓ Picked" in a result's details read as added, and the
+  × threw the picks away. Now closing with picks not yet added (×,
+  dragging down from the list, a tap outside, Escape) asks first: "Add
+  and close" · "Discard" · "Keep picking" (`requestCloseModal`,
+  js/searchModal.js; the confirm window got an optional third button,
+  `alt` in openActionConfirm). On a phone the add stamp also stays at
+  the bottom over a result's details, its "✓ Picked" just above.
+  **A phone turned sideways** (the owner's call, Oct. 2, 2026): Slate
+  is made upright, so sideways (touch, landscape, ≤500px tall) a taped
+  note says "Slate looks better upright" with "Keep it sideways" (no
+  lock: iOS doesn't let web apps lock orientation). Up to 3 notes per
+  launch (sessionStorage, cleared when the app is closed); "Keep it
+  sideways" stops them for that launch; never over a trailer
+  (js/rotateNote.js, css/responsive.css "A phone turned sideways").
+  The landscape layout itself is unchanged (the computer's).
+  **No pinch zoom on phones** (the
+  owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
+  that iOS only allows it by workaround): the viewport tag's
+  user-scalable=no (Android), `touch-action: pan-x pan-y` on <html> and
+  js/noZoom.js cancelling Safari's gesture events (iPhone), on touch
+  screens / ≤640px only (a Mac's Safari trackpad pinch sends the same
+  events). The system's accessibility zoom still works; privacy.html
+  stays zoomable. If an iOS update breaks it, that's why. Native store
+  ports are out for now (Play's $25 and 12-tester closed test, Apple's
+  $99 a year and a Mac; one would wrap this same web app). The owner
+  tests on an iPhone 15 (an Android too, not at hand). Chromium here can
+  fake an iPhone's notch and home bar (CDP
+  `Emulation.setSafeAreaInsetsOverride`, e.g. top 59 / bottom 34) for
+  screenshots; anything Safari-only is checked on the owner's iPhone.
+  The stages, from the basics up (the owner asked for them in that
+  order), each only with their go-ahead, mockups first for 3–5:
+  A. The foundations (Slate looks the same, behaves like an app):
+  1. **Opens like an app** — done, waiting for the owner's check:
+     `manifest.webmanifest` + icons (`img/icon-192/512.png`,
+     `icon-maskable-512.png`, `apple-touch-icon.png`, the master logo on
+     the brand's #0d0c15), `viewport-fit=cover`; css/responsive.css's
+     `--safe-top/right/bottom/left` (env()) keep content, the ☰ button,
+     toasts, windows, the login card and the landing page clear of the
+     notch and home bar, `--screen-h` is the height windows fit in, and
+     a strip of the theme's background sits under the status bar in the
+     app. Every field is ≥16px on touch screens (iOS zooms otherwise;
+     tests/mobile.spec.js checks it). js/statusBar.js: `theme-color` is
+     the screen's background; the iOS status bar is `black-translucent`
+     (white text over the page) on dark backgrounds and `default` on the
+     light themes, as iOS can't draw dark text over the page. Unverified:
+     whether iOS reads that change while the app is open (it may need
+     reopening after a theme change); the owner checks with a light
+     theme. privacy.html keeps clear of the edges too.
+  2. **Back works** (`pushState` for sections and windows): the edge
+     swipe of an installed iOS app (since iOS 12.2), Android's back
+     button. The owner left it to Claude: back works on the computer
+     too (the browser's button), the one computer change. Keep the auth
+     card's `#login` / `#request-access` / `#forgot` routes and
+     Supabase's recovery link working. iOS's own back animation may
+     clash with Slate's: tune on the iPhone.
+  B. What you see (mockups first):
+  3. **Tab bar at the bottom** instead of the ☰ drawer. Slate has 6
+     sections and such a bar holds about 5: the mockups decide. Mind
+     landscape: an iPhone sideways (852px) gets the computer layout.
+  4. **Windows as sheets** that slide up and swipe down to close.
+  5. **Search and forms with the keyboard open**, search full screen.
+  C. The finishing:
+  6. **Touch**: 44px targets, a response on tap, swiping between
+     subtabs.
+  7. **Offline and speed**: opening with no signal showing what was
+     last loaded, read-only (a service worker: take care that nobody is
+     left stuck on an old version), smooth with 1,000+ cards. It keeps
+     more on the device, so the privacy policy changes first: v1.3, a
+     new date, the owner's approval word for word, `PRIVACY_VERSION`
+     bumped. The policy says Slate uses no analytics, trackers or
+     cookies: keep it that way.
+- **The owner's own pending tasks** (from the handoff): before Dec. 1,
+  2026 delete resolved access requests and sent welcome emails, check
+  Supabase's DPA, and turn on two-step verification in Gmail, Supabase,
+  GitHub and Cloudflare; check that Search Console reads the sitemap as
+  "Success" and Slate shows up when searching "myslate". Unanswered:
+  whether to drop "confetti" from "Reduce animations"' text. Later ideas:
+  a domain of its own (also IMDb / Letterboxd / Trakt import and the owl,
+  below).
 - **The test scenario** the owner follows to hunt bugs (PC first, then
   the phone): https://claude.ai/artifact/WV8WgTtnTG5LsviRT4amDm. It runs
   with a throwaway account (`+slate1` / `+slate2` Gmail aliases), never a

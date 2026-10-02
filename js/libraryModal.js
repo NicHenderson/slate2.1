@@ -82,6 +82,7 @@ function libraryRowHtml(row) {
         ${collectionAddMode ? `<span class="add-check" aria-hidden="true">✓</span>` : ""}
       </div>
       <p class="add-title">${escapeHtml(row.title ?? t("Untitled"))}</p>
+      ${cardGlanceHtml(libraryType === "movie" ? "grid-movies-towatch" : "grid-shows-towatch", row)}
     </div>`;
 }
 
@@ -143,7 +144,7 @@ function openLibraryModal(type) {
   libraryFilter.value = "";
   renderLibraryList();
   libraryModal.classList.remove("hidden");
-  libraryFilter.focus();
+  focusOnOpen(libraryFilter);
 }
 
 function closeLibraryModal() {
@@ -235,7 +236,7 @@ modalBack.addEventListener("click", () => {
   renderLibraryList();
   updateLibraryFooter();
   libraryModal.classList.remove("hidden");
-  libraryFilter.focus();
+  focusOnOpen(libraryFilter);
 });
 
 libraryClose.addEventListener("click", closeLibraryModal);

@@ -8,9 +8,20 @@ const confirmTypedInput = document.getElementById("confirm-typed-input");
 const confirmError = document.getElementById("confirm-error");
 const confirmYes = document.getElementById("confirm-yes");
 const confirmCancel = document.getElementById("confirm-cancel");
+const confirmAlt = document.getElementById("confirm-alt");
 
 let pendingDelete = null;
 let requiredTypedTitle = null;
+let confirmAltRun = null;
+
+// The cancel button's own word and no third button, unless a question
+// asks for them (openActionConfirm's `no` and `alt`).
+function resetConfirmButtons({ no, alt } = {}) {
+  confirmCancel.textContent = no ?? t("Cancel");
+  confirmAltRun = alt?.run ?? null;
+  confirmAlt.textContent = alt?.label ?? "";
+  confirmAlt.classList.toggle("hidden", !alt);
+}
 
 // A whole sentence for each kind: in other languages "this" changes with
 // the noun.
@@ -68,7 +79,7 @@ function openDeleteConfirm(table, row) {
 
   confirmError.classList.add("hidden");
   confirmModal.classList.remove("hidden");
-  if (watched) confirmTypedInput.focus();
+  if (watched) focusOnOpen(confirmTypedInput);
 }
 
 // Deleting one of a movie's viewings (js/viewings.js): always asked, and
@@ -93,15 +104,17 @@ function openViewingDeleteConfirm(movie, viewing, run) {
   confirmYes.disabled = true;
   confirmError.classList.add("hidden");
   confirmModal.classList.remove("hidden");
-  confirmTypedInput.focus();
+  focusOnOpen(confirmTypedInput);
 }
 
 // Asked before something that isn't a delete (Keep watching, js/episodes.js):
 // the same window, its button in the theme's color. `run` does it and
 // resolves to the error, or null; `yes` / `busy` / `failed` are the
-// button's label, its label meanwhile and the error shown.
-function openActionConfirm({ heading, html, yes, busy, failed, run }) {
+// button's label, its label meanwhile and the error shown. `no` renames
+// Cancel, and `alt` ({ label, run }) adds a third way out.
+function openActionConfirm({ heading, html, yes, busy, failed, run, no, alt }) {
   pendingDelete = { run, yes, busy, failed };
+  resetConfirmButtons({ no, alt });
   requiredTypedTitle = null;
   confirmModalPanel.classList.remove("confirm-danger");
   confirmModalPanel.classList.add("confirm-action");
@@ -117,6 +130,7 @@ function openActionConfirm({ heading, html, yes, busy, failed, run }) {
 
 // Back to a delete's look, after an action's.
 function asDeleteConfirm() {
+  resetConfirmButtons();
   confirmModalPanel.classList.remove("confirm-action");
   confirmYes.textContent = t("Yes, delete");
 }
@@ -198,6 +212,12 @@ async function deleteRecord(table, row) {
 }
 
 confirmCancel.addEventListener("click", closeConfirmModal);
+confirmAlt.addEventListener("click", () => {
+  const run = confirmAltRun;
+  closeConfirmModal();
+  run?.();
+});
+document.getElementById("confirm-close").addEventListener("click", closeConfirmModal);
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !confirmModal.classList.contains("hidden")) {

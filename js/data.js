@@ -217,6 +217,44 @@ function startedAgoHtml(row) {
   return `<p class="card-meta${stale}">${text}</p>`;
 }
 
+// A date short enough for a phone's small card: "Sep 28" this year, just
+// the year before ("Unrated" and "Aug 2024" don't fit side by side).
+function formatShortDate(value) {
+  const date = new Date(value);
+  if (date.getUTCFullYear() !== new Date().getFullYear()) return String(date.getUTCFullYear());
+  return date.toLocaleDateString(LOCALE, { month: "short", day: "numeric", timeZone: "UTC" });
+}
+
+// The line a phone shows under a card's title, instead of the ten hearts
+// (css/responsive.css hides one or the other): a watched title's rating as
+// one heart and its date; a title to watch, its year and length. Watching
+// and dropped shows have their episode line already.
+function cardGlanceHtml(gridId, row) {
+  const state = GRID_CONFIG[gridId].state;
+  let parts;
+  if (state === "watched") {
+    const rated = row.rating !== null && row.rating !== undefined;
+    const rating = rated
+      ? `<span class="card-glance-rating"><span class="card-glance-heart" aria-hidden="true"></span>${Number.isInteger(row.rating) ? row.rating : formatDecimal(row.rating)}</span>`
+      : `<span class="card-glance-unrated">${t("Unrated")}</span>`;
+    const date = row.watched_date ?? row.finished_watching_date;
+    parts = [rating, date ? `<span class="card-glance-date">${formatShortDate(date)}</span>` : ""];
+  } else if (state === "towatch") {
+    const length =
+      GRID_CONFIG[gridId].table === "movies"
+        ? row.duration
+          ? formatRuntime(row.duration)
+          : ""
+        : row.total_seasons
+          ? tn(row.total_seasons, "{n} season", "{n} seasons")
+          : "";
+    parts = [`<span class="card-glance-date">${[row.release_year, length].filter(Boolean).join(" · ")}</span>`];
+  } else {
+    return "";
+  }
+  return `<p class="card-glance">${parts.join("")}</p>`;
+}
+
 // extra: markup for under the title (the rating, a "Started 12d ago" line).
 function cardHtml(item, showRating = false, extra = "") {
   const poster = item.poster
@@ -243,6 +281,30 @@ function ghostCardHtml(type) {
 }
 
 const NO_GHOST_GRIDS = new Set(["grid-shows-watching", "grid-shows-dropped"]);
+
+// Those two lists can't be added to directly, so empty they'd be a blank
+// page: a note says what lands there (the owner's ask). Watching's points
+// the way to To Watch, where a show is started.
+function emptyListNoteHtml(gridId) {
+  const watching = gridId === "grid-shows-watching";
+  const title = watching ? t("Nothing playing right now.") : t("No dropped shows. So far, so good!");
+  const text = watching
+    ? t("Start a show from To Watch and it'll wait for you here, right where you left off.")
+    : t("A show you give up on lands here, marked where you stopped.");
+  const action = watching
+    ? `<button class="empty-note-action" type="button" data-empty-goto="grid-shows-towatch">${t("Go to To Watch")} →</button>`
+    : "";
+  return `<div class="empty-note">
+      <p class="empty-note-title">${title}</p>
+      <p class="empty-note-text">${text}</p>
+      ${action}
+    </div>`;
+}
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-empty-goto]");
+  if (btn) document.querySelector(`.status-tab[data-subtab="${btn.dataset.emptyGoto}"]`)?.click();
+});
 
 // Shared by renderGrid and the detail modal's prev/next navigation, so
 // "the card next to this one" always means the same thing in both places.
@@ -293,14 +355,13 @@ function gridHtml(gridId, rows) {
           : gridId === "grid-shows-watched"
             ? newSeasonStickerHtml
             : () => "";
+  const card = (row) => cardHtml(row, showRating, extra(row) + cardGlanceHtml(gridId, row));
   // Searched: only what matches — no "+ Add" card among the results.
   if (isLibraryFiltered(gridId)) {
-    return visible.length ? visible.map((row) => cardHtml(row, showRating, extra(row))).join("") : libraryEmptyHtml(gridId);
+    return visible.length ? visible.map(card).join("") : libraryEmptyHtml(gridId);
   }
-  return (
-    visible.map((row) => cardHtml(row, showRating, extra(row))).join("") +
-    (NO_GHOST_GRIDS.has(gridId) ? "" : ghostCardHtml(cfg.type))
-  );
+  if (NO_GHOST_GRIDS.has(gridId)) return visible.length ? visible.map(card).join("") : emptyListNoteHtml(gridId);
+  return visible.map(card).join("") + ghostCardHtml(cfg.type);
 }
 
 // A grid shows its whole list (the page itself scrolls), "+ Add" card last.

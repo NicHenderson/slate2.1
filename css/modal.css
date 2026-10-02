@@ -41,7 +41,7 @@
 
 .modal {
   width: min(520px, calc(100vw - 32px));
-  max-height: min(640px, calc(100vh - 64px));
+  max-height: min(640px, calc(var(--screen-h) - 64px));
   display: flex;
   flex-direction: column;
   background: var(--paper);
@@ -270,7 +270,7 @@
   align-items: center;
   gap: 28px;
   width: min(1000px, calc(100vw - 48px));
-  max-height: calc(100vh - 48px);
+  max-height: calc(var(--screen-h) - 48px);
   animation: modal-in 0.2s ease;
 }
 
@@ -363,7 +363,7 @@
   position: relative;
   flex: 1;
   min-width: 0;
-  max-height: calc(100vh - 48px);
+  max-height: calc(var(--screen-h) - 48px);
   display: flex;
   flex-direction: column;
   background: var(--paper);
@@ -728,7 +728,7 @@
   align-items: center;
   gap: 22px;
   width: min(740px, calc(100vw - 48px));
-  max-height: calc(100vh - 48px);
+  max-height: calc(var(--screen-h) - 48px);
   animation: modal-in 0.2s ease;
 }
 
@@ -772,7 +772,7 @@
   position: relative;
   flex: 1;
   min-width: 0;
-  max-height: calc(100vh - 48px);
+  max-height: calc(var(--screen-h) - 48px);
   overflow-y: auto;
   background: var(--paper);
   box-shadow: 4px 10px 24px rgba(0, 0, 0, 0.4);
@@ -1092,6 +1092,21 @@
   margin-top: 20px;
 }
 
+/* Three ways out (a question with a third button, js/confirmModal.js):
+   the main one across the top, the other two side by side under it. */
+#confirm-modal .confirm-actions:has(.confirm-alt:not(.hidden)) {
+  flex-wrap: wrap;
+}
+
+#confirm-modal .confirm-actions:has(.confirm-alt:not(.hidden)) > button {
+  flex: 1 1 0;
+}
+
+#confirm-modal .confirm-actions:has(.confirm-alt:not(.hidden)) > #confirm-yes {
+  flex-basis: 100%;
+  order: -1;
+}
+
 /* Cancel / Yes, delete read as flat pills everywhere else has moved on to
    the "raised sticker" family (.add-btn / .sort-btn / .sort-btn-danger,
    also now the detail modal's action row) — offset shadow, slight
@@ -1333,7 +1348,7 @@
   transition: opacity var(--transition), background var(--transition);
 }
 
-body:not(.no-hover) .col-item-card:hover .col-item-remove {
+html:not(.touch-only) body:not(.no-hover) .col-item-card:hover .col-item-remove {
   opacity: 1;
 }
 
@@ -1367,7 +1382,7 @@ body:not(.no-hover) .col-item-card:hover .col-item-remove {
 
 #collection-modal .update-modal {
   width: min(520px, calc(100vw - 32px));
-  max-height: min(800px, calc(100vh - 48px)); /* room for the picker without a scroll inside a scroll */
+  max-height: min(800px, calc(var(--screen-h) - 48px)); /* room for the picker without a scroll inside a scroll */
 }
 
 #collection-form {
@@ -1848,7 +1863,7 @@ body:not(.no-hover) .col-item-card:hover .col-item-remove {
 
 .modal-add {
   width: min(840px, calc(100vw - 64px));
-  max-height: min(760px, calc(100vh - 64px));
+  max-height: min(760px, calc(var(--screen-h) - 64px));
   transform: rotate(-0.3deg);
 }
 

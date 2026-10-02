@@ -18,6 +18,9 @@ let startRow = null;
 // Told whether the window was saved when it closes: set by
 // openFinishShowModal (ticking a show's last episode, js/episodes.js).
 let startAfterClose = null;
+// Opened over the search right after adding the show there: saving closes
+// the search too (as js/updateModal.js does for a movie).
+let startFromSearch = false;
 
 function syncStartExtra() {
   const finished = Boolean(startFinishDate.value);
@@ -73,6 +76,7 @@ startDate.addEventListener("input", syncDatesError);
 function openStartWatchingModal(row, isNewInsert = false) {
   startRow = row;
   startAfterClose = null;
+  startFromSearch = isNewInsert;
   clearStaleNote(startForm);
   startHeartsInput.set(row.rating ?? 0);
   startDate.value = row.started_watching_date || localToday();
@@ -166,6 +170,7 @@ startForm.addEventListener("submit", async (e) => {
 
   closeStartModal(true);
   closeDetailModal();
+  if (startFromSearch) closeModal();
   applyLocalChange("shows", "UPDATE", data);
   showToast(finished ? t("Marked as watched.") : t("Started watching."));
   // A finished show has every episode ticked (js/episodes.js).

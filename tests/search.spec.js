@@ -59,3 +59,24 @@ test("picking the title the side already shows doesn't load it again", async ({ 
   await expect(page.locator("#modal-preview .tmdb-preview-action")).toHaveText("+ Pick");
   expect(detailsAsked).toHaveLength(1);
 });
+
+// Picked but not added: closing the search asks first, so the picks aren't
+// thrown away ("✓ Picked" read as added, and the × used to lose them).
+test("closing the search with titles picked asks before throwing them away", async ({ page, backend }) => {
+  await logIn(page);
+  await page.click('.nav-btn[data-section="movies-towatch"]');
+  await page.locator("#movies-towatch .add-btn").click();
+  await page.fill("#modal-input", "inception");
+  await page.press("#modal-input", "Enter");
+  await page.locator("#modal-results [data-action=pick]").first().click();
+
+  await page.click("#modal-close");
+  await expect(page.locator("#confirm-modal")).toBeVisible();
+  await page.click("#confirm-cancel"); // Keep picking
+  await expect(page.locator("#search-modal")).toBeVisible();
+
+  await page.click("#modal-close");
+  await page.click("#confirm-yes"); // Add and close
+  await expect(page.locator("#search-modal")).toBeHidden();
+  await expect.poll(() => backend.db.movies.some((m) => m.tmdb_id === 27205)).toBe(true);
+});

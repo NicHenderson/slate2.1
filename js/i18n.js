@@ -10,7 +10,8 @@
      aria-label, title and alt attributes. An element with data-i18n is
      translated as a whole, its HTML the key: for a sentence with markup
      inside (a link, a <strong>), which read as pieces would be translated
-     out of order. translate="no" leaves an element alone (the made-up
+     out of order. data-i18n-key gives a label its own entry (below).
+     translate="no" leaves an element alone (the made-up
      titles on the landing page, the name Slate).
    - The scripts, with t("English text", { name: value }) and
      tn(count, "{n} movie", "{n} movies"). Placeholders are {name}; {n} is
@@ -104,6 +105,13 @@ function walkStatic(root, visit) {
     });
     if (el.tagName === "META" && /^(description|og:title|og:description)$/.test(el.getAttribute("name") ?? el.getAttribute("property") ?? "")) {
       visit("attr", normalizeText(el.content), (text) => (el.content = text));
+    }
+    // data-i18n-key names the entry for a label whose English is another
+    // string's too, but whose translation isn't: "Watched" is "Visto" as a
+    // status and "Vistas" as the phone's Movies tab.
+    if (el.hasAttribute("data-i18n-key")) {
+      visit("text", el.getAttribute("data-i18n-key"), (text) => (el.textContent = text));
+      return;
     }
     if (el.hasAttribute("data-i18n")) {
       visit("html", normalizeText(el.innerHTML), (html) => (el.innerHTML = html));
