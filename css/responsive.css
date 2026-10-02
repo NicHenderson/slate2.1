@@ -5278,6 +5278,32 @@
     letter-spacing: 0.06em;
     transform: rotate(-1deg);
   }
+
+  /* Something picked, a result's details open: the add stamp stays in
+     reach at the bottom, under the details' own "✓ Picked" (the owner's
+     ask: picking isn't adding, and the details hid the one that adds).
+     The chips stay with the list. */
+  #search-modal .modal:has(.tmdb-split.is-previewing) .batch-footer:not(.hidden) {
+    position: absolute;
+    z-index: 2;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding-top: 10px;
+    background: var(--sheet-paper);
+  }
+
+  #search-modal .modal:has(.tmdb-split.is-previewing) .batch-footer:not(.hidden) .batch-picked {
+    display: none;
+  }
+
+  #search-modal .modal:has(.batch-footer:not(.hidden)) .tmdb-split.is-previewing .tmdb-preview {
+    padding-bottom: calc(146px + var(--safe-bottom));
+  }
+
+  #search-modal .modal:has(.batch-footer:not(.hidden)) .tmdb-preview-action {
+    bottom: calc(84px + var(--safe-bottom));
+  }
 }
 
 /* ==================== Windows on a phone, stage 5: episodes ====================

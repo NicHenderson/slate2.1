@@ -93,6 +93,30 @@ function closeModal() {
   modalPreview.innerHTML = "";
 }
 
+// Picked but not added yet: closing asks first. "✓ Picked" in a title's
+// details read as added, and the × threw the picks away (the owner's
+// find). Add them, let them go, or go back to picking.
+function requestCloseModal() {
+  if (batchBusy) return;
+  if (!batchMode || !batchSelection.size) {
+    closeModal();
+    return;
+  }
+  const n = batchSelection.size;
+  openActionConfirm({
+    heading: t("Add what you picked?"),
+    html: escapeHtml(tn(n, "You picked {n} title and haven't added it yet.", "You picked {n} titles and haven't added them yet.")),
+    yes: t("Add and close"),
+    busy: t("Adding…"),
+    no: t("Keep picking"),
+    alt: { label: t("Discard"), run: closeModal },
+    run: async () => {
+      await runBatchAdd();
+      return null;
+    },
+  });
+}
+
 function setStatus(text, isError = false) {
   modalStatus.textContent = text;
   modalStatus.classList.toggle("is-error", isError);
@@ -481,10 +505,16 @@ modalClear.addEventListener("click", () => {
   modalInput.focus();
 });
 
-modalClose.addEventListener("click", closeModal);
+modalClose.addEventListener("click", requestCloseModal);
 
+// The question above it takes its own Escape (js/confirmModal.js).
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+  if (e.key !== "Escape" || modal.classList.contains("hidden")) return;
+  const confirmEl = document.getElementById("confirm-modal");
+  if (!confirmEl.classList.contains("hidden")) return;
+  requestCloseModal();
+  // The question just opened: this same Escape mustn't reach its handler.
+  if (!confirmEl.classList.contains("hidden")) e.stopImmediatePropagation();
 });
 
 modalResults.addEventListener("click", (e) => {
@@ -536,5 +566,5 @@ batchPicked.addEventListener("click", (e) => {
 batchAddBtn.addEventListener("click", runBatchAdd);
 
 modal.addEventListener("click", (e) => {
-  if (e.target === modal) closeModal();
+  if (e.target === modal) requestCloseModal();
 });

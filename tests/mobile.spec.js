@@ -503,8 +503,14 @@ test("on a phone, a search result opens in the list's place, its button at the b
   await expect(page.locator("#modal-results")).toBeAttached();
   const action = page.locator(".tmdb-preview-action");
   await expect(action).toHaveText("✓ Picked");
+  // With something picked, the add stamp stays at the bottom, the
+  // details' own just above it (picking isn't adding).
   const box = await action.boundingBox();
-  expect(844 - (box.y + box.height), "pinned at the bottom").toBeLessThan(30);
+  const add = await page.locator("#batch-add-btn").boundingBox();
+  expect(844 - (add.y + add.height), "the add stamp pinned at the bottom").toBeLessThan(30);
+  const gap = add.y - (box.y + box.height);
+  expect(gap, "the details' stamp just above it").toBeGreaterThan(0);
+  expect(gap).toBeLessThan(30);
   await expectNoSidewaysScroll(page);
   // Dragged down, it steps back to the results (the pick kept), not out
   // of the search.

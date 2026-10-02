@@ -1134,6 +1134,14 @@ directly.
   the cause wasn't found here). "Use this one" now saves and closes the
   loupe (the owner expected that; it used to stay open with "In use"),
   computer too, and puts the screen's scroll back where it was.
+  Then (the owner): picking several in the search (from To Watch or a
+  collection), "✓ Picked" in a result's details read as added, and the
+  × threw the picks away. Now closing with picks not yet added (×,
+  dragging down from the list, a tap outside, Escape) asks first: "Add
+  and close" · "Discard" · "Keep picking" (`requestCloseModal`,
+  js/searchModal.js; the confirm window got an optional third button,
+  `alt` in openActionConfirm). On a phone the add stamp also stays at
+  the bottom over a result's details, its "✓ Picked" just above.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
