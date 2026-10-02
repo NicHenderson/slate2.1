@@ -18,13 +18,15 @@ const PHONE_WINDOWS = [
   // A title's window: its head (the polaroid and the title) is drawn anew
   // for each title, so it's looked for when the drag starts.
   { backdrop: "detail-modal", sheet: ".detail-layout", head: ".detail-head", close: "detail-close" },
-  { backdrop: "search-modal", sheet: ".modal", head: ".modal-head", close: "modal-close" },
+  // A search result open: dragging down goes back to the results (what's
+  // picked stays), as "← Results" does; from the results it closes.
+  { backdrop: "search-modal", sheet: ".modal", head: ".modal-head", close: "modal-close", back: ".tmdb-split.is-previewing .tmdb-preview-back" },
   { backdrop: "episodes-modal", sheet: ".modal", head: ".ep-head", close: "episodes-close" },
 ];
 
 const phoneWindowLayout = matchMedia("(max-width: 640px)");
 
-PHONE_WINDOWS.forEach(({ backdrop, sheet: sheetSel, head: headSel, close }) => {
+PHONE_WINDOWS.forEach(({ backdrop, sheet: sheetSel, head: headSel, close, back }) => {
   const sheet = document.getElementById(backdrop).querySelector(sheetSel);
   let drag = null;
 
@@ -51,7 +53,8 @@ PHONE_WINDOWS.forEach(({ backdrop, sheet: sheetSel, head: headSel, close }) => {
     sheet.style.willChange = "";
     // A long drag, or a quick flick that went somewhere.
     if (dy > sheet.offsetHeight * 0.25 || (dy > 30 && dy / Math.max(1, e.timeStamp - startT) > 0.5)) {
-      document.getElementById(close).click();
+      const step = back && sheet.querySelector(back);
+      (step ?? document.getElementById(close)).click();
     }
   };
   sheet.addEventListener("pointerup", end);

@@ -500,8 +500,16 @@ test("on a phone, a search result opens in the list's place, its button at the b
   const box = await action.boundingBox();
   expect(844 - (box.y + box.height), "pinned at the bottom").toBeLessThan(30);
   await expectNoSidewaysScroll(page);
-  await page.locator(".tmdb-preview-back").tap();
+  // Dragged down, it steps back to the results (the pick kept), not out
+  // of the search.
+  const head = await page.locator("#search-modal .modal-head").boundingBox();
+  await page.mouse.move(head.x + 200, head.y + 30);
+  await page.mouse.down();
+  for (let i = 1; i <= 8; i++) await page.mouse.move(head.x + 200, head.y + 30 + i * 40);
+  await page.mouse.up();
+  await expect(page.locator("#search-modal")).toBeVisible();
   await expect(row).toBeVisible();
+  await expect(row.locator(".tmdb-pick")).toHaveAttribute("aria-pressed", "true");
   await page.locator("#batch-add-btn").tap();
   await expect(page.locator("#search-modal")).toBeHidden();
   await expect(page.locator("#grid-movies-towatch .card", { hasText: "Paddington" })).toBeVisible();

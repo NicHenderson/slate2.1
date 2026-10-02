@@ -1073,6 +1073,11 @@ directly.
   and a new policy version still get the "Our Privacy Policy" card once.
   So an account should only ever be made from a request (one made for
   someone who never sent one would carry an acceptance they never gave).
+  Then, from the owner's phone test: dragging the search window down
+  while a result was open closed the whole search (the list and what was
+  picked lost). Dragging down now steps back one level, as "← Results"
+  does (`back` in js/phoneWindows.js's PHONE_WINDOWS); from the list it
+  closes. The × still closes everything.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
