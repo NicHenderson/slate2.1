@@ -588,6 +588,10 @@ html:not(.touch-only) body:not(.no-hover) .card-grid .ghost-card:hover {
   transform: rotate(1deg) translate(2px, 3px);
 }
 
+.empty-note.collections-empty-note {
+  display: none;
+}
+
 .loading {
   grid-column: 1 / -1;
   padding: 40px 0;

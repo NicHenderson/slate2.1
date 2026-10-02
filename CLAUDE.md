@@ -1123,6 +1123,11 @@ directly.
   ("Nothing playing right now." with "Go to To Watch →"; "No dropped
   shows. So far, so good!"), computer and phone alike
   (`emptyListNoteHtml`, js/data.js; `.empty-note`, css/cards.css).
+  Then (the owner found it ugly): on a phone, no collections showed the
+  "Add Collection" booklet as a big empty full-width box. It's now the
+  same note ("No collections yet." + "Create a collection"); the
+  booklet is hidden on phones (the floating "+" still clicks it);
+  computers keep the booklet, pixel-identical.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

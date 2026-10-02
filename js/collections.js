@@ -141,9 +141,25 @@ function paintGrid(grid, html) {
   grid._html = html;
 }
 
+// No collections yet: on a phone a note says what they're for, in place of
+// the "Add Collection" booklet, which as a full-width row was a big empty
+// box (the owner's call). Computers keep the booklet (the note is hidden).
+function collectionsEmptyNoteHtml() {
+  return `<div class="empty-note collections-empty-note">
+      <p class="empty-note-title">${t("No collections yet.")}</p>
+      <p class="empty-note-text">${t("Group titles your way: a saga, a director, your Sunday movies…")}</p>
+      <button class="empty-note-action" type="button" data-empty-add-collection>${t("Create a collection")}</button>
+    </div>`;
+}
+
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-empty-add-collection]")) document.querySelector("#grid-collections .ghost-card")?.click();
+});
+
 function collectionsGridHtml() {
   const cols = [...STORE.collections.values()].sort(byPosition);
   return (
+    (cols.length ? "" : collectionsEmptyNoteHtml()) +
     cols.map((c) => collectionCardHtml(c, collectionItemsFor(c.id))).join("") +
     `<button class="ghost-card booklet-ghost" type="button" data-type="collection">
       <span class="booklet-ghost-spine"></span>

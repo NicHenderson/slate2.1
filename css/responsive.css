@@ -2390,9 +2390,14 @@
     background: none;
   }
 
-  /* With "+" floating, "Add Collection" is only for an empty list. */
-  #grid-collections .ghost-card:not(:only-child) {
+  /* "+" floats, and an empty list has its note (collectionsEmptyNoteHtml,
+     js/collections.js): no "Add Collection" row. The "+" still works it. */
+  #grid-collections .ghost-card {
     display: none;
+  }
+
+  .empty-note.collections-empty-note {
+    display: block;
   }
 
   /* ---------- an open collection: the cover ---------- */
