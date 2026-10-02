@@ -1142,6 +1142,14 @@ directly.
   js/searchModal.js; the confirm window got an optional third button,
   `alt` in openActionConfirm). On a phone the add stamp also stays at
   the bottom over a result's details, its "✓ Picked" just above.
+  **A phone turned sideways** (the owner's call, Oct. 2, 2026): Slate
+  is made upright, so sideways (touch, landscape, ≤500px tall) a taped
+  note says "Slate looks better upright" with "Keep it sideways" (no
+  lock: iOS doesn't let web apps lock orientation). Up to 3 notes per
+  launch (sessionStorage, cleared when the app is closed); "Keep it
+  sideways" stops them for that launch; never over a trailer
+  (js/rotateNote.js, css/responsive.css "A phone turned sideways").
+  The landscape layout itself is unchanged (the computer's).
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
