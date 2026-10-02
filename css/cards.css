@@ -525,6 +525,69 @@ html:not(.touch-only) body:not(.no-hover) .card-grid .ghost-card:hover {
   color: var(--text-muted);
 }
 
+/* An empty Watching / Dropped list (emptyListNoteHtml, js/data.js): a
+   taped paper note, slightly askew, in the middle of the board. */
+.empty-note {
+  position: relative;
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(100%, 320px);
+  box-sizing: border-box;
+  margin: 40px 0;
+  padding: 24px 22px 20px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: center;
+  box-shadow: 3px 5px 0 var(--accent-deep), 0 10px 24px rgba(0, 0, 0, 0.3);
+  transform: rotate(-1.5deg);
+}
+
+.empty-note::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 64px;
+  height: 18px;
+  margin-left: -32px;
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+  transform: rotate(3deg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.empty-note-title {
+  margin: 0 0 8px;
+  font-family: var(--font-hand);
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.empty-note-text {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.empty-note-action {
+  margin-top: 16px;
+  padding: 9px 16px;
+  border: 0;
+  background: var(--accent-strong);
+  color: #fff;
+  font: 700 13px var(--font-body);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 2px 3px 0 var(--accent-deep);
+  cursor: pointer;
+  transform: rotate(1deg);
+}
+
+.empty-note-action:active {
+  box-shadow: none;
+  transform: rotate(1deg) translate(2px, 3px);
+}
+
 .loading {
   grid-column: 1 / -1;
   padding: 40px 0;

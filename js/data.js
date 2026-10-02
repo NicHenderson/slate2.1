@@ -282,6 +282,30 @@ function ghostCardHtml(type) {
 
 const NO_GHOST_GRIDS = new Set(["grid-shows-watching", "grid-shows-dropped"]);
 
+// Those two lists can't be added to directly, so empty they'd be a blank
+// page: a note says what lands there (the owner's ask). Watching's points
+// the way to To Watch, where a show is started.
+function emptyListNoteHtml(gridId) {
+  const watching = gridId === "grid-shows-watching";
+  const title = watching ? t("Nothing playing right now.") : t("No dropped shows. So far, so good!");
+  const text = watching
+    ? t("Start a show from To Watch and it'll wait for you here, right where you left off.")
+    : t("A show you give up on lands here, marked where you stopped.");
+  const action = watching
+    ? `<button class="empty-note-action" type="button" data-empty-goto="grid-shows-towatch">${t("Go to To Watch")} →</button>`
+    : "";
+  return `<div class="empty-note">
+      <p class="empty-note-title">${title}</p>
+      <p class="empty-note-text">${text}</p>
+      ${action}
+    </div>`;
+}
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-empty-goto]");
+  if (btn) document.querySelector(`.status-tab[data-subtab="${btn.dataset.emptyGoto}"]`)?.click();
+});
+
 // Shared by renderGrid and the detail modal's prev/next navigation, so
 // "the card next to this one" always means the same thing in both places.
 // The grid's titles as it shows them: its status, the section's search
@@ -336,10 +360,8 @@ function gridHtml(gridId, rows) {
   if (isLibraryFiltered(gridId)) {
     return visible.length ? visible.map(card).join("") : libraryEmptyHtml(gridId);
   }
-  return (
-    visible.map(card).join("") +
-    (NO_GHOST_GRIDS.has(gridId) ? "" : ghostCardHtml(cfg.type))
-  );
+  if (NO_GHOST_GRIDS.has(gridId)) return visible.length ? visible.map(card).join("") : emptyListNoteHtml(gridId);
+  return visible.map(card).join("") + ghostCardHtml(cfg.type);
 }
 
 // A grid shows its whole list (the page itself scrolls), "+ Add" card last.

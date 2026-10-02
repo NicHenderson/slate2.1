@@ -1118,6 +1118,11 @@ directly.
   collection), and shorter folder rows in Collections
   (css/responsive.css "Compact cards on a phone"); Comfortable as
   before.
+  Then (the owner): an empty Watching / Dropped list (no "+ Add" card
+  there) was a blank page. Now a taped paper note says what lands there
+  ("Nothing playing right now." with "Go to To Watch →"; "No dropped
+  shows. So far, so good!"), computer and phone alike
+  (`emptyListNoteHtml`, js/data.js; `.empty-note`, css/cards.css).
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
