@@ -1087,7 +1087,8 @@ directly.
   `.tmdb-preview-body`, js/searchModal.js); computer pixel-identical.
   Then: "Press & hold to reorder" (custom order: Movies / Shows To
   Watch, Collections, an open collection) sat flush on the numbers
-  strip; on a phone it's now centred with 12px under it.
+  strip; on a phone it now has 12px under it, left-aligned (the
+  owner tried it centred and preferred it on the left).
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
