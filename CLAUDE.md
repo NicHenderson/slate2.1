@@ -1058,6 +1058,21 @@ directly.
   a grey block on the paper; on a phone it's a faded red stamp. The
   danger question keeps Cancel on the right (a deliberate safety swap,
   css/modal.css). Computer unchanged (its hover lift checked).
+  **Before `main`** the owner listed general bugs to fix first (Oct. 2,
+  2026), then they test the whole app on the phone. Fixed: (1) a request
+  sent on a phone pushed "Send again in Ns" off the non-scrolling sheet:
+  the form now makes way for the message (`request-sent` on
+  #auth-screen, phone only), and after the cooldown "Send another
+  request" brings it back; (2) the Privacy Policy box was asked twice
+  (Request access and the first login's password card). **The owner's
+  call: only on Request access** (where someone first hands over their
+  data; the policy says "when you request access or sign in for the first
+  time"). The first login now records the acceptance on the account
+  without asking (`privacy_accepted_with: "access request"`; the request
+  email, with the version, is the proof). Accounts made before the policy
+  and a new policy version still get the "Our Privacy Policy" card once.
+  So an account should only ever be made from a request (one made for
+  someone who never sent one would carry an acceptance they never gave).
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

@@ -50,6 +50,7 @@ window.SLATE_LANGUAGES = {
       "Confirm new password": "Confirma la contraseña nueva",
       "Confirm password": "Confirma la contraseña",
       "Send again in {n}s": "Reenviar en {n} s",
+      "Send another request": "Enviar otra solicitud",
       "Tell us your name.": "Dinos tu nombre.",
       "Enter a valid email address.": "Escribe un correo válido.",
       "Password must be at least 8 characters.": "La contraseña debe tener al menos 8 caracteres.",

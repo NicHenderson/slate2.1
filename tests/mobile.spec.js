@@ -537,6 +537,28 @@ test("on a phone, an episode's box picks it, and its card's button ticks it", as
   await expectOnScreen(page.locator("#episodes-close"));
 });
 
+// The login sheet doesn't scroll, so a request just sent can't push its
+// button off the screen: the form makes way for the message (an iPhone
+// SE, the shortest), and the button brings it back.
+test("on a phone, a request sent leaves its message and button on screen", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/#request-access");
+  await page.fill("#auth-name", "Ana");
+  await page.fill("#auth-email", "ana@slate.test");
+  await page.check("#auth-consent");
+  await page.locator("#auth-submit").tap();
+  await expect(page.locator("#auth-message")).toContainText("Request sent!");
+  await expect(page.locator("#auth-name")).toBeHidden();
+  const box = await page.locator("#auth-submit").boundingBox();
+  expect(box.y + box.height, "the button runs off the screen").toBeLessThanOrEqual(667);
+  await page.evaluate(() => { resendReadyAt.request = 0; syncSubmit(); });
+  await expect(page.locator("#auth-submit")).toHaveText("Send another request");
+  await page.locator("#auth-submit").tap();
+  await expect(page.locator("#auth-name")).toBeVisible();
+  await expect(page.locator("#auth-message")).toBeHidden();
+});
+
 // Adding titles to a collection, as rows: tapping one ticks it, and the
 // stamp adds it. Picking a favorite: a tap anywhere on its row picks it.
 test("on a phone, titles are added to a collection by tapping their rows; a favorite by tapping its row", async ({ page, backend }) => {

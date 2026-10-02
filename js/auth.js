@@ -110,8 +110,12 @@ const AUTH_MODES = {
 const settingPassword = (mode) => mode === "reset" || mode === "choose";
 // Every card for someone already signed in, the policy's included.
 const signedInCard = (mode) => settingPassword(mode) || mode === "privacy";
-// The cards with the Privacy Policy box.
-const asksConsent = (mode) => mode === "request" || mode === "choose" || mode === "privacy";
+// The cards with the Privacy Policy box: asking for access (where someone
+// first hands over their data) and, once, an account made before the
+// policy or its current version. Not the first login's password card: the
+// account comes from a request whose box was ticked (the owner's call; it
+// was asked twice).
+const asksConsent = (mode) => mode === "request" || mode === "privacy";
 
 /* ---------- the Privacy Policy ----------
 
@@ -433,6 +437,7 @@ function setAuthMode(mode) {
   authMode = mode;
   const text = AUTH_MODES[mode];
   authScreen.dataset.mode = mode;
+  authScreen.classList.remove("request-sent");
   authNameField.classList.toggle("hidden", mode !== "request");
   authEmailField.classList.toggle("hidden", signedInCard(mode));
   authPasswordField.classList.toggle("hidden", mode === "forgot" || mode === "request" || mode === "privacy");
@@ -475,8 +480,19 @@ function syncSubmit() {
   const readyAt = resendReadyAt[authMode] ?? 0;
   const wait = Math.max(0, Math.ceil((readyAt - Date.now()) / 1000));
   authSubmit.disabled = authBusy || wait > 0;
-  authSubmit.textContent = authBusy ? text.busy : wait > 0 ? t("Send again in {n}s", { n: wait }) : text.submit;
+  authSubmit.textContent = authBusy
+    ? text.busy
+    : wait > 0
+      ? t("Send again in {n}s", { n: wait })
+      : requestSentOnPhone()
+        ? t("Send another request")
+        : text.submit;
 }
+
+/* On a phone the card never scrolls (the owner's call), so once a request
+   is sent its form makes way for the message (css/responsive.css): the
+   message and the button fit. The button then brings the form back. */
+const requestSentOnPhone = () => authSheetLayout.matches && authScreen.classList.contains("request-sent");
 
 function startResendCooldown(mode) {
   resendReadyAt[mode] = Date.now() + RESEND_COOLDOWN_S * 1000;
@@ -528,6 +544,13 @@ function validate() {
 authForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (authBusy) return;
+  // A request just sent, on a phone: the button brings the form back.
+  if (requestSentOnPhone()) {
+    authScreen.classList.remove("request-sent");
+    clearMessage();
+    syncSubmit();
+    return;
+  }
   clearMessage();
   if (!validate()) return;
 
@@ -630,6 +653,7 @@ async function sendAccessRequest(email) {
   }
   authForm.reset();
   syncNoteCount();
+  authScreen.classList.add("request-sent");
   startResendCooldown("request");
   showMessage(
     t(
@@ -659,9 +683,14 @@ async function updatePassword(password, sessionGoneMessage, moreData = {}) {
 }
 
 // First login: their own password replaces the temporary one, and the app
-// opens straight away — no need to log in again.
+// opens straight away — no need to log in again. The policy was accepted
+// with the access request (its email says so, with the version), so the
+// account records it now, saying where.
 async function saveChosenPassword(password) {
-  const saved = await updatePassword(password, t("You've been signed out. Log out and log in again with your temporary password."), privacyAcceptance());
+  const saved = await updatePassword(password, t("You've been signed out. Log out and log in again with your temporary password."), {
+    ...privacyAcceptance(),
+    privacy_accepted_with: "access request",
+  });
   if (!saved) return;
   authForm.reset();
   enterApp().then(() => showToast(t("Password saved. Welcome to Slate!")));

@@ -182,14 +182,9 @@ test.describe("first login with a temporary password", () => {
     await expect(page.locator("#auth-title")).toHaveText("Choose Your Password");
     await expect(page.locator("#app")).toBeHidden();
 
-    // Not the temporary one again, both boxes must match, and the Privacy
-    // Policy box is ticked here too.
-    await page.fill("#auth-password", "anas-own-password");
-    await page.fill("#auth-confirm", "anas-own-password");
-    await page.click("#auth-submit");
-    await expect(page.locator("#auth-consent-error")).toHaveText("Tick the box to go on.");
-    expect(ana.password).toBe(NEW.password);
-    await page.check("#auth-consent");
+    // Not the temporary one again, and both boxes must match. The Privacy
+    // Policy box isn't asked again here: it was ticked with the request.
+    await expect(page.locator("#auth-consent-field")).toBeHidden();
     await page.fill("#auth-password", NEW.password);
     await page.fill("#auth-confirm", "something-else-1");
     await page.click("#auth-submit");
@@ -204,7 +199,7 @@ test.describe("first login with a temporary password", () => {
     await expect(page.locator("#app")).toBeVisible();
     await expect(page.locator(".toast").last()).toHaveText("Password saved. Welcome to Slate!");
     expect(ana.password).toBe("anas-own-password");
-    expect(ana.metadata).toEqual({ password_chosen: true, privacy_version: "1.2", privacy_accepted_at: expect.any(String) });
+    expect(ana.metadata).toEqual({ password_chosen: true, privacy_version: "1.2", privacy_accepted_at: expect.any(String), privacy_accepted_with: "access request" });
 
     // From now on, straight in with it.
     await page.click("#logout-btn");

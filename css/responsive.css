@@ -1101,6 +1101,12 @@
     display: none;
   }
 
+  /* A request sent: the message and the button, the form out of the way
+     (the card doesn't scroll; js/auth.js brings the form back). */
+  .auth-screen.request-sent[data-mode="request"] :is(.auth-hint, #auth-name-field, #auth-email-field, #auth-note-field, #auth-consent-field) {
+    display: none;
+  }
+
   .auth-screen[data-mode="request"] .auth-hint {
     margin: 2px 0 14px;
   }
