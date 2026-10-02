@@ -16,6 +16,13 @@
 
    Each view remembers its last tab on this device. */
 
+// No pointer to hover with (a phone, a tablet): the cards' hover lift is
+// left off (css/cards.css), as a tap there leaves it stuck on.
+const touchOnly = matchMedia("(any-hover: none)");
+const syncTouchOnly = () => document.documentElement.classList.toggle("touch-only", touchOnly.matches);
+syncTouchOnly();
+touchOnly.addEventListener("change", syncTouchOnly);
+
 const PHONE_VIEWS = {
   "movies-watched": { tab: "movies", section: "movies-watched" },
   "movies-towatch": { tab: "movies", section: "movies-towatch" },

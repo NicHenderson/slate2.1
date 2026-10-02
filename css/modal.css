@@ -1333,7 +1333,7 @@
   transition: opacity var(--transition), background var(--transition);
 }
 
-body:not(.no-hover) .col-item-card:hover .col-item-remove {
+html:not(.touch-only) body:not(.no-hover) .col-item-card:hover .col-item-remove {
   opacity: 1;
 }
 

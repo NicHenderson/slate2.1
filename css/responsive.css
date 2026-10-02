@@ -3378,6 +3378,13 @@
     line-height: 1.45;
   }
 
+  /* Delete, until the title is typed: a faded red stamp (the computer's
+     grey read as a black block on the paper). */
+  #confirm-modal .confirm-modal.confirm-danger #confirm-yes:disabled {
+    background: color-mix(in srgb, #dc2626 28%, var(--paper));
+    color: color-mix(in srgb, #7f1d1d 60%, var(--paper));
+  }
+
   #confirm-modal .confirm-modal.confirm-danger {
     --sheet-paper: color-mix(in srgb, var(--paper) 92%, #dc2626 8%);
     border-top: 3px solid #dc2626;

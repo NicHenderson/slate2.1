@@ -1043,6 +1043,21 @@ directly.
   way: a show of eight seasons widened the sheet past the screen (its
   tabs' width leaked through the backdrop's grid); the sheets'
   backdrops are now one screen-wide column.
+  The owner checked stage 5 ("funciona bien"). Stage 6, the last pass —
+  done, waiting for the owner's iPhone: every window opened at iPhone
+  size with a notch and home bar faked, in a dark and a light theme (27
+  screens: each state of a title's window, Edit, Mark as watched,
+  starting / finishing / refinishing a show, Keep watching's question,
+  deleting a movie, a viewing and the account, a new collection, adding
+  titles, the favorite picker, Import, search, episodes). All on base C
+  and inside the screen. Fixed: (1) the diagnosis' old bug, a card left
+  lifted after a tap (a tap counts as a hover on a phone and sticks):
+  the cards' hover lift now needs a pointer that hovers
+  (`html.touch-only`, set from `(any-hover: none)` in js/phoneNav.js;
+  css/cards.css, modal.css); (2) Delete, before the title is typed, was
+  a grey block on the paper; on a phone it's a faded red stamp. The
+  danger question keeps Cancel on the right (a deliberate safety swap,
+  css/modal.css). Computer unchanged (its hover lift checked).
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
