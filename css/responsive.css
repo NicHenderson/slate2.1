@@ -4984,29 +4984,63 @@
     color: #fff;
   }
 
-  /* ---------- a result opened: the list's field and status go ---------- */
-  #search-modal .modal:has(.tmdb-split.is-previewing) :is(.modal-head h2, .tmdb-search-field, .tmdb-status, .batch-footer) {
-    display: none;
+  /* ---------- a result opened: a sheet of its own over the results ----------
+     (the owner's note: dragged down, the results show under it, as one
+     sheet on another; js/phoneWindows.js drags it by its top band.) The
+     results stay as they were beneath it. */
+  #search-modal .tmdb-split.is-previewing .tmdb-hits {
+    display: flex;
   }
 
-  #search-modal .tmdb-split.is-previewing {
-    margin-top: 0;
+  #search-modal .tmdb-split.is-previewing .tmdb-preview {
+    position: absolute;
+    z-index: 1; /* under the window's tape and × */
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 64px 0 calc(74px + var(--safe-bottom));
+    background: var(--sheet-paper);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.28);
+    touch-action: none; /* its top band drags it */
+    animation: phone-window-up 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+
+  /* Its own torn edge, over the window's. */
+  #search-modal .tmdb-split.is-previewing .tmdb-preview::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -7px;
+    height: 8px;
+    background: radial-gradient(circle at 6px -2px, transparent 6px, var(--sheet-paper) 6.5px) 0 0 / 12px 8px repeat-x;
+    pointer-events: none;
   }
 
   /* The details as a title's window: the polaroid beside the title, the
      synopsis cut to three lines ("more" opens it), the button pinned. */
-  #search-modal .tmdb-split.is-previewing .tmdb-preview {
+  #search-modal .tmdb-preview-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    border-top: 2px dashed color-mix(in srgb, var(--ink) 18%, transparent);
+  }
+
+  /* As tall as what's in it (the fifth row then takes only what the
+     polaroid is taller than the words beside it). */
+  #search-modal .tmdb-preview-body {
     display: grid;
     grid-template-columns: 92px minmax(0, 1fr);
     grid-template-rows: auto auto auto auto 1fr;
     column-gap: 14px;
     align-items: start;
-    padding: 18px 18px calc(88px + var(--safe-bottom)) 16px;
-    background: none;
-    box-shadow: none;
+    padding: 18px 18px 16px 16px;
   }
 
-  #search-modal .tmdb-preview > * {
+  #search-modal .tmdb-preview-body > * {
     grid-column: 1 / -1;
     min-width: 0;
   }
@@ -5189,7 +5223,8 @@
     margin-top: 8px;
   }
 
-  /* Its button: a stamp pinned at the bottom of the sheet. */
+  /* Its button: a stamp pinned at the bottom of its sheet, below what
+     scrolls. */
   #search-modal .tmdb-preview-action {
     position: absolute;
     z-index: 2;
@@ -5200,19 +5235,6 @@
     font-size: 15px;
     letter-spacing: 0.06em;
     transform: rotate(-1deg);
-  }
-
-  /* A strip of paper under it, so the details pass behind it, not
-     around it (placed against the sheet too, so it doesn't scroll). */
-  #search-modal .tmdb-split.is-previewing:has(.tmdb-preview-action)::after {
-    content: "";
-    position: absolute;
-    z-index: 1;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: calc(74px + var(--safe-bottom));
-    background: var(--sheet-paper);
   }
 
   /* ---------- the picked ones and the add stamp ---------- */

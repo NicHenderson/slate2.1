@@ -494,7 +494,13 @@ test("on a phone, a search result opens in the list's place, its button at the b
   await expectOnScreen(page.locator("#batch-add-btn"));
 
   await row.locator(".tmdb-hit-main").tap();
-  await expect(page.locator("#modal-results")).toBeHidden();
+  // Its details are a sheet over the results, which stay beneath it.
+  const layer = page.locator("#modal-preview");
+  await expect(layer).toBeVisible();
+  const sheetBox = await page.locator("#search-modal .modal").boundingBox();
+  const layerBox = await layer.boundingBox();
+  expect(Math.round(layerBox.y)).toBe(Math.round(sheetBox.y));
+  await expect(page.locator("#modal-results")).toBeAttached();
   const action = page.locator(".tmdb-preview-action");
   await expect(action).toHaveText("✓ Picked");
   const box = await action.boundingBox();
@@ -502,7 +508,7 @@ test("on a phone, a search result opens in the list's place, its button at the b
   await expectNoSidewaysScroll(page);
   // Dragged down, it steps back to the results (the pick kept), not out
   // of the search.
-  const head = await page.locator("#search-modal .modal-head").boundingBox();
+  const head = layerBox;
   await page.mouse.move(head.x + 200, head.y + 30);
   await page.mouse.down();
   for (let i = 1; i <= 8; i++) await page.mouse.move(head.x + 200, head.y + 30 + i * 40);

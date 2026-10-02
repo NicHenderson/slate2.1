@@ -268,17 +268,19 @@ async function showPreview(id, { retry = false } = {}) {
   // Straight away: what the search already knows, and that the rest is on its way.
   modalPreview.innerHTML = `
     <button class="tmdb-preview-back" type="button" data-action="back">${t("← Results")}</button>
-    <div class="tmdb-preview-top">
-      ${previewPosterHtml(id, item.poster_path)}
-      <div class="tmdb-preview-head">
-        <h3 class="detail-title">${escapeHtml(resultTitle(item))}</h3>
-        <p class="detail-meta-runtime">${resultYear(item)}</p>
+    <div class="tmdb-preview-scroll"><div class="tmdb-preview-body">
+      <div class="tmdb-preview-top">
+        ${previewPosterHtml(id, item.poster_path)}
+        <div class="tmdb-preview-head">
+          <h3 class="detail-title">${escapeHtml(resultTitle(item))}</h3>
+          <p class="detail-meta-runtime">${resultYear(item)}</p>
+        </div>
       </div>
-    </div>
-    <div class="tmdb-preview-loading" role="status">
-      <span class="tmdb-preview-dots" aria-hidden="true"><span></span><span></span><span></span></span>
-      ${t("Loading its details…")}
-    </div>`;
+      <div class="tmdb-preview-loading" role="status">
+        <span class="tmdb-preview-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+        ${t("Loading its details…")}
+      </div>
+    </div></div>`;
   modalPreview.scrollTop = 0;
 
   try {
@@ -301,22 +303,26 @@ function renderPreviewDetails(details) {
   const id = details.id;
   const genreLine = (details.genres ?? []).map((g) => genreName(englishGenre(g))).join(" · ");
   const date = details.release_date ?? details.first_air_date ?? "";
+  // What scrolls is wrapped apart from the way back, so on a phone the
+  // details can be a sheet of their own over the results (css/responsive.css).
   modalPreview.innerHTML = `
     <button class="tmdb-preview-back" type="button" data-action="back">${t("← Results")}</button>
-    <div class="tmdb-preview-top">
-      ${previewPosterHtml(id, details.poster_path)}
-      <div class="tmdb-preview-head">
-        <h3 class="detail-title">${escapeHtml(details.title ?? details.name ?? t("No title"))}</h3>
-        <p class="detail-meta-runtime">${date ? date.slice(0, 4) : "—"} · ${runtimeLine(currentType, details)}</p>
-        ${genreLine ? `<p class="detail-genre-line">${escapeHtml(genreLine)}</p>` : ""}
+    <div class="tmdb-preview-scroll"><div class="tmdb-preview-body">
+      <div class="tmdb-preview-top">
+        ${previewPosterHtml(id, details.poster_path)}
+        <div class="tmdb-preview-head">
+          <h3 class="detail-title">${escapeHtml(details.title ?? details.name ?? t("No title"))}</h3>
+          <p class="detail-meta-runtime">${date ? date.slice(0, 4) : "—"} · ${runtimeLine(currentType, details)}</p>
+          ${genreLine ? `<p class="detail-genre-line">${escapeHtml(genreLine)}</p>` : ""}
+        </div>
       </div>
-    </div>
-    <p class="detail-synopsis">${escapeHtml(details.overview || t("No synopsis available."))}</p>
-    <div class="tmdb-preview-actions">
-      ${previewActionHtml(id)}
-      <div class="detail-trailer">${TRAILER_BTN_LOADING}</div>
-    </div>
-    ${whereToWatchSlotHtml()}`;
+      <p class="detail-synopsis">${escapeHtml(details.overview || t("No synopsis available."))}</p>
+      <div class="tmdb-preview-actions">
+        ${previewActionHtml(id)}
+        <div class="detail-trailer">${TRAILER_BTN_LOADING}</div>
+      </div>
+      ${whereToWatchSlotHtml()}
+    </div></div>`;
   // On a phone the synopsis is cut to three lines; "more" opens it there.
   markCut(modalPreview.querySelector(".detail-synopsis"));
   const stillShowing = () => previewId === id && !modal.classList.contains("hidden");
@@ -514,8 +520,11 @@ modalPreview.addEventListener("click", (e) => {
   if (action === "retry" && previewId != null) showPreview(previewId, { retry: true });
   if (action === "back") {
     const id = previewId;
-    showPreviewHint();
-    modalResults.querySelector(`.tmdb-hit[data-id="${id}"] .tmdb-hit-main`)?.focus();
+    // On a phone the details slide down off the results first.
+    slideAway(modalPreview, () => {
+      showPreviewHint();
+      modalResults.querySelector(`.tmdb-hit[data-id="${id}"] .tmdb-hit-main`)?.focus();
+    });
   }
 });
 

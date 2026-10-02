@@ -18,48 +18,98 @@ const PHONE_WINDOWS = [
   // A title's window: its head (the polaroid and the title) is drawn anew
   // for each title, so it's looked for when the drag starts.
   { backdrop: "detail-modal", sheet: ".detail-layout", head: ".detail-head", close: "detail-close" },
-  // A search result open: dragging down goes back to the results (what's
-  // picked stays), as "← Results" does; from the results it closes.
-  { backdrop: "search-modal", sheet: ".modal", head: ".modal-head", close: "modal-close", back: ".tmdb-split.is-previewing .tmdb-preview-back" },
+  // A search result open is a sheet of its own over the results (the
+  // owner's note): its top band drags it alone, the results showing under
+  // it, and letting go far enough goes back to them (what's picked stays),
+  // as "← Results" does. From the results, the window closes.
+  {
+    backdrop: "search-modal",
+    sheet: ".modal",
+    head: ".modal-head",
+    close: "modal-close",
+    layer: ".tmdb-split.is-previewing .tmdb-preview",
+    layerBack: ".tmdb-preview-back",
+  },
   { backdrop: "episodes-modal", sheet: ".modal", head: ".ep-head", close: "episodes-close" },
 ];
 
 const phoneWindowLayout = matchMedia("(max-width: 640px)");
 
-PHONE_WINDOWS.forEach(({ backdrop, sheet: sheetSel, head: headSel, close, back }) => {
+// How tall a layer's top band is: where it can be dragged from.
+const LAYER_BAND = 64;
+
+PHONE_WINDOWS.forEach(({ backdrop, sheet: sheetSel, head: headSel, close, layer: layerSel, layerBack }) => {
   const sheet = document.getElementById(backdrop).querySelector(sheetSel);
   let drag = null;
 
   sheet.addEventListener("pointerdown", (e) => {
-    if (!phoneWindowLayout.matches || !e.target.closest(headSel) || e.target.closest("button, a, input")) return;
-    drag = { startY: e.clientY, startT: e.timeStamp, dy: 0 };
+    if (!phoneWindowLayout.matches || e.target.closest("button, a, input")) return;
+    const layer = layerSel && sheet.querySelector(layerSel);
+    let el = sheet;
+    if (layer) {
+      if (!layer.contains(e.target) || e.clientY - layer.getBoundingClientRect().top > LAYER_BAND) return;
+      el = layer;
+    } else if (!e.target.closest(headSel)) {
+      return;
+    }
+    drag = { el, layer: Boolean(layer), startY: e.clientY, startT: e.timeStamp, dy: 0 };
     sheet.setPointerCapture(e.pointerId);
+    // A mouse dragging it would select the text it passes over.
+    if (e.pointerType === "mouse") e.preventDefault();
     // A layer of its own before it moves: an iPhone otherwise repaints the
     // whole sheet, shadow and all, each frame (Android works it out itself).
-    sheet.style.willChange = "transform";
+    el.style.willChange = "transform";
   });
   sheet.addEventListener("pointermove", (e) => {
     if (!drag) return;
     drag.dy = Math.max(0, e.clientY - drag.startY);
-    sheet.style.transition = "none";
-    sheet.style.transform = `translate3d(0, ${drag.dy}px, 0)`;
+    drag.el.style.transition = "none";
+    drag.el.style.transform = `translate3d(0, ${drag.dy}px, 0)`;
   });
   const end = (e) => {
     if (!drag) return;
-    const { dy, startT } = drag;
+    const { el, layer, dy, startT } = drag;
     drag = null;
-    sheet.style.transition = "";
-    sheet.style.transform = "";
-    sheet.style.willChange = "";
     // A long drag, or a quick flick that went somewhere.
-    if (dy > sheet.offsetHeight * 0.25 || (dy > 30 && dy / Math.max(1, e.timeStamp - startT) > 0.5)) {
-      const step = back && sheet.querySelector(back);
-      (step ?? document.getElementById(close)).click();
+    const away = dy > el.offsetHeight * 0.25 || (dy > 30 && dy / Math.max(1, e.timeStamp - startT) > 0.5);
+    el.style.transition = "";
+    el.style.willChange = "";
+    // A layer goes on down from where it was let go (its way back slides
+    // it away); anything else springs back, or its window closes.
+    if (away && layer) {
+      el.querySelector(layerBack)?.click();
+      return;
     }
+    el.style.transform = "";
+    if (away) document.getElementById(close).click();
   };
   sheet.addEventListener("pointerup", end);
   sheet.addEventListener("pointercancel", end);
 });
+
+// A layer slid down off its window, then `done` (a search result going
+// back to the results). At once without motion, or off a phone.
+function slideAway(el, done) {
+  const finish = () => {
+    el.style.transition = "";
+    el.style.transform = "";
+    done();
+  };
+  if (!phoneWindowLayout.matches || motionReduced()) {
+    finish();
+    return;
+  }
+  el.style.transition = "transform 0.24s cubic-bezier(0.4, 0, 1, 1)";
+  el.style.transform = `translate3d(0, ${el.offsetHeight}px, 0)`;
+  let called = false;
+  const once = () => {
+    if (called) return;
+    called = true;
+    finish();
+  };
+  el.addEventListener("transitionend", once, { once: true });
+  setTimeout(once, 320);
+}
 
 /* ---------- Typing in a window, on a phone ----------
 
