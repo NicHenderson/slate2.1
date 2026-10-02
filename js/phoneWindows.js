@@ -19,6 +19,7 @@ const PHONE_WINDOWS = [
   // for each title, so it's looked for when the drag starts.
   { backdrop: "detail-modal", sheet: ".detail-layout", head: ".detail-head", close: "detail-close" },
   { backdrop: "search-modal", sheet: ".modal", head: ".modal-head", close: "modal-close" },
+  { backdrop: "episodes-modal", sheet: ".modal", head: ".ep-head", close: "episodes-close" },
 ];
 
 const phoneWindowLayout = matchMedia("(max-width: 640px)");

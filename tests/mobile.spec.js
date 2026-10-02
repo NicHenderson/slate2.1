@@ -507,6 +507,36 @@ test("on a phone, a search result opens in the list's place, its button at the b
   await expect(page.locator("#grid-movies-towatch .card", { hasText: "Paddington" })).toBeVisible();
 });
 
+// Episodes on a phone: a season is a card of boxes. Tapping one only
+// picks it (a stray tap must not tick anything); its card's button ticks
+// it, and the card moves on to the next one.
+test("on a phone, an episode's box picks it, and its card's button ticks it", async ({ page, backend }) => {
+  const dark = backend.db.shows.find((s) => s.title === "Dark");
+  Object.assign(dark, { finished_watching_date: null, rating: null });
+  backend.seed("watched_episodes", [1, 2, 3].map((episode) => ({ show_id: dark.id, season: 1, episode })), backend.user.id);
+  const ticked = () => backend.db.watched_episodes.filter((e) => e.show_id === dark.id).map((e) => `${e.season}x${e.episode}`).sort();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await logIn(page);
+  await page.locator('.tab-bar-btn[data-tab="shows"]').tap();
+  await page.locator("#grid-shows-watching .card", { hasText: "Dark" }).tap();
+  await page.locator('#detail-modal .up-next [data-action="open-episodes"]').tap();
+  const box = (n) => page.locator(`#episodes-modal .ep-row[data-episode="${n}"]`);
+  const card = page.locator("#episodes-modal .ep-card");
+  // It opens on the next one.
+  await expect(box(4)).toHaveClass(/\bis-picked\b/);
+  await expect(card.locator(".ep-card-name")).toHaveText("E4 · Double Lives");
+  await box(7).tap();
+  await expect(box(7)).toHaveClass(/\bis-picked\b/);
+  await expect(card.locator(".ep-card-name")).toHaveText("E7 · Crossroads");
+  expect(ticked()).toEqual(["1x1", "1x2", "1x3"]);
+  await card.locator(".ep-card-tick").tap();
+  await expect.poll(ticked).toEqual(["1x1", "1x2", "1x3", "1x7"]);
+  await expect(card.locator(".ep-card-name")).toHaveText("E8 · As You Sow, so You Shall Reap");
+  await expectNoSidewaysScroll(page);
+  await expectOnScreen(page.locator("#episodes-close"));
+});
+
 // Adding titles to a collection, as rows: tapping one ticks it, and the
 // stamp adds it. Picking a favorite: a tap anywhere on its row picks it.
 test("on a phone, titles are added to a collection by tapping their rows; a favorite by tapping its row", async ({ page, backend }) => {

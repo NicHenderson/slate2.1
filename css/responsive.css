@@ -148,6 +148,8 @@
 .density-select-wrap,
 .confirm-close,
 .detail-head-poster,
+.ep-tap-hint,
+.ep-card,
 .sheet-grip,
 .auth-sheet-grip,
 .auth-sheet-close,
@@ -3478,14 +3480,18 @@
    The same sheet of paper (above) for a new collection, adding titles to
    one, the favorite picker and Import. */
 @media (max-width: 640px) {
-  :is(#collection-modal, #library-modal, #favorite-modal, #import-modal, #search-modal) {
+  :is(#collection-modal, #library-modal, #favorite-modal, #import-modal, #search-modal, #episodes-modal) {
     align-items: end;
     justify-items: stretch;
+    /* One column as wide as the screen, whatever's inside: a row of tabs
+       too long for it (a show of eight seasons) slides instead of
+       widening the sheet past the screen. */
+    grid-template-columns: minmax(0, 1fr);
     padding: var(--safe-top) 0 0;
     background: rgba(5, 4, 10, 0.68);
   }
 
-  :is(#collection-modal, #library-modal, #favorite-modal, #search-modal) .modal,
+  :is(#collection-modal, #library-modal, #favorite-modal, #search-modal, #episodes-modal) .modal,
   #import-modal .import-panel {
     --sheet-paper: var(--paper);
     position: relative;
@@ -3506,11 +3512,11 @@
   }
 
   /* Lists stand tall, so their sheet does too: it doesn't jump as they fill. */
-  :is(#library-modal, #favorite-modal, #search-modal) .modal {
+  :is(#library-modal, #favorite-modal, #search-modal, #episodes-modal) .modal {
     height: calc(100dvh - var(--safe-top) - 16px);
   }
 
-  :is(#collection-modal, #library-modal, #favorite-modal, #search-modal) .modal::before,
+  :is(#collection-modal, #library-modal, #favorite-modal, #search-modal, #episodes-modal) .modal::before,
   #import-modal .import-panel::before {
     content: "";
     position: absolute;
@@ -3522,7 +3528,7 @@
     pointer-events: none;
   }
 
-  :is(#collection-modal, #library-modal, #favorite-modal, #search-modal) .modal::after,
+  :is(#collection-modal, #library-modal, #favorite-modal, #search-modal, #episodes-modal) .modal::after,
   #import-modal .import-panel::after {
     content: "";
     position: absolute;
@@ -3599,7 +3605,7 @@
     content: " · ";
   }
 
-  :is(#collection-close, #library-close, #favorite-close, #import-close, #modal-close) {
+  :is(#collection-close, #library-close, #favorite-close, #import-close, #modal-close, #episodes-close) {
     position: absolute;
     z-index: 3;
     top: 16px;
@@ -5219,5 +5225,338 @@
     font-size: 15px;
     letter-spacing: 0.06em;
     transform: rotate(-1deg);
+  }
+}
+
+/* ==================== Windows on a phone, stage 5: episodes ====================
+   The owner's pick ("C"): the same sheet; a season is a card of numbered
+   hand-drawn boxes, five across, ticked ones checked. A tap on a box
+   picks it (js/episodes.js) and shows that episode below: its photo,
+   what it is to you (Up next, Stopped here, New, Watched), its name and
+   a few lines, and "✓ Watched it" / "↓ Up to here" (only where it can be
+   ticked). The window scrolls only for a very long season. */
+@media (max-width: 640px) {
+  #episodes-modal .episodes-body {
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 24px 18px calc(18px + var(--safe-bottom));
+  }
+
+  /* ---------- the head: the name as a label, the hint, the progress ---------- */
+  #episodes-modal .ep-head {
+    display: block;
+    padding-right: 40px;
+    touch-action: none; /* it drags the sheet down */
+  }
+
+  #episodes-modal .ep-title {
+    display: table;
+    padding: 3px 12px 2px;
+    background: color-mix(in srgb, var(--accent-strong) 55%, var(--paper));
+    color: var(--ink);
+    font-size: 22px;
+    line-height: 1.2;
+    transform: rotate(-1.5deg);
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  #episodes-modal .ep-sub {
+    display: none;
+  }
+
+  #episodes-modal .ep-tap-hint {
+    display: block;
+    margin-top: 8px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+  }
+
+  /* Only to look at: the note says so instead. */
+  #episodes-modal .episodes-body:has(.ep-read-only) .ep-tap-hint {
+    display: none;
+  }
+
+  #episodes-modal .ep-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+    min-width: 0;
+  }
+
+  #episodes-modal .ep-progress-text {
+    flex: none;
+    font-size: 18px;
+    text-align: left;
+  }
+
+  #episodes-modal .ep-bar {
+    flex: 1;
+    margin-top: 0;
+  }
+
+  #episodes-modal .ep-read-only {
+    margin-top: 10px;
+    padding: 8px 12px;
+    font-size: 15px;
+  }
+
+  /* ---------- the seasons: tabs that slide sideways ---------- */
+  #episodes-modal .ep-tabs {
+    gap: 8px;
+    margin: 12px -18px 0;
+    padding: 2px 18px 8px;
+    scrollbar-width: none;
+  }
+
+  #episodes-modal .ep-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  #episodes-modal .ep-tab {
+    margin-right: 0;
+    padding: 6px 12px;
+    font-size: 17px;
+  }
+
+  #episodes-modal .ep-tab[aria-selected="true"] {
+    box-shadow: 2px 3px 0 var(--accent-deep);
+    transform: rotate(-1deg);
+  }
+
+  /* ---------- the season's boxes ---------- */
+  #episodes-modal .ep-list {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px 10px;
+    flex: none;
+    margin: 10px 0 0;
+    padding: 4px 2px 10px;
+    overflow: visible;
+    scrollbar-gutter: auto;
+  }
+
+  #episodes-modal .ep-list > .ep-loading {
+    grid-column: 1 / -1;
+  }
+
+  #episodes-modal .ep-row {
+    position: relative;
+    display: block;
+    aspect-ratio: 1 / 1.08;
+    padding: 0;
+    border: 2.2px solid var(--ink);
+    border-radius: 5px 8px 4px 7px;
+    background: var(--paper);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #episodes-modal .ep-row:nth-child(3n + 1) {
+    transform: rotate(-1.5deg);
+  }
+
+  #episodes-modal .ep-row:nth-child(3n + 2) {
+    transform: rotate(1deg);
+  }
+
+  #episodes-modal .ep-row.is-done {
+    background: color-mix(in srgb, var(--accent-strong) 18%, var(--paper));
+  }
+
+  #episodes-modal .ep-row.is-unaired {
+    border-style: dashed;
+    border-color: color-mix(in srgb, var(--ink) 35%, transparent);
+  }
+
+  /* The one shown below, ringed. */
+  #episodes-modal .ep-row.is-picked {
+    box-shadow: 0 0 0 3px var(--paper), 0 0 0 6px var(--accent-strong);
+  }
+
+  /* The box itself picks, it doesn't tick: the tap goes to the row. Its
+     tick is drawn big, in the box's top corner. */
+  #episodes-modal .ep-box-btn {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    pointer-events: none;
+  }
+
+  #episodes-modal .ep-row .up-next-box {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 30px;
+    height: 26px;
+    border: 0;
+    background: none;
+    transform: none;
+  }
+
+  #episodes-modal .ep-main {
+    position: static;
+  }
+
+  #episodes-modal :is(.ep-name, .ep-desc, .ep-air, .ep-upto, .ep-photo) {
+    display: none;
+  }
+
+  #episodes-modal .ep-line {
+    position: absolute;
+    left: 7px;
+    bottom: 4px;
+  }
+
+  #episodes-modal .ep-num {
+    font-family: var(--font-hand);
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--ink);
+  }
+
+  #episodes-modal .ep-row.is-unaired .ep-num {
+    color: var(--ink-muted);
+  }
+
+  /* Up next / Stopped here / New: a small tag hanging under the box. */
+  #episodes-modal .ep-flag {
+    position: absolute;
+    left: 50%;
+    bottom: -14px;
+    z-index: 1;
+    margin: 0;
+    padding: 0 5px;
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: nowrap;
+    transform: translateX(-50%) rotate(-3deg);
+  }
+
+  #episodes-modal .ep-line:has(.ep-flag) {
+    left: 0;
+    right: 0;
+    bottom: 4px;
+    padding-left: 7px;
+  }
+
+  /* ---------- the episode picked ---------- */
+  #episodes-modal .ep-card {
+    display: grid;
+    grid-template-columns: 118px minmax(0, 1fr);
+    gap: 10px 12px;
+    align-items: start;
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: color-mix(in srgb, var(--accent-strong) 18%, var(--paper));
+    box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.18);
+    transform: rotate(0.5deg);
+  }
+
+  #episodes-modal .ep-card:empty {
+    display: none;
+  }
+
+  #episodes-modal .ep-card-photo {
+    margin: 2px 0 0;
+    padding: 4px 4px 10px;
+    background: #fff;
+    box-shadow: 1px 3px 8px rgba(0, 0, 0, 0.25);
+    transform: rotate(-2.5deg);
+  }
+
+  #episodes-modal .ep-card-photo img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background: var(--surface);
+  }
+
+  #episodes-modal .ep-card-photo img.is-poster {
+    object-fit: contain;
+    background: #1a1a1a;
+  }
+
+  #episodes-modal .ep-card-text {
+    min-width: 0;
+  }
+
+  #episodes-modal .ep-card-flag {
+    font-family: var(--font-hand);
+    font-size: 19px;
+    line-height: 1.1;
+    color: var(--accent-deep);
+  }
+
+  #episodes-modal .ep-card-name {
+    margin-top: 2px;
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  #episodes-modal .ep-card-desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    overflow: hidden;
+    margin-top: 3px;
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--ink-muted);
+  }
+
+  #episodes-modal .ep-card-desc.is-generic {
+    font-style: italic;
+  }
+
+  #episodes-modal .ep-card-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  #episodes-modal .ep-card-tick {
+    flex: 1;
+    min-height: 48px;
+    padding: 0 12px;
+    border: 0;
+    background: var(--accent-strong);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    box-shadow: 3px 4px 0 var(--accent-deep);
+    transform: rotate(-1deg);
+    cursor: pointer;
+  }
+
+  /* Already watched: unticking it is the plainer button. */
+  #episodes-modal .ep-card-tick.is-done {
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 3px 4px 0 color-mix(in srgb, var(--ink) 35%, transparent);
+  }
+
+  #episodes-modal .ep-card-upto {
+    flex: none;
+    min-height: 48px;
+    padding: 0 12px;
+    border: 2px dashed var(--accent-deep);
+    background: none;
+    color: var(--accent-deep);
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
   }
 }

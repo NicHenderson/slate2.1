@@ -835,6 +835,59 @@ function episodeRowHtml(row, ep, mark, cutoff) {
     </li>`;
 }
 
+/* On a phone (the owner's pick, "C"): the season as a card of numbered
+   boxes; a tap on one shows that episode below, with "✓ Watched it" and
+   "↓ Up to here" (css/responsive.css). It opens on the episode flagged
+   (the next one, where a dropped show stopped, the first new one), else
+   the first not yet watched. The computer keeps its rows. */
+function defaultPick(row, shown, mark, cutoff) {
+  if (!shown?.length) return null;
+  const unseen = (ep) => hasAired(ep.airDate) && !shownAsTicked(row, ep, cutoff);
+  const flagged = shown.find((ep) => mark && ep.season === mark.season && ep.number === mark.number)
+    ?? (isFinishedShow(row) ? shown.find(unseen) : null);
+  return (flagged ?? shown.find(unseen) ?? shown[0]).number;
+}
+
+function episodeCardHtml(row, ep, mark, cutoff) {
+  if (!ep) return "";
+  const done = shownAsTicked(row, ep, cutoff);
+  const out = hasAired(ep.airDate);
+  const isNew = isFinishedShow(row) && out && !done;
+  const isMarked = mark && mark.season === ep.season && mark.number === ep.number;
+  const flag = isNew ? t("New") : isMarked ? mark.label : done ? t("Watched") : "";
+  const about = out
+    ? ep.overview
+      ? `<p class="ep-card-desc">${escapeHtml(ep.overview)}</p>`
+      : `<p class="ep-card-desc is-generic">${t("Episode {e} of season {s} of {title}.", { e: ep.number, s: ep.season, title: escapeHtml(row.title ?? t("Untitled")) })}</p>`
+    : `<p class="ep-card-desc">${ep.airDate ? t("Airs on {date}", { date: formatDate(ep.airDate) }) : t("Not out yet")}</p>`;
+  const src = ep.still ? TMDB_STILL + ep.still : row.poster;
+  const actions =
+    out && !isReadOnlyShow(row)
+      ? `<div class="ep-card-actions">
+          <button class="ep-card-tick${done ? " is-done" : ""}" type="button" data-action="toggle-episode" data-season="${ep.season}" data-episode="${ep.number}">${done ? t("Untick it") : t("✓ Watched it")}</button>
+          <button class="ep-card-upto" type="button" data-action="tick-up-to-here" data-season="${ep.season}" data-episode="${ep.number}">${t("↓ Up to here")}</button>
+        </div>`
+      : "";
+  return `
+    ${src ? `<figure class="ep-card-photo"><img class="${ep.still ? "" : "is-poster"}" src="${escapeHtml(src)}" alt="" /></figure>` : ""}
+    <div class="ep-card-text">
+      ${flag ? `<p class="ep-card-flag">${flag}</p>` : ""}
+      <p class="ep-card-name">${t("E{n}", { n: ep.number })} · ${escapeHtml(episodeName(ep))}</p>
+      ${about}
+    </div>
+    ${actions}`;
+}
+
+// The picked box ringed, and its episode on the card.
+function showPickedEpisode() {
+  const win = episodesWindow;
+  const view = win?.view;
+  if (!view) return;
+  episodesBody.querySelectorAll(".ep-row").forEach((li) => li.classList.toggle("is-picked", Number(li.dataset.episode) === win.picked));
+  const card = episodesBody.querySelector(".ep-card");
+  if (card) card.innerHTML = episodeCardHtml(view.row, view.shown?.find((ep) => ep.number === win.picked), view.mark, view.cutoff);
+}
+
 // Draws the window from what's known now: the show's seasons, the season
 // shown (looked up if it isn't yet) and what's ticked.
 async function renderEpisodesWindow({ scrollToNext = false } = {}) {
@@ -877,9 +930,12 @@ async function renderEpisodesWindow({ scrollToNext = false } = {}) {
       : row.is_dropped
         ? t("You dropped it. This list is just to look at: to start it over, move it back to To Watch.")
         : "";
+  const cutoff = finished && finishedCutoff(row, outline);
   const list = shown
-    ? shown.map((ep) => episodeRowHtml(row, ep, mark, finished && finishedCutoff(row, outline))).join("")
+    ? shown.map((ep) => episodeRowHtml(row, ep, mark, cutoff)).join("")
     : `<li class="ep-loading">${t("Couldn't load the episodes. Please try again later.")}</li>`;
+  win.view = { row, shown, mark, cutoff };
+  if (!shown?.some((ep) => ep.number === win.picked)) win.picked = defaultPick(row, shown, mark, cutoff);
 
   const listEl = episodesBody.querySelector(".ep-list");
   const keepScroll = listEl && !scrollToNext ? listEl.scrollTop : 0;
@@ -888,6 +944,7 @@ async function renderEpisodesWindow({ scrollToNext = false } = {}) {
       <div class="ep-head-text">
         <h2 class="ep-title" id="episodes-title">${t("{title} · Episodes", { title: escapeHtml(row.title ?? t("Untitled")) })}</h2>
         <p class="ep-sub">${tn(seasons.length, "{n} season", "{n} seasons")} · ${tn(out, "{n} episode out", "{n} episodes out")}</p>
+        <p class="ep-tap-hint">${t("Tap a number to see that episode.")}</p>
       </div>
       <div class="ep-progress">
         <p class="ep-progress-text">${t("{a} of {b} watched", { a: watched, b: out })}</p>
@@ -896,7 +953,9 @@ async function renderEpisodesWindow({ scrollToNext = false } = {}) {
     </div>
     ${note ? `<div class="ep-read-only"><p>${note}</p>${hasNews ? KEEP_WATCHING_HTML : ""}</div>` : ""}
     <div class="ep-tabs" role="tablist">${tabs}</div>
-    <ul class="ep-list">${list}</ul>`;
+    <ul class="ep-list">${list}</ul>
+    <div class="ep-card" aria-live="polite"></div>`;
+  showPickedEpisode();
   const newList = episodesBody.querySelector(".ep-list");
   if (scrollToNext) {
     const at = newList.querySelector(".is-next, .is-new");
@@ -1153,12 +1212,23 @@ async function refreshShowCounts(row) {
 }
 
 episodesBody.addEventListener("click", (e) => {
+  // On a phone a box is picked, not ticked: its episode shows on the card,
+  // whose buttons tick it.
+  const box = phoneWindowLayout.matches && e.target.closest(".ep-list .ep-row[data-episode]");
+  if (box && episodesWindow) {
+    episodesWindow.picked = Number(box.dataset.episode);
+    showPickedEpisode();
+    return;
+  }
   const button = e.target.closest("[data-action]");
   if (!button || button.disabled) return;
   if (button.dataset.action === "episodes-season" && episodesWindow) {
     episodesWindow.season = Number(button.dataset.season);
+    episodesWindow.picked = null;
     renderEpisodesWindow({ scrollToNext: true });
   }
+  // Ticked from the card: it moves on to what's next, as "Up next" does.
+  if (button.closest(".ep-card") && !button.classList.contains("is-done") && episodesWindow) episodesWindow.picked = null;
   if (button.dataset.action === "toggle-episode") toggleEpisodeInWindow(button);
   if (button.dataset.action === "keep-watching") {
     const row = STORE.shows.get(episodesWindow?.showId);

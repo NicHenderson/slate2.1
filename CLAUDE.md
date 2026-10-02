@@ -1026,6 +1026,23 @@ directly.
   The trailer plays over it as in a title's window. The head drags it
   down. Computer pixel-identical (1280/900/700: the list, a result,
   picking).
+  Stage 5 — built, waiting for the owner's check (css/responsive.css
+  "Windows on a phone, stage 5"): #episodes-modal is the same tall
+  sheet; the head is its name as a label, "Tap a number to see that
+  episode." (or the read-only note), "12 of 19 watched" and the bar;
+  the seasons as tabs sliding sideways; the season a card of numbered
+  hand-drawn boxes five across (ticked ones checked, not out dashed,
+  Up next / Stopped here / New as a tag under the box). **On a phone a
+  box picks, it doesn't tick** (a stray tap must not tick): the picked
+  one is ringed and shown below on a note (photo, Up next / Stopped
+  here / New / Watched, "E4 · name", four lines), with "✓ Watched it"
+  (or "Untick it") and "↓ Up to here" where it can be ticked; ticking
+  moves on to the next one (js/episodes.js, `episodesWindow.picked`,
+  `episodeCardHtml`). It opens on the flagged episode, else the first
+  not watched. Computer keeps its rows, pixel-identical. Found on the
+  way: a show of eight seasons widened the sheet past the screen (its
+  tabs' width leaked through the backdrop's grid); the sheets'
+  backdrops are now one screen-wide column.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's
