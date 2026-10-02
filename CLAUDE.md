@@ -1128,6 +1128,12 @@ directly.
   same note ("No collections yet." + "Create a collection"); the
   booklet is hidden on phones (the floating "+" still clicks it);
   computers keep the booklet, pixel-identical.
+  Then (the owner's iPhone): "Can't quite see it?" → "Use this one"
+  left the page at the top of Appearance with the loupe still open
+  further down, until the next touch closed it (Chromium doesn't jump;
+  the cause wasn't found here). "Use this one" now saves and closes the
+  loupe (the owner expected that; it used to stay open with "In use"),
+  computer too, and puts the screen's scroll back where it was.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

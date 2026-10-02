@@ -370,9 +370,20 @@ loupeChipsEl.addEventListener("click", (e) => {
   const chip = e.target.closest("[data-loupe-key]");
   if (chip && chip.dataset.loupeKey !== loupeKey) showLoupeTexture(chip.dataset.loupeKey, true);
 });
+// Used, the loupe has done its job and folds away (the owner expected it
+// to; it used to stay open saying "In use"). The screen stays where it
+// was: on the owner's iPhone it jumped to the top of Appearance with the
+// loupe still open further down, until the next touch closed it.
 loupeUseBtn.addEventListener("click", () => {
+  const scroller = document.querySelector(".content");
+  const top = scroller.scrollTop;
   saveSetting("background", loupeKey);
-  showLoupeTexture(loupeKey, false);
+  closeLoupe({ refocus: true });
+  const keepPlace = () => {
+    if (scroller.scrollTop !== top) scroller.scrollTop = top;
+  };
+  requestAnimationFrame(keepPlace);
+  setTimeout(keepPlace, 250);
 });
 // On the document: "Use this one" goes disabled once used, and a disabled
 // button drops the focus out of the loupe.
