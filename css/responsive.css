@@ -4776,8 +4776,9 @@
   }
 
   /* Too long for the screen: the last lines fade out while there's more
-     below. (Room for the bar is kept either way, so the lines don't
-     re-wrap when it shows.) */
+     below. The phone's own scroll bar shows beside the text (the owner
+     preferred it to one drawn by Slate); room is kept for it either way,
+     so the lines don't re-wrap. */
   .detail-note-text {
     padding-right: 14px;
   }
@@ -4785,32 +4786,6 @@
   .detail-note.can-scroll:not(.at-end) .detail-note-text {
     -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 48px), transparent);
     mask-image: linear-gradient(180deg, #000 calc(100% - 48px), transparent);
-  }
-
-  /* Its own scroll bar, always there while it can scroll (an iPhone's
-     only shows while the finger moves): how far in, and how much is left. */
-  .detail-note-track {
-    display: none;
-    position: absolute;
-    top: 58px;
-    bottom: 22px;
-    right: 8px;
-    width: 4px;
-    border-radius: 2px;
-    background: color-mix(in srgb, var(--ink) 12%, transparent);
-    pointer-events: none;
-  }
-
-  .detail-note.can-scroll .detail-note-track {
-    display: block;
-  }
-
-  .detail-note-thumb {
-    position: absolute;
-    left: 0;
-    right: 0;
-    border-radius: 2px;
-    background: var(--accent-deep);
   }
 
   /* "Keep scrolling" under the text while there's more. */

@@ -385,21 +385,14 @@ function openDetailNote(el) {
   syncNoteScroll();
 }
 
-// A text too long for the screen scrolls inside the note: its own bar
-// says how far in, and the end fades out until it's reached.
+// A text too long for the screen scrolls inside the note, its end fading
+// out (and a hint under it) until it's reached.
 const detailNoteText = document.getElementById("detail-note-text");
-const detailNoteThumb = document.getElementById("detail-note-thumb");
 
 function syncNoteScroll() {
   const { scrollTop, scrollHeight, clientHeight } = detailNoteText;
-  const scrolls = scrollHeight > clientHeight + 1;
-  detailNote.classList.toggle("can-scroll", scrolls);
+  detailNote.classList.toggle("can-scroll", scrollHeight > clientHeight + 1);
   detailNote.classList.toggle("at-end", scrollTop + clientHeight >= scrollHeight - 2);
-  if (!scrolls) return;
-  const track = detailNoteThumb.parentElement.clientHeight;
-  const size = Math.max(28, (clientHeight / scrollHeight) * track);
-  detailNoteThumb.style.height = `${size}px`;
-  detailNoteThumb.style.top = `${(scrollTop / (scrollHeight - clientHeight)) * (track - size)}px`;
 }
 
 detailNoteText.addEventListener("scroll", syncNoteScroll, { passive: true });

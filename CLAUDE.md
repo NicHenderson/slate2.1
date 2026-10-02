@@ -1007,10 +1007,10 @@ directly.
   The owner's iPhone: a very long review ran off the screen on the note
   (a grid row grows with its content, so the paper's max-height: 100%
   didn't limit it). Now the paper is capped to the screen and only the
-  text scrolls, with its own bar (always shown while it can scroll; an
-  iPhone's own shows only mid-swipe), the last lines fading and
-  "↓ Scroll to keep reading" until the end; the ruled lines scroll
-  with the text (`background-attachment: local`).
+  text scrolls, the last lines fading and "↓ Scroll to keep reading"
+  until the end; the ruled lines scroll with the text
+  (`background-attachment: local`). A bar drawn by Slate showed beside
+  the iPhone's own; the owner kept the iPhone's, so Slate's is gone.
   Stage 4 — built, waiting for the owner's check (css/responsive.css
   "Windows on a phone, stage 4"): #search-modal is the same paper sheet
   (it joins stage 2's shared rules), standing tall. The field on top
