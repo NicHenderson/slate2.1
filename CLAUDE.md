@@ -1112,6 +1112,12 @@ directly.
   form now closes the search too, so the list shows it at once (Cancel
   leaves the search open, as before). `updateFromSearch` /
   `startFromSearch`; test in tests/library.spec.js.
+  Then (the owner): "Card density" did nothing on a phone (stage 2
+  had pinned three across for both). Now Compact there is four across,
+  every piece of the polaroid a size down (lists and an open
+  collection), and shorter folder rows in Collections
+  (css/responsive.css "Compact cards on a phone"); Comfortable as
+  before.
   **No pinch zoom on phones** (the
   owner's call, Sept. 30, 2026, told it's an accessibility trade-off and
   that iOS only allows it by workaround): the viewport tag's

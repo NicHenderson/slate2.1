@@ -5609,6 +5609,190 @@
 }
 
 
+/* ==================== Compact cards on a phone ====================
+   Settings → Appearance → "Card density": Compact fits more titles on
+   each screen here too. The lists (and an open collection) go four
+   across instead of three, every piece of the polaroid a size down, and
+   the collections' folders get shorter rows. */
+@media (max-width: 640px) {
+  [data-density="compact"] [id^="grid-movies-"].card-grid,
+  [data-density="compact"] [id^="grid-shows-"].card-grid,
+  [data-density="compact"] #col-detail-grid.card-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px 7px;
+  }
+
+  [data-density="compact"] [id^="grid-movies-"] .card,
+  [data-density="compact"] [id^="grid-shows-"] .card,
+  [data-density="compact"] .drag-ghost[data-ghost-of$="-towatch"],
+  [data-density="compact"] [id^="grid-movies-"] .ghost-card,
+  [data-density="compact"] [id^="grid-shows-"] .ghost-card,
+  [data-density="compact"] .card.col-item-card {
+    gap: 4px;
+    padding: 4px 4px 6px;
+  }
+
+  [data-density="compact"] [id^="grid-movies-"] .card::before,
+  [data-density="compact"] [id^="grid-shows-"] .card::before,
+  [data-density="compact"] .drag-ghost[data-ghost-of$="-towatch"]::before,
+  [data-density="compact"] .col-item-card::before {
+    top: -5px;
+    right: 8px;
+    width: 24px;
+    height: 9px;
+  }
+
+  [data-density="compact"] [id^="grid-movies-"] .card-title,
+  [data-density="compact"] [id^="grid-shows-"] .card-title,
+  [data-density="compact"] .drag-ghost[data-ghost-of$="-towatch"] .card-title,
+  [data-density="compact"] .col-item-card .card-title {
+    padding: 0 1px;
+    font-size: 12.5px;
+  }
+
+  [data-density="compact"] [id^="grid-movies-"] .card-glance,
+  [data-density="compact"] [id^="grid-shows-"] .card-glance,
+  [data-density="compact"] .drag-ghost[data-ghost-of$="-towatch"] .card-glance,
+  [data-density="compact"] .col-item-card .card-glance {
+    gap: 3px;
+    min-height: 14px;
+    padding: 0 1px;
+    font-size: 9.5px;
+  }
+
+  [data-density="compact"] .card-glance-rating {
+    gap: 2px;
+    font-size: 13px;
+  }
+
+  [data-density="compact"] .card-glance-heart {
+    width: 11px;
+    height: 11px;
+  }
+
+  [data-density="compact"] .card-glance-unrated {
+    font-size: 11.5px;
+  }
+
+  [data-density="compact"] [id^="grid-shows-"] .card-episode {
+    padding: 0 1px;
+  }
+
+  [data-density="compact"] [id^="grid-shows-"] .card-episode-code {
+    font-size: 13px;
+  }
+
+  [data-density="compact"] #grid-shows-dropped .card-episode-code {
+    font-size: 11.5px;
+  }
+
+  [data-density="compact"] [id^="grid-shows-"] .card-episode-count {
+    font-size: 9.5px;
+  }
+
+  [data-density="compact"] [id^="grid-shows-"] .card-episode-bar {
+    height: 5px;
+  }
+
+  [data-density="compact"] [id^="grid-shows-"] .card-new-season {
+    width: 50px;
+    padding: 6px 4px;
+    font-size: 9px;
+  }
+
+  [data-density="compact"] [id^="grid-movies-"] .card-rewatch {
+    top: 8px;
+    right: 3px;
+    padding: 1px 5px;
+    font-size: 10px;
+  }
+
+  [data-density="compact"] [id^="grid-movies-"] .ghost-plus,
+  [data-density="compact"] [id^="grid-shows-"] .ghost-plus {
+    font-size: 24px;
+  }
+
+  [data-density="compact"] [id^="grid-movies-"] .ghost-label,
+  [data-density="compact"] [id^="grid-shows-"] .ghost-label {
+    font-size: 11.5px;
+  }
+
+  [data-density="compact"] .col-item-card .status-badge {
+    top: 7px;
+    left: 7px;
+    width: 18px;
+    height: 18px;
+  }
+
+  [data-density="compact"] .col-item-card .col-item-remove {
+    top: 7px;
+    right: 7px;
+    width: 20px;
+    height: 20px;
+  }
+
+  /* ---------- the collections' folders: shorter rows ---------- */
+  [data-density="compact"] #grid-collections.card-grid {
+    gap: 9px;
+  }
+
+  [data-density="compact"] .collection-card {
+    min-height: 60px;
+  }
+
+  [data-density="compact"] .collection-card .booklet-body {
+    grid-template-columns: 34px minmax(0, 1fr);
+    column-gap: 10px;
+    row-gap: 3px;
+    padding: 7px 80px 7px 10px;
+  }
+
+  [data-density="compact"] .collection-card .booklet-icon,
+  [data-density="compact"] .collection-card .booklet-empty-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 17px;
+  }
+
+  [data-density="compact"] .collection-card .booklet-icon .ico,
+  [data-density="compact"] .collection-card .booklet-empty-icon .ico {
+    width: 18px;
+    height: 18px;
+  }
+
+  [data-density="compact"] .collection-card .booklet-title {
+    font-size: 14px;
+    -webkit-line-clamp: 1;
+  }
+
+  [data-density="compact"] .collection-card .booklet-progress-text {
+    font-size: 9.5px;
+  }
+
+  [data-density="compact"] .collection-card .booklet-bar {
+    height: 5px;
+  }
+
+  [data-density="compact"] .collection-card .booklet-stamp {
+    width: 66px;
+    height: 46px;
+    margin-top: -23px;
+  }
+
+  [data-density="compact"] .collection-card .booklet-stamp > * {
+    width: 30px;
+    height: 44px;
+  }
+
+  [data-density="compact"] .collection-card .booklet-stamp > :nth-child(2) {
+    right: 14px;
+  }
+
+  [data-density="compact"] .collection-card .booklet-stamp > :nth-child(3) {
+    right: 28px;
+  }
+}
+
 /* ---------- The installed app's height ----------
    iOS 26 has a bug in apps installed on the home screen with a
    see-through status bar: once the keyboard has come up (and on the
