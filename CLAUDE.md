@@ -662,7 +662,12 @@ directly.
   claude-mobile-app.myslate.pages.dev); it goes to `main` **only when
   the owner says so**, not after each stage. The owner's flow: the whole
   project merged into `claude/funny-pascal-bk99gr` (done Oct. 2, 2026,
-  on their word), tested again there, then to `main` on "súbelo a main". `claude/funny-pascal-bk99gr`
+  on their word), tested again there, then to `main` on "súbelo a main".
+  **In `main` since Oct. 3, 2026 (PR #27, CI green on its exact head).**
+  Still to confirm on the owner's iPhone: the installed app's height fix
+  (the dark band after the keyboard) and the jump to the top of
+  Appearance after "Use this one". Left for later, only with the owner's
+  go-ahead: "back works" (stage 2) and offline (stage 7). `claude/funny-pascal-bk99gr`
   stays for small fixes meanwhile. Phone-only changes: the computer
   layout stays as it is (checked by comparing screenshots). **One phone
   design, chosen by the window's size, not by the device** (the owner's
