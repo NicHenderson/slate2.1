@@ -79,7 +79,7 @@ function openModal(type) {
   showPreviewHint();
   updateBatchFooter();
   modal.classList.remove("hidden");
-  modalInput.focus();
+  focusOnOpen(modalInput);
 }
 
 function closeModal() {
@@ -91,6 +91,30 @@ function closeModal() {
   // The side goes blank with it: a hidden trailer would still play.
   previewId = null;
   modalPreview.innerHTML = "";
+}
+
+// Picked but not added yet: closing asks first. "✓ Picked" in a title's
+// details read as added, and the × threw the picks away (the owner's
+// find). Add them, let them go, or go back to picking.
+function requestCloseModal() {
+  if (batchBusy) return;
+  if (!batchMode || !batchSelection.size) {
+    closeModal();
+    return;
+  }
+  const n = batchSelection.size;
+  openActionConfirm({
+    heading: t("Add what you picked?"),
+    html: escapeHtml(tn(n, "You picked {n} title and haven't added it yet.", "You picked {n} titles and haven't added them yet.")),
+    yes: t("Add and close"),
+    busy: t("Adding…"),
+    no: t("Keep picking"),
+    alt: { label: t("Discard"), run: closeModal },
+    run: async () => {
+      await runBatchAdd();
+      return null;
+    },
+  });
 }
 
 function setStatus(text, isError = false) {
@@ -268,17 +292,19 @@ async function showPreview(id, { retry = false } = {}) {
   // Straight away: what the search already knows, and that the rest is on its way.
   modalPreview.innerHTML = `
     <button class="tmdb-preview-back" type="button" data-action="back">${t("← Results")}</button>
-    <div class="tmdb-preview-top">
-      ${previewPosterHtml(id, item.poster_path)}
-      <div class="tmdb-preview-head">
-        <h3 class="detail-title">${escapeHtml(resultTitle(item))}</h3>
-        <p class="detail-meta-runtime">${resultYear(item)}</p>
+    <div class="tmdb-preview-scroll"><div class="tmdb-preview-body">
+      <div class="tmdb-preview-top">
+        ${previewPosterHtml(id, item.poster_path)}
+        <div class="tmdb-preview-head">
+          <h3 class="detail-title">${escapeHtml(resultTitle(item))}</h3>
+          <p class="detail-meta-runtime">${resultYear(item)}</p>
+        </div>
       </div>
-    </div>
-    <div class="tmdb-preview-loading" role="status">
-      <span class="tmdb-preview-dots" aria-hidden="true"><span></span><span></span><span></span></span>
-      ${t("Loading its details…")}
-    </div>`;
+      <div class="tmdb-preview-loading" role="status">
+        <span class="tmdb-preview-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+        ${t("Loading its details…")}
+      </div>
+    </div></div>`;
   modalPreview.scrollTop = 0;
 
   try {
@@ -301,22 +327,28 @@ function renderPreviewDetails(details) {
   const id = details.id;
   const genreLine = (details.genres ?? []).map((g) => genreName(englishGenre(g))).join(" · ");
   const date = details.release_date ?? details.first_air_date ?? "";
+  // What scrolls is wrapped apart from the way back, so on a phone the
+  // details can be a sheet of their own over the results (css/responsive.css).
   modalPreview.innerHTML = `
     <button class="tmdb-preview-back" type="button" data-action="back">${t("← Results")}</button>
-    <div class="tmdb-preview-top">
-      ${previewPosterHtml(id, details.poster_path)}
-      <div class="tmdb-preview-head">
-        <h3 class="detail-title">${escapeHtml(details.title ?? details.name ?? t("No title"))}</h3>
-        <p class="detail-meta-runtime">${date ? date.slice(0, 4) : "—"} · ${runtimeLine(currentType, details)}</p>
-        ${genreLine ? `<p class="detail-genre-line">${escapeHtml(genreLine)}</p>` : ""}
+    <div class="tmdb-preview-scroll"><div class="tmdb-preview-body">
+      <div class="tmdb-preview-top">
+        ${previewPosterHtml(id, details.poster_path)}
+        <div class="tmdb-preview-head">
+          <h3 class="detail-title">${escapeHtml(details.title ?? details.name ?? t("No title"))}</h3>
+          <p class="detail-meta-runtime">${date ? date.slice(0, 4) : "—"} · ${runtimeLine(currentType, details)}</p>
+          ${genreLine ? `<p class="detail-genre-line">${escapeHtml(genreLine)}</p>` : ""}
+        </div>
       </div>
-    </div>
-    <p class="detail-synopsis">${escapeHtml(details.overview || t("No synopsis available."))}</p>
-    <div class="tmdb-preview-actions">
-      ${previewActionHtml(id)}
-      <div class="detail-trailer">${TRAILER_BTN_LOADING}</div>
-    </div>
-    ${whereToWatchSlotHtml()}`;
+      <p class="detail-synopsis">${escapeHtml(details.overview || t("No synopsis available."))}</p>
+      <div class="tmdb-preview-actions">
+        ${previewActionHtml(id)}
+        <div class="detail-trailer">${TRAILER_BTN_LOADING}</div>
+      </div>
+      ${whereToWatchSlotHtml()}
+    </div></div>`;
+  // On a phone the synopsis is cut to three lines; "more" opens it there.
+  markCut(modalPreview.querySelector(".detail-synopsis"));
   const stillShowing = () => previewId === id && !modal.classList.contains("hidden");
   loadPreviewTrailer(id, stillShowing);
   loadWhereToWatch(modalPreview.querySelector(".where-to-watch"), currentType, id, stillShowing);
@@ -473,10 +505,16 @@ modalClear.addEventListener("click", () => {
   modalInput.focus();
 });
 
-modalClose.addEventListener("click", closeModal);
+modalClose.addEventListener("click", requestCloseModal);
 
+// The question above it takes its own Escape (js/confirmModal.js).
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+  if (e.key !== "Escape" || modal.classList.contains("hidden")) return;
+  const confirmEl = document.getElementById("confirm-modal");
+  if (!confirmEl.classList.contains("hidden")) return;
+  requestCloseModal();
+  // The question just opened: this same Escape mustn't reach its handler.
+  if (!confirmEl.classList.contains("hidden")) e.stopImmediatePropagation();
 });
 
 modalResults.addEventListener("click", (e) => {
@@ -493,6 +531,17 @@ modalPreview.addEventListener("click", (e) => {
     toggleTrailer(trailerBtn);
     return;
   }
+  // On a phone the trailer plays over the window: a tap on the dim closes it.
+  if (detailPhoneLayout.matches && e.target.classList.contains("detail-trailer-frame")) {
+    toggleTrailer(modalPreview.querySelector('[data-action="toggle-trailer"]'));
+    return;
+  }
+  const cut = e.target.closest(".detail-synopsis.is-cut");
+  if (cut) {
+    cut.classList.remove("is-cut");
+    cut.classList.add("is-open");
+    return;
+  }
   const el = e.target.closest("[data-action]");
   if (!el) return;
   const action = el.dataset.action;
@@ -501,8 +550,11 @@ modalPreview.addEventListener("click", (e) => {
   if (action === "retry" && previewId != null) showPreview(previewId, { retry: true });
   if (action === "back") {
     const id = previewId;
-    showPreviewHint();
-    modalResults.querySelector(`.tmdb-hit[data-id="${id}"] .tmdb-hit-main`)?.focus();
+    // On a phone the details slide down off the results first.
+    slideAway(modalPreview, () => {
+      showPreviewHint();
+      modalResults.querySelector(`.tmdb-hit[data-id="${id}"] .tmdb-hit-main`)?.focus();
+    });
   }
 });
 
@@ -514,5 +566,5 @@ batchPicked.addEventListener("click", (e) => {
 batchAddBtn.addEventListener("click", runBatchAdd);
 
 modal.addEventListener("click", (e) => {
-  if (e.target === modal) closeModal();
+  if (e.target === modal) requestCloseModal();
 });

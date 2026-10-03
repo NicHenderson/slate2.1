@@ -29,15 +29,21 @@ function viewTransitionsAllowed() {
 // happen after the change, or must not show in the "before" picture,
 // chains on this instead of assuming the swap already happened.
 function swapView(kind, update) {
+  // A new screen can mean a new background for the phone's status bar
+  // (js/statusBar.js).
+  const change = () => {
+    update();
+    syncStatusBar();
+  };
   if (!kind || !viewsRendered || !viewTransitionsAllowed()) {
     viewsRendered = true;
-    update();
+    change();
     return Promise.resolve();
   }
   const root = document.documentElement;
   const id = ++viewTransitionId;
   root.dataset.vt = kind;
-  const transition = document.startViewTransition(update);
+  const transition = document.startViewTransition(change);
   // A newer transition may have started (and re-set data-vt) before this
   // one finished; only the latest one clears it.
   transition.finished.finally(() => {

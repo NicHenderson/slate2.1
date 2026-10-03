@@ -21,6 +21,10 @@ let updateRow = null;
 // window's list instead (js/viewings.js).
 let updateViewing = null;
 let updateManyViewings = false;
+// Opened over the search right after adding the movie there (Movies, the
+// watched list): saving it is the end of adding it, so the search closes
+// too and the list shows it (the owner's call). Cancel leaves the search.
+let updateFromSearch = false;
 
 updateDate.addEventListener("input", () => {
   if (updateDate.value) updateDateError.classList.add("hidden");
@@ -28,6 +32,7 @@ updateDate.addEventListener("input", () => {
 
 function openMarkAsWatchedModal(row, isNewInsert = false) {
   updateRow = row;
+  updateFromSearch = isNewInsert;
   clearStaleNote(updateForm);
   const watched = row.watched_date != null;
   const viewings = viewingsOf(row.id);
@@ -121,6 +126,7 @@ updateForm.addEventListener("submit", async (e) => {
   afterViewingsChanged(movieId);
   closeUpdateModal();
   closeDetailModal();
+  if (updateFromSearch) closeModal();
   showToast(wasWatched ? t("Changes saved.") : t("Marked as watched."));
 });
 

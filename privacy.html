@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <!-- In Spanish, Slate's main language, for search engines and link
        previews; the script below shows the page in the reader's. -->
   <title>Privacidad · Slate</title>
@@ -41,7 +41,10 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+/* Opened from Slate installed on a phone, the page runs under the
+   status bar and the home bar (viewport-fit=cover): its text keeps clear. */
 body {
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
   margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px;
   background-image:
     radial-gradient(70% 900px at 85% 0%, color-mix(in srgb, var(--accent-strong) 20%, transparent), transparent 70%),

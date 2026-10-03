@@ -141,9 +141,25 @@ function paintGrid(grid, html) {
   grid._html = html;
 }
 
+// No collections yet: on a phone a note says what they're for, in place of
+// the "Add Collection" booklet, which as a full-width row was a big empty
+// box (the owner's call). Computers keep the booklet (the note is hidden).
+function collectionsEmptyNoteHtml() {
+  return `<div class="empty-note collections-empty-note">
+      <p class="empty-note-title">${t("No collections yet.")}</p>
+      <p class="empty-note-text">${t("Group titles your way: a saga, a director, your Sunday movies…")}</p>
+      <button class="empty-note-action" type="button" data-empty-add-collection>${t("Create a collection")}</button>
+    </div>`;
+}
+
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-empty-add-collection]")) document.querySelector("#grid-collections .ghost-card")?.click();
+});
+
 function collectionsGridHtml() {
   const cols = [...STORE.collections.values()].sort(byPosition);
   return (
+    (cols.length ? "" : collectionsEmptyNoteHtml()) +
     cols.map((c) => collectionCardHtml(c, collectionItemsFor(c.id))).join("") +
     `<button class="ghost-card booklet-ghost" type="button" data-type="collection">
       <span class="booklet-ghost-spine"></span>
@@ -231,7 +247,7 @@ function colItemCardHtml(item) {
       <span class="status-badge is-${status}" title="${badge.label}" role="img" aria-label="${badge.label}">${badge.inner}</span>
       ${poster}
       <p class="card-title">${escapeHtml(row.title ?? t("Untitled"))}</p>
-      ${rating}
+      ${rating}${cardGlanceHtml(gridIdFor(table, row), row)}
     </article>`;
 }
 
@@ -529,6 +545,9 @@ function setupDragReorder(grid, cardSelector, onReorder, canDrag = () => true) {
     const g = card.cloneNode(true);
     g.classList.remove("dragging");
     g.classList.add("drag-ghost");
+    // Where it came from: a phone draws a list's cards its own way, and the
+    // copy, out in <body>, needs telling which (css/responsive.css).
+    g.dataset.ghostOf = grid.id;
     // A card grabbed while it's still sliding into a new slot (flipReorder)
     // carries that slide inline: the clone must not keep the offset, nor a
     // transition that would replace the ghost's own.
@@ -1100,7 +1119,7 @@ function openCreateCollectionModal() {
   collectionError.classList.add("hidden");
   iconPickerSet("", true); // an icon is required, so start with the picker open
   collectionModal.classList.remove("hidden");
-  collectionName.focus();
+  focusOnOpen(collectionName);
 }
 
 function openCollectionEditor(col) {
@@ -1111,7 +1130,7 @@ function openCollectionEditor(col) {
   collectionError.classList.add("hidden");
   iconPickerSet(col.icon ?? "", false);
   collectionModal.classList.remove("hidden");
-  collectionName.focus();
+  focusOnOpen(collectionName);
 }
 
 function closeCollectionModal() {

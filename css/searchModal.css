@@ -6,7 +6,7 @@
 
 .modal-tmdb {
   width: min(1040px, calc(100vw - 64px));
-  height: min(720px, calc(100vh - 64px));
+  height: min(720px, calc(var(--screen-h) - 64px));
   max-height: none;
   overflow: hidden;
   border-radius: 0;
@@ -436,7 +436,7 @@
 @media (max-width: 720px) {
   .modal-tmdb {
     width: calc(100vw - 20px);
-    height: calc(100dvh - 24px);
+    height: calc(var(--screen-h) - 24px);
   }
 
   .tmdb-split {

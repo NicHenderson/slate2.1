@@ -105,12 +105,11 @@ test("the profile checks the username, saves only on Save profile, and comes bac
 });
 
 // On a phone the menu comes first and a page takes its place; Account's
-// "Log out" is there because the sidebar isn't.
+// "Log out" is there because the sidebar isn't (the bottom bar is).
 test("on a phone Settings is a menu, then a page with a way back; Account logs out", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 800 });
   await logIn(page);
-  await page.click("#menu-toggle");
-  await page.locator('.nav-btn[data-section="settings"]').click();
+  await page.click('.tab-bar-btn[data-tab="settings"]');
   await expect(page.locator('[data-settings-page="account"]')).toBeVisible();
   await expect(page.locator("#profile-username")).toBeHidden();
 

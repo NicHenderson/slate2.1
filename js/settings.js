@@ -96,6 +96,7 @@ const appRootEl = document.getElementById("app");
 const themeSwatchesEl = document.getElementById("theme-swatches");
 const reduceMotionToggle = document.getElementById("reduce-motion-toggle");
 const densityControl = document.getElementById("density-control");
+const densitySelect = document.getElementById("density-select"); // the phone's
 const backgroundSwatchesEl = document.getElementById("background-swatches");
 const openToSelect = document.getElementById("setting-open-to");
 const defaultSortSelect = document.getElementById("setting-default-sort");
@@ -105,6 +106,7 @@ const confirmDeletesToggle = document.getElementById("confirm-deletes-toggle");
 
 function applyTheme(key) {
   document.documentElement.setAttribute("data-theme", key);
+  syncStatusBar();
 }
 
 function applyReduceMotion(on) {
@@ -251,6 +253,10 @@ function renderSettingsPage() {
     btn.classList.toggle("is-active", on);
     btn.setAttribute("aria-pressed", String(on));
   });
+  densitySelect.value = currentSettings.density;
+  // Shown as a word right before its ▾ (css/responsive.css), however long
+  // the other choice is.
+  densitySelect.parentElement.dataset.label = densitySelect.selectedOptions[0]?.textContent ?? "";
 
   openToSelect.value = currentSettings.openTo;
   defaultSortSelect.value = currentSettings.defaultSort;
@@ -364,9 +370,20 @@ loupeChipsEl.addEventListener("click", (e) => {
   const chip = e.target.closest("[data-loupe-key]");
   if (chip && chip.dataset.loupeKey !== loupeKey) showLoupeTexture(chip.dataset.loupeKey, true);
 });
+// Used, the loupe has done its job and folds away (the owner expected it
+// to; it used to stay open saying "In use"). The screen stays where it
+// was: on the owner's iPhone it jumped to the top of Appearance with the
+// loupe still open further down, until the next touch closed it.
 loupeUseBtn.addEventListener("click", () => {
+  const scroller = document.querySelector(".content");
+  const top = scroller.scrollTop;
   saveSetting("background", loupeKey);
-  showLoupeTexture(loupeKey, false);
+  closeLoupe({ refocus: true });
+  const keepPlace = () => {
+    if (scroller.scrollTop !== top) scroller.scrollTop = top;
+  };
+  requestAnimationFrame(keepPlace);
+  setTimeout(keepPlace, 250);
 });
 // On the document: "Use this one" goes disabled once used, and a disabled
 // button drops the focus out of the loupe.
@@ -383,6 +400,7 @@ densityControl.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-density-value]");
   if (btn) saveSetting("density", btn.dataset.densityValue);
 });
+densitySelect.addEventListener("change", () => saveSetting("density", densitySelect.value));
 
 openToSelect.addEventListener("change", () => saveSetting("openTo", openToSelect.value));
 defaultSortSelect.addEventListener("change", () => saveSetting("defaultSort", defaultSortSelect.value));

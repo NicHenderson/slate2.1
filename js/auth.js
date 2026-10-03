@@ -110,8 +110,12 @@ const AUTH_MODES = {
 const settingPassword = (mode) => mode === "reset" || mode === "choose";
 // Every card for someone already signed in, the policy's included.
 const signedInCard = (mode) => settingPassword(mode) || mode === "privacy";
-// The cards with the Privacy Policy box.
-const asksConsent = (mode) => mode === "request" || mode === "choose" || mode === "privacy";
+// The cards with the Privacy Policy box: asking for access (where someone
+// first hands over their data) and, once, an account made before the
+// policy or its current version. Not the first login's password card: the
+// account comes from a request whose box was ticked (the owner's call; it
+// was asked twice).
+const asksConsent = (mode) => mode === "request" || mode === "privacy";
 
 /* ---------- the Privacy Policy ----------
 
@@ -328,6 +332,74 @@ document.getElementById("auth-back").addEventListener("click", (e) => {
   leaveAuthCard();
 });
 
+// The phone's sheet: its × is "Back to Slate", and its tabs switch
+// between logging in and asking for access, as the link under the form
+// does on a computer.
+document.getElementById("auth-sheet-close").addEventListener("click", () => {
+  if (!signedInCard(authMode)) leaveAuthCard();
+});
+
+// As a phone's own sheets do, it also closes with a tap on the dimmed page
+// above it, or dragged down by its grip (let go too soon and it springs
+// back). Neither on the cards a signed-in visitor must finish, and only
+// while it's a sheet: on a computer the card fills its own screen.
+const authSheetLayout = matchMedia("(max-width: 640px)");
+const authPanel = document.querySelector(".auth-panel");
+const authGrip = document.querySelector(".auth-sheet-grip");
+let sheetDrag = null;
+
+authScreen.addEventListener("click", (e) => {
+  if (e.target === authScreen && authSheetLayout.matches && !signedInCard(authMode)) leaveAuthCard();
+});
+
+authGrip.addEventListener("pointerdown", (e) => {
+  if (signedInCard(authMode)) return;
+  sheetDrag = { startY: e.clientY, startTime: e.timeStamp, dy: 0 };
+  authGrip.setPointerCapture(e.pointerId);
+  authPanel.style.transition = "none";
+  // A layer of its own before it moves: an iPhone otherwise repaints the
+  // whole sheet each frame of the drag (Android works it out by itself).
+  authPanel.style.willChange = "transform";
+});
+
+authGrip.addEventListener("pointermove", (e) => {
+  if (!sheetDrag) return;
+  sheetDrag.dy = Math.max(0, e.clientY - sheetDrag.startY);
+  authPanel.style.transform = `translate3d(0, ${sheetDrag.dy}px, 0)`;
+});
+
+function endSheetDrag(e) {
+  if (!sheetDrag) return;
+  const { dy, startTime } = sheetDrag;
+  sheetDrag = null;
+  setTimeout(() => (authPanel.style.willChange = ""), 300);
+  const flicked = dy > 30 && dy / Math.max(1, e.timeStamp - startTime) > 0.5;
+  authPanel.style.transition = "transform 0.25s cubic-bezier(0.22, 1, 0.36, 1)";
+  if (dy > authPanel.offsetHeight * 0.25 || flicked) {
+    authPanel.style.transform = "translateY(100%)";
+    setTimeout(() => {
+      leaveAuthCard();
+      // Back in place, unseen, for the next time it opens.
+      setTimeout(() => {
+        authPanel.style.transition = "";
+        authPanel.style.transform = "";
+      }, 600);
+    }, 200);
+  } else {
+    authPanel.style.transform = "";
+  }
+}
+
+authGrip.addEventListener("pointerup", endSheetDrag);
+authGrip.addEventListener("pointercancel", endSheetDrag);
+
+const authTabs = document.querySelectorAll("[data-auth-tab]");
+authTabs.forEach((tab) =>
+  tab.addEventListener("click", () => {
+    if (tab.dataset.authTab !== authMode) setAuthRoute(tab.dataset.authTab);
+  })
+);
+
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !currentUserId && !authScreen.classList.contains("hidden")) {
     leaveAuthCard();
@@ -365,6 +437,7 @@ function setAuthMode(mode) {
   authMode = mode;
   const text = AUTH_MODES[mode];
   authScreen.dataset.mode = mode;
+  authScreen.classList.remove("request-sent");
   authNameField.classList.toggle("hidden", mode !== "request");
   authEmailField.classList.toggle("hidden", signedInCard(mode));
   authPasswordField.classList.toggle("hidden", mode === "forgot" || mode === "request" || mode === "privacy");
@@ -381,6 +454,7 @@ function setAuthMode(mode) {
   authHint.classList.toggle("hidden", !text.hint);
   authToggleText.textContent = text.toggleText;
   authToggleBtn.textContent = text.toggleBtn;
+  authTabs.forEach((tab) => tab.setAttribute("aria-pressed", String(tab.dataset.authTab === mode)));
   clearFieldErrors();
   clearMessage();
   hidePasswordFields();
@@ -406,8 +480,19 @@ function syncSubmit() {
   const readyAt = resendReadyAt[authMode] ?? 0;
   const wait = Math.max(0, Math.ceil((readyAt - Date.now()) / 1000));
   authSubmit.disabled = authBusy || wait > 0;
-  authSubmit.textContent = authBusy ? text.busy : wait > 0 ? t("Send again in {n}s", { n: wait }) : text.submit;
+  authSubmit.textContent = authBusy
+    ? text.busy
+    : wait > 0
+      ? t("Send again in {n}s", { n: wait })
+      : requestSentOnPhone()
+        ? t("Send another request")
+        : text.submit;
 }
+
+/* On a phone the card never scrolls (the owner's call), so once a request
+   is sent its form makes way for the message (css/responsive.css): the
+   message and the button fit. The button then brings the form back. */
+const requestSentOnPhone = () => authSheetLayout.matches && authScreen.classList.contains("request-sent");
 
 function startResendCooldown(mode) {
   resendReadyAt[mode] = Date.now() + RESEND_COOLDOWN_S * 1000;
@@ -459,6 +544,13 @@ function validate() {
 authForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (authBusy) return;
+  // A request just sent, on a phone: the button brings the form back.
+  if (requestSentOnPhone()) {
+    authScreen.classList.remove("request-sent");
+    clearMessage();
+    syncSubmit();
+    return;
+  }
   clearMessage();
   if (!validate()) return;
 
@@ -561,6 +653,7 @@ async function sendAccessRequest(email) {
   }
   authForm.reset();
   syncNoteCount();
+  authScreen.classList.add("request-sent");
   startResendCooldown("request");
   showMessage(
     t(
@@ -590,9 +683,14 @@ async function updatePassword(password, sessionGoneMessage, moreData = {}) {
 }
 
 // First login: their own password replaces the temporary one, and the app
-// opens straight away — no need to log in again.
+// opens straight away — no need to log in again. The policy was accepted
+// with the access request (its email says so, with the version), so the
+// account records it now, saying where.
 async function saveChosenPassword(password) {
-  const saved = await updatePassword(password, t("You've been signed out. Log out and log in again with your temporary password."), privacyAcceptance());
+  const saved = await updatePassword(password, t("You've been signed out. Log out and log in again with your temporary password."), {
+    ...privacyAcceptance(),
+    privacy_accepted_with: "access request",
+  });
   if (!saved) return;
   authForm.reset();
   enterApp().then(() => showToast(t("Password saved. Welcome to Slate!")));

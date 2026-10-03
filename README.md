@@ -30,7 +30,8 @@ then open <http://127.0.0.1:8080>. After pulling changes, hard-refresh
 | `js/` | One file per part of the app, loaded in order by `index.html` (they share one global scope) |
 | `js/config.js` | Which Supabase project the app talks to — public values only |
 | `css/` | Styles, one file per area; themes are custom properties in `base.css` |
-| `img/` | The logo and the OpenMoji emoji used for collection icons |
+| `img/` | The logo, the home-screen icons and the OpenMoji emoji used for collection icons |
+| `manifest.webmanifest` | Makes Slate installable: its name, icons and full-screen look once added to a phone's home screen |
 | `supabase/` | The database structure (`migrations/`) and server-side code (`functions/`) — see [`supabase/README.md`](supabase/README.md) |
 | `tests/` | The automated tests (below) |
 | `scripts/` | `stamp.js` keeps the cache stamps (`?v=…`) in `index.html` in step with the files; `install-hooks.js` switches on the git hook in `.githooks/` that runs it on each commit; `supabase-js.js` updates the pinned Supabase library (below) |
@@ -75,7 +76,7 @@ your data and don't break when your password does.
 | `i18n.spec.js` | Every language has every string, and nothing on screen escapes translation |
 | `settings.spec.js` | Settings kept by the account, and saving the profile |
 | `account.spec.js` | Deleting an account: the locks, a wrong password, a server failure, and the account gone |
-| `mobile.spec.js` | Slate on a phone: nothing scrolls sideways, and the menu and adding a title work by tapping |
+| `mobile.spec.js` | Slate on a phone: nothing scrolls sideways, no field makes an iPhone zoom in, the landing page's stories, the bottom bar with its Movies and Shows tabs, cards three across, the header's search and sort sheet, adding a title from the floating +, opening a collection and Settings' tiles and pages work by tapping, windows rise as sheets that fit and close by dragging them down, a title's window fits one screen and opens a long review whole on a note, a search result opens in the list's place with its button at the bottom, an episode's box picks it and its card ticks it, titles are added to a collection and a favorite picked by tapping rows, and it's installable |
 | `bigLibrary.spec.js` | Libraries past 1,000 rows load whole |
 | `welcomeEmail.spec.js` | The welcome-email tool (`tools/welcome-email.html`) |
 | `stamps.spec.js` | Every CSS/JS link in `index.html` has its file's current stamp |
